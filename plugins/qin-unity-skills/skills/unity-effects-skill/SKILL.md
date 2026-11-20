@@ -7,6 +7,8 @@ description: Design, implement, repair, or review Unity VFX, Particle Systems, V
 
 Bind the receiving scene, effect Prefab or material, gameplay trigger, camera, scale, render pipeline, graphics backend, installed packages and target platform. For YoFaAssets-linked work, read its current `game-effect` source and the applicable VFX or shader method first.
 
+Use [staged effects](references/staged-effects.md) for complete effect choreography, progressive shape formation and layered composition. Use [rendering and verification](references/rendering-and-verification.md) for VFX and shader implementation, first-use behavior and native evidence.
+
 ## Define the effect
 
 1. State what the effect communicates, when it begins, which anchors it follows, and how it stops. Capture the trigger context once and keep damage, invulnerability and other gameplay authority in the existing gameplay system.

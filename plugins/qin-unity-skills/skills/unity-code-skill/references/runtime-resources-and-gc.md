@@ -2,6 +2,8 @@
 
 Use this reference when changing Jobs, native data, Addressables, materials, pooled objects, recurring allocations, or teardown. Bind the installed package versions and the feature's actual lifecycle and runtime owner.
 
+Read [allocation and ownership patterns](allocation-and-ownership-patterns.md) for the affected operation and its regression case. Use the frame-callback section of [lifecycle and serialization](unity-lifecycle-and-serialization.md#frame-callbacks) to decide whether recurring work is needed at its current cadence.
+
 ## Own acquisition and release
 
 - Identify the exact acquisition, owner, borrowers and retirement point for a handle, instance, material, native allocation, subscription or task. Release each owned acquisition once through its matching API. Retire borrowers before releasing the backing resource, or give a long-lived consumer its own lease.
