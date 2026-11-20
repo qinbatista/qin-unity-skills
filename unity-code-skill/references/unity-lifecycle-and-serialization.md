@@ -7,8 +7,23 @@ Load this category only when the Unity C# task materially touches MonoBehaviour 
 - Use `Awake()` for state and component references owned by the same object. Make initialization idempotent when domain reload, prefab reuse, or explicit reinitialization can repeat it.
 - Use `OnEnable()` and `OnDisable()` as a symmetric pair for subscriptions, callbacks, input actions, and enable-scoped resources. Do not subscribe twice or rely on `OnDestroy()` to repair an `OnDisable()` leak.
 - Use `Start()` only for work that genuinely depends on another object's completed `Awake()` or on an explicitly initialized service. Do not rely on accidental script execution order; configure the order or expose an explicit initialization dependency when order is contractual.
-- Read input and advance ordinary frame state in `Update()`, perform Rigidbody physics in `FixedUpdate()`, and perform camera/follow corrections in `LateUpdate()` when those timings are material.
 - Stop owned coroutines, cancel owned asynchronous operations, release native or pooled resources, and detach long-lived callbacks at the lifecycle boundary that acquired them.
+
+## Frame callbacks
+
+Trace each affected operation through its callees. Keep an operation on a frame or physics step only when its inputs or clock must be sampled at that cadence or a consumer needs its result in that phase. Identify the existing owner, what would break if the operation skipped a step, and when the work ends.
+
+| What makes the result change | Where to run the work |
+| --- | --- |
+| Initialization, binding, or a configuration change | Apply stable references and material settings at initialization or when the binding or configuration changes. |
+| A state change, discrete input, or operation completion | Run the decision or refresh at the owner's mutation or through its existing callback. Mark pending work when the consumer needs to apply it once in a later phase. Read current state when a consumer attaches or reopens. |
+| An action gate, deadline, or countdown | Check the gate when the action is requested. Use the owning clock for work due at a deadline and refresh countdown text when its displayed value changes. Preserve pause and resume behavior. |
+| An ordered batch of work | Prepare candidates and ordering when the batch starts or its inputs change. Advance only due or active entries in the existing batch owner. |
+| Continuous input, movement, physics, or presentation that depends on frame order | Use the project's actual phase. Use `Update()` for input or motion that needs a fresh per-frame sample, `FixedUpdate()` for Unity-driven fixed-step physics, and `LateUpdate()` when presentation needs the result of earlier frame writers. Preserve explicit simulation and presentation phases owned by the project. |
+
+Apply the same timing test to helpers, coroutines, and scheduled polling. Restrict necessary loops to active work and skip repeated calculations and writes when the inputs and result are unchanged. Use the existing owner to stop work at completion, disable, or retirement and preserve the initial update and restart behavior.
+
+Verify the real entry at initialization, through an actual change, and across unchanged frames and stop or reentry. Check that trigger-driven work stays idle between changes and the visible result updates at the required time. For timing or alignment changes, compare the producing state and its visible output in the same tick or rendered frame and coordinate space, including the affected transition.
 
 ## Async and main-thread safety
 
