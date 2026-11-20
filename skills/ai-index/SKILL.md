@@ -5,11 +5,11 @@ description: Route qin-unity-skills work to the public Unity Skills, their compa
 
 # qin-unity-skills AI index
 
-Use Management's project AI index helper to inspect this project at startup and closeout. Use the module menu in [index.json](index.json) to select Code, Assets, UI, Animation, Effects, Testing, or the package catalog.
+Follow the root startup guidance, then select the owning module in [index.json](index.json). Open the matching Skill and only the references needed for the change.
 
 - [Repository and delivery](rules/repository.md)
 - [Structure and ownership](rules/structure.md)
 - [Verification](rules/verification.md)
 - [Cache owners and lifecycle](cache/README.md)
 
-Update the affected route or guidance with each project change and read it back before publication.
+Update the affected route and verify it with the [repository test map](../../.agents/skills/testing-skill/SKILL.md) before delivery.

@@ -13,8 +13,18 @@ class CSharpRuleGuardTests(unittest.TestCase):
     def codes(self, source):
         return {item["code"] for item in module.csharp_violations(source)}
 
-    def test_pattern_wildcard_is_allowed(self):
-        self.assertEqual(self.codes("case _:\n    break;\n"), set())
+    def test_pattern_wildcards_and_lambda_arrows_are_allowed(self):
+        source = """case _:
+    break;
+int Score(int score) => score switch
+{
+    0 => 0,
+    _ => score
+};
+Func<int, int> identity = (_) => 1;
+"""
+        self.assertEqual(self.codes(source), set())
+        self.assertEqual(self.codes("_ = ReadAsync();\n(Record item, _) = Read();\n"), {"discard-assignment", "discard-binding"})
 
     def test_unity_csharp_rejects_named_pitfalls(self):
         source = "\n".join(["_ = SaveDataAsync();", "var controller = new PlayerController();", "void SaveData() { SaveData(); }", "public bool SaveData(Data value) => _provider.SaveData(value);", "SaveData(", "    value);", "Widget widget = new Widget(", "    first,", "    second);"])
@@ -23,6 +33,14 @@ class CSharpRuleGuardTests(unittest.TestCase):
     def test_unity_csharp_rejects_multiline_self_recursion_and_pass_through_wrapper(self):
         source = "\n".join(["void SaveData()", "{", "    SaveData();", "}", "", "public bool PersistData(Data value)", "{", "    return _provider.PersistData(value);", "}"])
         self.assertTrue({"self-recursion", "pass-through-wrapper"}.issubset(self.codes(source)))
+
+    def test_same_name_call_distinguishes_recursion_from_overload_and_owner(self):
+        source = """void Save(Data data) => this.Save(data);
+void Load(Data data) => Load(data, true);
+void Apply(Data data) => this._receiver.Apply(data);
+"""
+        findings = module.csharp_violations(source)
+        self.assertEqual([(item["code"], item["line"]) for item in findings], [("self-recursion", 1), ("pass-through-wrapper", 3)])
 
     def test_unity_csharp_allows_direct_call_explicit_type_and_marked_facade(self):
         source = "\n".join(["await SaveDataAsync();", "PlayerController controller = new PlayerController();", "// code-gate: semantic-boundary=public validation", "public bool SaveData(Data value) => _provider.SaveData(value);"])

@@ -14,7 +14,7 @@ Before delivery, read back the exact APK, AAB, IPA or other target artifact and 
 
 ## Observe the native runtime
 
-- Watch startup and the changed flow for actual frame and process continuity. Inspect bounded Console, Player or device diagnostics. Distinguish managed exceptions, native crashes, OS termination, hangs and expected shutdown. Preserve the first actionable error, exact failing interval, executing build and runtime. Rerun the actual trigger after repair.
+- Watch startup and the changed flow for frame and process continuity. Inspect bounded logs and distinguish managed exceptions, native crashes, OS termination, hangs and expected shutdown. Keep the first actionable diagnostic and rerun the real trigger after repair.
 - Keep routine loop and callback logging quiet at its producer, including repeated formatting. Enable narrow diagnostics for a bounded case. Measure idle and active output and check the actual exported profile or installed settings. Restore diagnostic state and preserve useful lifecycle summaries and failures.
 - For visual or input evidence inspect fresh native frames, scene geometry and the actual changed interaction. For moving evidence, check real decoded playback, duration, frame timing, action and target identity. Review captures without opening a visible player when the platform supports internal capture and decoding.
 
@@ -23,3 +23,7 @@ Before delivery, read back the exact APK, AAB, IPA or other target artifact and 
 Resolve the project's real frame limit, active refresh rate, quality and runtime overrides in its declared Unity version and platform. Measure achieved timing separately from the requested setting. Inspect CPU/GPU time, stalls and loading boundaries with a recorded scene, workload, device, graphics settings and observation interval. Keep platform defaults and source-owned timing intact while diagnosing. Compare cold startup, first use, scene transitions and warm steady state separately.
 
 For scene or memory cases, compare repeated entry and actual cleanup on the required Player. Read the relevant resource, lease or native object counts and ownership. Compare OS process, graphics, Unity allocated or reserved memory and managed allocation and collection on their own metrics. Verify that a snapshot completed on the intended target and account for profiling overhead. Attribute shared dependencies once and state whether the observed maximum covers the actual peak. Preserve the workload, visual quality and gameplay behavior during a before/after replay.
+
+## macOS batch startup
+
+Check Unity Bee's native IPC path budget. Use a shorter registered task path when it exceeds the socket limit. On APFS, `/.vol/<device>/<inode>` may address the same task temp directory. Verify the directory identity and bind a short Unix socket that appears inside task Cache before assigning the alias to the child's temporary environment. Keep the project and logs with their original owner.

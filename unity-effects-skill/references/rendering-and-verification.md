@@ -4,14 +4,15 @@
 
 Inspect the actual SpriteRenderer, UI, mesh, fullscreen pass or particle host and the installed Unity and rendering package versions. Bind the material and declared render pipeline, graphics API, target device, color space and asset identities. Preserve existing serialized shader properties, default assets and GUIDs. A standalone material check uses the affected material and pass. Effects tied to gameplay also verify the complete composite in the receiving scene.
 
-- For VFX and Particle Systems, declare simulation space, capacity, bounds and culling, sorting, timing, spawn distribution, material, exposed parameters, and stop and tail conditions. Prefer an existing batched effect for repeated visual particles. Keep VFX parameters, per-object changes and original art owned by their real consumers.
+- For VFX, set anchor and simulation space, capacity, emission, culling bounds, sorting, material and tail. Batch repeated pure decoration inside the effect. Bind start and stop to the real trigger and keep gameplay decisions with their owner.
 - For two renders of the same art, preserve the original base draw where required. Match each extra renderer to current Sprite frame, flips, skin/deformation, bones or other anchors, sorting and visibility. Verify actual pass or material-slot behavior in the selected renderer, including transparent ordering and blend accumulation.
-- For shader work, establish spaces, vertex inputs, UVs, textures, value ranges and units, alpha, blend, depth, culling, sorting, render queue and pass behavior. Budget samples, interpolators, variants, texture residency, precision and transparent coverage. Keep camera copies and readbacks within actual requirements and validate at intended screen coverage.
+- For shader work, use the receiving pipeline's supported HLSL or Shader Graph. Define vertex, UV and texture inputs, units, ranges and color space. Set alpha, blend, depth, culling, queue and required passes. Budget samples, interpolators, variants, precision, texture residency and overdraw at the intended load.
+- Reuse shared materials where values agree. Bind per-instance values in the existing owner and release any owned material instance at retirement. Keep camera copies and readbacks to the required passes.
 - Give a transparent body and independent emissive line separate coverage where needed. Under straight alpha, normalize premultiplied contributions by safe final coverage in the actual blend contract. Use the line texture's alpha even when transparent pixels carry RGB. Verify visible emission with zero body coverage and the zero-body/zero-emission state with the textures still bound.
 
 ## Share rendering calculations
 
-Use one guarded HLSL include for a calculation shared by a code shader and Shader Graph. Pass UV, time and material and vertex inputs explicitly. Document whether returned color already includes opacity, tint or emission. Keep the individual shader wrappers responsible for their own passes, blending, depth and lighting. Choose the supported function import for the installed Graph release. Confirm dependency import and compare RGB and alpha independently at meaningful fixed and animated inputs in both consumers.
+When a code shader and Shader Graph both use a calculation, share it in one guarded HLSL include. Pass inputs explicitly and define the returned opacity, tint and emission contract. Each renderer keeps its own passes, blend, depth and lighting. Verify both callers through the installed Graph's supported function import and compare RGB and alpha at matching fixed and animated inputs.
 
 ## Observe the actual render path and lifetime
 

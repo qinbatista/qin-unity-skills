@@ -12,8 +12,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from qin_rule_guard_common import deduplicate_violations, filter_violations, git_added_lines, violation
 
 
-CSHARP_DISCARD_ASSIGNMENT = re.compile(r"^[ \t]*_\s*=", re.MULTILINE)
-CSHARP_TUPLE_DISCARD = re.compile(r"\([^\n)]*\b_\b[^\n)]*\)\s*=", re.MULTILINE)
+CSHARP_DISCARD_ASSIGNMENT = re.compile(r"^[ \t]*_\s*=(?![=>])", re.MULTILINE)
+CSHARP_TUPLE_DISCARD = re.compile(r"\([^\n)]*\b_\b[^\n)]*\)\s*=(?![=>])", re.MULTILINE)
 CSHARP_OBVIOUS_VAR = re.compile(r"^[ \t]*var\s+[A-Za-z_]\w*\s*=\s*new\s+[A-Za-z_]", re.MULTILINE)
 CSHARP_VERTICAL_CALL_START = re.compile(r"^(?:(?:return|await)\s+)?(?:[A-Za-z_]\w*\.)*[A-Za-z_]\w*(?:<[^<>]+>)?\s*\($")
 CSHARP_EXPRESSION_METHOD = re.compile(r"^[ \t]*(?:(?:public|private|protected|internal|static|virtual|override|sealed|async|new|partial)\s+)*(?:[A-Za-z_]\w*(?:[.<>,?\[\]]+)?)\s+(?P<name>[A-Za-z_]\w*)\s*\((?P<parameters>[^)]*)\)\s*=>\s*(?P<callee>[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*\((?P<arguments>[^)]*)\)\s*;[ \t]*$", re.MULTILINE)
@@ -61,11 +61,13 @@ def csharp_violations(text):
         for match in pattern.finditer(code):
             line_number = text.count("\n", 0, match.start()) + 1
             end_line = line_number + match.group().count("\n")
-            callee_name = match.group("callee").split(".")[-1]
             arguments = text[match.start("arguments"):match.end("arguments")]
-            if callee_name == match.group("name") and ("." not in match.group("callee") or match.group("callee").startswith("this.")):
+            if not forwards_arguments(match.group("parameters"), arguments):
+                continue
+            name = match.group("name")
+            if match.group("callee") in (name, f"this.{name}"):
                 violations.append(violation("self-recursion", line_number, "A method whose only action calls itself has no visible base case or progress.", end_line))
-            elif forwards_arguments(match.group("parameters"), arguments) and not has_semantic_boundary(lines, line_number):
+            elif not has_semantic_boundary(lines, line_number):
                 violations.append(violation("pass-through-wrapper", line_number, "Call the real owner directly or mark the actual semantic boundary.", end_line))
     for line_number, line in enumerate(code_lines, start=1):
         stripped = line.strip()

@@ -1,6 +1,6 @@
 # Unity C# Lifecycle And Serialization
 
-Load this category only when the Unity C# task materially touches MonoBehaviour callbacks, scene or prefab lifetime, components, events, coroutines, async work, physics timing, or serialized data. The mandatory common writing rules remain in [`unity-csharp-rules.md`](unity-csharp-rules.md).
+Use this reference for Unity callbacks, frame timing, async work and serialized bindings.
 
 ## Callback ownership
 
@@ -11,34 +11,32 @@ Load this category only when the Unity C# task materially touches MonoBehaviour 
 
 ## Frame callbacks
 
-Trace each affected operation through its callees. Keep an operation on a frame or physics step only when its inputs or clock must be sampled at that cadence or a consumer needs its result in that phase. Identify the existing owner, what would break if the operation skipped a step, and when the work ends.
+Trace the operation through its callees. Before keeping frame work, name its changing input, the required cadence or phase, the visible consequence of a skipped step and its stop condition.
 
 | What makes the result change | Where to run the work |
 | --- | --- |
-| Initialization, binding, or a configuration change | Apply stable references and material settings at initialization or when the binding or configuration changes. |
-| A state change, discrete input, or operation completion | Run the decision or refresh at the owner's mutation or through its existing callback. Mark pending work when the consumer needs to apply it once in a later phase. Read current state when a consumer attaches or reopens. |
-| An action gate, deadline, or countdown | Check the gate when the action is requested. Use the owning clock for work due at a deadline and refresh countdown text when its displayed value changes. Preserve pause and resume behavior. |
-| An ordered batch of work | Prepare candidates and ordering when the batch starts or its inputs change. Advance only due or active entries in the existing batch owner. |
-| Continuous input, movement, physics, or presentation that depends on frame order | Use the project's actual phase. Use `Update()` for input or motion that needs a fresh per-frame sample, `FixedUpdate()` for Unity-driven fixed-step physics, and `LateUpdate()` when presentation needs the result of earlier frame writers. Preserve explicit simulation and presentation phases owned by the project. |
+| Initialization, binding or configuration | Resolve stable components and set material values once at initialization or when their owner changes. |
+| State change, discrete input or completion | Call from the owning mutation or its existing callback. Read current state on attach and defer only the work that requires a later phase. |
+| Action gate, deadline or countdown | Check admission on request. Use the owning clock for deadlines and refresh text when its displayed value changes. Preserve pause and resume. |
+| Ordered batch | Prepare ordering when inputs change and advance only due or active entries in its owner. |
+| Continuous input, movement, physics or late presentation | Use `Update` for required frame samples, `FixedUpdate` for fixed-step physics and `LateUpdate` for work that consumes this frame's earlier writes. Preserve the project's actual phases. |
 
-Apply the same timing test to helpers, coroutines, and scheduled polling. Restrict necessary loops to active work and skip repeated calculations and writes when the inputs and result are unchanged. Use the existing owner to stop work at completion, disable, or retirement and preserve the initial update and restart behavior.
+Apply the same test to helpers, coroutines and scheduled callbacks. Keep necessary loops active only while they own work. Skip unchanged writes and repeated queries or allocation. Stop at completion, disable or retirement.
 
-Verify the real entry at initialization, through an actual change, and across unchanged frames and stop or reentry. Check that trigger-driven work stays idle between changes and the visible result updates at the required time. For timing or alignment changes, compare the producing state and its visible output in the same tick or rendered frame and coordinate space, including the affected transition.
+Verify initial state, a real change, idle frames and stop or reentry. For timing or alignment, compare the producing state with the visible output in the same tick or frame and coordinate space.
 
 ## Async and main-thread safety
 
 Apply [current-operation and lifetime ownership](https://github.com/qinbatista/qin-codex-skills/blob/master/code-skill/references/state-and-side-effects.md#let-only-the-current-operation-publish), including pooled reuse and late callbacks. The following rules add Unity-specific constraints.
 
-- Do not write `_ = SomeTask()` or use `async void` for background ownership. Unity event callbacks are the narrow `async void` exception; catch and surface their failures at that boundary.
-- Await work when the caller owns completion. Otherwise store the `Task` in a named field, attach cancellation to the owning object's lifetime, and observe completion and exceptions.
-- Resume Unity-object access on the Unity main thread. After an await, confirm the owning lifecycle is still active before touching destroyed objects or scene state.
+- Await work or retain a named task with lifetime cancellation and observed completion and exceptions. A required `async void` Unity callback handles errors at that callback boundary.
+- Resume Unity-object access on the Unity main thread and verify the owning lifecycle is current after an await.
 
 ## Serialization and authored data
 
 - Prefer `[SerializeField] private ConcreteType _field;` for Inspector bindings. Do not expose public mutable fields merely for serialization.
 - Preserve serialized field compatibility. Use Unity's supported rename migration when an existing serialized name changes; do not silently orphan prefab or scene data.
 - Treat ScriptableObjects as authored/shared configuration unless the project explicitly owns mutable runtime state there. Do not use a mutable ScriptableObject as an accidental save file or hidden singleton.
-- Cache stable component references outside per-frame callbacks. Do not repeat `GetComponent`, allocation, reflection, LINQ enumeration, or string construction every frame when the same value can be retained safely.
 
 ## Parallel work
 

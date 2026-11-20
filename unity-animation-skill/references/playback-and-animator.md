@@ -17,7 +17,7 @@ Use saved Clips and a Controller for fixed, editable choreography. Use procedura
 ## States, transitions and multiple parts
 
 - Start a simple continuous loop in one default state. Use explicit states and transitions for conditions, one-shots, cancellation and recovery. Configure Any State reentry only when the action supports it and exercise same-state retriggers.
-- Use a Bool for a held condition, a Trigger for a one-shot request, a Float for a continuous input and an Int for a discrete value. Bind each parameter to its type, default, writer and actual consumer. Cache `Animator.StringToHash` where reused. Set discrete parameters on changes or requests. Reserve direct `Play` or `CrossFade` for a designed initialization, repositioning or interruption.
+- Use Bool for held state, Trigger for one-shot transitions, Float for continuous values and Int for discrete values. Bind each parameter's default, writer and consumer. Cache reused state hashes. Direct `Play` or `CrossFade` fits a request that already selects its state. Let Animator transitions arbitrate when they own admission.
 - For each transition, record conditions, Has Exit Time, exit position, duration in seconds or normalized time, destination offset, interruption sources and reentry. Conditions on one transition combine with AND. Give alternative routes their own transition. Match exit timing to immediate response or protected completion as required by the action.
 - Blend compatible poses or movement when continuity matters. Use stepped switches for discrete visibility, sprite replacement and exact impact states. Verify both sides and intermediate poses, including short clips, quick reverse requests and interruption recovery. Check actual settled values for new and existing channels. Use one verified Write Defaults policy within the Controller.
 - Use a 1D, 2D or Direct Blend Tree when its parameters continuously weight compatible child motions. Verify thresholds, weights, child speeds, phase and effective duration. Use states for ordered phases, several bindings in one Clip for coordinated channels, and layers, masks or an independent owner for concurrent channels that have separate write authority.
@@ -25,7 +25,7 @@ Use saved Clips and a Controller for fixed, editable choreography. Use procedura
 
 ## Contacts, side effects and cancellation
 
-Place an Animation Event at the actual impact, release or phase boundary when a receiver needs it. Bind a supported method and argument on a component on the actual Animator or Animation GameObject, and dispatch through the existing action owner. Treat StateMachineBehaviour entry and exit as state lifecycle. Verify whether the action actually reached its completion or contact.
+Place an Animation Event at the actual contact, release or completion when a receiver needs it. Bind a supported receiver and signature on the Animator or Animation GameObject. Use StateMachineBehaviour callbacks for state lifetime. Give each side effect one handoff on the existing timeline.
 
 A blend, loop, retrigger or interruption can repeat or skip a notification. Use the current action or session identity to keep gameplay effects idempotent. Distinguish completed, canceled and stale requests. Keep damage, payments, cleanup and other consequential results in the game owner. Release locks, listeners, particles and transient material values on the owning path and reset the acquired instance before reuse.
 

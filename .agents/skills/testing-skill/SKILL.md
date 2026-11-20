@@ -9,9 +9,8 @@ Use the smallest maintained case that can establish the change. Run from the rep
 
 | Purpose | Level | Runner and owner |
 | --- | --- | --- |
-| C# source checker reports violations, accepts intentional boundaries, and filters changed lines | 1 | `unittest`, [test_csharp_rule_guard.py](../../../unity-code-skill/tests/test_csharp_rule_guard.py), Unity Code |
-| Skill references resolve and preserve the moved C# rule contracts | 1 | `unittest`, [test_skill_contract.py](../../../unity-code-skill/tests/test_skill_contract.py), Unity Code |
-| Public catalog and AI routes match the installable folders and each package's local references stay inside its own folder | 2 | `unittest`, [test_skill_catalog.py](tests/test_skill_catalog.py), repository Testing |
+| C# checker finds actual discards and forwarding, distinguishes valid syntax, and filters changed lines | 1 | `unittest`, [test_csharp_rule_guard.py](../../../unity-code-skill/tests/test_csharp_rule_guard.py), Unity Code |
+| Release list and discovery routes agree, and each standalone package links its references | 2 | `unittest`, [test_skill_catalog.py](tests/test_skill_catalog.py), repository Testing |
 | Charge Pulse sample saved bindings, nonlinear clip timing, Toolkit layout and input, visible release, cancellation and replay | 2 | Native Unity CLI EditMode with the Play transition in [ChargePulseTests.cs](../../../examples/charge-pulse/Assets/Editor/Tests/ChargePulseTests.cs). Use a task-owned example snapshot and the [sample commands](../../../examples/charge-pulse/README.md#run-the-focused-tests). |
 
 ```text
@@ -21,4 +20,4 @@ macOS/Linux: python3 -B -m unittest discover -s .agents/skills/testing-skill/tes
 Windows PowerShell: py -3 -B -m unittest discover -s .agents\skills\testing-skill\tests
 ```
 
-For changes to the command or Git filtering, also run the actual checker on a clean source fixture and on a tracked file with changes. Use the selected game's test owner for native Unity behavior.
+For checker changes, run its CLI on representative source and a tracked diff. For package changes, read back the built or installed package. Run the native example for changes to its behavior or assets.

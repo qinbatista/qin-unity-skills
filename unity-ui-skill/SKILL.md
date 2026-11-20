@@ -5,14 +5,9 @@ description: Build, revise, or review Unity UI, especially UI Toolkit hierarchy,
 
 # Unity UI
 
-Resolve the formal scene or entry, screen, native host, controllers and assets. For a YoFaAssets-linked project, follow the registered owner's current task entry and applicable `unity-ui-build`, `ui-screen-adaptation`, or `ui-button-test` workflow first.
+Bind the real screen, entry and host. Follow the registered YoFaAssets task entry for linked work. Select `unity-ui-build` for construction, `ui-screen-adaptation` for its 4K and orientation policy, and `ui-button-test` for input replay.
 
-Use [artwork intake](references/artwork-intake.md) for component identity and paint boundaries, [screen adaptation](references/screen-adaptation.md) for the reference viewport and native layout evidence, and [layout and input](references/layout-and-input.md) for interaction, localization and destination-page review.
-
-1. **Understand the screen.** Inventory the selected pages, states and components. Bind each image's accepted version, role, parent, order, pixel bounds and reuse. Follow the original art or an accepted derivative for artwork. Use the project's data and localization owners for live values and actions.
-2. **Build the semantic tree.** Keep main regions, repeated content, interactive controls and overlays under their real parents. In UI Toolkit, use UXML for templates, USS for flow, layout and visual states, and C# for bindings, commands and required runtime geometry. For an existing Canvas or mixed host, apply the actual layout and input rules for that host.
-3. **Use one geometry owner.** Record the reference canvas, active viewport, scale, group anchors, available content region and hit bounds. Apply the [responsive layout and input checks](references/layout-and-input.md) to the actual PanelSettings or Canvas host. Reopen the real entry after changes to sizing or mounting.
-4. **Keep the same functional UI across the flow.** Reuse the same layout assets for test and production entry points where the project shares a screen. Preserve selection, page state, sensible scrolling, focus, modal input and the return route. Test the affected target screen as well as the entry screen.
-5. **Verify the rendered result and actions.** Start with the smallest affected flow. Review fresh native renders and exercise real input at representative supported widths, orientations, insets and languages. Record the source, host, runtime and exact covered cases before widening acceptance.
-
-Use the existing visual hierarchy, readable alignment and distinct interaction states. Changes to imagery or layout follow the receiving game's declared design and asset owners.
+1. Bind accepted art to its page, state and actual component using [artwork intake](references/artwork-intake.md). Reuse shared assets and use the current data and localization owners.
+2. Put controls and overlays under their real parents. In Toolkit, keep templates in UXML, layout and visual states in USS, and bindings and actions in C#. Preserve the existing Canvas or mixed host where it owns the screen.
+3. Apply [screen adaptation](references/screen-adaptation.md) through one geometry owner. Bind and unbind each action with the screen's lifetime. Refresh visible state on its actual change.
+4. Reopen the real entry. Verify rendered layout and hit bounds on affected viewport and language cases. Exercise focus, actions and the destination and return route through [layout and input](references/layout-and-input.md).

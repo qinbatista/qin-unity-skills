@@ -20,7 +20,7 @@
           "file": "unity-code-skill/scripts/csharp_rule_guard.py",
           "symbol": "csharp_violations",
           "anchor": "def csharp_violations(text):",
-          "summary": "Identify C# discard, wrapper, obvious type and layout findings in supplied source."
+          "summary": "Identify C# direct-code findings while distinguishing wildcard arms, overloads and other receivers."
         },
         {
           "id": "git-added-lines",
@@ -34,7 +34,7 @@
           "file": "unity-code-skill/tests/test_csharp_rule_guard.py",
           "symbol": "CSharpRuleGuardTests.test_unity_csharp_rejects_named_pitfalls",
           "anchor": "def test_unity_csharp_rejects_named_pitfalls(self):",
-          "summary": "Check the moved C# discard, recursion, forwarding, type and layout findings."
+          "summary": "Exercise the C# discard, recursion, forwarding, type and layout findings."
         }
       ]
     },
@@ -83,16 +83,16 @@
         {
           "id": "verify-package-discovery",
           "file": ".agents/skills/testing-skill/tests/test_skill_catalog.py",
-          "symbol": "PublicSkillCatalogTests.test_readme_comparison_and_index_list_every_public_package",
-          "anchor": "def test_readme_comparison_and_index_list_every_public_package(self):",
-          "summary": "Compare the public directories with the catalog, comparison and AI index routes."
+          "symbol": "PublicSkillCatalogTests.test_all_catalogs_list_the_same_public_packages",
+          "anchor": "def test_all_catalogs_list_the_same_public_packages(self):",
+          "summary": "Compare public folders with the release list, catalog, comparison and AI index."
         },
         {
           "id": "verify-package-local-links",
           "file": ".agents/skills/testing-skill/tests/test_skill_catalog.py",
-          "symbol": "PublicSkillCatalogTests.test_local_links_survive_installing_one_public_folder",
-          "anchor": "def test_local_links_survive_installing_one_public_folder(self):",
-          "summary": "Check package metadata and resolve local links within the owning directory."
+          "symbol": "PublicSkillCatalogTests.test_package_links_resolve_and_references_are_linked",
+          "anchor": "def test_package_links_resolve_and_references_are_linked(self):",
+          "summary": "Verify local link containment and referenced documents for each public package."
         }
       ]
     }
