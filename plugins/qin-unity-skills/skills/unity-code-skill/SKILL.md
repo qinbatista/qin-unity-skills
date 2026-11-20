@@ -20,11 +20,11 @@ Locate the actual project and its code owner before changing files. For a YoFaAs
 
 ## C# source checks
 
-Run the source checker with Python 3 and Git available. In a Git checkout, `--diff-from HEAD` filters findings to lines added since the selected revision. Omit the flag to check the supplied files in full.
+Run the source checker from the receiving project with Python 3 and Git available. Resolve `<skill-folder>` to the loaded Unity Code Skill. In a Git checkout, `--diff-from HEAD` filters findings to lines added since the selected revision. Omit the flag to check the supplied files in full. The checker scans C# source and skips comments and supported literal forms. Unity or the receiving toolchain owns compilation.
 
 ```text
-macOS/Linux: python3 -B scripts/csharp_rule_guard.py --diff-from HEAD <changed-files>
-Windows PowerShell: py -3 -B scripts\csharp_rule_guard.py --diff-from HEAD <changed-files>
+macOS/Linux: python3 -B "<skill-folder>/scripts/csharp_rule_guard.py" --diff-from HEAD <changed-files>
+Windows PowerShell: py -3 -B "<skill-folder>\scripts\csharp_rule_guard.py" --diff-from HEAD <changed-files>
 ```
 
 The checker accepts `.cs` paths, emits JSON, and exits with status 1 when it reports a violation. Use the game's compilation or focused runtime case when the claim depends on execution.
