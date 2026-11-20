@@ -5,12 +5,10 @@ description: Author, repair, or review Unity AnimationClips, Animator controller
 
 # Unity Animation
 
-Bind the actual object, Prefab or variant, Animator root, Unity version, animation packages and receiving project. In a YoFaAssets-linked game, use its current `unity-animation` or `skeletal-animation` source first.
+Bind the actual object, Prefab or variant, Animator root, Unity version, animation packages and receiving project. In a YoFaAssets-linked game, use its current `unity-animation` or `skeletal-animation` workflow first for the native authoring and delivery procedure.
 
 1. **Define playback.** Record the trigger, initial pose, key times, endpoint, loop or one-shot behavior, interruption and retrigger rules, time source and expected reset. Name the writer for each animated property and the owner of any gameplay action.
-2. **Choose the matching structure.** Use a single state for a simple loop. Add explicit transitions and parameters for entry, cancellation or reset where the behavior needs them. Use a Blend Tree for compatible motions driven by a continuous parameter. Use states or timelines for successive phases and layers or masks for genuinely independent channels.
-3. **Author observable timing.** Block the poses and contacts before shaping tangents. Design acceleration, hold, follow-through and recovery for continuous visual motion as appropriate. Preserve discrete events, actual gameplay timing and endpoints. Check overshoot, angular continuity, the loop seam and its entry and exit velocities.
-4. **Bind side effects to their owner.** Resolve Clip binding paths against the saved Animator root and keep physics or gameplay motion separate where the project gives it an independent owner. Use Animation Events for actual contact or release points. Gameplay actions retain their own request identity and completion semantics across interrupted, skipped or repeated callbacks.
-5. **Verify saved assets and playback.** Reopen the exact Prefab, Controller and Clip. Verify overrides, bindings, transition timing, contacts and reset at runtime. Exercise the relevant one-shot finish, repeated loops, interruption and reuse. Inspect moving frames for visual claims and use synchronized source and native playback when authoring to a motion reference.
-
-Use [2D rig and motion transfer](references/rig-transfer.md) for skinning, retargeting, GIF-driven authoring or Spine migration.
+2. **Choose the matching structure.** Use [playback and Animator](references/playback-and-animator.md) for states, transitions, Blend Trees, events, binding ownership and native readback.
+3. **Author observable timing.** Block poses and contacts before shaping [motion curves](references/motion-curves.md). Review the response of every continuous visual channel, including VFX and shader channels tied to the action.
+4. **Fit and review motion.** Use [reference motion review](references/reference-motion-review.md) for timed key poses, loop closure, GIF fidelity and synchronized playback. Use [rig transfer](references/rig-transfer.md) for skinning and retargeting, and the [Spine migration contract](references/spine-to-unity-contract.md) for source inventory and parity.
+5. **Verify the saved result.** Reopen the exact Prefab, Controller and Clip, then run the actual entry. Exercise the relevant one-shot finish, loop seam, interruption and reset. Deliver the actual asset paths and the timing or bindings the user can adjust.

@@ -7,6 +7,8 @@ description: Select and run scoped Unity verification for Editor, Edit Mode, Pla
 
 Bind the exact project, revision, Unity version, expected behavior, relevant scene or entry, platform and runtime. Reuse the project's established test map and supported CLI or headless runner. For YoFaAssets-linked work, read its current `unity-game-testing` source before dispatch.
 
+Use [runtime and artifact evidence](references/runtime-and-artifact-evidence.md) for package identity, focused scene or device replay, quiet diagnostics and transition or performance checks.
+
 | Claim | Check at this boundary |
 | --- | --- |
 | Skill guidance, route or asset metadata | Reopen the actual changed source, links or importer readback |

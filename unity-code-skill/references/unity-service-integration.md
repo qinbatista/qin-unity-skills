@@ -23,3 +23,9 @@ Use [state and side-effect ownership](https://github.com/qinbatista/qin-codex-sk
 - Preserve cancellation, exception, offline, and retry semantics at the provider boundary. Do not add silent fallback providers or report a successful cloud/device operation from local source inspection alone.
 - Use a thin test UI only to exercise the public facade. It must not become a second service owner or bypass the neutral interface.
 - Claim editor, device, cloud, sandbox, production, or general-availability support only when that exact surface has fresh evidence under [Verify's target-bound evidence](https://github.com/qinbatista/qin-codex-skills/blob/master/verify-skill/SKILL.md#bind-evidence-to-the-actual-target).
+
+## Purchase and durable side effects
+
+Establish the provider and exact reward, persistence, confirmation and wallet owners before wiring purchase UI. For an explicitly local diagnostic adapter that owns native pending confirmation, commit and read back the local reward and transaction ledger before confirming that pending order. Preserve deduplication across restart and a failed confirmation. A server-authoritative provider retains its own confirmation and wallet contract. Its final result updates the receiver through that boundary.
+
+Verify transaction identity, repeated callbacks, save or provider failure, pending recovery, reentry and process restart where applicable. Record provider confirmation, persistence and authoritative balance with their separate evidence. Use a clearly labeled simulation only for its authorized local test scope. Exercise actual native store flow in the selected environment when making a store claim.
