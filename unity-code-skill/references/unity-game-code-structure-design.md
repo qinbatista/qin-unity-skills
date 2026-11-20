@@ -8,6 +8,7 @@ Use for Unity gameplay ownership, data flow, and pattern decisions. Read current
 - A Controller owns one GameObject-bound local responsibility, including its bindings and cleanup. Multiple Controllers may share an object when their concerns are independently named and changeable.
 - One single-instance Manager owns a feature's bootstrap, registration, shared data flow, creation, pooling, release, and group coordination. Its singleton lifetime follows project bootstrap and teardown; it is not a shortcut to hidden mutable globals.
 - After handoff, Controllers operate autonomously. Managers re-coordinate only real shared concerns such as pooling, global pause, selection, group state, or release; they do not drive every local update.
+- Select representations by actual responsibility. Use a batched VFX owner for repeated purely decorative particles. Use independent gameplay objects or the project's established entity model where identity and interaction are required. Use Jobs or Burst when the project needs parallel data computation. Choose pooling when actual instance reuse justifies its cost and capacity. See [runtime resources and GC](runtime-resources-and-gc.md) for ownership, teardown and verification.
 
 ## Data
 

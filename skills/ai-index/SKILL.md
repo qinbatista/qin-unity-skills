@@ -1,11 +1,11 @@
 ---
 name: ai-index
-description: Route qin-unity-skills work to the independent Unity Code Skill, checker, and tests.
+description: Route qin-unity-skills work to the public Unity Skills, their comparison, and maintained checks.
 ---
 
 # qin-unity-skills AI index
 
-Use Management's project AI index helper to inspect this project at startup and closeout. Select the `unity-code` module through [index.json](index.json) to find the current rules, checker, and tests.
+Use Management's project AI index helper to inspect this project at startup and closeout. Use the module menu in [index.json](index.json) to select Code, Assets, UI, Animation, Effects, Testing, or the package catalog.
 
 - [Repository and delivery](rules/repository.md)
 - [Structure and ownership](rules/structure.md)

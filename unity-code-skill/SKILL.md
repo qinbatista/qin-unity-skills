@@ -1,6 +1,6 @@
 ---
 name: unity-code-skill
-description: Write, fix, refactor, or review Unity C# code, including gameplay ownership, lifecycle callbacks, serialization, async work, and provider boundaries. The common C# style and source checker also apply to C# work outside Unity when compatible with its runtime.
+description: Write, fix, refactor, or review Unity C# code, including gameplay ownership, lifecycle, serialization, Jobs, pooled resources, managed allocations, and SDK integration. The common C# style and source checker also apply to C# work outside Unity when compatible with its runtime.
 ---
 
 # Unity Code
@@ -15,6 +15,7 @@ Locate the actual project and its code owner before changing files. For a YoFaAs
 | --- | --- |
 | Gameplay ownership, data flow, patterns | [Game code structure](references/unity-game-code-structure-design.md) |
 | Callbacks, async, thread affinity, serialization, component lifetime | [Lifecycle and serialization](references/unity-lifecycle-and-serialization.md) |
+| Jobs and native data, Addressables leases, pools, resource release, or recurring allocations | [Runtime resources and GC](references/runtime-resources-and-gc.md) |
 | Initialization, cloud APIs, SDKs, optional providers | [Service integration](references/unity-service-integration.md) |
 
 ## C# source checks

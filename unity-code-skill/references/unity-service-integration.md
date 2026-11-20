@@ -9,6 +9,12 @@ Load this category only when the Unity C# task touches Unity Gaming Services, cl
 - Keep initialization explicit with observable states such as uninitialized, initializing, ready, and failed. Coalesce concurrent initialization, reject or queue calls according to the declared contract, and do not initialize the same SDK from multiple owners.
 - Forward each callback or operation once. Avoid duplicate event bridges, duplicate save calls, nested manager-to-manager forwarding, and hidden initialization in getters or unrelated methods.
 
+## Transfer into a receiving game
+
+- Bind the selected SDK and receiver revisions. Resolve the required assembly and package dependencies, including transitive references, platform defines, native plugins and any linker preservation needed for reflected code in the Player. Keep optional modules outside the transfer unless needed by those dependencies.
+- Configure the receiving project's service identity and environment in its owned configuration. Keep credentials with their existing provider or secret owner and preserve the game's separate build and signing configuration.
+- Check the selected Player's initialization and normal gameplay consumer. Bind evidence to the installed artifact, provider environment and operation identity. Observe the terminal result and the authoritative state for a service operation that changes persistent data or currency.
+
 ## Optional provider and proof boundary
 
 Use [state and side-effect ownership](https://github.com/qinbatista/qin-codex-skills/blob/master/code-skill/references/state-and-side-effects.md) for configuration handoff, operation identity, duplicate callbacks, and uncertain retries; keep those semantics in the actual service owner.

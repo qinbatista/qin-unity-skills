@@ -8,11 +8,10 @@
   "modules": [
     {
       "id": "unity-code",
-      "summary": "Independent C# style, Unity structure and lifecycle, and its source checker",
+      "summary": "C# style and checker, Unity structure, Jobs, resource lifetimes, GC and SDK integration",
       "document": "skills/ai-index/modules/unity-code.md",
       "sources": [
-        "unity-code-skill",
-        ".agents/skills/testing-skill"
+        "unity-code-skill"
       ],
       "dependencies": [],
       "code_targets": [
@@ -36,6 +35,64 @@
           "symbol": "CSharpRuleGuardTests.test_unity_csharp_rejects_named_pitfalls",
           "anchor": "def test_unity_csharp_rejects_named_pitfalls(self):",
           "summary": "Check the moved C# discard, recursion, forwarding, type and layout findings."
+        }
+      ]
+    },
+    {
+      "id": "unity-assets",
+      "summary": "Unity asset placement, GUID-preserving moves, and texture intake",
+      "document": "skills/ai-index/modules/unity-assets.md",
+      "sources": ["unity-assets-skill"],
+      "dependencies": []
+    },
+    {
+      "id": "unity-ui",
+      "summary": "UI Toolkit and Canvas, responsive geometry, localization and input",
+      "document": "skills/ai-index/modules/unity-ui.md",
+      "sources": ["unity-ui-skill"],
+      "dependencies": []
+    },
+    {
+      "id": "unity-animation",
+      "summary": "Clip and Animator playback, loops, rig reuse and Spine transfer",
+      "document": "skills/ai-index/modules/unity-animation.md",
+      "sources": ["unity-animation-skill"],
+      "dependencies": []
+    },
+    {
+      "id": "unity-effects",
+      "summary": "Unity VFX and shaders, effect composition, lifetime and rendered proof",
+      "document": "skills/ai-index/modules/unity-effects.md",
+      "sources": ["unity-effects-skill"],
+      "dependencies": []
+    },
+    {
+      "id": "unity-testing",
+      "summary": "Scoped native Unity test, build, device and provider evidence",
+      "document": "skills/ai-index/modules/unity-testing.md",
+      "sources": ["unity-testing-skill"],
+      "dependencies": []
+    },
+    {
+      "id": "catalog",
+      "summary": "Public package catalog, YoFaAssets comparison and repository tests",
+      "document": "skills/ai-index/modules/catalog.md",
+      "sources": ["README.md", "docs", ".agents/skills/testing-skill"],
+      "dependencies": [],
+      "code_targets": [
+        {
+          "id": "verify-package-discovery",
+          "file": ".agents/skills/testing-skill/tests/test_skill_catalog.py",
+          "symbol": "PublicSkillCatalogTests.test_readme_comparison_and_index_list_every_public_package",
+          "anchor": "def test_readme_comparison_and_index_list_every_public_package(self):",
+          "summary": "Compare the public directories with the catalog, comparison and AI index routes."
+        },
+        {
+          "id": "verify-package-local-links",
+          "file": ".agents/skills/testing-skill/tests/test_skill_catalog.py",
+          "symbol": "PublicSkillCatalogTests.test_local_links_survive_installing_one_public_folder",
+          "anchor": "def test_local_links_survive_installing_one_public_folder(self):",
+          "summary": "Check package metadata and resolve local links within the owning directory."
         }
       ]
     }
