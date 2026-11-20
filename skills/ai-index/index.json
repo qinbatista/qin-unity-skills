@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "rules": {
+    "repository": "skills/ai-index/rules/repository.md",
+    "structure": "skills/ai-index/rules/structure.md",
+    "verification": "skills/ai-index/rules/verification.md"
+  },
+  "modules": [
+    {
+      "id": "unity-code",
+      "summary": "Independent C# style, Unity structure and lifecycle, and its source checker",
+      "document": "skills/ai-index/modules/unity-code.md",
+      "sources": [
+        "unity-code-skill",
+        ".agents/skills/testing-skill"
+      ],
+      "dependencies": [],
+      "code_targets": [
+        {
+          "id": "csharp-violations",
+          "file": "unity-code-skill/scripts/csharp_rule_guard.py",
+          "symbol": "csharp_violations",
+          "anchor": "def csharp_violations(text):",
+          "summary": "Identify C# discard, wrapper, obvious type and layout findings in supplied source."
+        },
+        {
+          "id": "git-added-lines",
+          "file": "unity-code-skill/scripts/csharp_rule_guard.py",
+          "symbol": "git_added_lines",
+          "anchor": "def git_added_lines(path, reference):",
+          "summary": "Read added Git line ranges and treat new source files as entirely added."
+        },
+        {
+          "id": "verify-csharp-rules",
+          "file": "unity-code-skill/tests/test_csharp_rule_guard.py",
+          "symbol": "CSharpRuleGuardTests.test_unity_csharp_rejects_named_pitfalls",
+          "anchor": "def test_unity_csharp_rejects_named_pitfalls(self):",
+          "summary": "Check the moved C# discard, recursion, forwarding, type and layout findings."
+        }
+      ]
+    }
+  ]
+}
