@@ -7,6 +7,7 @@ This repository owns the Unity Skills listed in the [catalog](README.md), their 
 - Use `install_skill_pack.py install qin-unity-skills` through Python to install at `~/.agents/skills/qin-unity-skills/`. Each Skill directory is an immediate child of that path.
 - Use `update qin-unity-skills` to fetch and replace the complete pack or `uninstall qin-unity-skills` to remove it. See [installation](README.md#install-the-global-skill-pack).
 - The Git release retains its native Marketplace and plugin manifests. The installed group contains the pack manifest and six Skills with their references and C# checker. The README, `AGENTS.md`, AI index, comparison and tests stay in the source repository.
+- To require automatic routing for a Unity-only installation, set the Codex user `developer_instructions` to read matching `SKILL.md` entries under `~/.agents/skills/qin-unity-skills/` for Unity and C# tasks after the applicable project's source-owner rules. With both packs installed, use the [shared routing guide](https://github.com/qinbatista/qin-codex-skills/blob/master/task-analyze-skill/references/global-skill-routing.md#require-routing-across-projects).
 
 - Use the [project AI index](skills/ai-index/SKILL.md) at task start and finish. Refresh related index guidance after changing source or ownership.
 - Write durable instructions and project documentation in English. Keep cross-game rules in the current shared owner and concrete game contracts in their receiving project.

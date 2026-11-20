@@ -42,5 +42,13 @@ class CSharpRuleGuardTests(unittest.TestCase):
             "/*", "    _ = Call();", "    var fake = new Widget();", "*/",
             'string example = """', "    var sample = new Widget();", '""";',
             'void Say() => Output("A closing )");',
+            'void Speak() => Output("first,,last");',
         ])
         self.assertEqual(self.codes(source), set())
+
+    def test_forwarding_requires_unchanged_arguments_and_reports_changes_inside_the_body(self):
+        changed = "void Scale(int count) => Output(count + count);\n"
+        self.assertEqual(self.codes(changed), set())
+        forwarding = "void Save(ref Data value)\n{\n    Output(ref value);\n}\n"
+        scoped = module.filter_violations(module.csharp_violations(forwarding), {3})
+        self.assertEqual([(item["code"], item["line"], item["end_line"]) for item in scoped], [("pass-through-wrapper", 1, 4)])

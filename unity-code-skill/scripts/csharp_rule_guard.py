@@ -18,6 +18,7 @@ CSHARP_OBVIOUS_VAR = re.compile(r"^[ \t]*var\s+[A-Za-z_]\w*\s*=\s*new\s+[A-Za-z_
 CSHARP_VERTICAL_CALL_START = re.compile(r"^(?:(?:return|await)\s+)?(?:[A-Za-z_]\w*\.)*[A-Za-z_]\w*(?:<[^<>]+>)?\s*\($")
 CSHARP_EXPRESSION_METHOD = re.compile(r"^[ \t]*(?:(?:public|private|protected|internal|static|virtual|override|sealed|async|new|partial)\s+)*(?:[A-Za-z_]\w*(?:[.<>,?\[\]]+)?)\s+(?P<name>[A-Za-z_]\w*)\s*\((?P<parameters>[^)]*)\)\s*=>\s*(?P<callee>[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*\((?P<arguments>[^)]*)\)\s*;[ \t]*$", re.MULTILINE)
 CSHARP_BLOCK_METHOD = re.compile(r"^[ \t]*(?:(?:public|private|protected|internal|static|virtual|override|sealed|async|new|partial)\s+)*(?:[A-Za-z_]\w*(?:[.<>,?\[\]]+)?)\s+(?P<name>[A-Za-z_]\w*)\s*\((?P<parameters>[^)]*)\)\s*\{\s*(?:return\s+)?(?P<callee>[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*\((?P<arguments>[^)]*)\)\s*;\s*\}[ \t]*$", re.MULTILINE)
+CSHARP_PARAMETER = re.compile(r"(?:(?P<modifier>in|ref|out)\s+|params\s+)?[^\s,=]+\s+(?P<name>@?[A-Za-z_]\w*)\s*(?:=.*)?", re.DOTALL)
 CSHARP_NON_CODE = re.compile(
     r'//[^\r\n]*|/\*[\s\S]*?(?:\*/|\Z)|'
     r'\$*(?P<raw_delimiter>"{3,})[\s\S]*?(?P=raw_delimiter)|'
@@ -32,10 +33,20 @@ def has_semantic_boundary(lines, line_number):
     return any(re.search(r"^\s*//\s*code-gate:\s*semantic-boundary=\s*\S", line) for line in lines[start:line_number])
 
 
-def comma_names(value):
-    if not value.strip():
-        return []
-    return [part.strip().split("=")[0].strip().split()[-1] for part in value.split(",")]
+def forwards_arguments(parameters, arguments):
+    declared = parameters.split(",") if parameters.strip() else []
+    passed = arguments.split(",") if arguments.strip() else []
+    if len(declared) != len(passed):
+        return False
+    for declaration, argument in zip(declared, passed):
+        parameter = CSHARP_PARAMETER.fullmatch(declaration.strip())
+        if parameter is None:
+            return False
+        modifier = parameter.group("modifier")
+        expected = f"{modifier} {parameter['name']}" if modifier else parameter["name"]
+        if " ".join(argument.split()) != expected:
+            return False
+    return True
 
 
 def csharp_violations(text):
@@ -49,12 +60,13 @@ def csharp_violations(text):
     for pattern in (CSHARP_EXPRESSION_METHOD, CSHARP_BLOCK_METHOD):
         for match in pattern.finditer(code):
             line_number = text.count("\n", 0, match.start()) + 1
+            end_line = line_number + match.group().count("\n")
             callee_name = match.group("callee").split(".")[-1]
             arguments = text[match.start("arguments"):match.end("arguments")]
             if callee_name == match.group("name") and ("." not in match.group("callee") or match.group("callee").startswith("this.")):
-                violations.append(violation("self-recursion", line_number, "A method whose only action calls itself has no visible base case or progress."))
-            elif comma_names(arguments) == comma_names(match.group("parameters")) and not has_semantic_boundary(lines, line_number):
-                violations.append(violation("pass-through-wrapper", line_number, "Call the real owner directly or mark the actual semantic boundary."))
+                violations.append(violation("self-recursion", line_number, "A method whose only action calls itself has no visible base case or progress.", end_line))
+            elif forwards_arguments(match.group("parameters"), arguments) and not has_semantic_boundary(lines, line_number):
+                violations.append(violation("pass-through-wrapper", line_number, "Call the real owner directly or mark the actual semantic boundary.", end_line))
     for line_number, line in enumerate(code_lines, start=1):
         stripped = line.strip()
         if not stripped.endswith("(") or not (any(marker in line for marker in ("=", "return ", "new ", ".")) or CSHARP_VERTICAL_CALL_START.fullmatch(stripped)):
