@@ -75,9 +75,9 @@
     },
     {
       "id": "catalog",
-      "summary": "Public package catalog, YoFaAssets comparison and repository tests",
+      "summary": "Global Codex plugin, public catalog, YoFaAssets comparison and repository tests",
       "document": "skills/ai-index/modules/catalog.md",
-      "sources": ["README.md", "docs", ".agents/skills/testing-skill"],
+      "sources": ["README.md", "docs", ".agents/skills/testing-skill", "plugins/qin-unity-skills", ".github/workflows/publish-plugin.yml"],
       "dependencies": [],
       "code_targets": [
         {
