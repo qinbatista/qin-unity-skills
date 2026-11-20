@@ -5,9 +5,21 @@ description: Design, implement, repair, or review Unity VFX, Particle Systems, V
 
 # Unity Effects
 
-Bind the receiving scene, effect Prefab or material, gameplay trigger, camera, scale, render pipeline, graphics backend, installed packages and target platform. For YoFaAssets-linked work, read its current `game-effect` source and the applicable VFX or shader method first.
+Bind the receiving scene, effect Prefab or material, gameplay trigger, camera, scale, render pipeline, graphics backend, installed packages and target platform. For YoFaAssets-linked work, read `explain game-effect` from the registered YoFaAssets checkout first. Its source links to the reference VFX and Shader libraries, exact asset lookup, and the applicable game workflow.
 
 Use [staged effects](references/staged-effects.md) for complete effect choreography, progressive shape formation and layered composition. Use [rendering and verification](references/rendering-and-verification.md) for VFX and shader implementation, first-use behavior and native evidence.
+
+## Use an existing effect or reference
+
+1. Define what you need to reuse or learn. For VFX, identify the relevant emitter, anchor, trajectory, timing or tail. For a shader, identify the surface, mask, reveal, blend or lighting contribution. Inspect the selected reference at the relevant phase and camera scale.
+2. For asset reuse, verify the license, Prefab or material, source identities and complete dependency set against the destination renderer, packages and platform. A preview or reference ID is evidence for visual study. Use the verified reusable source when available, preserving its asset identities and references.
+3. Bind the reusable effect in the destination's existing effect owner. Verify scale, sorting, timing and lifecycle for VFX. Verify the destination renderer, material properties, textures and required passes for shaders. Record any adaptation together with the source ID or path, then run the receiving scene's native case.
+
+## Create or revise an effect
+
+1. Choose the implementation by contribution. Use the receiving project's supported Particle System or VFX Graph for emission, travel and tails. Use a shader with its material for coverage, reveal, distortion, lighting or emission. Use both when the composition calls for them.
+2. Author the Prefab, graph, shader, material and effect-specific dependencies in the existing game owner. For VFX, bind spawn and stop to the real trigger and make completion observable. For shaders, declare the inputs, ranges and units, bind the material to the actual renderer, and validate the required passes and variants. Keep changes to per-instance values isolated.
+3. For a layered effect, give each channel its own shape, timing and coverage, then check the intended result through the native render and lifecycle steps below.
 
 ## Define the effect
 
