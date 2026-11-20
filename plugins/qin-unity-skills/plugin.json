@@ -1,0 +1,17 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "qin-unity-skills",
+  "version": "1.0.0",
+  "description": "Six Unity skills covering C#, assets, UI, animation, effects, and focused native testing.",
+  "repository": "https://github.com/qinbatista/qin-unity-skills",
+  "author": { "name": "Qin" },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Qin Unity Skills",
+        "shortDescription": "Unity C#, assets, UI, animation, effects, and testing",
+        "category": "Game Development"
+      }
+    }
+  }
+}
