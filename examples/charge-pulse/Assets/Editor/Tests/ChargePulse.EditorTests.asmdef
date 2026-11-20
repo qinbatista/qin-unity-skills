@@ -1,0 +1,7 @@
+{
+    "name": "ChargePulse.EditorTests",
+    "rootNamespace": "Qin.UnitySamples.Tests",
+    "references": ["ChargePulse.Runtime"],
+    "includePlatforms": ["Editor"],
+    "optionalUnityReferences": ["TestAssemblies"]
+}

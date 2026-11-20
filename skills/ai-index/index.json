@@ -77,7 +77,7 @@
       "id": "catalog",
       "summary": "Global Codex plugin, public catalog, YoFaAssets comparison and repository tests",
       "document": "skills/ai-index/modules/catalog.md",
-      "sources": ["README.md", "docs", ".agents/skills/testing-skill", "plugins/qin-unity-skills", ".github/workflows/publish-plugin.yml"],
+      "sources": ["README.md", "docs", "examples/charge-pulse", ".agents/skills/testing-skill", "plugins/qin-unity-skills", ".github/workflows/publish-plugin.yml"],
       "dependencies": [],
       "code_targets": [
         {

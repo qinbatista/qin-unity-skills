@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="ChargePulseHud.uss" />
+    <ui:VisualElement name="viewport" picking-mode="Ignore" class="viewport">
+        <ui:VisualElement class="pulse-panel">
+            <ui:VisualElement class="pulse-copy">
+                <ui:Label text="Charge pulse" class="pulse-title" />
+                <ui:Label name="status" text="Ready" class="pulse-status" />
+            </ui:VisualElement>
+            <ui:Button name="charge" text="Charge" class="charge" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

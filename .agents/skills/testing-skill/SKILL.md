@@ -12,6 +12,7 @@ Use the smallest maintained case that can establish the change. Run from the rep
 | C# source checker reports violations, accepts intentional boundaries, and filters changed lines | 1 | `unittest`, [test_csharp_rule_guard.py](../../../unity-code-skill/tests/test_csharp_rule_guard.py), Unity Code |
 | Skill references resolve and preserve the moved C# rule contracts | 1 | `unittest`, [test_skill_contract.py](../../../unity-code-skill/tests/test_skill_contract.py), Unity Code |
 | Public catalog and AI routes match the installable folders and each package's local references stay inside its own folder | 2 | `unittest`, [test_skill_catalog.py](tests/test_skill_catalog.py), repository Testing |
+| Charge Pulse sample saved bindings, nonlinear clip timing, Toolkit layout and input, visible release, cancellation and replay | 2 | Native Unity CLI EditMode with the Play transition in [ChargePulseTests.cs](../../../examples/charge-pulse/Assets/Editor/Tests/ChargePulseTests.cs). Use a task-owned example snapshot and the [sample commands](../../../examples/charge-pulse/README.md#run-the-focused-tests). |
 
 ```text
 macOS/Linux: python3 -B -m unittest discover -s unity-code-skill/tests

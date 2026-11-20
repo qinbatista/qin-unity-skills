@@ -1,0 +1,65 @@
+.viewport {
+    flex-grow: 1;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.pulse-panel {
+    width: 88%;
+    max-width: 1320px;
+    min-height: 252px;
+    margin-bottom: 108px;
+    padding: 40px 50px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 36px;
+    background-color: rgba(18, 31, 41, 0.98);
+}
+
+.pulse-copy {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    margin-right: 36px;
+}
+
+.pulse-title {
+    font-size: 64px;
+    -unity-font-style: bold;
+    white-space: normal;
+    color: #e9fbff;
+}
+
+.pulse-status {
+    font-size: 50px;
+    color: #9ebbc6;
+}
+
+.charge {
+    flex-shrink: 0;
+    width: 365px;
+    min-height: 168px;
+    margin: 0;
+    border-width: 0;
+    border-radius: 25px;
+    background-color: #57edcd;
+    color: #0a252a;
+    font-size: 53px;
+    -unity-font-style: bold;
+}
+
+.charge:hover,
+.charge:focus {
+    background-color: #a4ffe8;
+}
+
+.charge:active {
+    background-color: #2dbb9f;
+}
+
+.charge:disabled {
+    background-color: #293c48;
+    color: #bdd6db;
+    opacity: 1;
+}

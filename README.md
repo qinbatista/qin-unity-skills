@@ -11,6 +11,8 @@ Six Unity Skills installed together in one user-global directory.
 | [Unity Effects](unity-effects-skill/SKILL.md) | VFX, particles, Shader Graph, HLSL, materials and effect lifecycle. |
 | [Unity Testing](unity-testing-skill/SKILL.md) | Focused native checks, Player and device evidence, regressions and profiling. |
 
+The [Charge Pulse Unity example](examples/charge-pulse/README.md) shows all six Skills through a single interaction, with saved assets and native tests for the result.
+
 ## Install the global Skill pack
 
 Save [install_skill_pack.py](https://raw.githubusercontent.com/qinbatista/qin-codex-skills/master/management-skill/scripts/install_skill_pack.py) and run the command for your operation. Use `py -3 -B` on Windows.
