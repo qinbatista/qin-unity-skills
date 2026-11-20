@@ -24,10 +24,10 @@
         },
         {
           "id": "git-added-lines",
-          "file": "unity-code-skill/scripts/csharp_rule_guard.py",
+          "file": "unity-code-skill/scripts/qin_rule_guard_common.py",
           "symbol": "git_added_lines",
           "anchor": "def git_added_lines(path, reference):",
-          "summary": "Read added Git line ranges and treat new source files as entirely added."
+          "summary": "Read added Git lines with the runtime mirror of the shared Python and C# guard."
         },
         {
           "id": "verify-csharp-rules",

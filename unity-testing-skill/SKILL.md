@@ -22,6 +22,8 @@ Bind the exact project, revision, Unity version, expected behavior, relevant sce
 3. For requested package tests, preserve the project's configured identity, names, icons, profiles and effective defaults. Check the packaged manifest and installed application when those claims are in scope. Build, installation, provider completion and store acceptance have separate evidence.
 4. Keep test output in the receiving project's task Cache. Bind the actual runner and current fixture before launch. Check the affected normal path plus the failure, teardown or re-entry case most likely to invalidate it.
 
+Check the native IPC path budget before a macOS batch compile. If Unity Bee's socket path exceeds the limit, use a shorter registered task path. On APFS, a `/.vol/<device>/<inode>` address can refer to the existing task temp directory without relocating it. Confirm that both paths identify the same directory and that a short native Unix socket binds and appears inside the task Cache before passing the absolute address to Unity's temporary environment. Keep the project and log paths with their original owner.
+
 ## Interpret and deliver
 
 - Observe process or frame continuity and bounded logs. Distinguish managed exceptions, native crashes, expected shutdown and missing evidence. Preserve the first actionable diagnostic and rerun the real failing trigger after a scoped fix.

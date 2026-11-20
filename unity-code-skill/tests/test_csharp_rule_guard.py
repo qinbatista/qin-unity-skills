@@ -31,3 +31,16 @@ class CSharpRuleGuardTests(unittest.TestCase):
     def test_changed_line_filter_does_not_fail_for_legacy_violation_outside_patch(self):
         violations = [module.violation("legacy", 2, "old"), module.violation("new", 7, "new", 9)]
         self.assertEqual([item["code"] for item in module.filter_violations(violations, {8})], ["new"])
+
+    def test_new_code_after_a_blank_line_keeps_its_actual_line(self):
+        source = "class Fixture {\n\n    var item = new Value();\n}\n"
+        scoped = module.filter_violations(module.csharp_violations(source), {3})
+        self.assertEqual([(finding["code"], finding["line"]) for finding in scoped], [("obvious-var", 3)])
+
+    def test_comments_and_literals_are_excluded_from_the_rule_scan(self):
+        source = "\n".join([
+            "/*", "    _ = Call();", "    var fake = new Widget();", "*/",
+            'string example = """', "    var sample = new Widget();", '""";',
+            'void Say() => Output("A closing )");',
+        ])
+        self.assertEqual(self.codes(source), set())
