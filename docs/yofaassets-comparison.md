@@ -19,6 +19,6 @@ Use the public Skills for portable Unity development decisions. A YoFaAssets-lin
 
 ## Connected workflows
 
-YoFaAssets exposes portable references in `sharedUnitySkill` for the topics above. Its primary documents and required originals own the connected workflow and apply its receiving-game rules. Existing topic IDs, aliases and reference entry paths remain callable. A moved reference points to its published source through the matching topic.
+YoFaAssets exposes portable references in `sharedUnitySkill` through nine mapped entry topics. Screen adaptation, button review and Toolkit cases use `explain unity-ui-build` for portable UI methods. Scene and Map Checker workflows use `explain unity-project` or `explain texture-compression` for applicable asset methods. The SpriteTamer shader adapter uses `explain game-effect` for portable rendering methods. Existing topic IDs, aliases and reference paths retain their connected procedures.
 
 YoFaAssets owns the exact folder, PPU and 4K policies, its Unity CLI gate and native adapters, game-specific code contracts and acceptance profiles. Its catalog, planning, stories, tasks, art generation and splitting, animation gallery and GIF fitting, Map Checker exports, resource and database sync, SDK and publishing workflows operate on declared YoFaAssets sources and tools. The receiving game owns its implementation, assets, timers, profiles, fixtures and runtime results.
