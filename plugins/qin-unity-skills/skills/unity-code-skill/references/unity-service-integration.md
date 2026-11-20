@@ -1,11 +1,10 @@
 # Unity C# Service Integration
 
-Load this category only when the Unity C# task touches Unity Gaming Services, cloud save, authentication, analytics, Addressables services, a platform SDK, provider selection, or initialization exposed across a public game API. The mandatory common writing rules remain in [`unity-csharp-rules.md`](unity-csharp-rules.md).
+Use for Unity services, platform SDKs and provider initialization.
 
 ## Stable boundary
 
-- When optional or interchangeable providers require a stable boundary, public game code depends on a neutral contract and provider/SDK types stay behind the selected implementation. Do not manufacture facade/interface/provider layers for a direct single-owner operation.
-- A facade is allowed only when it owns real public compatibility, validation, state translation, lifecycle, or provider selection. If it merely calls another method with the same arguments and return value, remove it and call the real owner once.
+- A neutral public contract can shield callers from optional or interchangeable SDKs. For a direct single-owner operation, use the [common method boundary rules](unity-csharp-rules.md#c-style).
 - Keep initialization explicit with observable states such as uninitialized, initializing, ready, and failed. Coalesce concurrent initialization, reject or queue calls according to the declared contract, and do not initialize the same SDK from multiple owners.
 - Forward each callback or operation once. Avoid duplicate event bridges, duplicate save calls, nested manager-to-manager forwarding, and hidden initialization in getters or unrelated methods.
 

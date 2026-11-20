@@ -1,22 +1,19 @@
 # Unity Game Code Structure
 
-Use for Unity gameplay ownership, data flow, and pattern decisions. Read current project structure and relevant project memory first. These are general code-organization preferences, not feature recipes. They do not apply to Editor windows, importers, build tools, asset processors, tests, or migration utilities.
+Use for Unity gameplay ownership and data flow. Read the current feature and its local contract. Editor tooling and tests follow their actual owners.
 
 ## Ownership
 
 - Gameplay runtime behavior belongs to named `XXController` or `XXManager` roles. Avoid a third helper MonoBehaviour role when one of these already owns the responsibility. Data records, enums, interfaces, and ScriptableObjects are not runtime-behavior roles.
 - A Controller owns one GameObject-bound local responsibility, including its bindings and cleanup. Multiple Controllers may share an object when their concerns are independently named and changeable.
-- One single-instance Manager owns a feature's bootstrap, registration, shared data flow, creation, pooling, release, and group coordination. Its singleton lifetime follows project bootstrap and teardown; it is not a shortcut to hidden mutable globals.
-- After handoff, Controllers operate autonomously. Managers re-coordinate only real shared concerns such as pooling, global pause, selection, group state, or release; they do not drive every local update.
-- Select representations by actual responsibility. Use a batched VFX owner for repeated purely decorative particles. Use independent gameplay objects or the project's established entity model where identity and interaction are required. Use Jobs or Burst when the project needs parallel data computation. Choose pooling when actual instance reuse justifies its cost and capacity. See [runtime resources and GC](runtime-resources-and-gc.md) for ownership, teardown and verification.
+- Use one feature Manager when actual callers need shared lifecycle or group coordination. Bind its lifetime to the feature. After handoff each Controller owns its local behavior.
+- Batch repeated pure decoration inside VFX. Use gameplay objects for independent identity or interaction, Jobs for needed parallel computation, and pools for actual bounded reuse. See [runtime resources and GC](runtime-resources-and-gc.md).
 
 ## Data
 
-- Every Manager authored functional or tunable parameter comes from its feature's ScriptableObject data contract. A Manager serializes ScriptableObject references only.
-- Controllers may serialize GameObject/component/UI bindings needed for their own object. Feature tuning comes through the Manager or established data flow, without duplicate authored values.
-- Transient runtime state stays with its owner: observations, cached references, IDs/handles, counters, registries, collections, pool state, subscriptions, and per-call values.
-- Immutable constants, protocol keys, shader names, enums, and compile-time limits need no ScriptableObject. Configuration assets are not accidental save files or hidden runtime singletons.
-- Reuse the project's canonical ScriptableObject location and preserve main-thread, Addressables, serialization, and cleanup contracts.
+- Managers serialize only the feature's ScriptableObject configuration references. Controllers keep their own bindings and consume each tunable from its existing authored owner.
+- Keep fields with the same identity, writer and lifetime in one record. Keep local runtime state with its owner. Create an unmanaged Job snapshot only for an actual execution boundary, using only the fields that Job reads or writes.
+- Keep immutable constants, protocol keys, shader names and enums in code. Store authored configuration in its existing asset owner.
 
 ## Patterns
 
@@ -32,8 +29,8 @@ Use patterns only for a demonstrated coordination or lifecycle need:
 | Prototype | Copy semantics beyond prefab/Addressables instantiation |
 | Singleton | A real feature-wide lifetime and coordination owner |
 
-Otherwise retain direct calls and the existing owner. A pool has one owner for acquire, reset, release, capacity, and shutdown; an observer has explicit subscribe/unsubscribe lifetime.
+Keep direct calls when they already meet the requirement. A public method or event needs a current caller or an actual framework or compatibility contract.
 
 ## Continuity
 
-Current user instructions can change these preferences. Project rules refine paths, bootstrap, naming, and stricter constraints; preserve public/serialized compatibility and document a necessary scoped exception. Keep only stable local ownership and entry points in `AGENTS.md`, and concise verified project facts in memory. Do not copy this reference or a task log into either place. Verify ownership/data changes through focused checks during the active task; documentation edits do not prove runtime behavior.
+Use the receiving contract for paths, bootstrap and explicit exceptions. Preserve serialized and public compatibility. Keep stable routes in project guidance and verified facts in project memory.

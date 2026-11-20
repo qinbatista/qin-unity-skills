@@ -5,30 +5,22 @@ description: Select and run scoped Unity verification for Editor, Edit Mode, Pla
 
 # Unity Testing
 
-Bind the exact project, revision, Unity version, expected behavior, relevant scene or entry, platform and runtime. Reuse the project's established test map and supported CLI or headless runner. For YoFaAssets-linked work, read its current `unity-game-testing` source before dispatch.
-
-Use [runtime and artifact evidence](references/runtime-and-artifact-evidence.md) for package identity, focused scene or device replay, quiet diagnostics and transition or performance checks.
+Bind the exact source, expected behavior and runtime. Use the existing test map and CLI. For linked work, follow the registered YoFaAssets task entry and `explain unity-game-testing`.
 
 | Claim | Check at this boundary |
 | --- | --- |
-| Skill guidance, route or asset metadata | Reopen the actual changed source, links or importer readback |
-| Editor logic or compilation | Use the project's focused compilation or Edit Mode case |
-| Scene behavior, input, timed playback or cleanup | Exercise the affected Play Mode or Player flow through its real entry and observe the result |
-| Screen or device behavior | Verify the required runtime, viewport, orientation, safe area and actual input |
-| Built package, provider action or transaction | Bind the exact artifact and environment and observe the required manifest, native flow, callback or provider state |
+| Guidance, routes or metadata | Read back the changed source, links or importer values |
+| Editor logic or compilation | Focused compile or Edit Mode case |
+| Input, scene behavior, motion or cleanup | Real Play Mode or Player entry and its resulting state |
+| Display or device | Actual runtime, viewport, orientation, safe area and input |
+| Package or provider | Exact artifact, environment and required native or provider result |
 
 ## Prepare and run
 
-1. Select the smallest existing case that can establish the claim. Record the requested source/build identities and effective configuration. Keep maintained Editor tooling and fixtures in their declared non-shipping owner. Verify assembly scope when test placement changes.
-2. Use an authorized physical device for device tests when one is available. Otherwise use the compatible emulator or simulator for supported checks, and use a project-configured compatible host when the local ABI is unavailable. State exactly which target supplied the evidence.
-3. For requested package tests, preserve the project's configured identity, names, icons, profiles and effective defaults. Check the packaged manifest and installed application when those claims are in scope. Build, installation, provider completion and store acceptance have separate evidence.
-4. Keep test output in the receiving project's task Cache. Bind the actual runner and current fixture before launch. Check the affected normal path plus the failure, teardown or re-entry case most likely to invalidate it.
-
-Check the native IPC path budget before a macOS batch compile. If Unity Bee's socket path exceeds the limit, use a shorter registered task path. On APFS, a `/.vol/<device>/<inode>` address can refer to the existing task temp directory without relocating it. Confirm that both paths identify the same directory and that a short native Unix socket binds and appears inside the task Cache before passing the absolute address to Unity's temporary environment. Keep the project and log paths with their original owner.
+1. Select the smallest case, including the relevant failure, retirement or reentry. Keep maintained automation in its Editor-only or external test owner and disposable output under the receiving project's task Cache.
+2. For device cases, prefer an available authorized physical device, then a compatible emulator or simulator. Use a configured compatible host if the local ABI cannot run the case. Preserve package identity and effective defaults.
+3. Use [runtime and artifact evidence](references/runtime-and-artifact-evidence.md) for package readback, native rendering, crash or performance checks and batch startup recovery.
 
 ## Interpret and deliver
 
-- Observe process or frame continuity and bounded logs. Distinguish managed exceptions, native crashes, expected shutdown and missing evidence. Preserve the first actionable diagnostic and rerun the real failing trigger after a scoped fix.
-- For a visual or input claim, inspect fresh native frames and exercise the relevant control or transition through its actual input path. Record using the supported runner when motion evidence is required.
-- For a performance or memory claim, compare the same revision conditions, workload, platform, warm-up and observation window. Distinguish cold first use, steady playback, managed allocations, native objects and process memory.
-- Report the exact scene, runtime and verified behavior. Keep source, Editor, device, simulator, fake provider, test-network and store outcomes independently attributable.
+Report the actual scene, runtime, result and evidence type. Attribute Editor, device, simulator, fake or test-network provider, and store results to their own runs. Release consumed scratch once the verified evidence reaches its owner.

@@ -1,10 +1,10 @@
 # Staged effects
 
-Bind the source ability or effect brief, trigger and intended result. Record the source requirements and the chosen visual design. Set the camera, subject scale and position, layer ordering, spatial anchors, and real scene budget before tuning individual effects. A world-space trail, camera-facing line, body surface and detached particles may require different spaces. Record each layer's job, anchor, sort order, stage window, nonlinear controls and expected capacity.
+Use the actual trigger and viewing scale. For each layer, record its contribution, anchor and space, sorting, stage window, nonlinear control and budget in the existing effect recipe.
 
 ## Native lifecycle
 
-Use the following phases when the receiving effect calls for the complete seven-stage lifecycle. Give every applicable phase a native entry, behavior, exit and observable state on one owning timeline. Keep gameplay state in its original owner so visual tails cannot extend a hit, shield or protection window.
+Use these phases on one native timeline for the complete linked profile or when the receiving effect calls for them. Give each phase a real entry, behavior and exit. Keep the hit or protection window with its gameplay owner.
 
 | Phase | Visible contribution | Runtime boundary |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ Use the following phases when the receiving effect calls for the complete seven-
 | Releasing | Extend lines, open arcs, expand surfaces or scatter particles. | Start from the prepared state when the actual release is accepted. |
 | Released | Show the active form, impact and any controlled hold. | Observe the gameplay owner's active window and any independent residual presentation. |
 | Retracting | Unwind, reverse-draw, shrink, absorb or disperse. | Stop new work at the correct event and retract from the current values. |
-| Recycled | Finish with zero coverage and no live tails or stale instance state. | Confirm completion, then reset and release or return the exact acquisition. |
+| Recycled | Return to the authored rest state with no effect coverage or stale tail. | Reset and release or return the exact acquisition. |
 
 Resource readiness can precede the cycle. Verify first visible preparation as well as warm playback. On interruption, retract the current partial shape and record which stages were reached. Preserve immediate owner destruction where it is required and distinguish it from natural completion. Exercise normal completion, early and late cancellation, disable and another use of the same pooled slot.
 

@@ -13,11 +13,9 @@ Read [allocation and ownership patterns](allocation-and-ownership-patterns.md) f
 
 ## Schedule data and bound reuse
 
-- Snapshot required Unity object inputs on the main thread. Put parallel calculations in the existing Job or data owner and apply results through the declared consumer. Complete scheduled dependencies before reading, rebuilding or disposing owned native storage. Retire borrowers with their producer or use the project's explicit rebind protocol.
-- Keep pool capacity, admission, exhaustion and reset explicit. Clear per-use timers, targets, subscriptions and asynchronous state during return or acquisition. Bound capacity based on actual concurrent use and preserve the lifetime of shared dependencies.
+- Snapshot required Unity inputs on the main thread. Use one Job/data owner for work that shares its slot, schedule and write-back boundary. Complete outstanding work before reading, rebuilding or disposing native storage.
+- Size pools and scratch capacity to actual concurrent use. Define admission and exhaustion. On return, clear per-use timers, targets, listeners, callbacks and visible state. Keep shared dependencies leased until the last borrower retires.
 
 ## Measure a recurring path
 
-1. Identify the method and trigger, then follow its calls to the operation that allocates. Inspect likely sources such as closure capture, boxing, temporary collections, array-returning APIs and repeated text formatting.
-2. Reuse buffers, delegates or cached results at their real owner when doing so preserves ordering, invalidation, cancellation and reentrancy. Give simultaneous operations independent mutable scratch. Keep startup, first use and steady reuse as distinct measurements.
-3. Run the same workload and runtime before and after the change. Verify the relevant failure and lifetime case, then report the measured metric and scope. Managed allocations, native memory, retained resources, frame time and package size require their own evidence.
+Trace the actual hot path to the allocating operation. Reuse capacity only with a current consumer and a matching release boundary. Measure the same workload before and after, separating first use from warm repeats and managed allocations from native objects and retained memory. Verify cleanup and reentry when they can invalidate the result.
