@@ -1,5 +1,13 @@
 # UI artwork intake
 
+## YoFaAssets split to Unity
+
+Resolve the current YoFaAssets owner and run `explain ui-split` for extracting or supplementing artwork. Its screen-adaptation workflow owns saved artwork compositions, their coordinates and any approved aspect-specific variants. Use the accepted output directly when it already exists. Read `explain unity-ui-build` and `explain ui-screen-adaptation` for the receiving game's native construction and 4K layout contract.
+
+Hand over the accepted screen and state, exact source revision and SHA, original canvas and orientation, component IDs and files, parent/instance relationships, drawing order, source rectangles, alpha bounds, and the saved screen variants or composition metadata that apply. Record shared sources once and retain a placement for each required instance. Use the same accepted art when changing layout alone. Route missing art or an authored variant back to `ui-split` for the affected component and state.
+
+The split workflow can finish at its accepted artwork handoff. Unity can start from an existing handoff, project art, or native shapes and text. Unity owns the semantic runtime hierarchy, layout, scaling, safe areas, data, input and rendered acceptance. Map the accepted design into native layout units and verify the resulting groups in Unity after import.
+
 ## Source, component and instance identity
 
 Bind the accepted source revision, original canvas, each selected state, editable source and actual component files. Read the whole relevant atlas and semantic layout before implementing the first page. Record each component's role, version, decoded dimensions, alpha and source rectangle. Identify repeated instances, shared art and independently sourced children. Bind each instance to its actual parent, drawing order, state and input. Reuse one accepted image where the image is genuinely shared while preserving independent instances and behaviors.
