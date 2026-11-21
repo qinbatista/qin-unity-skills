@@ -1,6 +1,6 @@
 ---
 name: unity-assets-skill
-description: Explain or review Unity project folder layouts and asset ownership. Place, move, audit, or import Prefabs, scenes, textures, Sprite geometry, and Addressables assets while preserving serialized references.
+description: Place, move, audit, or import Unity assets while preserving serialized references. Use whenever Unity work touches an image or texture to check Sprite PPU, import it and optimize platform compression, including on projects without YoFaAssets.
 ---
 
 # Unity Assets
@@ -26,4 +26,6 @@ Use the same consumer inventory before removing an unused asset, including retai
 
 ## Admit artwork and textures
 
-Use [texture intake and import](references/texture-intake.md) for source sizing, companion maps, Sprite geometry and effective native import.
+Whenever Unity work reads, receives, generates, edits or reuses an image, run the scoped [texture intake and import workflow](references/texture-intake.md). Apply the project's PPU and world scale first. The standalone default for world Sprites is **1000 pixels = 1 Unity unit = 1 meter** at effective Transform scale 1.
+
+Use the receiving project's native import workflow where declared. Otherwise, this Skill performs intake, reimport, compression and readback through Unity CLI using the linked reference, including without YoFaAssets. Apply verified improvements within the task's write scope. For read-only requests, report the audit and eligible changes.
