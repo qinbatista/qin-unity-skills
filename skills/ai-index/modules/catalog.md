@@ -6,8 +6,6 @@ The [Codex C# writing regression](../../../.agents/skills/testing-skill/referenc
 
 The [Job State Batches sample](../../../examples/job-state-batches/README.md) owns the five standalone movement scenes, their native authoring route and [Play Mode cases](../../../examples/job-state-batches/README.md#run-the-five-cases).
 
-The [Server Sync sample](../../../examples/server-sync/README.md) owns the standalone player-save contract, memory and HTTP implementations and the native provider-selection cases.
-
 The [installed routing guide](../../../unity-code-skill/references/global-skill-routing.md) selects all six entries, including ordinary C# checks and the Unity test-packaging owner. The [public catalog](../../../README.md) links the Charge button example to the native duplicate-request and replay case. Keep the [C# checker's shared helpers](unity-code.md) byte-identical to the Code pack's Git scope and quiet-process helpers. The [YoFaAssets comparison](../../../docs/yofaassets-comparison.md) maps portable guidance to the registered shared workflows and game-owned contracts. The [repository test map](../../../.agents/skills/testing-skill/SKILL.md) checks release membership, project precedence, standalone references and the C# checker.
 
 The [project memory owner catalog](../../../unity-code-skill/assets/project-memory-owners.json) declares the Documents-relative game checkouts used by the general memory reader. Its [identity regression](../../../.agents/skills/testing-skill/tests/test_project_memory_owners.py) covers historical and current checkout names.

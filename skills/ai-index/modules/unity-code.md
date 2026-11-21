@@ -6,6 +6,4 @@ The [completed Job batch contract](../../../unity-code-skill/references/unity-ga
 
 The [Job State Batches sample](../../../examples/job-state-batches/README.md#five-scenes) demonstrates the same contract in five independent systems. Each saved scene exercises movement while its presentation Controller is detached and applies the completed state when subscribed.
 
-The [Server Sync sample](../../../examples/server-sync/README.md#choose-the-provider) demonstrates caller-owned provider selection, a provider-bound sync session and conditional writes against a read snapshot.
-
 The [C# checker](../../../unity-code-skill/scripts/csharp_rule_guard.py) reports lexical findings. It distinguishes wildcard arrows from discard assignments and same-name overloads or other receivers from likely self-recursion. Its [Git scope](../../../unity-code-skill/scripts/qin_rule_guard_common.py) and [hidden-process](../../../unity-code-skill/scripts/hidden_process.py) helpers mirror the shared [Code Skill scripts](https://github.com/qinbatista/qin-codex-skills/tree/master/code-skill/scripts) for standalone installation. Use the [test map](../../../.agents/skills/testing-skill/SKILL.md) for the checker and installed-package routes.

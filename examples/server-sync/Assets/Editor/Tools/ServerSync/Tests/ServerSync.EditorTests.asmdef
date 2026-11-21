@@ -1,6 +1,0 @@
-{
-  "name": "ServerSync.EditorTests",
-  "references": ["ServerSync.Runtime"],
-  "includePlatforms": ["Editor"],
-  "optionalUnityReferences": ["TestAssemblies"]
-}
