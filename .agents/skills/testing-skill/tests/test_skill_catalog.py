@@ -9,6 +9,7 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[4]
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 UNITY_CLI_GUIDE = PROJECT / "unity-code-skill/references/unity-cli.md"
+UNITY_ROUTING_GUIDE = PROJECT / "unity-code-skill/references/global-skill-routing.md"
 
 
 class PublicSkillCatalogTests(unittest.TestCase):
@@ -25,17 +26,24 @@ class PublicSkillCatalogTests(unittest.TestCase):
         self.assertEqual(routed, entries)
         release = json.loads((PROJECT / "plugins/qin-unity-skills/skills.json").read_text(encoding="utf-8"))
         self.assertCountEqual(release, [entry.parent.name for entry in entries])
-        for relative_path in ("README.md", "docs/yofaassets-comparison.md"):
-            document = PROJECT / relative_path
+        for document in (PROJECT / "README.md", PROJECT / "docs/yofaassets-comparison.md", UNITY_ROUTING_GUIDE):
             targets = MARKDOWN_LINK.findall(document.read_text(encoding="utf-8"))
             local_entries = (
                 (document.parent / target).resolve()
                 for target in targets
-                if target.endswith("-skill/SKILL.md") and "://" not in target
+                if target.endswith("/SKILL.md") and "://" not in target
             )
             linked = {entry for entry in local_entries if entry.parent.parent == PROJECT}
-            with self.subTest(document=relative_path):
+            with self.subTest(document=document.relative_to(PROJECT)):
                 self.assertEqual(linked, entries)
+        testing = PROJECT / "unity-testing-skill/SKILL.md"
+        packaging = {
+            (UNITY_ROUTING_GUIDE.parent / target.split("#", 1)[0]).resolve()
+            for target in MARKDOWN_LINK.findall(UNITY_ROUTING_GUIDE.read_text(encoding="utf-8"))
+            if target.endswith("#test-packaging")
+        }
+        self.assertEqual(packaging, {testing})
+        self.assertIn("\n## Test packaging\n", testing.read_text(encoding="utf-8"))
 
     def test_layout_and_gameplay_skills_route_to_existing_game_architecture(self):
         self.assertIn("\n## Existing-game architecture\n", UNITY_CLI_GUIDE.read_text(encoding="utf-8"))
@@ -52,11 +60,14 @@ class PublicSkillCatalogTests(unittest.TestCase):
 
     def test_package_links_resolve_and_references_are_linked(self):
         self.assertIn("\n## Standalone CLI\n", UNITY_CLI_GUIDE.read_text(encoding="utf-8"))
-        for entry in sorted(PROJECT.glob("unity-*-skill/SKILL.md")):
+        entries = set(PROJECT.glob("unity-*-skill/SKILL.md"))
+        for entry in sorted(entries):
             package = entry.parent
             linked_files = set()
             with self.subTest(package=package.name):
-                frontmatter, instructions = entry.read_text(encoding="utf-8").split("---\n", 2)[1:]
+                source = entry.read_text(encoding="utf-8")
+                self.assertNotIn("qin-unity-csharp-minimal-style", source)
+                frontmatter, instructions = source.split("---\n", 2)[1:]
                 self.assertIn(f"name: {package.name}", frontmatter.splitlines())
                 self.assertRegex(frontmatter, r"(?m)^description: \S+")
                 opening = instructions.strip().split("\n\n", 2)[1]
@@ -76,7 +87,8 @@ class PublicSkillCatalogTests(unittest.TestCase):
                         continue
                     resolved = (document.parent / local_path).resolve()
                     with self.subTest(document=document.relative_to(PROJECT), target=target):
-                        self.assertTrue(resolved == UNITY_CLI_GUIDE or package in resolved.parents)
+                        routed_entry = document == UNITY_ROUTING_GUIDE and resolved in entries
+                        self.assertTrue(routed_entry or resolved == UNITY_CLI_GUIDE or package in resolved.parents)
                         self.assertTrue(resolved.is_file())
                         linked_files.add(resolved)
             with self.subTest(package=package.name):

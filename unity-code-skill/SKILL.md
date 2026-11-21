@@ -7,7 +7,7 @@ description: Explain or design Unity gameplay architecture and write, fix, refac
 
 **Project rules come first.** Follow the target project's `AGENTS.md`, Skill order and registered workflows. Use this Skill for remaining decisions. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
 
-Use the [existing-game architecture workflow](references/unity-cli.md#existing-game-architecture) for questions, examples and implementation plans.
+Use the [existing-game architecture workflow](references/unity-cli.md#existing-game-architecture) for questions, examples and implementation plans. The [Unity routing guide](references/global-skill-routing.md) selects companion Skills when the task spans other systems.
 
 For linked game code, select `explain game-code-logic` through the registered workflow. Bind the owning type, actual callers and C# version through the project's system contract.
 

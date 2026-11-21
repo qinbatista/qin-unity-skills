@@ -22,9 +22,15 @@ For manual setup, save [install_skill_pack.py](https://raw.githubusercontent.com
 
 Check `~/.agents/skills/qin-unity-skills/<skill>/SKILL.md` and select `$unity-code-skill` in Codex. `install_skill_pack.py update qin-unity-skills` replaces the whole directory from the published package. `install_skill_pack.py uninstall qin-unity-skills` removes the pack. [Shared installer guide](https://github.com/qinbatista/qin-codex-skills/blob/master/management-skill/SKILL.md#install) · [Codex Skill discovery](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)
 
+For automatic selection across projects, use the [installed Unity routing guide](unity-code-skill/references/global-skill-routing.md#require-routing-across-projects).
+
 ## Examples
 
 The [Charge Pulse sample](examples/charge-pulse/README.md) follows one button press through gameplay code, UI, animation and an effect. Start with the [project structure](examples/charge-pulse/CASEBOOK.md#project-structure) or open any of the 52 cases.
+
+> Read this Unity project's rules and use the matching Skills to repair a Charge button that admits a second request while its animation is playing. Verify the actual input and replay path.
+
+In Charge Pulse, follow the button binding to the controller that admits the request. The Play Mode case `NativeButtonPlaysTheEffectAndRecyclesForAnotherPulse` checks duplicate requests during playback and submits the button again after recycling. With both packs installed, the general Skills cover task scope, scratch and delivery, and the Unity Skills cover the controller, UI, animation and native test. [Native test](examples/charge-pulse/Assets/Editor/Tests/ChargePulseTests.cs) · [Four repeatable Codex writing prompts](.agents/skills/testing-skill/references/codex-writing-regression.md)
 
 The [Job State Batches sample](examples/job-state-batches/README.md) contains five Unity scenes and native tests for Job-owned movement, completed-state events and Controller-owned presentation.
 

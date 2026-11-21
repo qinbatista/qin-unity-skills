@@ -3,7 +3,7 @@
 ## Bind source and receiver
 
 - Record the source revision, hash, format, decoded dimensions, visible bounds and receiving consumer. Keep original and approved derivative identities distinct and verify the delivered bytes.
-- For Sprite imports, read configured and effective PPU under the game's world-scale convention.
+- For Sprite imports, read configured and effective PPU under the game's world-scale convention. When the Sprite requires a transparent background, inspect its decoded alpha channel and native import. A painted checkerboard stays opaque. Apply atlas, slicing and background constraints only to the assets that require them.
 - For companion maps, confirm that the base and maps represent the same source revision and that their alignment, dimensions, channels, precision and color interpretation match the actual material. Verify the rendered result under the affected lighting or material states.
 
 ## Resolve the actual size and geometry

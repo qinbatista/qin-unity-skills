@@ -30,6 +30,15 @@ Before delivery, read back the exact APK, AAB, IPA or other target artifact and 
 - Keep routine loop and callback logging quiet at its producer, including repeated formatting. Enable narrow diagnostics for a bounded case. Measure idle and active output and check the actual exported profile or installed settings. Restore diagnostic state and preserve useful lifecycle summaries and failures.
 - For visual or input evidence inspect fresh native frames, scene geometry and the actual changed interaction. For moving evidence, check real decoded playback, duration, frame timing, action and target identity. Review captures without opening a visible player when the platform supports internal capture and decoding.
 
+## Playable scene review
+
+When asked to assess a playable scene, capture the actual Play Mode or Player state at the intended camera scale. Use motion and input evidence for feedback, control response or stutter. Judge the scene against its genre, platform and brief.
+
+- Check that the player, hazards, goals, interactables, pickups, projectiles and navigation cues stay readable. The camera should show upcoming action and keep important actors in frame.
+- Read the HUD, meters, scores and prompts while moving. Buttons and overlays must leave the action visible. Check sprites, lighting, particles, environment and menus together for a consistent visual style.
+- Trigger the action. Observe whether input, animation, hits, damage, transitions and audiovisual feedback communicate cause and effect. Check that effects preserve visibility and frame pacing during play.
+- Exercise the menus, pause, loss, win and restart states covered by the brief. Confirm that input returns to the expected state after each transition.
+
 ## Frame pacing and memory
 
 Resolve the project's real frame limit, active refresh rate, quality and runtime overrides in its declared Unity version and platform. Measure achieved timing separately from the requested setting. Inspect CPU/GPU time, stalls and loading boundaries with a recorded scene, workload, device, graphics settings and observation interval. Keep platform defaults and source-owned timing intact while diagnosing. Compare cold startup, first use, scene transitions and warm steady state separately.

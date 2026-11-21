@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "document_roots": [
+    ["YofaGames/ThisIsMyOregon", "ThisIsMyOregon"],
+    ["YofaGames/SpriteTamer", "ThisIsMyOregon"],
+    ["YofaGames/AIAnimation2D", "AIAnimation2D"],
+    ["YofaGames/AIShaderGraphic2D", "AIShaderGraphic2D"],
+    ["YofaGames/AIVFX2D", "AIVFX2D"],
+    ["YofaGames/YoFaAssets", "YoFaAssets"],
+    ["YofaGames/YoFaPublisher", "YoFaPublisher"],
+    ["YofaGames/YoFaUnityPlguin", "YoFaUnityPlguin"],
+    ["Mokozoo/Unity-淘金热", "Unity-淘金热"],
+    ["YofaGames/Destiny", "Destiny"],
+    ["YofaGames/FunctionWebsite", "FunctionWebsite"],
+    ["Unity3DPersonalProject/MetaStory", "MetaStory"],
+    ["YofaGames/MetaStory", "MetaStory"],
+    ["Unity3DPersonalProject/UnityCodexTest", "UnityCodexTest"],
+    ["YofaGames/UnityCodexTest", "UnityCodexTest"],
+    ["YofaGames/XNews", "XNews"]
+  ]
+}
