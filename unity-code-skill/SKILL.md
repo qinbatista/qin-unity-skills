@@ -1,11 +1,13 @@
 ---
 name: unity-code-skill
-description: Write, fix, refactor, or review Unity C# code, including gameplay ownership, lifecycle, serialization, Jobs, pooled resources, managed allocations, and SDK integration. The common C# style and source checker also apply to C# work outside Unity when compatible with its runtime.
+description: Explain or design Unity gameplay architecture and write, fix, refactor, or review Unity C# code, including runtime ownership, lifecycle, serialization, Jobs, pools, managed allocations, and SDK integration. The common C# style and source checker also apply outside Unity when compatible with its runtime.
 ---
 
 # Unity Code
 
 **Project rules come first.** Start with the target project's `AGENTS.md` and follow its order for applicable project Skills and registered shared workflows. This global Skill fills gaps. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
+
+Apply the [existing-game architecture workflow](references/unity-cli.md#existing-game-architecture) to questions and examples as well as implementation plans.
 
 For linked game code, select `explain game-code-logic` through the registered workflow. Bind the owning type, actual callers and C# version through the project's system contract.
 

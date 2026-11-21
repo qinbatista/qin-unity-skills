@@ -6,6 +6,12 @@ Start with the receiving project's `AGENTS.md` and follow its declared order for
 
 For YoFaAssets-linked work, resolve the registered owner and read `explain task-entry`, the current catalog and the selected topic with its required references. That owner defines the shared CLI and update workflow. The game selects the concrete runner, settings, fixtures and evidence. The linked daily check runs on the first eligible Unity CLI command of the local day under the registered workflow. A source-only lookup or documentation task in a linked project uses source and reference readback without an additional version probe. If a required owner is unreadable, report the exact source failure and follow the registered workflow's recovery rules.
 
+## Existing-game architecture
+
+For a folder layout or code structure question, resolve the intended or named reference game from the request, conversation or registered workspace, including when the working directory contains only this Skill pack. Follow that game's project rules and registered shared source. For a YoFaAssets-linked game, read `unity-project`, `game-code-logic` and the applicable game feature Skill.
+
+Show the verified Assets roots and trace the closest existing feature through its Prefab package, shared code, authored configuration and serialized bindings. Identify proposed files as new and place them with the existing owners. If the intended game remains unclear after checking context, ask for its name or path before giving a project-specific tree. Use a standalone template for an explicitly standalone or project-independent request.
+
 ## Standalone CLI
 
 When the project permits Unity CLI execution and neither it nor a registered shared owner supplies a CLI workflow, run the version command at the start of each Unity Skill invocation, including source-only work. Resolve `<launcher-path>` to the packaged [unity_cli_daily.py](../scripts/unity_cli_daily.py). A project or user instruction that excludes Unity execution also excludes the version probe. For an explicit CLI pin or no-update instruction, use the selected CLI with `--non-interactive` and `UNITY_NO_UPDATE_CHECK=1` where execution is permitted.

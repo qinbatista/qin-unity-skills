@@ -37,6 +37,19 @@ class PublicSkillCatalogTests(unittest.TestCase):
             with self.subTest(document=relative_path):
                 self.assertEqual(linked, entries)
 
+    def test_layout_and_gameplay_skills_route_to_existing_game_architecture(self):
+        self.assertIn("\n## Existing-game architecture\n", UNITY_CLI_GUIDE.read_text(encoding="utf-8"))
+        for name in ("unity-assets-skill", "unity-code-skill"):
+            entry = PROJECT / name / "SKILL.md"
+            targets = MARKDOWN_LINK.findall(entry.read_text(encoding="utf-8"))
+            with self.subTest(skill=name):
+                routes = {
+                    (entry.parent / target.split("#", 1)[0]).resolve()
+                    for target in targets
+                    if target.endswith("#existing-game-architecture")
+                }
+                self.assertEqual(routes, {UNITY_CLI_GUIDE})
+
     def test_package_links_resolve_and_references_are_linked(self):
         self.assertIn("\n## Standalone CLI\n", UNITY_CLI_GUIDE.read_text(encoding="utf-8"))
         for entry in sorted(PROJECT.glob("unity-*-skill/SKILL.md")):
