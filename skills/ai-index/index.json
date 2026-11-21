@@ -99,7 +99,7 @@
           "file": ".agents/skills/testing-skill/tests/test_skill_catalog.py",
           "symbol": "PublicSkillCatalogTests.test_package_links_resolve_and_references_are_linked",
           "anchor": "def test_package_links_resolve_and_references_are_linked(self):",
-          "summary": "Verify the shared CLI entry link and resolve each package's local references."
+          "summary": "Verify project precedence and the standalone CLI route in every public entry, then resolve package references."
         }
       ]
     }

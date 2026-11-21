@@ -13,7 +13,7 @@ Six Unity Skills installed together in one user-global directory.
 
 The [Charge Pulse Unity example](examples/charge-pulse/README.md) shows all six Skills through a single interaction. Its [code review casebook](examples/charge-pulse/CASEBOOK.md) links focused examples, negative controls and native or host evidence.
 
-Every Skill invocation starts with the [daily Unity CLI gate](unity-code-skill/references/unity-cli.md). The first invocation each local calendar day checks for and applies available CLI updates. Later invocations share that day's successful check. All Unity operations stay in the background without Editor or Hub windows or user clicks.
+The receiving project's rules and registered workflows take precedence. The six Skills provide portable guidance for decisions those sources leave open. Standalone work without a declared CLI workflow uses a daily update check with same-day reuse. Unity CLI work stays in the background without Editor or Hub windows or user clicks. See [Unity workflow and precedence](unity-code-skill/references/unity-cli.md).
 
 ## Install the global Skill pack
 

@@ -8,7 +8,7 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[4]
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
-UNITY_CLI_GATE = PROJECT / "unity-code-skill/references/unity-cli.md"
+UNITY_CLI_GUIDE = PROJECT / "unity-code-skill/references/unity-cli.md"
 
 
 class PublicSkillCatalogTests(unittest.TestCase):
@@ -38,6 +38,7 @@ class PublicSkillCatalogTests(unittest.TestCase):
                 self.assertEqual(linked, entries)
 
     def test_package_links_resolve_and_references_are_linked(self):
+        self.assertIn("\n## Standalone CLI\n", UNITY_CLI_GUIDE.read_text(encoding="utf-8"))
         for entry in sorted(PROJECT.glob("unity-*-skill/SKILL.md")):
             package = entry.parent
             linked_files = set()
@@ -45,8 +46,15 @@ class PublicSkillCatalogTests(unittest.TestCase):
                 frontmatter, instructions = entry.read_text(encoding="utf-8").split("---\n", 2)[1:]
                 self.assertIn(f"name: {package.name}", frontmatter.splitlines())
                 self.assertRegex(frontmatter, r"(?m)^description: \S+")
-                invocation_links = MARKDOWN_LINK.findall(instructions.strip().split("\n\n", 2)[1])
-                self.assertIn(UNITY_CLI_GATE, {(package / target).resolve() for target in invocation_links})
+                opening = instructions.strip().split("\n\n", 2)[1]
+                self.assertTrue(opening.startswith("**Project rules come first.**"))
+                self.assertIn("no project or registered shared owner governs Unity CLI", opening)
+                standalone_routes = {
+                    (package / target.split("#", 1)[0]).resolve()
+                    for target in MARKDOWN_LINK.findall(opening)
+                    if target.endswith("#standalone-cli")
+                }
+                self.assertEqual(standalone_routes, {UNITY_CLI_GUIDE})
             for document in sorted(package.rglob("*.md")):
                 targets = MARKDOWN_LINK.findall(document.read_text(encoding="utf-8"))
                 for target in targets:
@@ -55,7 +63,7 @@ class PublicSkillCatalogTests(unittest.TestCase):
                         continue
                     resolved = (document.parent / local_path).resolve()
                     with self.subTest(document=document.relative_to(PROJECT), target=target):
-                        self.assertTrue(resolved == UNITY_CLI_GATE or package in resolved.parents)
+                        self.assertTrue(resolved == UNITY_CLI_GUIDE or package in resolved.parents)
                         self.assertTrue(resolved.is_file())
                         linked_files.add(resolved)
             with self.subTest(package=package.name):

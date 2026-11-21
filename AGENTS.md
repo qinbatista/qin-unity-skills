@@ -13,6 +13,6 @@ This repository owns the Unity Skills listed in the [catalog](README.md), their 
 - Write durable instructions and project documentation in English. Keep cross-game rules in the current shared owner and concrete game contracts in their receiving project.
 - Keep each Skill's references with its source folder. Maintain the [YoFaAssets comparison](docs/yofaassets-comparison.md) and the release list when ownership changes.
 - For YoFaAssets-linked work, resolve the current source through its documented project connection or configured `YOFA_ASSETS_ROOT` and follow its task entry before game work.
-- Apply the [daily Unity CLI gate](unity-code-skill/references/unity-cli.md) on every Unity Skill invocation. Use background CLI execution for all native operations without Editor or Hub windows, UI automation, or user clicks.
+- Apply the receiving project's rules and registered workflow before global guidance. The [Unity workflow](unity-code-skill/references/unity-cli.md) defines background execution and the daily check for standalone work without a declared CLI workflow.
 - Keep temporary output in a workflow-owned `Cache/temp-*` directory. Verify the smallest affected case through the [test map](.agents/skills/testing-skill/SKILL.md).
 - Verify changed references and executable checks, then deliver through the current branch's configured upstream.
