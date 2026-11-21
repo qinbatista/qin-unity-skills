@@ -5,9 +5,9 @@ description: Build, revise, or review Unity UI, especially UI Toolkit hierarchy,
 
 # Unity UI
 
-**Required on every invocation.** Run the [daily Unity CLI gate](../unity-code-skill/references/unity-cli.md) first. Use Unity CLI for every Unity operation in background mode. Editor and Hub windows, UI automation, and user clicks are prohibited.
+**Project rules come first.** Start with the target project's `AGENTS.md` and follow its order for applicable project Skills and registered shared workflows. This global Skill fills gaps. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
 
-Bind the real screen, entry and host. Follow the registered YoFaAssets task entry for linked work. Select `unity-ui-build` for construction, `ui-screen-adaptation` for its 4K and orientation policy, and `ui-button-test` for input replay.
+For linked work, select `unity-ui-build` for construction, `ui-screen-adaptation` for shared viewport and 4K rules, or `ui-button-test` for input replay. Use the project's real screen, host, orientation and acceptance cases.
 
 1. Bind accepted art to its page, state and actual component using [artwork intake](references/artwork-intake.md). Reuse shared assets and use the current data and localization owners.
 2. Put controls and overlays under their real parents. In Toolkit, keep templates in UXML, layout and visual states in USS, and bindings and actions in C#. Preserve the existing Canvas or mixed host where it owns the screen.

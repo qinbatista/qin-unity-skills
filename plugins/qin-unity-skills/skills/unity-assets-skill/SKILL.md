@@ -5,14 +5,14 @@ description: Place, move, audit, or import Unity assets, including Prefabs, scen
 
 # Unity Assets
 
-**Required on every invocation.** Run the [daily Unity CLI gate](../unity-code-skill/references/unity-cli.md) first. Use Unity CLI for every Unity operation in background mode. Editor and Hub windows, UI automation, and user clicks are prohibited.
+**Project rules come first.** Start with the target project's `AGENTS.md` and follow its order for applicable project Skills and registered shared workflows. This global Skill fills gaps. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
 
-Bind the receiving project, existing owner and actual consumers. In a linked game, follow the registered YoFaAssets task entry. Use `explain unity-project` for the canonical eight-root Assets layout and checker and `explain texture-compression` for image intake.
+For linked work, select `explain unity-project` for the shared Assets layout and checker or `explain texture-compression` for image intake. Bind the receiving project's declared asset owner, existing paths and actual consumers.
 
 ## Place by owner
 
 - Group first-party runtime scripts by feature. Keep the Prefab and its exclusive artwork, clips, materials, UI and effects together. Reference each genuinely shared asset from its existing owner.
-- Keep dedicated effect preview and test scenes in their effect package. Keep integrated gameplay scenes in their declared scene owner and automated tools and tests in a physical Editor-only location and assembly.
+- Keep dedicated effect preview and test scenes with their effect owner. Keep integrated gameplay scenes, Editor tools, and test fixtures in the project's declared locations and assemblies.
 - Preserve native loading and assembly locations, project settings and vendor structures. Create only the folders with actual consumers.
 
 ## Move with identity
