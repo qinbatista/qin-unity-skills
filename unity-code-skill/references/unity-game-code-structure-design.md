@@ -17,13 +17,13 @@ Apply these rules to gameplay implementation, architecture proposals and code ex
 
 ## Completed Job batches
 
-Use this default in gameplay designs, implementations and examples when Controllers act on one Job's batch of results. Follow the receiving project's established event and slot contract.
+Use this default when Controllers consume state from a gameplay Job. Apply it in gameplay designs, implementations and examples. Follow the receiving project's established movement backend, event and slot contract.
 
-1. The Manager owns the native container and Job lifetime. At the required cadence, sample shared input, schedule the Job, call `Complete()` and publish once through a typed event such as `Action<NativeArray<EnemyJobData>.ReadOnly>`. Pass the existing result collection as a read-only view that subscribers use synchronously during the callback.
-2. Each Controller subscribes for its active or declared lifetime and detaches from the same publisher at retirement. It reads its assigned slot directly and applies the result to its own component. Keep per-entity sampling, result traversal and dispatch loops out of the Manager's frame callbacks and their helpers in this pattern, including `ForEach` and LINQ passes. Each receiver performs only its own indexed lookup.
-3. Keep the collection, slot mapping and backing storage stable until dispatch returns. The Manager applies any structural changes afterward. Reuse the existing view and stable subscriptions across ticks to avoid copying the list or allocating a relay collection. A completion event still calls each subscriber.
+1. For centralized movement, the movement Job owns the trajectory calculation and the position write. For transform-driven GameObjects, bind the root Transforms via `TransformAccessArray` and set `TransformAccess.position` in `IJobParallelForTransform.Execute`. Keep managed physics API calls on their supported thread with the declared physics owner when the game's movement backend requires them. Keep any such operation outside the completed-state event.
+2. The Manager owns native storage, membership and Job lifetime. At the required cadence, sample shared inputs, schedule the Job and call `Complete()`. When Controllers consume the resulting state, publish the existing list once through a typed event such as `Action<NativeArray<EnemyJobData>.ReadOnly>`. Subscribers borrow the read-only view for the synchronous callback.
+3. Each Controller reads its assigned slot and uses the state for its own animation, presentation or local behavior. Keep position writes in the movement owner. Pair subscriptions with the Controller's active or declared lifetime and detach from the same publisher. Keep the slot mapping and backing storage stable throughout dispatch and apply structural changes afterward.
 
-Keep required per-object input sampling at the existing Unity-to-Job boundary. When physics owns the current position, let each Controller submit the raw position of its own Rigidbody to its assigned slot before scheduling. Keep one-time construction and teardown traversal with the owner that creates and releases the group.
+Keep per-entity movement, sampling and dispatch loops out of the Manager's frame callbacks and their helpers for this pattern, including `ForEach` and LINQ passes. Each Controller reads one slot. Keep required one-time group construction and teardown with the owner. Verify that roots continue moving with the presentation subscription disabled and that the completed event still drives the Controller's intended state when it is subscribed.
 
 ## Patterns
 
