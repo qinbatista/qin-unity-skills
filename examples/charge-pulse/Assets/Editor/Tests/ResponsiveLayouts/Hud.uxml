@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Layouts.uss" />
+    <ui:VisualElement name="screen" class="screen">
+        <ui:VisualElement name="safe" class="safe hud-main" picking-mode="Ignore">
+            <ui:VisualElement name="objective" class="card hud-objective">
+                <ui:Label text="Current objective" class="caption" />
+                <ui:Label text="Reach the summit" class="title" />
+                <ui:VisualElement name="stamina" class="meter">
+                    <ui:VisualElement class="meter-fill" />
+                </ui:VisualElement>
+                <ui:Label text="Stamina  72 / 100" class="detail" />
+            </ui:VisualElement>
+            <ui:VisualElement name="tools" class="hud-tools action-row">
+                <ui:Label text="Compass" class="status" />
+                <ui:Label text="Elevation  2,480 m" class="status" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="header" class="header" picking-mode="Ignore">
+            <ui:Button name="left-wing" text="Map" class="wing" />
+            <ui:Label name="center-title" text="North Ridge" class="hud-title" />
+            <ui:Button name="right-wing" text="Pack" class="wing" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="tile" class="card tile">
+        <ui:VisualElement name="item-identity" class="item-identity">
+            <ui:Label name="item-icon" class="item-icon" />
+            <ui:Label name="item-name" class="item-name" />
+        </ui:VisualElement>
+        <ui:Label name="item-count" class="detail item-count" />
+    </ui:VisualElement>
+</ui:UXML>

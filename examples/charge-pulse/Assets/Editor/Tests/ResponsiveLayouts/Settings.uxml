@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Layouts.uss" />
+    <ui:VisualElement name="screen" class="screen">
+        <ui:VisualElement name="safe" class="safe page">
+            <ui:Label text="Settings" class="title page-title" />
+            <ui:VisualElement name="settings-groups" class="settings-groups">
+                <ui:VisualElement name="display" class="card settings-card">
+                    <ui:Label text="Display" class="card-title" />
+                    <ui:VisualElement name="display-row" class="setting-row">
+                        <ui:Label name="display-label" text="Interface brightness" class="detail" />
+                        <ui:Label name="display-value" text="80%" class="value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Frame rate limit" class="detail" />
+                        <ui:Label text="60" class="value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="audio" class="card settings-card">
+                    <ui:Label text="Audio" class="card-title" />
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Environmental sound" class="detail" />
+                        <ui:Label text="65%" class="value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Music" class="detail" />
+                        <ui:Label text="50%" class="value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

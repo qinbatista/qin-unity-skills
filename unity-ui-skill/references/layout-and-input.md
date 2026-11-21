@@ -1,9 +1,17 @@
 # Responsive layout and input
 
+## Hierarchy and reuse
+
+- Use one named parent per functional group, for example Header, Inventory Grid, or Dialog Actions. Within the group, give related text, icons and values bounded slots. An icon and its label belong to the same control. A list or grid owns its repeated items. Set the parent layout, padding, gaps, alignment and size constraints before adjusting individual children. Add a visible boundary only where it communicates a grouping.
+- Align peer edges, baselines, gutters and row starts. Keep a header or action group in one row when it fits readably. Center the complete icon-and-label group in its usable button face and each child in its own slot. Measure the actual painted area. Balance whitespace around the group, and use equal side slots when the label must stay on the parent's centerline. Explicitly left-align reading content where appropriate.
+- Check each subgroup against its parent and each interactive group against viewport and obstruction bounds. Contain text, glyphs, art, focus rings and hit targets. Reserve space for long labels and variable states. Use bounded wrapping, an approved compact layout or a clipped scroll viewport where needed. Preserve readability and usable touch sizes.
+- Reuse one template, style and accepted artwork for each shared role. Give each necessary instance its own data and action. Mount one instance per active screen or overlay slot, and update the mounted tree on data or geometry changes. Bind handlers once per lifetime, unbind on detach, and refresh only changed values. Use `ListView` virtualization for long collections when it fits the interaction. Release inactive views according to their owner. Reopen and resize to check that rows, callbacks and loads stay within the intended count.
+- For a Canvas alternative, map the same groups and slots to RectTransforms and Prefabs, with layout groups or anchors and one CanvasScaler. Preserve the same labels, artwork, visible and hit bounds, ordering, state, focus, actions and outcomes in equivalent viewports. Verify the two native hosts when delivering both.
+
 ## Fit and anchor
 
 - Use [screen adaptation](screen-adaptation.md) for scaling, safe areas and painted bounds. In Toolkit, use parent-relative layout, flex and native anchors.
-- Rebind when the host or screen lifetime changes. Invoke the existing action directly and read the current state on mount. Use the owning change callbacks for geometry, values and text.
+- Read the current state on mount and invoke the owning action directly. Use the owning change callbacks for geometry, values and text.
 
 ## Check buttons and destination pages
 

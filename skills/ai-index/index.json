@@ -54,7 +54,7 @@
     },
     {
       "id": "unity-ui",
-      "summary": "UI Toolkit and Canvas, responsive geometry, localization and input",
+      "summary": "UI Toolkit defaults, semantic groups, portrait and landscape fit, Canvas parity and artwork handoff",
       "document": "skills/ai-index/modules/unity-ui.md",
       "sources": ["unity-ui-skill"],
       "dependencies": []
@@ -100,6 +100,20 @@
           "symbol": "PublicSkillCatalogTests.test_package_links_resolve_and_references_are_linked",
           "anchor": "def test_package_links_resolve_and_references_are_linked(self):",
           "summary": "Verify project precedence and the standalone CLI route in every public entry, then resolve package references."
+        },
+        {
+          "id": "replay-responsive-layouts",
+          "file": "examples/charge-pulse/Assets/Editor/Tests/ResponsiveLayouts/ResponsiveLayoutCases.cs",
+          "symbol": "ResponsiveLayoutCases.Review",
+          "anchor": "static IEnumerator Review(string name, Action<VisualElement> bind, Func<VisualElement, LayoutProfile, RenderTexture, IEnumerator> check)",
+          "summary": "Mount one Toolkit tree in Unity Play Mode, replay orientation and safe-area profiles and capture native evidence before case-specific assertions."
+        },
+        {
+          "id": "draw-canvas-confirmation",
+          "file": "examples/charge-pulse/Assets/Editor/Tests/ResponsiveLayouts/CanvasConfirmation.cs",
+          "symbol": "CanvasConfirmation.Draw",
+          "anchor": "public void Draw(Vector2Int size, Rect safe, float scale, string profile)",
+          "summary": "Project the Canvas confirmation dialog into the same viewport and usable bounds for native render and input parity checks."
         }
       ]
     }
