@@ -1,12 +1,12 @@
 # Unity Game Code Structure
 
-Use for Unity gameplay ownership and data flow. Read the current feature and its local contract. Editor tooling and tests follow their actual owners.
+Apply these rules to gameplay implementation, architecture proposals and code examples. Use the receiving project's current feature contract and its declared exceptions. Editor tooling and tests follow their own owners.
 
 ## Ownership
 
-- Gameplay runtime behavior belongs to named `XXController` or `XXManager` roles. Avoid a third helper MonoBehaviour role when one of these already owns the responsibility. Data records, enums, interfaces, and ScriptableObjects are not runtime-behavior roles.
-- A Controller owns one GameObject-bound local responsibility, including its bindings and cleanup. Multiple Controllers may share an object when their concerns are independently named and changeable.
-- Use one feature Manager when actual callers need shared lifecycle or group coordination. Bind its lifetime to the feature. After handoff each Controller owns its local behavior.
+- Assign each gameplay runtime responsibility to a named `XXController` or `XXManager` unless the project contract declares an exception. Name the sole writer of each gameplay state and identify its real callers. Enums, records, interfaces, ScriptableObjects and Jobs keep their declared data or computation roles.
+- A Controller owns one GameObject-bound responsibility, its bindings and cleanup. Keep a self-contained gameplay component's rules, tick and reset with that Controller. Add separate Controllers for independently owned responsibilities with real consumers.
+- Use a feature Manager when actual consumers need shared lifecycle or group coordination. Keep each Controller's local presentation and bindings with that Controller. Input and UI send requests to the state owner and read its results.
 - Batch repeated pure decoration inside VFX. Use gameplay objects for independent identity or interaction, Jobs for needed parallel computation, and pools for actual bounded reuse. See [runtime resources and GC](runtime-resources-and-gc.md).
 
 ## Data
@@ -29,7 +29,7 @@ Use patterns only for a demonstrated coordination or lifecycle need:
 | Prototype | Copy semantics beyond prefab/Addressables instantiation |
 | Singleton | A real feature-wide lifetime and coordination owner |
 
-Keep direct calls when they already meet the requirement. A public method or event needs a current caller or an actual framework or compatibility contract.
+Keep direct calls when they already meet the requirement. A public method or event needs a current caller or an actual framework or compatibility contract. A new assembly definition needs a concrete dependency, isolation or Editor/test boundary.
 
 ## Continuity
 

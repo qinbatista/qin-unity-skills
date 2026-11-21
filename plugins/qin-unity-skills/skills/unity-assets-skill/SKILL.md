@@ -1,17 +1,19 @@
 ---
 name: unity-assets-skill
-description: Place, move, audit, or import Unity assets, including Prefabs, scenes, textures, Sprite geometry, Addressables bindings, and serialized references. Use for asset migration, scene intake, and texture import or compression decisions.
+description: Explain or review Unity project folder layouts and asset ownership. Place, move, audit, or import Prefabs, scenes, textures, Sprite geometry, and Addressables assets while preserving serialized references.
 ---
 
 # Unity Assets
 
 **Project rules come first.** Start with the target project's `AGENTS.md` and follow its order for applicable project Skills and registered shared workflows. This global Skill fills gaps. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
 
+For folder layout questions and proposed feature trees, follow the [existing-game architecture workflow](../unity-code-skill/references/unity-cli.md#existing-game-architecture).
+
 For linked work, select `explain unity-project` for the shared Assets layout and checker or `explain texture-compression` for image intake. Bind the receiving project's declared asset owner, existing paths and actual consumers.
 
 ## Place by owner
 
-- Group first-party runtime scripts by feature. Keep the Prefab and its exclusive artwork, clips, materials, UI and effects together. Reference each genuinely shared asset from its existing owner.
+- Place shared runtime in the project's declared script owner. Keep a Prefab's exclusive code, artwork, clips, materials, UI and effects with the object package where the project defines that ownership. Reference shared assets from their existing owners.
 - Keep dedicated effect preview and test scenes with their effect owner. Keep integrated gameplay scenes, Editor tools, and test fixtures in the project's declared locations and assemblies.
 - Preserve native loading and assembly locations, project settings and vendor structures. Create only the folders with actual consumers.
 
