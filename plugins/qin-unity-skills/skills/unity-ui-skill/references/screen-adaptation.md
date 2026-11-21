@@ -28,4 +28,6 @@ Read the active font, fallback, outline and shadow and observe actual glyph ink 
 
 Measure the usable size, complete joystick travel or other hit envelope, title and fixed actions, final scroll item and text readability. Check the longest supported translations and required content extremes in the actual host. Follow the same active flow through size, orientation or language changes where supported and verify state, focus, input and alignment settle after returning. Record screenshots and input outcomes with the actual runtime, revision and geometry.
 
+Apply the [locale acceptance matrix](layout-and-input.md#verify-each-locale) to the adapted layout. Measure text with its actual locale and font after uniform viewport fitting. Reserve room for longer translations at the minimum readable size and verify that any allowed local fitting still keeps content, neighboring controls and hit targets within their declared bounds.
+
 Check grids and aligned peers at fractional scales. Leave space for rounding in a wrapping row or give the row an explicit column count. Compare settled edges and sizes in framebuffer pixels with a tolerance justified by the projection.
