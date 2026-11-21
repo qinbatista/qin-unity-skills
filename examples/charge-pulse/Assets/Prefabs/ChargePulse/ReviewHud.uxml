@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="ReviewHud.uss" />
+    <ui:VisualElement name="review-viewport" class="review-viewport">
+        <ui:VisualElement name="home" class="review-home">
+            <ui:VisualElement class="review-row">
+                <ui:Label name="heading" text="Charge review" class="review-heading" />
+                <ui:Button name="open" text="Details" class="review-button" />
+            </ui:VisualElement>
+            <ui:ScrollView name="results" class="review-results" />
+        </ui:VisualElement>
+        <ui:VisualElement name="details" class="review-overlay" style="display: none;">
+            <ui:VisualElement class="review-sheet">
+                <ui:Label name="detail-heading" text="Release timing" class="review-heading" />
+                <ui:Label name="summary" text="The ring reaches its maximum after the spark burst." class="review-summary" />
+                <ui:Button name="back" text="Back" class="review-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

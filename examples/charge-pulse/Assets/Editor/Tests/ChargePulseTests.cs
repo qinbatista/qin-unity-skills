@@ -1,11 +1,10 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
@@ -86,7 +85,7 @@ namespace Qin.UnitySamples.Tests
                     testPanel.colorClearValue = previous;
 
                     if (resolution.x == 3840) continue;
-                    using (Readback ui = new Readback(hudTarget))
+                    using (NativeReadback ui = new NativeReadback(hudTarget))
                     {
                         Assert.That(ui.CoveredPixels, Is.GreaterThan(1000), "The native PanelSettings target must contain the HUD.");
                         ui.SaveIfRequested("hud-" + resolution.x + ".png");
@@ -100,7 +99,7 @@ namespace Qin.UnitySamples.Tests
                 camera.targetTexture = worldTarget;
                 camera.Render();
                 int idlePixels;
-                using (Readback floor = new Readback(worldTarget)) idlePixels = floor.BrightPixels;
+                using (NativeReadback floor = new NativeReadback(worldTarget)) idlePixels = floor.BrightPixels;
                 Assert.That(idlePixels, Is.GreaterThan(100), "The resting ring and core must render.");
 
                 Submit(button);
@@ -108,14 +107,15 @@ namespace Qin.UnitySamples.Tests
                 Assert.That(status.text, Is.EqualTo("Charging"));
                 Assert.That(button.enabledSelf, Is.False);
                 pulse.StartPulse();
-                Assert.That(observed, Is.EqualTo(new[] { PulseStage.Prepare }), "Concurrent requests must be rejected at admission.");
+                pulse.ApplyAnimationStage((int)PulseStage.Released);
+                Assert.That(observed, Is.EqualTo(new[] { PulseStage.Prepare }), "Duplicate requests and later phase events must leave preparation intact.");
                 yield return WaitForStage(pulse, PulseStage.Released);
                 Assert.That(button.worldBound, Is.EqualTo(readyBounds));
                 Assert.That(ring.localScale.x, Is.GreaterThan(restScale * 4f));
                 Assert.That(sparks.particleCount, Is.GreaterThan(0));
 
                 camera.Render();
-                using (Readback active = new Readback(worldTarget))
+                using (NativeReadback active = new NativeReadback(worldTarget))
                 {
                     Assert.That(active.BrightPixels, Is.GreaterThan(idlePixels * 2));
                     active.SaveIfRequested("pulse-released.png");
@@ -150,6 +150,30 @@ namespace Qin.UnitySamples.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator SceneReentryReplacesTheEffectAndRetiresThePriorScene()
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            yield return new EnterPlayMode();
+            ChargePulseController previous = null;
+            for (int visit = 0; visit < 2; visit++)
+            {
+                yield return SceneManager.LoadSceneAsync(_scene, LoadSceneMode.Additive);
+                Scene loaded = SceneManager.GetSceneByPath(_scene);
+                Assert.That(loaded.isLoaded, Is.True);
+                ChargePulseController pulse = Object.FindFirstObjectByType<ChargePulseController>();
+                Assert.That(pulse.gameObject.scene, Is.EqualTo(loaded));
+                Assert.That(pulse.Stage, Is.EqualTo(PulseStage.Recycled));
+                if (visit > 0) Assert.That(pulse, Is.Not.SameAs(previous));
+                pulse.StartPulse();
+                yield return WaitForStage(pulse, PulseStage.Releasing);
+                yield return SceneManager.UnloadSceneAsync(loaded);
+                Assert.That(pulse == null, Is.True);
+                Assert.That(SceneManager.GetSceneByPath(_scene).isLoaded, Is.False);
+                previous = pulse;
+            }
+        }
+
         [UnityTearDown]
         public IEnumerator LeavePlayMode()
         {
@@ -169,47 +193,6 @@ namespace Qin.UnitySamples.Tests
             float deadline = Time.realtimeSinceStartup + 5f;
             while (pulse.Stage != stage && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.That(pulse.Stage, Is.EqualTo(stage));
-        }
-
-        private sealed class Readback : IDisposable
-        {
-            private readonly Texture2D _image;
-
-            public int BrightPixels { get; }
-            public int CoveredPixels { get; }
-
-            public Readback(RenderTexture source)
-            {
-                _image = new Texture2D(source.width, source.height, TextureFormat.RGBA32, false);
-                RenderTexture previous = RenderTexture.active;
-                try
-                {
-                    RenderTexture.active = source;
-                    _image.ReadPixels(new Rect(0, 0, source.width, source.height), 0, 0);
-                    _image.Apply();
-                }
-                finally
-                {
-                    RenderTexture.active = previous;
-                }
-
-                foreach (Color32 pixel in _image.GetPixels32())
-                {
-                    if (pixel.g > 150) BrightPixels++;
-                    if (pixel.a > 127) CoveredPixels++;
-                }
-            }
-
-            public void SaveIfRequested(string name)
-            {
-                string path = Environment.GetEnvironmentVariable("CHARGE_PULSE_EVIDENCE");
-                if (!string.IsNullOrEmpty(path)) File.WriteAllBytes(Path.Combine(path, name), _image.EncodeToPNG());
-            }
-
-            public void Dispose()
-            {
-                Object.Destroy(_image);
-            }
         }
     }
 }

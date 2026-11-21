@@ -11,7 +11,7 @@ Six Unity Skills installed together in one user-global directory.
 | [Unity Effects](unity-effects-skill/SKILL.md) | VFX, particles, Shader Graph, HLSL, materials and effect lifecycle. |
 | [Unity Testing](unity-testing-skill/SKILL.md) | Focused native checks, Player and device evidence, regressions and profiling. |
 
-The [Charge Pulse Unity example](examples/charge-pulse/README.md) shows all six Skills through a single interaction, with saved assets and native tests for the result.
+The [Charge Pulse Unity example](examples/charge-pulse/README.md) shows all six Skills through a single interaction. Its [code review casebook](examples/charge-pulse/CASEBOOK.md) links focused examples, negative controls and native or host evidence.
 
 ## Install the global Skill pack
 

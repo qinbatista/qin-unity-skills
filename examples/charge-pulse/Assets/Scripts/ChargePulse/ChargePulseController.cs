@@ -44,7 +44,15 @@ namespace Qin.UnitySamples
         {
             if (!isActiveAndEnabled || Stage == PulseStage.Recycled) return;
 
-            PulseStage nextStage = Stage == PulseStage.Retracting ? PulseStage.Recycled : Stage + 1;
+            PulseStage nextStage = Stage switch
+            {
+                PulseStage.Prepare => PulseStage.Preparing,
+                PulseStage.Preparing => PulseStage.Prepared,
+                PulseStage.Prepared => PulseStage.Releasing,
+                PulseStage.Releasing => PulseStage.Released,
+                PulseStage.Released => PulseStage.Retracting,
+                _ => PulseStage.Recycled
+            };
             if (stageIndex != (int)nextStage) return;
 
             switch (nextStage)

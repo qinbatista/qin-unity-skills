@@ -1,7 +1,7 @@
 {
     "name": "ChargePulse.EditorTests",
     "rootNamespace": "Qin.UnitySamples.Tests",
-    "references": ["ChargePulse.Runtime"],
+    "references": ["ChargePulse.Runtime", "UnityEngine.UI"],
     "includePlatforms": ["Editor"],
     "optionalUnityReferences": ["TestAssemblies"]
 }

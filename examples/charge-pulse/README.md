@@ -2,6 +2,8 @@
 
 A Unity example that traces one button action through the six Skills. Open this project folder in Unity 6000.6.7f1, open [ChargePulse.unity](Assets/Scenes/ChargePulse.unity), enter Play Mode, and press **Charge**. The center gathers, the ring expands with a burst of sparks, and the effect returns to its original pose. The button becomes available again after the effect has recycled.
 
+The [case-by-case code review](CASEBOOK.md) links the runnable Skill cases, negative controls, findings and integration examples. It includes the native and host test commands.
+
 | Skill | Example | Decision demonstrated |
 | --- | --- | --- |
 | [Unity Code](../../unity-code-skill/SKILL.md) | [ChargePulseController.cs](Assets/Scripts/ChargePulse/ChargePulseController.cs) | The controller admits one request at a time. Button callbacks and authored animation events advance the state and publish changes to the HUD. |

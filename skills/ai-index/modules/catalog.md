@@ -1,6 +1,6 @@
 # Public Skill catalog
 
-The [Charge Pulse example](../../../examples/charge-pulse/README.md) demonstrates all six Skills in a standalone Unity scene. The source repository owns its Prefab, animation, UI, effect and Editor tests.
+The [Charge Pulse example](../../../examples/charge-pulse/README.md) demonstrates the six Skills in a standalone Unity scene. Follow the [casebook](../../../examples/charge-pulse/CASEBOOK.md) to select a code case and its native, host or receiver-specific proof boundary. The source repository owns the example and its checks.
 
 The [public catalog](../../../README.md) resolves each installable folder. The [YoFaAssets comparison](../../../docs/yofaassets-comparison.md) maps portable rules to the linked owners. The [repository test map](../../../.agents/skills/testing-skill/SKILL.md) checks release membership, standalone references and the actual checker.
 
