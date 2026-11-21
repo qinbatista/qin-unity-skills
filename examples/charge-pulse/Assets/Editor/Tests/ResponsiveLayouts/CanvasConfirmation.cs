@@ -19,12 +19,13 @@ namespace Qin.UnitySamples.Tests
         readonly EventSystem events;
         readonly Font font;
         readonly Dictionary<string, RectTransform> groups = new Dictionary<string, RectTransform>();
+        readonly Dictionary<string, Text> captions = new Dictionary<string, Text>();
         readonly RectTransform dialog;
         readonly Vector3[] corners = new Vector3[4];
         RenderTexture target;
         string choice;
 
-        public CanvasConfirmation(Font font, string heading, string message, string stay, string leave)
+        public CanvasConfirmation(Font font)
         {
             this.font = font;
             host = new GameObject("Confirmation Canvas fixture", typeof(RectTransform), typeof(Canvas));
@@ -44,12 +45,20 @@ namespace Qin.UnitySamples.Tests
 
             dialog = Group("dialog", canvas.transform, new Vector2(400, 204), Vector2.zero);
             dialog.gameObject.AddComponent<Image>().color = new Color32(37, 56, 74, 255);
-            Caption(Group("heading", dialog, new Vector2(352, 44), new Vector2(0, 66)), heading, 32, Ink, FontStyle.Bold);
-            Caption(Group("message", dialog, new Vector2(352, 44), new Vector2(0, 22)), message, 20, Muted, FontStyle.Normal);
+            Caption("heading", Group("heading", dialog, new Vector2(352, 44), new Vector2(0, 66)), 32, Ink, FontStyle.Bold);
+            Caption("message", Group("message", dialog, new Vector2(352, 44), new Vector2(0, 22)), 20, Muted, FontStyle.Normal);
             RectTransform actions = Group("actions", dialog, new Vector2(336, 48), new Vector2(0, -52));
-            AddButton(actions, "stay", stay, -84, new Color32(58, 82, 99, 255), Ink);
-            AddButton(actions, "leave", leave, 84, new Color32(239, 198, 129, 255), new Color32(19, 30, 43, 255));
+            AddButton(actions, "stay", -84, new Color32(58, 82, 99, 255), Ink);
+            AddButton(actions, "leave", 84, new Color32(239, 198, 129, 255), new Color32(19, 30, 43, 255));
         }
+
+        public void ApplyLocale(LayoutText locale)
+        {
+            foreach (KeyValuePair<string, Text> caption in captions)
+                caption.Value.text = locale.Resolve($"dialog.{caption.Key}");
+        }
+
+        public string CaptionText(string name) => captions[name].text;
 
         public void Draw(Vector2Int size, Rect safe, float scale, string profile)
         {
@@ -62,6 +71,11 @@ namespace Qin.UnitySamples.Tests
             camera.orthographicSize = size.y / (2f * scale);
             dialog.anchoredPosition = new Vector2(safe.center.x - size.x / 2f, size.y / 2f - safe.center.y) / scale;
             Canvas.ForceUpdateCanvases();
+            foreach (Text caption in captions.Values)
+            {
+                Assert.That(caption.preferredWidth, Is.LessThanOrEqualTo(caption.rectTransform.rect.width), caption.text);
+                Assert.That(caption.preferredHeight, Is.LessThanOrEqualTo(caption.rectTransform.rect.height), caption.text);
+            }
             camera.Render();
             using NativeReadback image = new NativeReadback(next);
             Assert.That(image.BrightPixels, Is.GreaterThan(100), profile);
@@ -87,7 +101,7 @@ namespace Qin.UnitySamples.Tests
             return choice;
         }
 
-        void AddButton(RectTransform actions, string name, string label, float offset, Color face, Color ink)
+        void AddButton(RectTransform actions, string name, float offset, Color face, Color ink)
         {
             RectTransform bounds = Group(name, actions, new Vector2(152, 48), new Vector2(offset, 0f));
             Image image = bounds.gameObject.AddComponent<Image>();
@@ -97,10 +111,10 @@ namespace Qin.UnitySamples.Tests
             button.transition = Selectable.Transition.None;
             button.onClick.AddListener(() =>
             {
-                choice = label;
+                choice = name;
                 dialog.gameObject.SetActive(false);
             });
-            Caption(Group(name + "-caption", bounds, bounds.sizeDelta, Vector2.zero), label, 20, ink, FontStyle.Bold);
+            Caption(name, Group(name + "-caption", bounds, bounds.sizeDelta, Vector2.zero), 20, ink, FontStyle.Bold);
         }
 
         RectTransform Group(string name, Transform parent, Vector2 size, Vector2 offset)
@@ -114,16 +128,16 @@ namespace Qin.UnitySamples.Tests
             return rect;
         }
 
-        void Caption(RectTransform slot, string label, int size, Color ink, FontStyle style)
+        void Caption(string key, RectTransform slot, int size, Color ink, FontStyle style)
         {
             Text text = slot.gameObject.AddComponent<Text>();
             text.font = font;
             text.fontSize = size;
             text.fontStyle = style;
-            text.text = label;
             text.color = ink;
             text.alignment = TextAnchor.MiddleCenter;
             text.raycastTarget = false;
+            captions.Add(key, text);
         }
 
         public void Dispose()

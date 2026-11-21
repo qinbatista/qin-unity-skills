@@ -262,7 +262,7 @@
 }
 
 .journal {
-    width: 388px;
+    width: 416px;
     height: 640px;
 }
 
@@ -276,6 +276,10 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
+}
+
+.screen .journal-header #entry-count {
+    margin-left: 12px;
 }
 
 .quest-scroll {

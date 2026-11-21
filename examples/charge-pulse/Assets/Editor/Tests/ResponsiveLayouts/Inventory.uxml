@@ -2,8 +2,8 @@
     <Style src="Layouts.uss" />
     <ui:VisualElement name="screen" class="screen">
         <ui:VisualElement name="safe" class="safe page">
-            <ui:Label text="Inventory" class="title page-title" />
-            <ui:Label text="6 of 12 slots used" class="detail page-subtitle" />
+            <ui:Label name="heading" class="title page-title localized" />
+            <ui:Label name="capacity" class="detail page-subtitle" />
             <ui:VisualElement name="tiles" class="tiles" />
         </ui:VisualElement>
     </ui:VisualElement>

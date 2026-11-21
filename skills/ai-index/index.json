@@ -54,7 +54,7 @@
     },
     {
       "id": "unity-ui",
-      "summary": "UI Toolkit defaults, semantic groups, portrait and landscape fit, Canvas parity and artwork handoff",
+      "summary": "UI Toolkit defaults, localization, semantic groups, viewport fit, Canvas parity and artwork handoff",
       "document": "skills/ai-index/modules/unity-ui.md",
       "sources": ["unity-ui-skill"],
       "dependencies": []
@@ -105,8 +105,16 @@
           "id": "replay-responsive-layouts",
           "file": "examples/charge-pulse/Assets/Editor/Tests/ResponsiveLayouts/ResponsiveLayoutCases.cs",
           "symbol": "ResponsiveLayoutCases.Review",
-          "anchor": "static IEnumerator Review(string name, Action<VisualElement> bind, Func<VisualElement, LayoutProfile, RenderTexture, IEnumerator> check)",
-          "summary": "Mount one Toolkit tree in Unity Play Mode, replay orientation and safe-area profiles and capture native evidence before case-specific assertions."
+          "anchor": "static IEnumerator Review(string name, Action<VisualElement, LayoutText> bind, Func<VisualElement, LayoutProfile, LayoutText, RenderTexture, IEnumerator> check)",
+          "summary": "Mount one Toolkit tree in Unity Play Mode and replay every fixture locale against orientation and safe-area profiles.",
+          "related": [{"module": "catalog", "target": "refresh-layout-text", "reason": "Changes locale on the mounted labels and buttons without replacing the view."}]
+        },
+        {
+          "id": "refresh-layout-text",
+          "file": "examples/charge-pulse/Assets/Editor/Tests/ResponsiveLayouts/LayoutText.cs",
+          "symbol": "LayoutText.SelectLocale",
+          "anchor": "public void SelectLocale(int localeIndex)",
+          "summary": "Apply the selected fixture locale and culture-aware arguments to the existing Toolkit text elements."
         },
         {
           "id": "draw-canvas-confirmation",

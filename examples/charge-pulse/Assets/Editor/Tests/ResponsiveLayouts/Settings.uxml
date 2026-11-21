@@ -2,28 +2,28 @@
     <Style src="Layouts.uss" />
     <ui:VisualElement name="screen" class="screen">
         <ui:VisualElement name="safe" class="safe page">
-            <ui:Label text="Settings" class="title page-title" />
+            <ui:Label name="heading" class="title page-title localized" />
             <ui:VisualElement name="settings-groups" class="settings-groups">
                 <ui:VisualElement name="display" class="card settings-card">
-                    <ui:Label text="Display" class="card-title" />
+                    <ui:Label name="display-heading" class="card-title localized" />
                     <ui:VisualElement name="display-row" class="setting-row">
-                        <ui:Label name="display-label" text="Interface brightness" class="detail" />
-                        <ui:Label name="display-value" text="80%" class="value" />
+                        <ui:Label name="display-label" class="detail localized" />
+                        <ui:Label name="display-value" class="value" />
                     </ui:VisualElement>
                     <ui:VisualElement class="setting-row">
-                        <ui:Label text="Frame rate limit" class="detail" />
-                        <ui:Label text="60" class="value" />
+                        <ui:Label name="frame-rate-label" class="detail localized" />
+                        <ui:Label name="frame-rate-value" class="value" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="audio" class="card settings-card">
-                    <ui:Label text="Audio" class="card-title" />
+                    <ui:Label name="audio-heading" class="card-title localized" />
                     <ui:VisualElement class="setting-row">
-                        <ui:Label text="Environmental sound" class="detail" />
-                        <ui:Label text="65%" class="value" />
+                        <ui:Label name="environment-label" class="detail localized" />
+                        <ui:Label name="environment-value" class="value" />
                     </ui:VisualElement>
                     <ui:VisualElement class="setting-row">
-                        <ui:Label text="Music" class="detail" />
-                        <ui:Label text="50%" class="value" />
+                        <ui:Label name="music-label" class="detail localized" />
+                        <ui:Label name="music-value" class="value" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>

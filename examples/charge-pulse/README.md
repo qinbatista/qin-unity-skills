@@ -15,9 +15,11 @@ The [case-by-case code review](CASEBOOK.md) links the runnable Skill cases, nega
 
 ## Responsive UI cases
 
-Five English-language fixtures mount their own UXML screens and apply the same geometry policy to the live tree as the viewport changes. All use a 4K design baseline with quarter-resolution USS units. The Canvas dialog uses the same content and an independent native layout for comparison.
+Five fixtures mount their own UXML screens and apply the same geometry policy to the live tree as the viewport changes. All use a 4K design baseline with quarter-resolution USS units. The Canvas dialog uses the same content and an independent native layout for comparison.
 
-[View the Unity-rendered portrait and landscape comparison](ui-layout-preview.jpg).
+The [fixture string table](Assets/Editor/Tests/ResponsiveLayouts/LayoutStrings.json) contains the player-facing copy in English (`en-US`) and German (`de-DE`). [LayoutText](Assets/Editor/Tests/ResponsiveLayouts/LayoutText.cs) updates existing UI Toolkit elements from locale keys and typed arguments. The Canvas dialog reads the same resources and returns stable action IDs. The sample table is Editor test data. Production screens use their game's localization service.
+
+[View the Unity-rendered English portrait and German landscape comparison](ui-layout-preview.jpg).
 
 | Layout | Portrait | Landscape | Native check |
 | --- | --- | --- | --- |
@@ -28,6 +30,8 @@ Five English-language fixtures mount their own UXML screens and apply the same g
 | [Trail journal](Assets/Editor/Tests/ResponsiveLayouts/Quests.uxml) | Tall list between header and footer. | Wider, shorter scrolling region. | The final item scrolls into the content viewport and the header and footer stay fixed. |
 
 [ResponsiveLayoutCases.cs](Assets/Editor/Tests/ResponsiveLayouts/ResponsiveLayoutCases.cs) runs each layout at the 2160 × 3840 and 3840 × 2160 reference sizes, at 540 × 1170 and 1080 × 2340 with synthetic center cutouts, and at 1170 × 540 with synthetic left and right obstructions. The iPhone Duo outer display (1398 × 2034) and inner display (1878 × 2670) each replay in portrait and landscape using their rectangular resolutions. Device insets, physical folding and touch need their own device run. Input here uses scripted events in Unity Play Mode. [Apple iPhone Duo display specifications](https://www.apple.com/iphone-duo/specs/)
+
+Each viewport runs all locales in the table on the same mounted tree. The tests check text fit, the journal's scroll position during language changes, native focus, and Canvas dialog parity. Capture file names include the locale.
 
 Run the class from a task-owned snapshot, with a graphics device and an optional `CHARGE_PULSE_EVIDENCE` directory for rendered frames.
 

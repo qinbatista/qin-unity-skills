@@ -35,11 +35,13 @@ namespace Qin.UnitySamples.Tests
             int mapRequests = 0;
             int packRequests = 0;
             int frames = 0;
-            yield return Review("Hud", screen =>
+            yield return Review("Hud", (screen, text) =>
             {
                 screen.Q<Button>("left-wing").clicked += () => mapRequests++;
                 screen.Q<Button>("right-wing").clicked += () => packRequests++;
-            }, (screen, profile, target) =>
+                text.Bind(screen.Q<Label>("stamina-text"), "hud.stamina-text", 72, 100);
+                text.Bind(screen.Q<Label>("elevation"), "hud.elevation", 2480);
+            }, (screen, profile, text, target) =>
             {
                 Button left = screen.Q<Button>("left-wing");
                 Button right = screen.Q<Button>("right-wing");
@@ -47,9 +49,6 @@ namespace Qin.UnitySamples.Tests
                 Rect leftBounds = left.worldBound;
                 Rect rightBounds = right.worldBound;
                 Rect centerBounds = center.worldBound;
-                AssertTextFits(left);
-                AssertTextFits(right);
-                AssertTextFits(center);
                 Assert.That(leftBounds.yMin, Is.EqualTo(14f).Within(Tolerance));
                 Assert.That(rightBounds.yMin, Is.EqualTo(leftBounds.yMin).Within(Tolerance));
                 Assert.That(leftBounds.xMin * profile.Scale, Is.EqualTo(profile.Safe.xMin + 18f * profile.Scale).Within(Tolerance));
@@ -80,8 +79,6 @@ namespace Qin.UnitySamples.Tests
                 AssertInside(objective.worldBound, screen.Q("safe").worldBound, objective.name);
                 Label objectiveTitle = objective.Q<Label>(className: "title");
                 AssertInside(objectiveTitle.worldBound, objective.worldBound, objectiveTitle.text);
-                AssertTextFits(objectiveTitle);
-                foreach (Label status in tools.Query<Label>().ToList()) AssertTextFits(status);
                 Assert.That(objective.worldBound.yMax, Is.LessThan(tools.worldBound.yMin));
                 return null;
             });
@@ -91,22 +88,23 @@ namespace Qin.UnitySamples.Tests
         public IEnumerator InventoryReflowsOneSetOfInstances()
         {
             VisualElement[] cards = new VisualElement[6];
-            string[] names = { "Rope", "Map", "Compass", "Lantern", "Salve", "Rations" };
+            string[] itemIds = { "rope", "map", "compass", "lantern", "salve", "rations" };
             int[] counts = { 2, 1, 1, 1, 3, 4 };
-            yield return Review("Inventory", screen =>
+            yield return Review("Inventory", (screen, text) =>
             {
                 VisualTreeAsset item = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(Assets + "Item.uxml");
                 VisualElement grid = screen.Q("tiles");
+                text.Bind(screen.Q<Label>("capacity"), "inventory.capacity", itemIds.Length, 12);
                 for (int index = 0; index < cards.Length; index++)
                 {
                     item.CloneTree(grid);
                     VisualElement tile = grid.ElementAt(index);
                     cards[index] = tile;
-                    tile.Q<Label>("item-icon").text = names[index].Substring(0, 1);
-                    tile.Q<Label>("item-name").text = names[index];
-                    tile.Q<Label>("item-count").text = $"Qty {counts[index]}";
+                    text.Bind(tile.Q<Label>("item-icon"), $"items.{itemIds[index]}.icon");
+                    text.Bind(tile.Q<Label>("item-name"), $"items.{itemIds[index]}.name");
+                    text.Bind(tile.Q<Label>("item-count"), "inventory.quantity", counts[index]);
                 }
-            }, (screen, profile, target) =>
+            }, (screen, profile, text, target) =>
             {
                 VisualElement grid = screen.Q("tiles");
                 Assert.That(grid.childCount, Is.EqualTo(cards.Length));
@@ -118,9 +116,9 @@ namespace Qin.UnitySamples.Tests
                     Assert.That(tile, Is.SameAs(cards[index]));
                     Rect bounds = tile.worldBound;
                     Rect first = cards[0].worldBound;
-                    Assert.That(bounds.xMin, Is.EqualTo(first.xMin + index % columns * 174f).Within(Tolerance), $"{profile.Name} {names[index]} column");
-                    Assert.That(bounds.yMin, Is.EqualTo(first.yMin + index / columns * 116f).Within(Tolerance), $"{profile.Name} {names[index]} row");
-                    AssertInside(bounds, grid.worldBound, names[index]);
+                    Assert.That(bounds.xMin, Is.EqualTo(first.xMin + index % columns * 174f).Within(Tolerance), $"{profile.Name} {text.Locale} {itemIds[index]} column");
+                    Assert.That(bounds.yMin, Is.EqualTo(first.yMin + index / columns * 116f).Within(Tolerance), $"{profile.Name} {text.Locale} {itemIds[index]} row");
+                    AssertInside(bounds, grid.worldBound, itemIds[index]);
                     Rect identity = tile.Q("item-identity").worldBound;
                     Label icon = tile.Q<Label>("item-icon");
                     Label name = tile.Q<Label>("item-name");
@@ -128,7 +126,6 @@ namespace Qin.UnitySamples.Tests
                     AssertInside(name.worldBound, identity, "inventory name");
                     Assert.That(icon.worldBound.xMax, Is.LessThan(name.worldBound.xMin));
                     Assert.That((icon.worldBound.xMin + name.worldBound.xMax) / 2f, Is.EqualTo(identity.center.x).Within(Tolerance));
-                    AssertTextFits(name);
                 }
                 return null;
             });
@@ -137,7 +134,13 @@ namespace Qin.UnitySamples.Tests
         [UnityTest]
         public IEnumerator SettingsKeepRowsContainedAndCardsAligned()
         {
-            yield return Review("Settings", null, (screen, profile, target) =>
+            yield return Review("Settings", (screen, text) =>
+            {
+                text.Bind(screen.Q<Label>("display-value"), "settings.display-value", 0.8d);
+                text.Bind(screen.Q<Label>("frame-rate-value"), "settings.frame-rate-value", 60);
+                text.Bind(screen.Q<Label>("environment-value"), "settings.environment-value", 0.65d);
+                text.Bind(screen.Q<Label>("music-value"), "settings.music-value", 0.5d);
+            }, (screen, profile, text, target) =>
             {
                 Rect group = screen.Q("settings-groups").worldBound;
                 Rect display = screen.Q("display").worldBound;
@@ -165,7 +168,6 @@ namespace Qin.UnitySamples.Tests
                     AssertInside(value.worldBound, row.worldBound, value.text);
                     Assert.That(label.worldBound.xMax, Is.LessThan(value.worldBound.xMin));
                     Assert.That(label.worldBound.center.y, Is.EqualTo(value.worldBound.center.y).Within(Tolerance));
-                    AssertTextFits(label);
                 }
                 return null;
             });
@@ -179,17 +181,17 @@ namespace Qin.UnitySamples.Tests
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             try
             {
-                yield return Review("Dialog", screen =>
+                yield return Review("Dialog", (screen, text) =>
                 {
                     VisualElement dialog = screen.Q("dialog");
                     Button stay = dialog.Q<Button>("stay");
                     Button leave = dialog.Q<Button>("leave");
-                    foreach (TextElement text in dialog.Query<TextElement>().ToList())
-                        text.style.unityFont = font;
-                    stay.clicked += () => { choice = stay.text; dialog.style.display = DisplayStyle.None; };
-                    leave.clicked += () => { choice = leave.text; dialog.style.display = DisplayStyle.None; };
-                    canvas = new CanvasConfirmation(font, dialog.Q<Label>("heading").text, dialog.Q<Label>("message").text, stay.text, leave.text);
-                }, (screen, profile, target) =>
+                    foreach (TextElement element in dialog.Query<TextElement>().ToList())
+                        element.style.unityFont = font;
+                    stay.clicked += () => { choice = stay.name; dialog.style.display = DisplayStyle.None; };
+                    leave.clicked += () => { choice = leave.name; dialog.style.display = DisplayStyle.None; };
+                    canvas = new CanvasConfirmation(font);
+                }, (screen, profile, text, target) =>
                 {
                     VisualElement dialog = screen.Q("dialog");
                     AssertInside(dialog.worldBound, screen.Q("safe").worldBound, "confirmation dialog");
@@ -199,10 +201,12 @@ namespace Qin.UnitySamples.Tests
                     {
                         Button button = dialog.Q<Button>(name);
                         AssertInside(button.worldBound, actions, name);
-                        AssertTextFits(button);
                     }
 
-                    canvas.Draw(profile.Size, profile.Safe, profile.Scale, profile.Name);
+                    canvas.ApplyLocale(text);
+                    canvas.Draw(profile.Size, profile.Safe, profile.Scale, $"{profile.Name}-{text.Locale}");
+                    foreach (string name in new[] { "heading", "message", "stay", "leave" })
+                        Assert.That(canvas.CaptionText(name), Is.EqualTo(screen.Q<TextElement>(name).text), name);
                     foreach (string name in new[] { "dialog", "heading", "message", "stay", "leave" })
                     {
                         Rect toolkit = screen.Q(name).worldBound;
@@ -215,7 +219,7 @@ namespace Qin.UnitySamples.Tests
                     Button selected = dialog.Q<Button>(action);
                     choice = null;
                     Submit(selected);
-                    Assert.That(choice, Is.EqualTo(selected.text));
+                    Assert.That(choice, Is.EqualTo(action));
                     Assert.That(canvas.Choose(action), Is.EqualTo(choice));
                     Assert.That(dialog.style.display.value, Is.EqualTo(DisplayStyle.None));
                     dialog.style.display = DisplayStyle.Flex;
@@ -231,25 +235,23 @@ namespace Qin.UnitySamples.Tests
         [UnityTest]
         public IEnumerator QuestListScrollsInsideFixedHeaderAndFooter()
         {
-            string[] titles =
-            {
-                "Check the trailhead", "Read the ridge map", "Fill the canteen", "Cross the stone bridge",
-                "Mark the fork", "Find the north trail", "Rest at the shelter", "Follow the cairns",
-                "Collect the marker", "Reach the upper ridge", "Record the view", "Return to camp"
-            };
-            yield return Review("Quests", screen =>
+            const int entryCount = 12;
+            yield return Review("Quests", (screen, text) =>
             {
                 ScrollView list = screen.Q<ScrollView>("quest-scroll");
-                foreach (string title in titles)
+                text.Bind(screen.Q<Label>("entry-count"), "quests.entry-count", entryCount);
+                text.Bind(screen.Q<Label>("journal-footer"), "quests.journal-footer", 4, new DateTime(2020, 1, 4, 6, 20, 0));
+                for (int number = 1; number <= entryCount; number++)
                 {
-                    Label entry = new Label(title);
+                    Label entry = new Label();
                     entry.AddToClassList("quest-row");
+                    text.Bind(entry, $"quests.entry-{number}");
                     list.Add(entry);
                 }
             }, CheckQuestScroll);
         }
 
-        static IEnumerator CheckQuestScroll(VisualElement screen, LayoutProfile profile, RenderTexture target)
+        static IEnumerator CheckQuestScroll(VisualElement screen, LayoutProfile profile, LayoutText text, RenderTexture target)
         {
             VisualElement journal = screen.Q("journal");
             VisualElement header = screen.Q("journal-header");
@@ -257,6 +259,10 @@ namespace Qin.UnitySamples.Tests
             ScrollView list = screen.Q<ScrollView>("quest-scroll");
             VisualElement last = list.contentContainer.ElementAt(list.contentContainer.childCount - 1);
             AssertInside(journal.worldBound, screen.Q("safe").worldBound, "trail journal");
+            Rect heading = header.Q("heading").worldBound;
+            Rect entryCount = header.Q("entry-count").worldBound;
+            Assert.That((entryCount.xMin - heading.xMax) * profile.Scale, Is.GreaterThanOrEqualTo(12f * profile.Scale - Tolerance), text.Locale);
+            AssertInside(entryCount, header.worldBound, "entry count");
             Assert.That(list.worldBound.yMin, Is.GreaterThan(header.worldBound.yMax));
             Assert.That(list.worldBound.yMax, Is.LessThanOrEqualTo(footer.worldBound.yMin + Tolerance));
             Rect fixedHeader = header.worldBound;
@@ -267,11 +273,10 @@ namespace Qin.UnitySamples.Tests
             AssertInside(last.worldBound, list.contentViewport.worldBound, "last quest entry");
             Assert.That(header.worldBound, Is.EqualTo(fixedHeader));
             Assert.That(footer.worldBound, Is.EqualTo(fixedFooter));
-            using (NativeReadback image = new NativeReadback(target)) image.SaveIfRequested($"quests-{profile.Name}-last.png");
-            list.scrollOffset = Vector2.zero;
+            using (NativeReadback image = new NativeReadback(target)) image.SaveIfRequested($"quests-{profile.Name}-{text.Locale}-last.png");
         }
 
-        static IEnumerator Review(string name, Action<VisualElement> bind, Func<VisualElement, LayoutProfile, RenderTexture, IEnumerator> check)
+        static IEnumerator Review(string name, Action<VisualElement, LayoutText> bind, Func<VisualElement, LayoutProfile, LayoutText, RenderTexture, IEnumerator> check)
         {
             Assert.That(Application.isPlaying, Is.True, "The layout fixtures require Unity Play Mode.");
             GameObject host = new GameObject(name + " layout fixture");
@@ -291,7 +296,12 @@ namespace Qin.UnitySamples.Tests
                 VisualElement cutout = new VisualElement { pickingMode = PickingMode.Ignore };
                 cutout.AddToClassList("cutout");
                 screen.Add(cutout);
-                bind?.Invoke(screen);
+                string scope = name.ToLowerInvariant();
+                LayoutText strings = new LayoutText(AssetDatabase.LoadAssetAtPath<TextAsset>(Assets + "LayoutStrings.json"));
+                foreach (TextElement element in screen.Query<TextElement>(className: "localized").ToList())
+                    strings.Bind(element, $"{scope}.{element.name}");
+                bind(screen, strings);
+                ScrollView journal = screen.Q<ScrollView>("quest-scroll");
                 foreach (LayoutProfile profile in Profiles)
                 {
                     RenderTexture next = new RenderTexture(profile.Size.x, profile.Size.y, 24);
@@ -302,18 +312,37 @@ namespace Qin.UnitySamples.Tests
                     // USS uses quarter-resolution design units. PanelSettings projects them directly.
                     settings.scale = 4f;
                     ApplyGeometry(screen, cutout, profile);
-                    yield return null;
-                    yield return null;
-                    Assert.That(document.rootVisualElement.Q("screen"), Is.SameAs(screen));
-                    Assert.That(screen.worldBound.width * profile.Scale, Is.EqualTo(profile.Size.x).Within(Tolerance));
-                    Assert.That(screen.worldBound.height * profile.Scale, Is.EqualTo(profile.Size.y).Within(Tolerance));
-                    using (NativeReadback image = new NativeReadback(current))
+                    if (journal != null) journal.scrollOffset = Vector2.zero;
+                    for (int locale = 0; locale < strings.Locales.Count; locale++)
                     {
-                        Assert.That(image.BrightPixels, Is.GreaterThan(100), $"{name} {profile.Name} has no bright foreground");
-                        image.SaveIfRequested($"{name.ToLowerInvariant()}-{profile.Name}.png");
+                        Focusable focus = screen.focusController.focusedElement;
+                        Vector2 scroll = journal?.scrollOffset ?? Vector2.zero;
+                        strings.SelectLocale(locale);
+                        yield return null;
+                        yield return null;
+                        if (locale > 0)
+                        {
+                            Assert.That(screen.focusController.focusedElement, Is.SameAs(focus), strings.Locale);
+                            if (journal != null)
+                            {
+                                Assert.That(journal.scrollOffset, Is.EqualTo(scroll), strings.Locale);
+                                journal.scrollOffset = Vector2.zero;
+                                yield return null;
+                            }
+                        }
+
+                        Assert.That(document.rootVisualElement.Q("screen"), Is.SameAs(screen));
+                        Assert.That(screen.worldBound.width * profile.Scale, Is.EqualTo(profile.Size.x).Within(Tolerance));
+                        Assert.That(screen.worldBound.height * profile.Scale, Is.EqualTo(profile.Size.y).Within(Tolerance));
+                        foreach (TextElement element in strings.BoundElements) AssertTextFits(element);
+                        using (NativeReadback image = new NativeReadback(current))
+                        {
+                            Assert.That(image.BrightPixels, Is.GreaterThan(100), $"{name} {profile.Name} {strings.Locale} has no bright foreground");
+                            image.SaveIfRequested($"{scope}-{profile.Name}-{strings.Locale}.png");
+                        }
+                        IEnumerator checkFrames = check(screen, profile, strings, current);
+                        if (checkFrames != null) yield return checkFrames;
                     }
-                    IEnumerator checkFrames = check(screen, profile, current);
-                    if (checkFrames != null) yield return checkFrames;
                 }
             }
             finally

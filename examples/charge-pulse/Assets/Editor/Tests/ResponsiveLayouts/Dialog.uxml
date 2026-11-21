@@ -3,11 +3,11 @@
     <ui:VisualElement name="screen" class="screen dialog-screen">
         <ui:VisualElement name="safe" class="safe page">
             <ui:VisualElement name="dialog" class="dialog">
-                <ui:Label name="heading" text="Leave camp?" class="dialog-heading" />
-                <ui:Label name="message" text="Your route will stay saved." class="dialog-message" />
+                <ui:Label name="heading" class="dialog-heading localized" />
+                <ui:Label name="message" class="dialog-message localized" />
                 <ui:VisualElement name="actions" class="dialog-actions action-row">
-                    <ui:Button name="stay" text="Stay" class="dialog-button secondary" />
-                    <ui:Button name="leave" text="Leave" class="dialog-button primary" />
+                    <ui:Button name="stay" class="dialog-button secondary localized" />
+                    <ui:Button name="leave" class="dialog-button primary localized" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

@@ -4,11 +4,11 @@
         <ui:VisualElement name="safe" class="safe page">
             <ui:VisualElement name="journal" class="journal">
                 <ui:VisualElement name="journal-header" class="journal-header">
-                    <ui:Label text="Trail journal" class="title" />
-                    <ui:Label text="12 entries" class="detail" />
+                    <ui:Label name="heading" class="title localized" />
+                    <ui:Label name="entry-count" class="detail" />
                 </ui:VisualElement>
                 <ui:ScrollView name="quest-scroll" class="quest-scroll card" vertical-scroller-visibility="AlwaysVisible" />
-                <ui:Label name="journal-footer" text="Last updated  ·  Day 04, 06:20" class="journal-footer detail" />
+                <ui:Label name="journal-footer" class="journal-footer detail" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
