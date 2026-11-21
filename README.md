@@ -59,4 +59,4 @@ The [Server Sync sample](examples/server-sync/README.md) opens the same player-s
 
 To use the cases on another Unity project, start with its rules and registered workflows. The six Skills fill the gaps with portable methods. Follow the [Unity CLI workflow](unity-code-skill/references/unity-cli.md) for background execution and standalone CLI updates. For a YoFaAssets-linked game, see the [shared workflow map](docs/yofaassets-comparison.md).
 
-The [project AI index](skills/ai-index/SKILL.md) and [test map](.agents/skills/testing-skill/SKILL.md) cover this repository. GitHub Actions publishes the package from `master` to `codex/plugin`.
+The [project AI index](skills/ai-index/SKILL.md) and [test map](.agents/skills/testing-skill/SKILL.md) cover this repository. GitHub Actions tags the published `master` commit as `codex/plugin` and attaches the six-Skill ZIP to that release.
