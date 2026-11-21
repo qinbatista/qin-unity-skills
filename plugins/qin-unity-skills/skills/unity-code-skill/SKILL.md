@@ -14,7 +14,7 @@ For linked game code, select `explain game-code-logic` through the registered wo
 - Call the real owner directly. Keep a method boundary for a distinct responsibility, current reuse or a required contract. Apply the [C# style](references/unity-csharp-rules.md).
 - Run discrete decisions at their request, state change or completion. Keep `Update`, `FixedUpdate` and `LateUpdate` for work that needs that cadence or phase. Apply the [lifecycle and frame rules](references/unity-lifecycle-and-serialization.md#frame-callbacks).
 - Keep one authoritative state. Apply [runtime resources and GC](references/runtime-resources-and-gc.md) when changing Jobs, leases, pools, allocations or teardown.
-- When Controllers consume the results of a gameplay Job, default to [one completed-batch event](references/unity-game-code-structure-design.md#completed-job-batches). Publish the existing result list as a read-only view after completion. Each Controller reads its own entry and applies it.
+- For [centralized Job movement](references/unity-game-code-structure-design.md#completed-job-batches), the movement Job calculates and writes the root position through the supported native movement API. When Controllers need completed gameplay Job state for animation or other local behavior, publish one read-only state batch after completion.
 - Use [game code structure](references/unity-game-code-structure-design.md) for Controller, Manager and data ownership, and [service integration](references/unity-service-integration.md) for SDKs and providers.
 
 Preserve serialized fields, public contracts and execution order. Verify the real entry and the affected failure, teardown or ordering case.
