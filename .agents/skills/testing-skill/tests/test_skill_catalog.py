@@ -45,6 +45,19 @@ class PublicSkillCatalogTests(unittest.TestCase):
         self.assertEqual(packaging, {testing})
         self.assertIn("\n## Test packaging\n", testing.read_text(encoding="utf-8"))
 
+    def test_screen_profiles_and_reader_ship_together(self):
+        source = PROJECT / "unity-ui-skill"
+        published = PROJECT / "plugins/qin-unity-skills/skills/unity-ui-skill"
+        for path in ("assets/screen-layouts.json", "assets/ScreenLayoutPolicy.cs", "references/screen-profiles.md"):
+            with self.subTest(path=path):
+                self.assertEqual((source / path).read_bytes(), (published / path).read_bytes())
+        policy = json.loads((source / "assets/screen-layouts.json").read_text(encoding="utf-8"))
+        limits = [profile["maxWidthOverHeight"] for profile in policy["profiles"]]
+        self.assertEqual(limits[-1], 0)
+        self.assertGreater(limits[0], 0)
+        self.assertEqual(limits[:-1], sorted(set(limits[:-1])))
+        self.assertEqual(len({p["id"] for p in policy["profiles"]}), len(limits))
+
     def test_layout_and_gameplay_skills_route_to_existing_game_architecture(self):
         self.assertIn("\n## Existing-game architecture\n", UNITY_CLI_GUIDE.read_text(encoding="utf-8"))
         for name in ("unity-assets-skill", "unity-code-skill"):

@@ -54,7 +54,7 @@
     },
     {
       "id": "unity-ui",
-      "summary": "UI Toolkit defaults, localization, semantic groups, viewport fit, Canvas parity and artwork handoff",
+      "summary": "UI Toolkit, localization, screen profiles, full-window backgrounds, action rails, fold panes and Canvas parity",
       "document": "skills/ai-index/modules/unity-ui.md",
       "sources": ["unity-ui-skill"],
       "dependencies": []

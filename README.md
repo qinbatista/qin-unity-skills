@@ -38,7 +38,7 @@ The [Job State Batches sample](examples/job-state-batches/README.md) contains fi
 | --- | --- |
 | [Unity Code](unity-code-skill/SKILL.md) | [C# style and runtime ownership](examples/charge-pulse/CASEBOOK.md#unity-code) · [Charge controller](examples/charge-pulse/Assets/Scripts/ChargePulse/ChargePulseController.cs) |
 | [Unity Assets](unity-assets-skill/SKILL.md) | [Prefab placement, asset moves and imports](examples/charge-pulse/CASEBOOK.md#unity-assets) |
-| [Unity UI](unity-ui-skill/SKILL.md) | [Five responsive layouts](examples/charge-pulse/README.md#responsive-ui-cases) · [Toolkit and Canvas input and localization](examples/charge-pulse/CASEBOOK.md#unity-ui) |
+| [Unity UI](unity-ui-skill/SKILL.md) | [Screen layout configuration](unity-ui-skill/assets/screen-layouts.json) · [Five responsive layouts](examples/charge-pulse/README.md#responsive-ui-cases) · [Toolkit and Canvas input and localization](examples/charge-pulse/CASEBOOK.md#unity-ui) |
 | [Unity Animation](unity-animation-skill/SKILL.md) | [Clips, transitions, Blend Trees and rigs](examples/charge-pulse/CASEBOOK.md#unity-animation) |
 | [Unity Effects](unity-effects-skill/SKILL.md) | [Particles, shaders, Graph bindings and replay](examples/charge-pulse/CASEBOOK.md#unity-effects) |
 | [Unity Testing](unity-testing-skill/SKILL.md) | [Native tests and evidence checks](examples/charge-pulse/CASEBOOK.md#unity-testing-and-repository-skills) · [Run the cases](examples/charge-pulse/CASEBOOK.md#run-the-cases) |

@@ -1,5 +1,7 @@
 # Screen adaptation
 
+Choose a base composition and its reserved-region behavior from the [shared screen profiles](screen-profiles.md).
+
 ## Scale and geometry ownership
 
 Use the game's approved design baseline in each supported orientation, including its declared 4K projection when applicable. Record visible and hit bounds, order, group centers, anchors, artwork sizes, offsets, gaps and text metrics in that baseline. Keep design pixels, layout units, active viewport pixels and capture dimensions distinct.
