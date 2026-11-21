@@ -8,13 +8,20 @@
   "modules": [
     {
       "id": "unity-code",
-      "summary": "C# style and checker, Unity structure, Jobs, resource lifetimes, GC and SDK integration",
+      "summary": "C# style and checker, structure, Jobs, resource lifetimes, SDK integration and the daily CLI launcher",
       "document": "skills/ai-index/modules/unity-code.md",
       "sources": [
         "unity-code-skill"
       ],
       "dependencies": [],
       "code_targets": [
+        {
+          "id": "unity-cli-daily-check",
+          "file": "unity-code-skill/scripts/unity_cli_daily.py",
+          "symbol": "check_update",
+          "anchor": "def check_update(executable, environment, state_path):",
+          "summary": "Serialize daily update checks for an installed Unity CLI and share the successful date with YoFaAssets."
+        },
         {
           "id": "csharp-violations",
           "file": "unity-code-skill/scripts/csharp_rule_guard.py",
@@ -92,7 +99,7 @@
           "file": ".agents/skills/testing-skill/tests/test_skill_catalog.py",
           "symbol": "PublicSkillCatalogTests.test_package_links_resolve_and_references_are_linked",
           "anchor": "def test_package_links_resolve_and_references_are_linked(self):",
-          "summary": "Verify local link containment and referenced documents for each public package."
+          "summary": "Verify the shared CLI entry link and resolve each package's local references."
         }
       ]
     }

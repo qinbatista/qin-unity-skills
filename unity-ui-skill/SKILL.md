@@ -5,6 +5,8 @@ description: Build, revise, or review Unity UI, especially UI Toolkit hierarchy,
 
 # Unity UI
 
+**Required on every invocation.** Run the [daily Unity CLI gate](../unity-code-skill/references/unity-cli.md) first. Use Unity CLI for every Unity operation in background mode. Editor and Hub windows, UI automation, and user clicks are prohibited.
+
 Bind the real screen, entry and host. Follow the registered YoFaAssets task entry for linked work. Select `unity-ui-build` for construction, `ui-screen-adaptation` for its 4K and orientation policy, and `ui-button-test` for input replay.
 
 1. Bind accepted art to its page, state and actual component using [artwork intake](references/artwork-intake.md). Reuse shared assets and use the current data and localization owners.

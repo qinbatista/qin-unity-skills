@@ -5,6 +5,8 @@ description: Design, implement, repair, or review Unity VFX, Particle Systems, V
 
 # Unity Effects
 
+**Required on every invocation.** Run the [daily Unity CLI gate](../unity-code-skill/references/unity-cli.md) first. Use Unity CLI for every Unity operation in background mode. Editor and Hub windows, UI automation, and user clicks are prohibited.
+
 Bind the receiving effect or material, real trigger, camera, scale, renderer and target. For linked work, follow the registered YoFaAssets task entry and `explain game-effect`. That source owns reference assets, the linked-game profile and library handoff.
 
 ## Use an existing effect or reference

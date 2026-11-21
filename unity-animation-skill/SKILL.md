@@ -5,6 +5,8 @@ description: Author, repair, or review Unity AnimationClips, Animator controller
 
 # Unity Animation
 
+**Required on every invocation.** Run the [daily Unity CLI gate](../unity-code-skill/references/unity-cli.md) first. Use Unity CLI for every Unity operation in background mode. Editor and Hub windows, UI automation, and user clicks are prohibited.
+
 Bind the real Prefab or variant and Animator root. In a linked game, follow the registered YoFaAssets task entry, then `explain unity-animation` for native authoring or `explain skeletal-animation` for rigs and Spine.
 
 1. Set trigger, clock, property writers, loop or finish, interruption and reset through [playback and Animator](references/playback-and-animator.md). Use the existing timeline for authored motion and real handoff events.

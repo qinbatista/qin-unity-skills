@@ -8,6 +8,7 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[4]
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+UNITY_CLI_GATE = PROJECT / "unity-code-skill/references/unity-cli.md"
 
 
 class PublicSkillCatalogTests(unittest.TestCase):
@@ -41,9 +42,11 @@ class PublicSkillCatalogTests(unittest.TestCase):
             package = entry.parent
             linked_files = set()
             with self.subTest(package=package.name):
-                _, frontmatter, _ = entry.read_text(encoding="utf-8").split("---\n", 2)
+                frontmatter, instructions = entry.read_text(encoding="utf-8").split("---\n", 2)[1:]
                 self.assertIn(f"name: {package.name}", frontmatter.splitlines())
                 self.assertRegex(frontmatter, r"(?m)^description: \S+")
+                invocation_links = MARKDOWN_LINK.findall(instructions.strip().split("\n\n", 2)[1])
+                self.assertIn(UNITY_CLI_GATE, {(package / target).resolve() for target in invocation_links})
             for document in sorted(package.rglob("*.md")):
                 targets = MARKDOWN_LINK.findall(document.read_text(encoding="utf-8"))
                 for target in targets:
@@ -52,7 +55,7 @@ class PublicSkillCatalogTests(unittest.TestCase):
                         continue
                     resolved = (document.parent / local_path).resolve()
                     with self.subTest(document=document.relative_to(PROJECT), target=target):
-                        self.assertIn(package, resolved.parents)
+                        self.assertTrue(resolved == UNITY_CLI_GATE or package in resolved.parents)
                         self.assertTrue(resolved.is_file())
                         linked_files.add(resolved)
             with self.subTest(package=package.name):

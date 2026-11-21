@@ -1,6 +1,6 @@
 # Charge Pulse
 
-A Unity example that traces one button action through the six Skills. Open this project folder in Unity 6000.6.7f1, open [ChargePulse.unity](Assets/Scenes/ChargePulse.unity), enter Play Mode, and press **Charge**. The center gathers, the ring expands with a burst of sparks, and the effect returns to its original pose. The button becomes available again after the effect has recycled.
+A Unity 6000.6.7f1 example that traces one button action through the six Skills. The focused native test loads [ChargePulse.unity](Assets/Scenes/ChargePulse.unity) and invokes **Charge** in batch mode. The center gathers, the ring expands with a burst of sparks, and the effect returns to its original pose. The button becomes available again after the effect has recycled.
 
 The [case-by-case code review](CASEBOOK.md) links the runnable Skill cases, negative controls, findings and integration examples. It includes the native and host test commands.
 
@@ -15,14 +15,14 @@ The [case-by-case code review](CASEBOOK.md) links the runnable Skill cases, nega
 
 ## Run the focused tests
 
-Use a task-owned directory for the XML and Editor log. The runtime case uses the built-in render pipeline and needs a graphics device. It exercises scripted UI Toolkit navigation input and checks full-viewport layouts at 3840 × 2160, 1280 × 720 and 1080 × 1440.
+Follow the [daily Unity CLI gate](../../unity-code-skill/references/unity-cli.md). Run the commands from the repository root with a task-owned project copy and log directory. Use `py -3` in place of `python3` in Windows PowerShell. The runtime case uses the built-in render pipeline and needs a graphics device. It exercises scripted UI Toolkit navigation input and checks full-viewport layouts at 3840 × 2160, 1280 × 720 and 1080 × 1440.
 
 ```text
-unity test examples/charge-pulse --mode EditMode --filter ChargePulseTests --output <task-cache>/results.xml -- -logFile <task-cache>/unity.log
+python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<task-project>" --non-interactive --no-pager --mode EditMode --filter ChargePulseTests --output "<task-cache>/results.xml" -- -logFile "<task-cache>/unity.log"
 ```
 
 Set `CHARGE_PULSE_EVIDENCE` to an allocated task directory to capture native HUD and effect PNGs. The test assembly and authoring command live under `Assets/Editor`. The authoring command recreates the sample scene and refreshes the existing effect assets in place.
 
 ```text
-unity run examples/charge-pulse --log-file <task-cache>/authoring.log -- -executeMethod Qin.UnitySamples.ChargePulseSampleAuthoring.Rebuild
+python3 -B unity-code-skill/scripts/unity_cli_daily.py run "<task-project>" --non-interactive --no-pager --log-file "<task-cache>/authoring.log" -- -executeMethod Qin.UnitySamples.ChargePulseSampleAuthoring.Rebuild
 ```

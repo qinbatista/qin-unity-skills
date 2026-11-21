@@ -13,6 +13,8 @@ Six Unity Skills installed together in one user-global directory.
 
 The [Charge Pulse Unity example](examples/charge-pulse/README.md) shows all six Skills through a single interaction. Its [code review casebook](examples/charge-pulse/CASEBOOK.md) links focused examples, negative controls and native or host evidence.
 
+Every Skill invocation starts with the [daily Unity CLI gate](unity-code-skill/references/unity-cli.md). The first invocation each local calendar day checks for and applies available CLI updates. Later invocations share that day's successful check. All Unity operations stay in the background without Editor or Hub windows or user clicks.
+
 ## Install the global Skill pack
 
 Save [install_skill_pack.py](https://raw.githubusercontent.com/qinbatista/qin-codex-skills/master/management-skill/scripts/install_skill_pack.py) and run the command for your operation. Use `py -3 -B` on Windows.

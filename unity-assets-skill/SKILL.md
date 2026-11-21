@@ -5,6 +5,8 @@ description: Place, move, audit, or import Unity assets, including Prefabs, scen
 
 # Unity Assets
 
+**Required on every invocation.** Run the [daily Unity CLI gate](../unity-code-skill/references/unity-cli.md) first. Use Unity CLI for every Unity operation in background mode. Editor and Hub windows, UI automation, and user clicks are prohibited.
+
 Bind the receiving project, existing owner and actual consumers. In a linked game, follow the registered YoFaAssets task entry. Use `explain unity-project` for the canonical eight-root Assets layout and checker and `explain texture-compression` for image intake.
 
 ## Place by owner

@@ -122,10 +122,10 @@ For device acceptance, use the authorized physical target, compatible emulator o
 
 ## Run the cases
 
-Run the native suite in a task-owned copy of the Unity project, with its original Assets, Packages and ProjectSettings. Import and test through the configured quiet Unity CLI. For linked work, use YoFaAssets' Unity CLI wrapper.
+Run the native suite from the repository root against a task-owned copy of the Unity project, with its original Assets, Packages and ProjectSettings. Follow the [daily Unity CLI gate](../../unity-code-skill/references/unity-cli.md). Use `py -3` in place of `python3` in Windows PowerShell.
 
 ```text
-unity test <task-project> --mode EditMode --filter Qin.UnitySamples.Tests --output <task-cache>/results.xml -- -logFile <task-cache>/unity.log
+python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<task-project>" --non-interactive --no-pager --mode EditMode --filter Qin.UnitySamples.Tests --output "<task-cache>/results.xml" -- -logFile "<task-cache>/unity.log"
 ```
 
 Keep the graphics device enabled. Set `CHARGE_PULSE_EVIDENCE` to an existing task-owned directory for PNGs and the host test scratch. Run the host suite from the repository root with Python 3 and FFmpeg/FFprobe available. Use `py -3` on Windows.
