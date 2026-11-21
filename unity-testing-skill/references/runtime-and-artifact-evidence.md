@@ -39,3 +39,5 @@ For scene or memory cases, compare repeated entry and actual cleanup on the requ
 ## macOS batch startup
 
 Check Unity Bee's native IPC path budget. Use a shorter registered task path when it exceeds the socket limit. On APFS, `/.vol/<device>/<inode>` may address the same task temp directory. Verify the directory identity and bind a short Unix socket that appears inside task Cache before assigning the alias to the child's temporary environment. Keep the project and logs with their original owner.
+
+macOS can write application preferences in a user domain during the build or headless Player startup. The temporary directory and log flags do not select that domain. Use the project's process-scoped preference isolation and verify the exact user preference domains after the Editor and Player exit. Preserve preexisting preferences and the original bundle identity. If a stopped run still has an open native handle, reconcile the exact consumer and repeat Workflow's cleanup check before allocating the next run.

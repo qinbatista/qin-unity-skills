@@ -1,0 +1,4 @@
+(version 1)
+(allow default)
+(deny mach-lookup (global-name "com.apple.cfprefsd.agent") (global-name "com.apple.cfprefsd.daemon"))
+(deny file-write* (subpath (param "USER_PREFS")) (subpath (param "COMPANY_DATA")))

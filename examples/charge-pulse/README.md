@@ -52,3 +52,23 @@ Set `CHARGE_PULSE_EVIDENCE` to an allocated task directory to capture native HUD
 ```text
 python3 -B unity-code-skill/scripts/unity_cli_daily.py run "<task-project>" --non-interactive --no-pager --log-file "<task-cache>/authoring.log" -- -executeMethod Qin.UnitySamples.ChargePulseSampleAuthoring.Rebuild
 ```
+
+## Run a macOS package smoke test
+
+Use a fresh registered run under the repository's `Cache/temp-*` for each build. Copy this sample's saved `Assets`, `Packages`, and `ProjectSettings` into `<run>/charge-pulse` and verify their bytes against the source. Keep `UPM_CACHE_ROOT` and build outputs in the run. Set `TMP`, `TEMP`, and `TMPDIR` to its verified short native temporary path when Bee needs one. Follow the [test packaging lifecycle](../../unity-testing-skill/references/runtime-and-artifact-evidence.md#isolated-test-packaging).
+
+Run the following from the repository root on macOS after binding those paths. The [sample preference profile](inspection/macos-packaging-preferences.sb) limits only the test processes. It blocks writes to the user's preferences and the sample company's shared application data while preserving the package identity.
+
+```text
+sandbox-exec -f examples/charge-pulse/inspection/macos-packaging-preferences.sb \
+  -D "USER_PREFS=$HOME/Library/Preferences" \
+  -D "COMPANY_DATA=$HOME/Library/Application Support/DefaultCompany" \
+  python3 -B unity-code-skill/scripts/unity_cli_daily.py build "<run>/charge-pulse" \
+  --target StandaloneOSX --output "<run>/ChargePulse.app" \
+  --log-file "<run>/unity-build.log" --no-tail --no-accelerator --timeout 900 \
+  --non-interactive --no-pager --format json
+```
+
+Read the bundle identifier and executable from `Contents/Info.plist`, verify the bundle with `codesign --verify --deep --strict`, and confirm the native architecture and first packed scene. Launch that executable under the same preference profile with `-batchmode -logFile <run>/player.log`. Give the Player a run-owned `CFFIXED_USER_HOME` and set `__CFPREFERENCES_AVOID_DAEMON=1` for that invocation. Check that the log reaches engine initialization and first-scene loading and that the process stays alive without crash or exception evidence. This is a headless startup check.
+
+Stop the owned Player, then verify that the `com.DefaultCompany.charge-pulse` and `unity.DefaultCompany.charge-pulse` preference domains outside the run are unchanged. Run Workflow's exact cleanup checkpoint and confirm that the directory and registration are gone before starting the next build.
