@@ -35,6 +35,8 @@ For a two-bone leg, record the signed bend in the rig's facing-normalized coordi
 
 At each facing change, measure the screen-space displacement of the head, hips, shoulders, knees and loaded shoe on the same two frames. Track the camera, floor and movement root independently. Include transition frames in the state and phase ledger. If an uninterrupted stick reversal should continue the gait, check that deceleration through zero preserves its state and step. Inspect the braking approach, mirror and first new stride in a fixed view at normal speed, then step through any jump in a landmark. A planted toe can coincide with a moving torso. For a rejected revision, restore the specified original in isolation, run the same observer against the rejected release and candidate, and review their full-body playback before promotion.
 
+For asymmetric side-view artwork, also track the visible silhouette in the encoded frames. At a direction change, report its raw displacement and the residual after reflecting the previous silhouette about the tracked body landmark. Show the real facing change at natural and reduced speed. This measurement separates the artwork's original change of side from a moving head or a misplaced pivot.
+
 Keep a checked-in recipe with the source identity, native authoring entry, saved asset readback and the exact replay case. Rebuild from the frozen source in two independent native runs and compare their assets and bindings with the installed result. Replay the saved result independently to check that the facing and contact transitions still pass. Retain the synchronized moving reference and native evidence through delivery.
 
 ## Matched native playback
