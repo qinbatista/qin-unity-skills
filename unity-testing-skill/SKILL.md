@@ -5,9 +5,9 @@ description: Select and run scoped Unity verification for Editor, Edit Mode, Pla
 
 # Unity Testing
 
-**Project rules come first.** Start with the target project's `AGENTS.md` and follow its order for applicable project Skills and registered shared workflows. This global Skill fills gaps. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
+**Project rules come first.** Follow the target project's `AGENTS.md`, Skill order and registered workflows. Use this Skill for remaining decisions. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
 
-For linked work, select `explain unity-game-testing`. Use the project's test map, runner and required acceptance boundary. Bind the exact source, expected behavior and runtime. Where the project leaves the check open, use the table below.
+For linked work, use `explain unity-game-testing` and the project's test map, runner and acceptance boundary. Bind the source, expected behavior and runtime. Use the table for choices the project leaves open.
 
 | Claim | Check at this boundary |
 | --- | --- |
@@ -19,7 +19,7 @@ For linked work, select `explain unity-game-testing`. Use the project's test map
 
 ## Prepare and run
 
-1. Select the smallest case, including the relevant failure, retirement or reentry. Keep maintained automation in its Editor-only or external test owner and disposable output under the receiving project's task Cache.
+1. Select the smallest case covering relevant failure, retirement or reentry. Keep automation with its Editor-only or external owner and scratch in the receiving project's task Cache.
 2. For device cases, follow the project's target and package rules. Where the project allows a choice, prefer an available authorized physical device, then a compatible emulator or simulator. Use a configured compatible host if the local ABI cannot run the case. Preserve package identity and effective defaults.
 3. Use [runtime and artifact evidence](references/runtime-and-artifact-evidence.md) for package readback, native rendering, crash or performance checks and batch startup recovery.
 

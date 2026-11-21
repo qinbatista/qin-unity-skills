@@ -25,4 +25,6 @@ macOS/Linux: python3 -B -m unittest discover -s .agents/skills/testing-skill/tes
 Windows PowerShell: py -3 -B -m unittest discover -s .agents\skills\testing-skill\tests
 ```
 
+Run the [Codex C# writing regression](references/codex-writing-regression.md) for Level 2 Skill-behavior verification. Its four independent prompts exercise frame admission, texture ownership, Job slots and a warmed filter against the existing Charge Pulse assertions.
+
 For checker changes, run its CLI on representative source and a tracked diff. For package changes, read back the built or installed package. Run the native example for changes to its behavior or assets.

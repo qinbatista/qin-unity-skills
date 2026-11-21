@@ -5,14 +5,14 @@ description: Explain or design Unity gameplay architecture and write, fix, refac
 
 # Unity Code
 
-**Project rules come first.** Start with the target project's `AGENTS.md` and follow its order for applicable project Skills and registered shared workflows. This global Skill fills gaps. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
+**Project rules come first.** Follow the target project's `AGENTS.md`, Skill order and registered workflows. Use this Skill for remaining decisions. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
 
-Apply the [existing-game architecture workflow](references/unity-cli.md#existing-game-architecture) to questions and examples as well as implementation plans.
+Use the [existing-game architecture workflow](references/unity-cli.md#existing-game-architecture) for questions, examples and implementation plans.
 
 For linked game code, select `explain game-code-logic` through the registered workflow. Bind the owning type, actual callers and C# version through the project's system contract.
 
 - Call the real owner directly. Keep a method boundary for a distinct responsibility, current reuse or a required contract. Apply the [C# style](references/unity-csharp-rules.md).
-- Run discrete decisions at their request, state change or completion. Keep `Update`, `FixedUpdate` and `LateUpdate` for work that needs that cadence or phase. Apply the [lifecycle and frame rules](references/unity-lifecycle-and-serialization.md#frame-callbacks).
+- Handle discrete work at request, state change or completion. Reserve `Update`, `FixedUpdate` and `LateUpdate` for their required cadence or phase under the [lifecycle and frame rules](references/unity-lifecycle-and-serialization.md#frame-callbacks).
 - Keep one authoritative state. Apply [runtime resources and GC](references/runtime-resources-and-gc.md) when changing Jobs, leases, pools, allocations or teardown.
 - For [centralized Job movement](references/unity-game-code-structure-design.md#completed-job-batches), the movement Job calculates and writes the root position through the supported native movement API. When Controllers need completed gameplay Job state for animation or other local behavior, publish one read-only state batch after completion.
 - Use [game code structure](references/unity-game-code-structure-design.md) for Controller, Manager and data ownership, and [service integration](references/unity-service-integration.md) for SDKs and providers.
@@ -28,4 +28,4 @@ macOS/Linux: python3 -B "<skill-folder>/scripts/csharp_rule_guard.py" --diff-fro
 Windows PowerShell: py -3 -B "<skill-folder>\scripts\csharp_rule_guard.py" --diff-from HEAD <changed-files>
 ```
 
-The checker returns JSON and exits with status 1 for findings. Treat them as source review cues. Use the project's compiler and runtime for overload resolution, ownership and behavior.
+The checker returns JSON and exits 1 on findings. Review them against the project's compiler and runtime evidence for overloads, ownership and behavior.

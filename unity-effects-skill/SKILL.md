@@ -5,14 +5,14 @@ description: Design, implement, repair, or review Unity VFX, Particle Systems, V
 
 # Unity Effects
 
-**Project rules come first.** Start with the target project's `AGENTS.md` and follow its order for applicable project Skills and registered shared workflows. This global Skill fills gaps. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
+**Project rules come first.** Follow the target project's `AGENTS.md`, Skill order and registered workflows. Use this Skill for remaining decisions. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
 
-For linked work, select `explain game-effect` for reference assets, the shared effect profile and library handoff. Bind the receiving project's effect or material, real trigger, camera, scale, renderer and target.
+For linked work, use `explain game-effect` for references, the effect profile and library handoff. Bind the actual effect or material, trigger, camera, scale, renderer and target.
 
 ## Use an existing effect or reference
 
 1. Name the contribution to study or reuse. In YoFaAssets, search `game-effect --kind vfx --query TERM` or `game-effect --kind shader --query TERM` via `bin/yofa_assets.py`, then resolve the selected ID with `effect-id ID`.
-2. Inspect the relevant phase and actual source. Reuse files when license, verified package contents, dependencies, pipeline and target fit. Use previews and source-only entries for technique study within their evidence.
+2. Inspect the phase and source. Reuse files when the license, verified contents, dependencies, pipeline and target fit. Treat previews and source-only entries as technique evidence.
 3. Adapt in the receiving effect's existing package. Preserve source identity and record the accepted ID or path and changed bindings. Run the receiving native case.
 
 ## Create or revise an effect
