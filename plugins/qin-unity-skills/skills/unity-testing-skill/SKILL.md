@@ -5,7 +5,9 @@ description: Select and run scoped Unity verification for Editor, Edit Mode, Pla
 
 # Unity Testing
 
-Bind the exact source, expected behavior and runtime. Use the existing test map and CLI. For linked work, follow the registered YoFaAssets task entry and `explain unity-game-testing`.
+**Required on every invocation.** Run the [daily Unity CLI gate](../unity-code-skill/references/unity-cli.md) first. Use Unity CLI for every Unity operation in background mode. Editor and Hub windows, UI automation, and user clicks are prohibited.
+
+Bind the exact source, expected behavior and runtime. Use the existing test map. For linked work, follow the registered YoFaAssets task entry and `explain unity-game-testing`.
 
 | Claim | Check at this boundary |
 | --- | --- |

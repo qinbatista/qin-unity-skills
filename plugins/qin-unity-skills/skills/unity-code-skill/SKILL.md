@@ -5,6 +5,8 @@ description: Write, fix, refactor, or review Unity C# code, including gameplay o
 
 # Unity Code
 
+**Required on every invocation.** Run the [daily Unity CLI gate](references/unity-cli.md) first. Use Unity CLI for every Unity operation in background mode. Editor and Hub windows, UI automation, and user clicks are prohibited.
+
 Bind the owning type, its actual callers and the C# version. In a YoFaAssets-linked game, apply the registered owner's `explain task-entry` and `explain game-code-logic` and the game's system contract first.
 
 - Call the real owner directly. Keep a method boundary for a distinct responsibility, current reuse or a required contract. Apply the [C# style](references/unity-csharp-rules.md).
