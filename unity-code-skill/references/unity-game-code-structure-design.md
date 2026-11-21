@@ -15,6 +15,16 @@ Apply these rules to gameplay implementation, architecture proposals and code ex
 - Keep fields with the same identity, writer and lifetime in one record. Keep local runtime state with its owner. Create an unmanaged Job snapshot only for an actual execution boundary, using only the fields that Job reads or writes.
 - Keep immutable constants, protocol keys, shader names and enums in code. Store authored configuration in its existing asset owner.
 
+## Completed Job batches
+
+Use this default in gameplay designs, implementations and examples when Controllers act on one Job's batch of results. Follow the receiving project's established event and slot contract.
+
+1. The Manager owns the native container and Job lifetime. At the required cadence, sample shared input, schedule the Job, call `Complete()` and publish once through a typed event such as `Action<NativeArray<EnemyJobData>.ReadOnly>`. Pass the existing result collection as a read-only view that subscribers use synchronously during the callback.
+2. Each Controller subscribes for its active or declared lifetime and detaches from the same publisher at retirement. It reads its assigned slot directly and applies the result to its own component. Keep per-entity sampling, result traversal and dispatch loops out of the Manager's frame callbacks and their helpers in this pattern, including `ForEach` and LINQ passes. Each receiver performs only its own indexed lookup.
+3. Keep the collection, slot mapping and backing storage stable until dispatch returns. The Manager applies any structural changes afterward. Reuse the existing view and stable subscriptions across ticks to avoid copying the list or allocating a relay collection. A completion event still calls each subscriber.
+
+Keep required per-object input sampling at the existing Unity-to-Job boundary. When physics owns the current position, let each Controller submit the raw position of its own Rigidbody to its assigned slot before scheduling. Keep one-time construction and teardown traversal with the owner that creates and releases the group.
+
 ## Patterns
 
 Use patterns only for a demonstrated coordination or lifecycle need:
