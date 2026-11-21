@@ -1,6 +1,6 @@
 # Public Skill catalog
 
-The [Charge Pulse example](../../../examples/charge-pulse/README.md) demonstrates the six Skills in a standalone Unity scene. The [casebook](../../../examples/charge-pulse/CASEBOOK.md) links runtime evidence, including [checks for the seven reviewed failures](../../../examples/charge-pulse/CASEBOOK.md#findings-from-this-review).
+The [README example directory](../../../README.md#examples) links the six Skills and every numbered case by its stable anchor. The [Charge Pulse project structure](../../../examples/charge-pulse/CASEBOOK.md#project-structure) shows the runtime, asset, Editor and host owners. The [casebook findings](../../../examples/charge-pulse/CASEBOOK.md#findings-from-this-review) link the seven reviewed failures to their evidence.
 
 The [public catalog](../../../README.md) resolves each installable folder. The [YoFaAssets comparison](../../../docs/yofaassets-comparison.md) maps portable guidance to the registered shared workflows and game-owned contracts. The [repository test map](../../../.agents/skills/testing-skill/SKILL.md) checks release membership, project precedence, standalone references and the C# checker.
 
