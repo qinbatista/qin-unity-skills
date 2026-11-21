@@ -84,7 +84,7 @@
       "id": "catalog",
       "summary": "Global Codex plugin, public catalog, YoFaAssets comparison and repository tests",
       "document": "skills/ai-index/modules/catalog.md",
-      "sources": ["README.md", "docs", "examples/charge-pulse", "examples/job-state-batches", ".agents/skills/testing-skill", "plugins/qin-unity-skills", ".github/workflows/publish-plugin.yml"],
+      "sources": ["README.md", "docs", "examples/charge-pulse", "examples/job-state-batches", "examples/server-sync", ".agents/skills/testing-skill", "plugins/qin-unity-skills", ".github/workflows/publish-plugin.yml"],
       "dependencies": [],
       "code_targets": [
         {
@@ -100,6 +100,13 @@
           "symbol": "PublicSkillCatalogTests.test_package_links_resolve_and_references_are_linked",
           "anchor": "def test_package_links_resolve_and_references_are_linked(self):",
           "summary": "Verify project precedence and the standalone CLI route in every public entry, then resolve package references."
+        },
+        {
+          "id": "verify-server-sync-provider-selection",
+          "file": "examples/server-sync/Assets/Editor/Tools/ServerSync/Tests/ServerSyncTests.cs",
+          "symbol": "ServerSyncTests.OutsideSelectionKeepsProviderDataAndSnapshotsSeparate",
+          "anchor": "public IEnumerator OutsideSelectionKeepsProviderDataAndSnapshotsSeparate() => Observe(VerifyOutsideSelection());",
+          "summary": "Open a player-save session through the selected provider and verify that records and revision snapshots stay bound to their owners."
         },
         {
           "id": "verify-job-state-batches",

@@ -28,6 +28,8 @@ The [Charge Pulse sample](examples/charge-pulse/README.md) follows one button pr
 
 The [Job State Batches sample](examples/job-state-batches/README.md) contains five Unity scenes and native tests for Job-owned movement, completed-state events and Controller-owned presentation.
 
+The [Server Sync sample](examples/server-sync/README.md) opens the same player-save session against a selected provider and verifies versioned writes and provider switching.
+
 | Skill | What to inspect |
 | --- | --- |
 | [Unity Code](unity-code-skill/SKILL.md) | [C# style and runtime ownership](examples/charge-pulse/CASEBOOK.md#unity-code) · [Charge controller](examples/charge-pulse/Assets/Scripts/ChargePulse/ChargePulseController.cs) |
