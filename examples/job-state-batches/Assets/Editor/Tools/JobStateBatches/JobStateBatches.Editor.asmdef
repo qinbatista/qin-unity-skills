@@ -1,0 +1,9 @@
+{
+  "name": "JobStateBatches.Editor",
+  "references": [
+    "JobStateBatches.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

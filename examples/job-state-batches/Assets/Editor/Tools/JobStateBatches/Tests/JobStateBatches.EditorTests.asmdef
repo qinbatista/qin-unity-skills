@@ -1,0 +1,12 @@
+{
+  "name": "JobStateBatches.EditorTests",
+  "references": [
+    "JobStateBatches.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

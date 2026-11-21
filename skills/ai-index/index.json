@@ -84,7 +84,7 @@
       "id": "catalog",
       "summary": "Global Codex plugin, public catalog, YoFaAssets comparison and repository tests",
       "document": "skills/ai-index/modules/catalog.md",
-      "sources": ["README.md", "docs", "examples/charge-pulse", ".agents/skills/testing-skill", "plugins/qin-unity-skills", ".github/workflows/publish-plugin.yml"],
+      "sources": ["README.md", "docs", "examples/charge-pulse", "examples/job-state-batches", ".agents/skills/testing-skill", "plugins/qin-unity-skills", ".github/workflows/publish-plugin.yml"],
       "dependencies": [],
       "code_targets": [
         {
@@ -100,6 +100,13 @@
           "symbol": "PublicSkillCatalogTests.test_package_links_resolve_and_references_are_linked",
           "anchor": "def test_package_links_resolve_and_references_are_linked(self):",
           "summary": "Verify project precedence and the standalone CLI route in every public entry, then resolve package references."
+        },
+        {
+          "id": "verify-job-state-batches",
+          "file": "examples/job-state-batches/Assets/Editor/Tools/JobStateBatches/Tests/CompletedBatchCases.cs",
+          "symbol": "CompletedBatchCases.EnemyChaseMovesWithoutPresentationAndRetiresOnlyAtPlayer",
+          "anchor": "public IEnumerator EnemyChaseMovesWithoutPresentationAndRetiresOnlyAtPlayer()",
+          "summary": "Enter the saved enemy scene and verify Job-owned movement with its presentation subscriber detached. This suite also covers the fireball, coin, platform and formation scenes."
         },
         {
           "id": "replay-responsive-layouts",

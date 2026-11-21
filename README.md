@@ -26,6 +26,8 @@ Check `~/.agents/skills/qin-unity-skills/<skill>/SKILL.md` and select `$unity-co
 
 The [Charge Pulse sample](examples/charge-pulse/README.md) follows one button press through gameplay code, UI, animation and an effect. Start with the [project structure](examples/charge-pulse/CASEBOOK.md#project-structure) or open any of the 52 cases.
 
+The [Job State Batches sample](examples/job-state-batches/README.md) contains five Unity scenes and native tests for Job-owned movement, completed-state events and Controller-owned presentation.
+
 | Skill | What to inspect |
 | --- | --- |
 | [Unity Code](unity-code-skill/SKILL.md) | [C# style and runtime ownership](examples/charge-pulse/CASEBOOK.md#unity-code) · [Charge controller](examples/charge-pulse/Assets/Scripts/ChargePulse/ChargePulseController.cs) |
