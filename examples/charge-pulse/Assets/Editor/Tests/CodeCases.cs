@@ -53,6 +53,12 @@ namespace Qin.UnitySamples.Tests
             pending.Complete();
             Assert.That(samples[0].Position, Is.EqualTo(2f));
             Assert.That(samples[1].Position, Is.EqualTo(7f));
+
+            Type[] slotContainers = typeof(AdvanceJob).GetFields()
+                .Select(field => field.FieldType)
+                .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(NativeArray<>))
+                .ToArray();
+            CollectionAssert.AreEqual(new[] { typeof(NativeArray<MotionSample>) }, slotContainers);
         }
 
         [Test]
@@ -61,30 +67,50 @@ namespace Qin.UnitySamples.Tests
             int[] samples = { -2, 1, 4, 0, 6 };
             List<int> owned = new List<int>(samples.Length);
             Filter(samples, 0, owned);
-            int checksum = 0;
-            using ProfilerRecorder reused = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "GC.Alloc", 512, ProfilerRecorderOptions.CollectOnlyOnCurrentThread | ProfilerRecorderOptions.WrapAroundWhenCapacityReached);
+            GC.KeepAlive(AllocatingScan(0));
+            using ProfilerRecorder recorder = new ProfilerRecorder(ProfilerCategory.Internal, "GC.Alloc", 1024, ProfilerRecorderOptions.CollectOnlyOnCurrentThread);
+            Assert.That(recorder.Valid, Is.True);
+
+            recorder.Start();
+            recorder.Stop();
+            int idle = recorder.Count;
+            recorder.Reset();
+            recorder.Start();
+            GC.KeepAlive(new byte[64]);
+            recorder.Stop();
+            int deliberate = recorder.Count;
+            Assert.That(idle, Is.Zero, "The idle probe must stay quiet.");
+            Assert.That(deliberate, Is.GreaterThan(0), "A silent positive control invalidates a zero-allocation claim.");
+
+            int reusedChecksum = 0;
+            recorder.Reset();
+            recorder.Start();
             for (int iteration = 0; iteration < 64; iteration++)
             {
-                Filter(samples, 0, owned);
-                checksum += owned.Count;
+                Filter(samples, iteration % 2, owned);
+                reusedChecksum += owned.Count;
             }
-            reused.Stop();
+            recorder.Stop();
+            int reused = recorder.Count;
 
-            using ProfilerRecorder transient = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "GC.Alloc", 512, ProfilerRecorderOptions.CollectOnlyOnCurrentThread | ProfilerRecorderOptions.WrapAroundWhenCapacityReached);
+            int transientChecksum = 0;
+            recorder.Reset();
+            recorder.Start();
             for (int iteration = 0; iteration < 64; iteration++)
             {
-                int threshold = iteration % 2;
-                int[] temporary = samples.Where(sample => sample > threshold).ToArray();
-                checksum += temporary.Length;
+                int[] temporary = AllocatingScan(iteration % 2);
+                transientChecksum += temporary.Length;
             }
-            transient.Stop();
+            recorder.Stop();
+            int transient = recorder.Count;
 
-            CollectionAssert.AreEqual(new[] { 1, 4, 6 }, owned);
-            Assert.That(checksum, Is.GreaterThan(0));
-            Assert.That(reused.Valid && transient.Valid, Is.True);
-            Assert.That(reused.Count, Is.Zero);
-            Assert.That(transient.Count, Is.GreaterThan(0), "The negative control must allocate on this runtime.");
-            TestContext.WriteLine($"GC.Alloc samples during 64 calls: reuse {reused.Count}, transient {transient.Count}.");
+            CollectionAssert.AreEqual(new[] { 4, 6 }, owned);
+            Assert.That(reusedChecksum, Is.EqualTo(transientChecksum));
+            Assert.That(reused, Is.Zero);
+            Assert.That(transient, Is.InRange(1, recorder.Capacity - 1));
+            TestContext.WriteLine($"GC.Alloc samples: idle {idle}, deliberate {deliberate}, reuse {reused}, transient {transient} for 64 matched calls.");
+
+            int[] AllocatingScan(int threshold) => samples.Where(sample => sample > threshold).ToArray();
         }
 
         [Test]

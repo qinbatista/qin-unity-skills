@@ -25,4 +25,4 @@ For stable tag equality use the engine's typed tag check on the same target. Cac
 
 ## Measure the claimed result
 
-Use the [recurring-path check](runtime-resources-and-gc.md#measure-a-recurring-path). Calibrate an allocation probe with a known positive and idle case when its accuracy matters. A sampled iterator step establishes that step's cost. Check actual frames for frame-cost claims.
+Use the [recurring-path check](runtime-resources-and-gc.md#measure-a-recurring-path). Attribute a sampled iterator step to that step. Use actual frames for frame-cost claims.

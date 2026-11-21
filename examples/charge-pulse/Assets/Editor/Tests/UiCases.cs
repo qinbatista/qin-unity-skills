@@ -72,6 +72,8 @@ namespace Qin.UnitySamples.Tests
                 Assert.That(root.Q("details").resolvedStyle.display, Is.EqualTo(DisplayStyle.Flex));
                 Assert.That(back.focusController.focusedElement, Is.SameAs(back));
                 Assert.That(root.Q<Label>("detail-heading").text, Is.EqualTo("Zeitpunkt der Freisetzung"));
+                Assert.That(root.Q<Label>("summary").text, Is.EqualTo("Der Ring erreicht seine maximale Größe nach dem Funkenstoß."));
+                Assert.That(back.text, Is.EqualTo("Zurück"));
                 using (NativeReadback details = new NativeReadback(target)) details.SaveIfRequested("review-details-de.png");
 
                 using (NavigationSubmitEvent input = NavigationSubmitEvent.GetPooled())

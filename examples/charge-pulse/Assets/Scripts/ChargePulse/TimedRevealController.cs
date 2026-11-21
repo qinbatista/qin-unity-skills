@@ -26,14 +26,16 @@ namespace Qin.UnitySamples
 
         public void ScaleTo(float target, float duration)
         {
-            _from = _visual.localScale.x;
-            if (duration <= 0f || Mathf.Approximately(_from, target))
+            Vector3 current = _visual.localScale;
+            if (duration <= 0f || Mathf.Approximately(current.x, target))
             {
-                _visual.localScale = Vector3.one * target;
+                Vector3 endpoint = Vector3.one * target;
+                if (!current.Equals(endpoint)) _visual.localScale = endpoint;
                 enabled = false;
                 return;
             }
 
+            _from = current.x;
             _target = target;
             _duration = duration;
             _startedAt = Time.unscaledTime;

@@ -9,7 +9,7 @@ Bind the owning type, its actual callers and the C# version. In a YoFaAssets-lin
 
 - Call the real owner directly. Keep a method boundary for a distinct responsibility, current reuse or a required contract. Apply the [C# style](references/unity-csharp-rules.md).
 - Run discrete decisions at their request, state change or completion. Keep `Update`, `FixedUpdate` and `LateUpdate` for work that needs that cadence or phase. Apply the [lifecycle and frame rules](references/unity-lifecycle-and-serialization.md#frame-callbacks).
-- Keep one authoritative state and release each owned resource at its real retirement. Use [runtime resources and GC](references/runtime-resources-and-gc.md) for Jobs, leases, pools, allocation and teardown.
+- Keep one authoritative state. Apply [runtime resources and GC](references/runtime-resources-and-gc.md) when changing Jobs, leases, pools, allocations or teardown.
 - Use [game code structure](references/unity-game-code-structure-design.md) for Controller, Manager and data ownership, and [service integration](references/unity-service-integration.md) for SDKs and providers.
 
 Preserve serialized fields, public contracts and execution order. Verify the real entry and the affected failure, teardown or ordering case.

@@ -31,8 +31,11 @@ namespace Qin.UnitySamples.Tests
                 Assert.That(sawIntermediate, Is.True);
                 Assert.That(subject.transform.localScale, Is.EqualTo(Vector3.one));
                 Assert.That(reveal.enabled, Is.False);
+                subject.transform.hasChanged = false;
                 reveal.ScaleTo(1f, 0.4f);
                 Assert.That(reveal.enabled, Is.False, "An already settled property needs no frame callback.");
+                yield return null;
+                Assert.That(subject.transform.hasChanged, Is.False, "The settled Transform must stay unchanged.");
             }
             finally
             {
@@ -83,10 +86,10 @@ namespace Qin.UnitySamples.Tests
                 binding.ApplyModifiedPropertiesWithoutUndo();
                 Assert.That(motion.enabled, Is.False);
                 motion.SetVelocity(new Vector3(2f, 0f, 0f));
-                yield return new WaitForFixedUpdate();
-                yield return new WaitForFixedUpdate();
+                float deadline = Time.realtimeSinceStartup + 3f;
+                while (body.position.x <= 0f && Time.realtimeSinceStartup < deadline) yield return null;
+                Assert.That(body.position.x, Is.GreaterThan(0f), "The active Rigidbody must move before the deadline.");
                 yield return null;
-                Assert.That(body.position.x, Is.GreaterThan(0f));
                 Assert.That(Vector3.Distance(marker.transform.position, subject.transform.position), Is.LessThanOrEqualTo(0.1f));
                 motion.SetVelocity(Vector3.zero);
                 Vector3 stopped = body.position;

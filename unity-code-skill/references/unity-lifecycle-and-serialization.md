@@ -21,9 +21,9 @@ Trace the operation through its callees. Before keeping frame work, name its cha
 | Ordered batch | Prepare ordering when inputs change and advance only due or active entries in its owner. |
 | Continuous input, movement, physics or late presentation | Use `Update` for required frame samples, `FixedUpdate` for fixed-step physics and `LateUpdate` for work that consumes this frame's earlier writes. Preserve the project's actual phases. |
 
-Apply the same test to helpers, coroutines and scheduled callbacks. Keep necessary loops active only while they own work. Skip unchanged writes and repeated queries or allocation. Stop at completion, disable or retirement.
+Decide admission before enabling a frame callback, coroutine or repeating schedule. An already satisfied request with no required retrigger effect must leave that work idle and skip unchanged writes. Keep loops active only while work requires their cadence. Reuse stable results and avoid repeated allocation in active loops. Stop at completion, disable or retirement.
 
-Verify initial state, a real change, idle frames and stop or reentry. For timing or alignment, compare the producing state with the visible output in the same tick or frame and coordinate space.
+Verify the initial state, a real change and a settled request that keeps the loop idle. Inspect the settled path for assignments of identical values. Check stop or reentry. For timing or alignment, compare the producing state with the visible output in the same tick or frame and coordinate space.
 
 ## Async and main-thread safety
 

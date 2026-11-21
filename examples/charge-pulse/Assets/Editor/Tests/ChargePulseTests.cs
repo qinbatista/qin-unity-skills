@@ -115,11 +115,16 @@ namespace Qin.UnitySamples.Tests
                 Assert.That(sparks.particleCount, Is.GreaterThan(0));
 
                 camera.Render();
+                Texture2D image;
                 using (NativeReadback active = new NativeReadback(worldTarget))
                 {
+                    image = active.CapturedTexture;
                     Assert.That(active.BrightPixels, Is.GreaterThan(idlePixels * 2));
                     active.SaveIfRequested("pulse-released.png");
                 }
+                Assert.That(image != null, Is.True, "Play Mode destruction is deferred.");
+                yield return null;
+                Assert.That(image == null, Is.True, "The owned image must retire at the frame boundary.");
                 yield return WaitForStage(pulse, PulseStage.Recycled);
                 CollectionAssert.AreEqual(new[] { PulseStage.Prepare, PulseStage.Preparing, PulseStage.Prepared, PulseStage.Releasing, PulseStage.Released, PulseStage.Retracting, PulseStage.Recycled }, observed);
                 Assert.That(button.enabledSelf, Is.True);

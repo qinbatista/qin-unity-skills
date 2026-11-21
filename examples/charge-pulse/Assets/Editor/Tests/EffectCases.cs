@@ -65,6 +65,29 @@ namespace Qin.UnitySamples.Tests
             }
         }
 
+        [Test]
+        public void Effects07_EditModeReadbackReleasesItsImageAndPreservesItsBorrowedTarget()
+        {
+            RenderTexture target = RenderTexture.GetTemporary(8, 8);
+            RenderTexture previous = RenderTexture.active;
+            Texture2D image;
+            try
+            {
+                using (NativeReadback readback = new NativeReadback(target))
+                {
+                    image = readback.CapturedTexture;
+                    Assert.That(image != null, Is.True);
+                    Assert.That(RenderTexture.active, Is.SameAs(previous));
+                }
+                Assert.That(image == null, Is.True, "The owned Edit Mode image must be destroyed during disposal.");
+                Assert.That(target.IsCreated(), Is.True, "The caller still owns the render target.");
+            }
+            finally
+            {
+                RenderTexture.ReleaseTemporary(target);
+            }
+        }
+
         private static Texture2D Pixel(Color color)
         {
             Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA32, false, true);

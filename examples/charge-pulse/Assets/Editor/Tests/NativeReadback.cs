@@ -7,20 +7,20 @@ namespace Qin.UnitySamples.Tests
 {
     sealed class NativeReadback : IDisposable
     {
-        private readonly Texture2D _image;
-
+        // Consumers borrow this image until the readback is disposed.
+        public Texture2D CapturedTexture { get; }
         public int BrightPixels { get; }
         public int CoveredPixels { get; }
 
         public NativeReadback(RenderTexture source)
         {
-            _image = new Texture2D(source.width, source.height, TextureFormat.RGBA32, false);
+            CapturedTexture = new Texture2D(source.width, source.height, TextureFormat.RGBA32, false);
             RenderTexture previous = RenderTexture.active;
             try
             {
                 RenderTexture.active = source;
-                _image.ReadPixels(new Rect(0, 0, source.width, source.height), 0, 0);
-                _image.Apply();
+                CapturedTexture.ReadPixels(new Rect(0, 0, source.width, source.height), 0, 0);
+                CapturedTexture.Apply();
             }
             catch
             {
@@ -32,25 +32,25 @@ namespace Qin.UnitySamples.Tests
                 RenderTexture.active = previous;
             }
 
-            foreach (Color32 pixel in _image.GetPixels32())
+            foreach (Color32 pixel in CapturedTexture.GetPixels32())
             {
                 if (pixel.g > 150) BrightPixels++;
                 if (pixel.a > 127) CoveredPixels++;
             }
         }
 
-        public Color32 CenterPixel => _image.GetPixel(_image.width / 2, _image.height / 2);
+        public Color32 CenterPixel => CapturedTexture.GetPixel(CapturedTexture.width / 2, CapturedTexture.height / 2);
 
         public void SaveIfRequested(string name)
         {
             string path = Environment.GetEnvironmentVariable("CHARGE_PULSE_EVIDENCE");
-            if (!string.IsNullOrEmpty(path)) File.WriteAllBytes(Path.Combine(path, name), _image.EncodeToPNG());
+            if (!string.IsNullOrEmpty(path)) File.WriteAllBytes(Path.Combine(path, name), CapturedTexture.EncodeToPNG());
         }
 
         public void Dispose()
         {
-            if (Application.isPlaying) Object.Destroy(_image);
-            else Object.DestroyImmediate(_image);
+            if (Application.isPlaying) Object.Destroy(CapturedTexture);
+            else Object.DestroyImmediate(CapturedTexture);
         }
     }
 }
