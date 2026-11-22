@@ -24,13 +24,15 @@ For linked work select `explain game-effect` for references, the effect profile 
 
 ## Use an existing effect or reference
 
+When a design document or image supplies the brief, identify the exact ability and read that input before looking for effects. Use the receiving project's planning route to bind the version and page or image. Take the event and outcome from the game rules and describe the visible requirements from the design. When asked to pick an ability, choose one defined by that source.
+
 Start with editable assets from the game’s named source. Open the exact Prefab, graph, material, mesh, texture or code and check that it can drive the effect in the receiving project. Adapt the usable source in place or in the game’s effect package. Use a motion GIF for a recorded gap in the registered library, or as the default when the game has no registered source. Follow the [source and component procedure](references/staged-effects.md#use-an-existing-effect-or-reference).
 
 ## Create or revise an effect
 
 1. Inspect the editable source and its behavior. Break the selected motion into its independently visible effects. State the count and the job, anchor, time window and source asset for each. A single effect is a valid result.
 2. Adapt and play each effect alone. Retain compatible source emitters, curves, shader logic and materials, and build only a contribution the usable source does not supply. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and the receiving project's lifecycle. Keep exclusive assets in the owning package and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
-3. Play the complete composition from the real trigger at game speed and scale. Compare it to the reference. Tune an individual effect when its shape or timing is wrong. When the combined gesture still reads incorrectly, return to step 1, revise the count or responsibilities and rebuild the affected effects. Replay the same case until its observable criteria pass.
+3. Play the complete composition from the documented game trigger at game speed and scale. Check the ability's observable game result and compare its visuals to the selected reference. Tune an individual effect when its shape or timing is wrong. When the combined gesture still reads incorrectly, return to step 1, revise the count or responsibilities and rebuild the affected effects. Replay the same case until its observable criteria pass.
 
 ## Verify the native result
 
