@@ -22,13 +22,13 @@ For linked work select `explain game-effect` for references, the effect profile 
 
 ## Use an existing effect or reference
 
-Follow the [reference search and reuse steps](references/staged-effects.md#use-an-existing-effect-or-reference) for the actual ID, license, dependencies and native result.
+Start with the game’s named reference source, or a motion GIF when the game has no source. Follow the [reference selection and component review](references/staged-effects.md#use-an-existing-effect-or-reference) before authoring.
 
 ## Create or revise an effect
 
-1. Use a supported Particle System or VFX Graph for emission, travel and tails. Use a shader and its bound material for coverage, reveal, lighting or distortion. Combine them when their contributions are distinct.
-2. Use [progressive formation and layers](references/staged-effects.md#progressive-formation-and-layers) for one trigger, progressive shape, nonlinear timing and cleanup. For linked effects, apply the profile from the current shared topic. Static materials stay static.
-3. Keep exclusive assets and dedicated preview scenes with the effect, Editor-only test code with its native owner, and shared assets in their existing location. Use [renderer binding](references/rendering-and-verification.md#bind-the-renderer-and-source) to build and bind the selected VFX and shader.
+1. Break the selected motion into its independently visible effects. State the count and the job, anchor and time window of each. A single effect is a valid result.
+2. Build and play each effect alone. Choose a Particle System or VFX Graph for emission and travel, or a shader and bound material for reveal, lighting and distortion. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and the receiving project's lifecycle. Keep exclusive assets in the owning package and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
+3. Play the complete composition from the real trigger at game speed and scale. Compare it to the reference. Tune an individual effect when its shape or timing is wrong. When the combined gesture still reads incorrectly, return to step 1, revise the count or responsibilities and rebuild the affected effects. Replay the same case until its observable criteria pass.
 
 ## Verify the native result
 
