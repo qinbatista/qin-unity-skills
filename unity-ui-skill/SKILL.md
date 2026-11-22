@@ -23,6 +23,7 @@ For a new screen follow the [screen construction workflow](#build-a-screen), inc
 | Text clipped or stale after a language change | [Verify each locale](references/layout-and-input.md#verify-each-locale) at the affected viewport. For missing keys, new copy or formatting use [text binding](references/layout-and-input.md#bind-player-facing-text-by-key). |
 | Incorrect size, inset, notch, orientation or fold | [Geometry ownership](references/screen-adaptation.md#scale-and-geometry-ownership) for scaling, [obstructions](references/screen-adaptation.md#obstructions-and-orientation) for local occlusion or [composition](references/screen-profiles.md#choose-a-composition) for a profile change. Use [hardware geometry](references/screen-profiles.md#apply-hardware-and-system-geometry) for side cameras and hinges. Check affected viewports and hit bounds. |
 | Wrong, sliced or split artwork | [Source and component identity](references/artwork-intake.md#source-component-and-instance-identity) or [YoFaAssets split handoff](references/artwork-intake.md#yofaassets-split-to-unity). Audit each touched image through Assets. |
+| Artwork stretched after resizing or captions squeezed into a navigation row | [UI Toolkit artwork and navigation](references/screen-adaptation.md#ui-toolkit-artwork-and-navigation). Verify original proportions, caption ink and actual button hits. |
 
 ## Build a screen
 
