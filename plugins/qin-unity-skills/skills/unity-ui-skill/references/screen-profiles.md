@@ -48,11 +48,14 @@ Get Unity pixel rectangles from the active rendering surface. Convert `Screen.sa
 4. Use `BodyAroundCorner` when a precise localized obstruction explains a side inset. It preserves a persistent side exclusion and returns the available body width. For a top corner action, include both its painting and hit bounds. Start with the physical edge from `TopRowLane` when precise local exclusions are available. Intersect the available row with the space left by stationary peers and any persistent system bars. Use `TryPlaceInRow` to find the nearest clear X on the authored row. For a confirmed Duo outer display, obtain the header lane from `TryDuoOuterHeader` first. Apply its width only to top foreground groups. The header starts at the top and its controls use the returned physical lens center Y. Place all four controls on this centerline. Reserve the complete painted and interactive corner bounds first, then center the resource pair in the gap. Reduce surplus gaps and counter widths as the reservation grows. Use the authored compact row on particularly narrow spans. Keep both totals and their hit targets visible on this row. An unexplained side inset remains the edge for interactive content.
 5. Recalculate on actual geometry changes, including an inset-only change. Keep focus and the active page or game state. Discard the previous display's geometry when the window transfers.
 
+For a confirmed Duo lower-right aperture, use `DuoOuterTopSafe` before `TopRowLane`. It restores the normal right header anchor when a localized lower reservation accounts for the reported side inset and the upper part of that side is clear. Continue to use the current safe bounds and reservations for the body and footer.
+
 A Toolkit geometry callback can bind an authored physical-right top action as follows. The same pixel rectangle can drive a Canvas RectTransform through its owning CanvasScaler.
 
 ```csharp
 var profile = policy.Select(pane);
-Rect lane = policy.TopRowLane(pane, safeArea, exclusions, true);
+Rect topSafe = policy.DuoOuterTopSafe(pane, safeArea, exclusions, confirmedDuoOuterAperture);
+Rect lane = policy.TopRowLane(pane, topSafe, exclusions, true);
 float groupTop = authoredTop;
 bool hasDuoHeader = policy.TryDuoOuterHeader(pane, safeArea, exclusions, confirmedDuoOuterAperture, out Rect header, out float centerY);
 bool inlineResources = hasDuoHeader && policy.DuoOuterSingleRow;
@@ -80,6 +83,12 @@ Supply an empty aperture on all other hardware and windows. Compute bounds in on
 
 Replay the five compositions and relevant overlays through the real screen. Capture a full-resolution reference and a smaller same-aspect case. Measure background coverage and each group's visible and hit bounds. Exercise enabled actions, their destinations and returns. Compare adjacent controls, footer actions and world-space content within the active pane. Check the [language matrix](layout-and-input.md#verify-each-locale). Label the evidence with its active window, display identity, orientation and geometry source.
 
+### Screen adaptation regression
+
+Run the receiving game's existing layout replay from its actual entry. Include a clear window, both sides of the affected aspect breakpoint and the relevant centered or corner regions. Compare a before → changed → restored sequence in the same live state. Check the original artwork proportions, readable text, painted and interactive bounds, and button destinations after each transition.
+
+For Duo, include outer portrait → both landscape turns → outer portrait, and an outer → inner transfer at the same viewport size. Compare the restored anchors with the first visit, and check the same-size inner destination against its clean safe-area baseline. A change in the native reservation alone must also refresh placement. Replay supported locales and panes. Record Editor geometry replay, named simulator observations and physical device results with their actual runtime scope.
+
 ### Capture each iPhone Duo display separately
 
 Capture a full frame per supported pose and scene. Label each with its display, orientation and geometry source. The default policy has five cases.
@@ -88,7 +97,7 @@ Capture a full frame per supported pose and scene. Label each with its display, 
 | --- | --- |
 | Outer upright portrait, lens at upper right | Use the aperture from the upright mechanical drawing. Align the avatar, both resources and Settings or Return with its center Y. Keep painted artwork and hit bounds to its left. Verify proportional full-screen scenery and exercise the right action. |
 | Outer landscape, lens at upper left | Turn the upright aperture counterclockwise. The top row starts to the right of the current reservation and aligns with the lens center. Verify avatar, resources, Settings or Return and the full scene. |
-| Outer landscape, lens at lower right | Turn the upright aperture clockwise. The normal top row stays clear. Check the footer artwork and hit targets beside the lens, then tap the last available navigation control. |
+| Outer landscape, lens at lower right | Turn the upright aperture clockwise. Compare the top row with the clear landscape baseline while the window reports the camera-side inset. Check the footer artwork and hit targets beside the lens, then tap the last available navigation control. |
 | Inner portrait | The inactive camera leaves a clear corner. The right action uses its normal safe-area anchor and the resource pair is centered. Inspect the portrait body and footer. |
 | Inner landscape | The inactive camera leaves a clear corner and the right action uses its normal safe-area anchor. Verify the centered resource pair and the landscape body and footer. |
 

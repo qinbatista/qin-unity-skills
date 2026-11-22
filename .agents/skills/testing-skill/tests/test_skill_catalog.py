@@ -49,7 +49,7 @@ class PublicSkillCatalogTests(unittest.TestCase):
     def test_screen_profiles_and_reader_ship_together(self):
         source = PROJECT / "unity-ui-skill"
         published = PROJECT / "plugins/qin-unity-skills/skills/unity-ui-skill"
-        for path in ("assets/screen-layouts.json", "assets/ScreenLayoutPolicy.cs", "assets/camera-aperture.svg", "references/screen-profiles.md"):
+        for path in ("SKILL.md", "assets/screen-layouts.json", "assets/ScreenLayoutPolicy.cs", "assets/camera-aperture.svg", "references/screen-profiles.md"):
             with self.subTest(path=path):
                 self.assertEqual((source / path).read_bytes(), (published / path).read_bytes())
         policy = json.loads((source / "assets/screen-layouts.json").read_text(encoding="utf-8"))
@@ -58,6 +58,10 @@ class PublicSkillCatalogTests(unittest.TestCase):
         self.assertEqual(policy["edgeActions"]["sideCameraAppearance"], "authored")
         self.assertEqual(policy["edgeActions"]["duoOuterHeader"], "single-row-at-camera")
         self.assertEqual(policy["edgeActions"]["duoOuterOrientation"], "portrait-and-landscape")
+        self.assertIn(
+            "references/screen-profiles.md#screen-adaptation-regression",
+            (published / "SKILL.md").read_text(encoding="utf-8"),
+        )
         limits = [profile["maxWidthOverHeight"] for profile in policy["profiles"]]
         self.assertEqual(limits[-1], 0)
         self.assertGreater(limits[0], 0)

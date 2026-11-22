@@ -1,6 +1,6 @@
 ---
 name: unity-ui-skill
-description: Route Unity UI tasks by screen construction, localization, responsive layout, input and artwork binding. Use for UI Toolkit and Canvas screens, profiles, safe areas, hit testing and navigation.
+description: Use for Unity screen adaptation, UI Toolkit or Canvas layout, localization, safe areas, iPhone Duo and other foldables, artwork binding, input and navigation.
 ---
 
 # Unity UI
@@ -11,7 +11,7 @@ Treat the Skill's methods as adaptable defaults. Use the approach that best fits
 
 Read the selected headings by link or [section reader](../unity-code-skill/scripts/read_topic.py). Audit any Unity image touched via [Assets](../unity-assets-skill/SKILL.md#admit-artwork-and-textures).
 
-For linked work use `unity-ui-build` for construction, `ui-screen-adaptation` for viewport rules and `ui-button-test` for input replay as applicable. Bind the actual screen, state and UI owner.
+For linked work use `unity-ui-build` for construction, `ui-screen-adaptation` for viewport rules and `ui-button-test` for input replay as applicable. For a screen adaptation request on an existing game, start with [adapt an existing screen](#adapt-an-existing-screen).
 
 ## Choose an operation
 
@@ -21,9 +21,15 @@ For a new screen follow the [screen construction workflow](#build-a-screen), inc
 | --- | --- |
 | Wrong button, duplicate input or broken return route | [Buttons and destination pages](references/layout-and-input.md#check-buttons-and-destination-pages). Replay the actual hit, destination and return. |
 | Text clipped or stale after a language change | [Verify each locale](references/layout-and-input.md#verify-each-locale) at the affected viewport. For missing keys, new copy or formatting use [text binding](references/layout-and-input.md#bind-player-facing-text-by-key). |
-| Incorrect size, inset, notch, orientation or fold | [Geometry ownership](references/screen-adaptation.md#scale-and-geometry-ownership) for scaling, [obstructions](references/screen-adaptation.md#obstructions-and-orientation) for local occlusion or [composition](references/screen-profiles.md#choose-a-composition) for a profile change. Use [hardware geometry](references/screen-profiles.md#apply-hardware-and-system-geometry) for side cameras and hinges. Check affected viewports and hit bounds. |
+| Incorrect size, inset, notch, orientation or fold | [Adapt an existing screen](#adapt-an-existing-screen). |
 | Wrong, sliced or split artwork | [Source and component identity](references/artwork-intake.md#source-component-and-instance-identity) or [YoFaAssets split handoff](references/artwork-intake.md#yofaassets-split-to-unity). Audit each touched image through Assets. |
 | Artwork stretched after resizing or captions squeezed into a navigation row | [UI Toolkit artwork and navigation](references/screen-adaptation.md#ui-toolkit-artwork-and-navigation). Verify original proportions, caption ink and actual button hits. |
+
+## Adapt an existing screen
+
+1. Locate the real scene entry, its mounted UI host, and the active layout data. Reuse the game's [profile configuration and geometry owner](references/screen-profiles.md#choose-a-composition). Adopt the bundled [configuration](assets/screen-layouts.json) and [reader](assets/ScreenLayoutPolicy.cs) together when the project lacks an equivalent.
+2. [Scale uniformly](references/screen-adaptation.md#scale-and-geometry-ownership) from the authored viewport. Keep artwork proportions, painted bounds and hit targets together. Select a composition by usable window shape, then apply [local obstructions](references/screen-profiles.md#apply-hardware-and-system-geometry) from the current window and confirmed active display. Keep full-window scenery and per-group foreground placement independent.
+3. Use the [screen adaptation regression](references/screen-profiles.md#screen-adaptation-regression) in the game's real scene and repeat the affected transitions. For iPhone Duo, use the top row left of the lens in outer upright portrait, the projected aperture in either landscape turn, and the inner window's safe area in its active orientation.
 
 ## Build a screen
 

@@ -175,6 +175,27 @@ namespace Qin.UnityUI
         public bool UsesDuoInnerSingleRow(DuoDisplay display) =>
             display == DuoDisplay.Inner && edgeActions.duoInnerHeader == "single-row-in-safe-area";
 
+        // Restore the upper-right anchor when the measured side inset belongs to a lower camera.
+        // This rectangle is for the top row. The body and footer keep their own safe bounds.
+        public Rect DuoOuterTopSafe(Rect pane, Rect safe, IReadOnlyList<Rect> exclusions, Rect aperture)
+        {
+            if (!DuoOuterSingleRow || exclusions == null || safe.xMax >= pane.xMax ||
+                aperture.width <= 0f || aperture.height <= 0f || !pane.Overlaps(aperture) ||
+                aperture.xMin < pane.center.x || aperture.yMin < pane.center.y) return safe;
+
+            bool cameraExplainsInset = false;
+            foreach (Rect region in exclusions)
+            {
+                if (region.width <= 0f || region.height <= 0f || region.xMax <= safe.xMax ||
+                    !pane.Overlaps(region)) continue;
+                if (region.yMin < pane.center.y) return safe;
+                if (region.Overlaps(aperture) && Mathf.Abs(region.xMin - safe.xMax) <= 1f &&
+                    region.xMax >= pane.xMax - 1f) cameraExplainsInset = true;
+            }
+            if (cameraExplainsInset) safe.xMax = pane.xMax;
+            return safe;
+        }
+
         // Both policies enable the two landscape directions on confirmed built-in panels.
         public bool TryDuoRotation(DuoDisplay display, out bool allowPortrait)
         {
