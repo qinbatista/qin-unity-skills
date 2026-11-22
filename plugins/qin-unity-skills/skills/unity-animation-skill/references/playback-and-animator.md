@@ -7,7 +7,7 @@ Identify the actual Prefab or variant, Animator root, bound paths and sole write
 | Decision | What to establish |
 | --- | --- |
 | Entry and exit | Automatic, conditional, one-shot or interactive start. Define natural completion, stop, cancellation, destruction and the final pose. |
-| Timing | Set preparation, main action, hold and recovery in real seconds. Include intervals in the loop period and account for Animator speed, state speed, Blend Tree child speed and time scale. |
+| Timing | Set preparation, main action, hold and recovery in real seconds. Include intervals in the loop period and account for Animator speed, state speed, Blend Tree child speed and time scale. For a walk or run apply [ground travel and step cadence](reference-motion-review.md#ground-travel-and-step-cadence). |
 | Retrigger | Decide whether to ignore, restart, queue or continue, and resolve priority when requests overlap. |
 | Clock and lifetime | Choose scaled, unscaled or physics-synchronized time. Define pause, speed, culling, disable and pooled reuse, including property and parameter reset. |
 | Coordination | Identify independent layers and synchronized phases, with the actual contact, audio, shader, particle or gameplay trigger for each. |

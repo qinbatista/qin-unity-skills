@@ -121,6 +121,24 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertTrue(failed.stderr.strip())
                 self.assertEqual(failed.stdout, "")
 
+    def test_gait_lookup_keeps_speed_step_count_and_contact_together(self):
+        menu = read_topic("animation", "#choose-an-operation")
+        link = re.search(r"\(([^)]+#ground-travel-and-step-cadence)\)", menu)
+        self.assertIsNotNone(link)
+        result = run_reader("animation", link.group(1))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = re.findall(r"^\| ([\d.]+) m/s \| ([\d.]+) s \| (\d+) \| (\d+) \|$", result.stdout, re.MULTILINE)
+        self.assertEqual(len(rows), 2)
+        full, half = [list(map(float, row)) for row in rows]
+        self.assertGreater(full[0], 0)
+        self.assertEqual(half[0], full[0] / 2)
+        self.assertEqual(half[1], full[1] * 2)
+        self.assertEqual(half[2], full[2] / 2)
+        self.assertEqual(half[3], full[3])
+        self.assertIn("support's local space", result.stdout)
+        self.assertIn("even if the step counts pass", result.stdout)
+        self.assertNotIn("## Fit the actual source", result.stdout)
+
     def test_gameplay_animation_and_effect_routes_preserve_native_contracts(self):
         jobs = read_topic("code", "references/unity-game-code-structure-design.md#completed-job-batches")
         self.assertIn("TransformAccess.position", jobs)

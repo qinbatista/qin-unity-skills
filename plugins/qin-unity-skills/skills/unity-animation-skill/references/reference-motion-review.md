@@ -21,11 +21,28 @@ Bind one exact source revision for an action and record its hash or stable ident
 
 Map observed poses onto the receiving rig using sparse keys at their actual times. Preserve the original art, bone lengths, skin, scale, optional modules and movement root. Compare joint angles, contact roles and body-height-normalized paths when source proportions differ. Preserve limb order, direction, palm and foot motion, extrema, holds and the gesture itself. Inspect between keys for extra motion, intersections and slipping. Record unreachable poses or decisive unknowns as failed or unresolved for the affected channel. Adopt an intentional motion difference through its accepted brief. Keep any extra gameplay entry or return-to-idle outside the unchanged source clock and identify that interval in the native capture.
 
+## Ground travel and step cadence
+
+**For the same walk or run, half the actual ground speed means half the playback rate and half the steps per second.** The cycle takes twice as long. Keep the stride length, poses and footfall order. Over the same distance the character takes the same number of steps. Use a separate calibration when switching to a different gait.
+
+Calibrate one full cycle from a foot landing to its next landing. Measure its ground distance and duration at the character's working scale and reference playback rate. For controller-driven travel, advance phase in cycles by `ground distance / stride length`, or scale the reference playback rate by `actual ground speed / reference ground speed`. Measure travel along the surface relative to the support under the character, at the rendered pose. Use the same clock for speed and playback. A stationary rider on a moving platform or a character blocked by a wall accrues zero walking distance. For root motion, let the locomotion owner apply the clip's travel once and check the displacement achieved after collisions. Apply the speed factor once, preserve phase through speed changes and settle into the authored stop when travel ends.
+
+For example, a two-step cycle that covers 2 m in 1 s gives the following results in steady travel. Count new landings after the starting plant.
+
+| Actual ground speed | Cycle duration | Steps in 4 s | Steps over 4 m |
+| --- | --- | --- | --- |
+| 2 m/s | 1 s | 8 | 4 |
+| 1 m/s | 2 s | 4 | 4 |
+
+During a plant, the loaded part of the visible sole stays on the same footprint in the support's local space. Follow the heel or forefoot actually bearing weight through a roll. The swing foot clears the surface and a run retains its authored flight interval.
+
+**Accept the saved gait in gameplay.** Replay steady full speed and half speed from the same phase. Count visible landings over equal times and equal distances, and measure sole drift, gap and penetration through each plant. Then replay start, slowdown, return to full speed, stop, reversal and two consecutive loops. Watch at normal playback speed from a fixed view and inspect adjacent rendered frames at two render cadences against the physics clock. Reject visible foot chatter, sliding, knee flips or one-frame jumps in the hips or head, even if the step counts pass. Measure against tolerances set for the actual character and camera before testing. For a reported regression, bind the replay to the current clip, Animator, movement and foot-contact code before reusing an earlier pass.
+
 ## Foot contact and stride alignment
 
 Freeze the original motion before the first revision. Bind the approved moving source, rig, receiving state, original saved clip when available, and the real gameplay input sequence. Mark each foot's contact, loaded roll, release, swing and next landing in source phase. Keep the original rig and anatomical mapping. Register the painted outsole to the rendered ground and its supporting collider.
 
-Set the distance and phase contract for each gait. For a fixed stride length `L`, a normalized phase change `dPhase` covers `L * dPhase` along the gait's forward axis. Measure character displacement relative to the support surface at the same evaluation point as the rendered rig. Trace the input, fixed-step pose, interpolated visual root, Animator phase, transition weight and final heel and toe in one ledger. Use it to locate a clock mismatch or a second writer. Unity's [Rigidbody2D interpolation](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Rigidbody2D-interpolation.html) defines the visual interpolation between physics updates.
+Compare measured ground travel with the distance predicted by the [calibrated gait](#ground-travel-and-step-cadence). Multiply stride length by the change in unwrapped cycle phase to obtain the predicted distance. Trace the input, fixed-step pose, interpolated visual root, Animator phase including completed loops, transition weight and final heel and toe on the same rendered frames. Use the trace to locate a clock mismatch or a second writer. [Unity Animator normalized time](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/AnimatorStateInfo-normalizedTime.html) · [Unity Rigidbody2D interpolation](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Rigidbody2D-interpolation.html)
 
 Track the loaded footprint in the support object's local space. During a heel-to-forefoot roll, pivot around the forefoot patch placed by the flat boot. Lift the forefoot before releasing into the source swing. During a held reversal, carry the prior rendered support point through the facing switch and ease the free foot and planted-to-swing handoff into the new gait. Measure clearance, horizontal drift, release velocity and pelvis travel from before the switch through the first new step. Keep the supporting leg reachable at the original segment lengths and bound the pelvis adjustment. Reinitialize on a genuine surface change, a teleport, or a new action with its own contacts.
 

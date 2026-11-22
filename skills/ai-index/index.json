@@ -68,7 +68,7 @@
     },
     {
       "id": "unity-animation",
-      "summary": "Clip and Animator playback, loops, rig reuse and Spine transfer",
+      "summary": "Ground-relative gait speed, step counts, planted feet and jitter checks, Clip and Animator playback, rig reuse and Spine transfer",
       "document": "skills/ai-index/modules/unity-animation.md",
       "sources": ["unity-animation-skill"],
       "dependencies": []

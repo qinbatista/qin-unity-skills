@@ -11,7 +11,7 @@ Pick the result below, open its domain menu, then read the linked headings for t
 | Implement, fix or review C#, gameplay ownership, Jobs, GC, SDKs or serialization | [Code](../SKILL.md) |
 | Place or move assets, or inspect, import or compress an image, including 2D Sprites, 3D textures and UI art | [Assets](../../unity-assets-skill/SKILL.md) |
 | Build or repair a screen, input, localization, layout or safe-area settings | [UI](../../unity-ui-skill/SKILL.md) |
-| Author motion, Animator states, 2D rigs, Spine or 3D clip playback | [Animation](../../unity-animation-skill/SKILL.md) |
+| Author motion, fix a jittering gait or sliding foot, or change Animator, 2D rig, Spine or 3D clip playback | [Animation](../../unity-animation-skill/SKILL.md) |
 | Change particles, a shader, material lighting, emission or overdraw | [Effects](../../unity-effects-skill/SKILL.md) |
 | Reproduce a fault, choose a runner, profile a frame or verify runtime behavior | [Testing](../../unity-testing-skill/SKILL.md) |
 | Optimize CPU, GC, GPU time, texture size or an unexplained frame spike | [Optimization by cost](#optimize-by-cost) |
