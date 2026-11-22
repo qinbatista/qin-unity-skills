@@ -61,7 +61,7 @@
     },
     {
       "id": "unity-ui",
-      "summary": "UI Toolkit, localization, screen profiles, full-window backgrounds, iPhone Duo outer header boundaries, inner orientations, fold panes and Canvas parity",
+      "summary": "UI Toolkit, localization, screen profiles, full-window backgrounds, iPhone Duo outer landscape and single-row resource headers, inner orientations, fold panes and Canvas parity",
       "document": "skills/ai-index/modules/unity-ui.md",
       "sources": ["unity-ui-skill"],
       "dependencies": []

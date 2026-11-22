@@ -56,7 +56,8 @@ class PublicSkillCatalogTests(unittest.TestCase):
         self.assertEqual(policy["version"], 2)
         self.assertEqual(policy["edgeActions"]["sideCameraPlacement"], "shift-inward")
         self.assertEqual(policy["edgeActions"]["sideCameraAppearance"], "authored")
-        self.assertEqual(policy["edgeActions"]["duoOuterHeader"], "left-of-camera-align-centers")
+        self.assertEqual(policy["edgeActions"]["duoOuterHeader"], "single-row-at-camera")
+        self.assertEqual(policy["edgeActions"]["duoOuterOrientation"], "landscape")
         limits = [profile["maxWidthOverHeight"] for profile in policy["profiles"]]
         self.assertEqual(limits[-1], 0)
         self.assertGreater(limits[0], 0)

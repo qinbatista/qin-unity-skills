@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace Qin.UnityUI
 {
+    public enum DuoDisplay { Unavailable = -1, Other = 0, Outer = 1, Inner = 2 }
+
     // Input rectangles use active-window pixels with a top-left origin.
     [Serializable]
     public sealed class ScreenLayoutPolicy
@@ -23,6 +25,7 @@ namespace Qin.UnityUI
             public string sideCameraPlacement;
             public string sideCameraAppearance;
             public string duoOuterHeader;
+            public string duoOuterOrientation;
             public bool blendCompactCamera;
             public float cameraRingDiameterInHubs;
             // Version 1 fields remain readable for existing projects.
@@ -166,24 +169,37 @@ namespace Qin.UnityUI
             return lane;
         }
 
+        public bool DuoOuterSingleRow => edgeActions.duoOuterHeader == "single-row-at-camera";
+
+        // The receiver enables both landscape orientations. The inner display also accepts portrait.
+        public bool TryDuoRotation(DuoDisplay display, out bool allowPortrait)
+        {
+            allowPortrait = display == DuoDisplay.Inner;
+            return edgeActions.duoOuterOrientation == "landscape" && (display == DuoDisplay.Outer || allowPortrait);
+        }
+
         // Only the native Duo outer-display adapter supplies an aperture. All inputs
         // are in the current window's top-left pixel space. The body keeps its own pane.
         public bool TryDuoOuterHeader(Rect pane, Rect safe, IReadOnlyList<Rect> exclusions, Rect aperture, out Rect header, out float centerY)
         {
             header = default;
             centerY = 0f;
-            if (edgeActions.duoOuterHeader != "left-of-camera-align-centers" || aperture.width <= 0f || aperture.height <= 0f ||
-                !pane.Overlaps(aperture) || aperture.xMin < pane.center.x || aperture.yMax > pane.center.y) return false;
+            bool onRight = aperture.xMin >= pane.center.x;
+            bool onLeft = aperture.xMax <= pane.center.x;
+            bool enabled = DuoOuterSingleRow ? onRight || onLeft : onRight && edgeActions.duoOuterHeader == "left-of-camera-align-centers";
+            if (!enabled || aperture.width <= 0f || aperture.height <= 0f ||
+                !pane.Overlaps(aperture) || aperture.yMax > pane.center.y) return false;
 
-            float left = Mathf.Max(pane.xMin, safe.xMin);
-            float right = aperture.xMin;
+            float left = onRight ? Mathf.Max(pane.xMin, safe.xMin) : aperture.xMax;
+            float right = onRight ? aperture.xMin : Mathf.Min(pane.xMax, safe.xMax);
             if (exclusions != null)
                 foreach (Rect region in exclusions)
                 {
                     if (region.width <= 0f || region.height <= 0f || !pane.Overlaps(region)) continue;
                     // The native island can extend beyond the black lens when expanded.
-                    if (region.xMin >= pane.center.x && region.Overlaps(aperture))
-                        right = Mathf.Min(right, region.xMin);
+                    if (!region.Overlaps(aperture)) continue;
+                    if (onRight && region.xMin >= pane.center.x) right = Mathf.Min(right, region.xMin);
+                    if (onLeft && region.xMax <= pane.center.x) left = Mathf.Max(left, region.xMax);
                 }
             if (right <= left || safe.yMax <= pane.yMin) return false;
             header = Rect.MinMaxRect(left, pane.yMin, right, Mathf.Min(pane.yMax, safe.yMax));
