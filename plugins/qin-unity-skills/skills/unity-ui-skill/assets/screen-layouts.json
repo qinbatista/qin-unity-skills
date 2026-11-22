@@ -9,6 +9,13 @@
     { "id": "landscape", "maxWidthOverHeight": 2.0, "body": "side-by-side", "header": "fit-row" },
     { "id": "ultrawide", "maxWidthOverHeight": 0, "body": "bounded-center-and-wings", "header": "fit-row" }
   ],
-  "edgeActions": { "sideCameraPlacement": "shift-inward", "sideCameraAppearance": "authored", "duoOuterHeader": "single-row-at-camera", "duoOuterOrientation": "landscape", "clearanceReferencePixels": 8 },
+  "edgeActions": {
+    "sideCameraPlacement": "shift-inward",
+    "sideCameraAppearance": "authored",
+    "duoOuterHeader": "single-row-at-camera",
+    "duoOuterOrientation": "landscape",
+    "duoInnerHeader": "single-row-in-safe-area",
+    "clearanceReferencePixels": 8
+  },
   "separatingFold": { "equalPanePreference": "top-or-left" }
 }

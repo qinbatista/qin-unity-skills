@@ -26,6 +26,7 @@ namespace Qin.UnityUI
             public string sideCameraAppearance;
             public string duoOuterHeader;
             public string duoOuterOrientation;
+            public string duoInnerHeader;
             public bool blendCompactCamera;
             public float cameraRingDiameterInHubs;
             // Version 1 fields remain readable for existing projects.
@@ -170,6 +171,9 @@ namespace Qin.UnityUI
         }
 
         public bool DuoOuterSingleRow => edgeActions.duoOuterHeader == "single-row-at-camera";
+
+        public bool UsesDuoInnerSingleRow(DuoDisplay display) =>
+            display == DuoDisplay.Inner && edgeActions.duoInnerHeader == "single-row-in-safe-area";
 
         // The receiver enables both landscape orientations. The inner display also accepts portrait.
         public bool TryDuoRotation(DuoDisplay display, out bool allowPortrait)
