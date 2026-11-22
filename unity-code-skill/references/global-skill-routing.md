@@ -8,6 +8,7 @@ Pick the result below, open its domain menu, then read the linked headings for t
 
 | Requested result | Start here |
 | --- | --- |
+| Report a problem or contribute a fix or improvement to this Skill pack | [Contribute to the pack](contributing.md#submit-a-skill-change). |
 | Implement, fix or review C#, gameplay ownership, Jobs, GC, SDKs or serialization | [Code](../SKILL.md) |
 | Place or move assets, or inspect, import or compress an image, including 2D Sprites, 3D textures and UI art | [Assets](../../unity-assets-skill/SKILL.md) |
 | Build or repair a screen, input, localization, layout or safe-area settings | [UI](../../unity-ui-skill/SKILL.md) |

@@ -47,6 +47,20 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertIn("## Choose an operation", result.stdout)
                 self.assertNotIn("description:", result.stdout)
 
+    def test_pack_changes_route_to_the_contribution_workflow(self):
+        code_menu = read_topic("code", "#choose-an-operation")
+        pack_menu = run_reader()
+        self.assertEqual(pack_menu.returncode, 0, pack_menu.stderr)
+        link = re.search(r"\((references/contributing\.md#[^)]+)\)", code_menu)
+        self.assertIsNotNone(link)
+        self.assertIn(f"({link.group(1).removeprefix('references/')})", pack_menu.stdout)
+        contribution = run_reader("code", link.group(1))
+        self.assertEqual(contribution.returncode, 0, contribution.stderr)
+        self.assertIn("fresh topic branch", contribution.stdout)
+        self.assertIn("your fork", contribution.stdout)
+        self.assertIn("local debugging or testing", contribution.stdout)
+        self.assertIn("verifying the open PR", contribution.stdout)
+
     def test_published_files_match_their_sources(self):
         for owner in json.loads((RELEASE / "skills.json").read_text(encoding="utf-8")):
             source = PROJECT / owner

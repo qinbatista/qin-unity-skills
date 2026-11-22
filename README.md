@@ -26,6 +26,10 @@ For automatic selection across projects, use the [installed Unity routing guide]
 
 To extend the pack with another operation or domain, follow the [catalog maintenance guide](skills/ai-index/modules/catalog.md#extend-the-task-menu).
 
+## Contribute changes
+
+Everyone is welcome to use and test these Skills, suggest improvements, and submit fixes. Put each proposed change on a fresh branch and open a pull request against `master`. Fixes found while debugging or testing locally follow the same path. Keep the branch available for review. [Contribution workflow](unity-code-skill/references/contributing.md#submit-a-skill-change) · [GitHub Issues](https://github.com/qinbatista/qin-unity-skills/issues)
+
 ## Examples
 
 The [Charge Pulse sample](examples/charge-pulse/README.md) follows one button press through gameplay code, UI, animation and an effect. Start with the [project structure](examples/charge-pulse/CASEBOOK.md#project-structure) or open any of the 52 cases.

@@ -10,6 +10,8 @@ The [installed task menu](../../../unity-code-skill/references/global-skill-rout
 
 ## Extend the task menu
 
+Submit changes to the pack through the [contribution workflow](../../../unity-code-skill/references/contributing.md#submit-a-skill-change), including verified improvements found in local tests.
+
 1. Identify what the user wants to change or prove, who owns it and what counts as acceptance. Put a new operation under an existing domain when the owner fits. For example, texture format tuning belongs in Assets and profiling unknown frame spikes belongs in Testing. A distinct, implemented domain such as scene lighting can gain its own entry once it has an owner and verified procedures.
 2. Keep each procedure in one reference with stable, descriptive Markdown headings. Put shared prerequisites before the first subheading and link the required verification from the operation. Add a row to the owning Skill's `Choose an operation` menu. Add or revise a top-level route only when domain selection changes. The [reader](../../../unity-code-skill/scripts/read_topic.py) uses those same headings. Preserve published paths and anchors used by receiving projects.
 3. For a new domain also update the release list, discovery description, README, comparison and project index. Run the [catalog and routing cases](../../../.agents/skills/testing-skill/SKILL.md) against the published layout. Try a focused lookup, a change with its required checks and any applicable cross-domain or project-owned handoff.

@@ -15,4 +15,4 @@ This repository owns the Unity Skills listed in the [catalog](README.md), their 
 - For YoFaAssets-linked work, resolve the current source through its documented project connection or configured `YOFA_ASSETS_ROOT` and follow its task entry before game work.
 - Apply the receiving project's rules and registered workflow before global guidance. The [Unity workflow](unity-code-skill/references/unity-cli.md) defines background execution and the daily check for standalone work without a declared CLI workflow.
 - Keep temporary output in a workflow-owned `Cache/temp-*` directory. Verify the smallest affected case through the [test map](.agents/skills/testing-skill/SKILL.md).
-- Verify changed references and executable checks, then deliver through the current branch's configured upstream.
+- Deliver every proposed change, including local test fixes, from a fresh topic branch through one pull request into upstream `master`. Verify the open PR and submitted commit, then leave it for review. [Contribution workflow](unity-code-skill/references/contributing.md#submit-a-skill-change)
