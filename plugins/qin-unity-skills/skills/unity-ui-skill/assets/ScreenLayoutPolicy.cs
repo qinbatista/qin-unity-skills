@@ -175,11 +175,14 @@ namespace Qin.UnityUI
         public bool UsesDuoInnerSingleRow(DuoDisplay display) =>
             display == DuoDisplay.Inner && edgeActions.duoInnerHeader == "single-row-in-safe-area";
 
-        // The receiver enables both landscape orientations. The inner display also accepts portrait.
+        // Both policies enable the two landscape directions on confirmed built-in panels.
         public bool TryDuoRotation(DuoDisplay display, out bool allowPortrait)
         {
-            allowPortrait = display == DuoDisplay.Inner;
-            return edgeActions.duoOuterOrientation == "landscape" && (display == DuoDisplay.Outer || allowPortrait);
+            string orientation = edgeActions.duoOuterOrientation;
+            bool outerPortrait = orientation == "portrait-and-landscape";
+            allowPortrait = display == DuoDisplay.Inner || (display == DuoDisplay.Outer && outerPortrait);
+            return (outerPortrait || orientation == "landscape") &&
+                (display == DuoDisplay.Outer || display == DuoDisplay.Inner);
         }
 
         // Only the native Duo outer-display adapter supplies an aperture. All inputs

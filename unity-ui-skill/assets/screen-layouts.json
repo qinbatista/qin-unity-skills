@@ -13,7 +13,7 @@
     "sideCameraPlacement": "shift-inward",
     "sideCameraAppearance": "authored",
     "duoOuterHeader": "single-row-at-camera",
-    "duoOuterOrientation": "landscape",
+    "duoOuterOrientation": "portrait-and-landscape",
     "duoInnerHeader": "single-row-in-safe-area",
     "clearanceReferencePixels": 8
   },
