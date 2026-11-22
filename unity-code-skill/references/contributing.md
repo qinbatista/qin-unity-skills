@@ -2,13 +2,24 @@
 
 This pack is a shared library of Unity methods and defaults. Apply the receiving project's requirements and choose the approach that solves the task best. If you find a better approach while working, use it in the current task and verify the affected behavior.
 
-When the gap is in the shared guidance, anyone using the library may revise the owning `SKILL.md` or reference as part of that work. Submit the reusable improvement for review. Share suggestions or reproducible problems without a patch through [GitHub Issues](https://github.com/qinbatista/qin-unity-skills/issues).
+When the gap is in the shared guidance, anyone using the library may revise the owning `SKILL.md` or reference as part of that work. Use the delivery route below to share the improvement. Share suggestions or reproducible problems without a patch through [GitHub Issues](https://github.com/qinbatista/qin-unity-skills/issues).
 
 ## Submit a Skill change
 
-Each distinct contribution to the library requires a fresh topic branch and a pull request into [the upstream repository](https://github.com/qinbatista/qin-unity-skills). This applies to maintainers and external contributors, including improvements they find during regular work, local debugging or testing.
+Verify the authenticated GitHub account against the owner of [the upstream repository](https://github.com/qinbatista/qin-unity-skills). Use the contributor route whenever ownership is unverified. Honor explicit local-only requests.
 
-1. Fetch upstream `master` and create the topic branch from its current tip. Check the authenticated GitHub account and the push destination. Use a branch in your fork if your account cannot push branches to the upstream repository. Commit and push the contribution only on the topic branch.
-2. Record the Skill revision, environment, and steps that exposed the gap. Update the owning source and rerun the smallest affected case. Test local Skill edits from a disposable project or package copy. Keep receiving-project customizations with that project and keep private files and scratch output out of the contribution. Follow the [repository test map](https://github.com/qinbatista/qin-unity-skills/blob/master/.agents/skills/testing-skill/SKILL.md) and prepare the generated plugin mirror when packaged files change.
-3. Push the verified topic branch and open a single PR against upstream `master`. Name the affected Skill and the problem its current guidance leaves unresolved. Explain what you changed, why the proposed approach addresses the gap, and why it belongs in the shared library. Include a focused example or reproduction and the verification results. If the same head repository, branch, and base already have an open PR, update that branch and use the existing PR.
-4. If a push or PR submission has an uncertain result, look up the exact remote branch or PR before retrying. For a permission rejection, use an authorized fork or preserve the local commit and report the blocker. Finish after verifying the open PR targets upstream `master` and its head matches the submitted commit. Leave review and merge to the maintainers. Honor explicit local-only requests.
+For improvements found during regular work, local debugging or testing, record the Skill revision, environment, and steps that exposed the gap. Update the owning source and rerun the smallest affected case. Test local Skill edits from a disposable project or package copy. Keep receiving-project customizations with that project and keep private files and scratch output out of the contribution. Follow the [repository test map](https://github.com/qinbatista/qin-unity-skills/blob/master/.agents/skills/testing-skill/SKILL.md) and prepare the generated plugin mirror when packaged files change.
+
+In the owner's commit message or the contributor's PR description, name the affected Skill and the problem its current guidance leaves unresolved. Explain what changed, why the approach addresses the gap, and why it belongs in the shared library. Include a focused example or reproduction and the verification results.
+
+### Deliver as the repository owner
+
+When the authenticated account matches the upstream repository owner, integrate the verified change into the current upstream `master` and push it directly. Use a temporary branch when isolation is needed. For an existing PR, merge its verified head into `master` using a linear history.
+
+Read back the landed commit on upstream `master`. After confirming the task branch's changes landed, release its clean worktree and remove its local branch, remote branch, and tracking ref where present. Verify those refs are gone.
+
+### Submit as a contributor
+
+1. Create a fresh topic branch for each distinct contribution from the current upstream `master`. Confirm your push destination and use a branch in your fork if your account lacks upstream branch write access.
+2. Push the verified topic branch and open one PR against upstream `master`. Reuse the open PR for the same head repository, branch, and base. Verify the open PR and its exact head commit, then leave it for maintainer review.
+3. For an uncertain submission, look up the exact remote branch or PR before retrying. For a permission rejection, use an authorized fork or preserve the local commit and report the blocker.
