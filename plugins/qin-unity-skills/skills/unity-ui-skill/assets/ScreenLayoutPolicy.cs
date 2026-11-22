@@ -22,6 +22,7 @@ namespace Qin.UnityUI
         {
             public string sideCameraPlacement;
             public string sideCameraAppearance;
+            public string duoOuterHeader;
             public bool blendCompactCamera;
             public float cameraRingDiameterInHubs;
             // Version 1 fields remain readable for existing projects.
@@ -163,6 +164,31 @@ namespace Qin.UnityUI
                 if (!rightEdge && r.xMin < lane.xMin) lane.xMin = pane.xMin;
             }
             return lane;
+        }
+
+        // Only the native Duo outer-display adapter supplies an aperture. All inputs
+        // are in the current window's top-left pixel space. The body keeps its own pane.
+        public bool TryDuoOuterHeader(Rect pane, Rect safe, IReadOnlyList<Rect> exclusions, Rect aperture, out Rect header, out float centerY)
+        {
+            header = default;
+            centerY = 0f;
+            if (edgeActions.duoOuterHeader != "left-of-camera-align-centers" || aperture.width <= 0f || aperture.height <= 0f ||
+                !pane.Overlaps(aperture) || aperture.xMin < pane.center.x || aperture.yMax > pane.center.y) return false;
+
+            float left = Mathf.Max(pane.xMin, safe.xMin);
+            float right = aperture.xMin;
+            if (exclusions != null)
+                foreach (Rect region in exclusions)
+                {
+                    if (region.width <= 0f || region.height <= 0f || !pane.Overlaps(region)) continue;
+                    // The native island can extend beyond the black lens when expanded.
+                    if (region.xMin >= pane.center.x && region.Overlaps(aperture))
+                        right = Mathf.Min(right, region.xMin);
+                }
+            if (right <= left || safe.yMax <= pane.yMin) return false;
+            header = Rect.MinMaxRect(left, pane.yMin, right, Mathf.Min(pane.yMax, safe.yMax));
+            centerY = aperture.center.y;
+            return true;
         }
 
         // A short corner obstruction does not consume a full-height body column.
