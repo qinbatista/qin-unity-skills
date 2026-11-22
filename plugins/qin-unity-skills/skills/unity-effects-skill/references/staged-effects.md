@@ -28,3 +28,9 @@ Resource readiness can precede the cycle. Verify first visible preparation as we
 Test early, middle and late geometry separately from opacity. Trace path coverage, angle, radius or assembly in the native output. Use the `unity-animation-skill` motion-curve rules for the actual resulting time response of each independent control. Preserve the real clock and action events while shaping the visual progression.
 
 For a layered complete effect, give the composition distinct independently controllable contributions. A surface or silhouette, directional energy and particulate accents provide three distinct roles for a profile that requires them. Add impact or residual layers as the brief and budget permit. Choose depth, occlusion, contrasting scale and foreground/background balance to keep the subject readable. Compare attribute variants in grayscale by silhouette, flow, start, main timing and finish. Verify bound body or world anchors throughout the action and preserve the underlying collision or hit behavior.
+
+## Use an existing effect or reference
+
+1. Name the contribution to study or reuse. In YoFaAssets, search `game-effect --kind vfx --query TERM` or `game-effect --kind shader --query TERM` via `bin/yofa_assets.py`, then resolve the selected ID with `effect-id ID`.
+2. Inspect the phase and source. Reuse files when the license, verified contents, dependencies, pipeline and target fit. Treat previews and source-only entries as technique evidence.
+3. Adapt in the receiving effect's existing package. Preserve source identity and record the accepted ID or path and changed bindings. Run the receiving native case.

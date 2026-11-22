@@ -1,15 +1,24 @@
 ---
 name: unity-animation-skill
-description: Author, repair, or review Unity AnimationClips, Animator controllers, transitions, Blend Trees, events, loops, and 2D rig or Spine transfer. Use when the work concerns what moves and how playback behaves.
+description: Route Unity motion tasks by Clip or Animator playback, transitions, Blend Trees, events, loops, easing, source-footage review, 2D rig reuse and Spine migration.
 ---
 
 # Unity Animation
 
-**Project rules come first.** Follow the target project's `AGENTS.md`, Skill order and registered workflows. Use this Skill for remaining decisions. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
+**Project rules come first.** Follow the project's rules and registered workflows. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) when permitted and no project or registered shared owner governs Unity CLI.
 
-For linked work, use `explain unity-animation` for native authoring or `explain skeletal-animation` for rigs and Spine. Bind the actual Prefab or variant, Animator root and playback contract.
+Read the selected headings by link or [section reader](../unity-code-skill/scripts/read_topic.py). Audit any Unity image touched via [Assets](../unity-assets-skill/SKILL.md#admit-artwork-and-textures).
 
-1. Set trigger, clock, property writers, loop or finish, interruption and reset through [playback and Animator](references/playback-and-animator.md). Use the existing timeline for authored motion and real handoff events.
-2. Block key poses and contacts first. Shape each changing visual channel through the [motion-curve rules](references/motion-curves.md), including related VFX and shader values.
-3. For source-bound motion, use [reference motion review](references/reference-motion-review.md) for key poses, seams and synchronized playback. For a grounded gait, apply the [foot contact and stride checks](references/reference-motion-review.md#foot-contact-and-stride-alignment) for signed knee bends, whole-body turns and planted feet before replacing the saved action. Select [rig transfer](references/rig-transfer.md) or the [Spine migration contract](references/spine-to-unity-contract.md) for actual rig work.
-4. Reopen and play the saved bindings through the real entry. Check the affected finish, seam, interruption or reuse. Identify delivered assets and editable values.
+For linked work select `explain unity-animation` for native authoring or `explain skeletal-animation` for rigs and Spine. Bind the actual Prefab or variant, Animator root and playback contract.
+
+## Choose an operation
+
+| Operation | Read for this task |
+| --- | --- |
+| Author or repair a Clip, loop or one-shot | [Playback contract](references/playback-and-animator.md#playback-contract). Set the clock, sole property writers, handoff, interruption and reset. Block key poses and contacts first. |
+| Repair a transition, Blend Tree or event | [States and transitions](references/playback-and-animator.md#states-transitions-and-multiple-parts) for weights or transitions, [contacts and cancellation](references/playback-and-animator.md#contacts-side-effects-and-cancellation) for side effects. |
+| Tune easing, tangents or synchronized VFX values | [Design each channel](references/motion-curves.md#design-and-inspect-each-channel) and [verify interior motion and seams](references/motion-curves.md#verify-the-resulting-motion). |
+| Match reference footage or repair a sliding foot | [Timed key poses](references/reference-motion-review.md#timed-key-poses-and-loop-closure), [contact and stride](references/reference-motion-review.md#foot-contact-and-stride-alignment) for gait, then [matched playback](references/reference-motion-review.md#matched-native-playback). |
+| Reuse a 2D rig or migrate Spine | [Select the transfer mode](references/rig-transfer.md#establish-the-mode). For inventory use the [source schema](references/spine-to-unity-contract.md#source-inventory-schema). For migration also [map the source](references/spine-to-unity-contract.md#mapping-table), verify the [rig signature](references/spine-to-unity-contract.md#conversion-and-rig-signature) and [prove parity](references/spine-to-unity-contract.md#parity-and-reuse). |
+
+For a saved change, reopen the real bindings and play the affected finish, seam, interruption or reuse. Rig changes also require [saved rig acceptance](references/rig-transfer.md#accept-the-saved-rig). Identify delivered assets and editable values.

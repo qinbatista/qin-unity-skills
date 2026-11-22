@@ -1,15 +1,29 @@
 ---
 name: unity-assets-skill
-description: Place, move, audit, or import Unity assets while preserving serialized references. Use whenever Unity work touches an image or texture to check Sprite PPU, import it and optimize platform compression, including on projects without YoFaAssets.
+description: Route Unity asset placement, GUID-preserving moves and image intake. Use whenever Unity work touches an image, including Sprite sizing, platform texture formats, Crunch and native import optimization with or without YoFaAssets.
 ---
 
 # Unity Assets
 
-**Project rules come first.** Follow the target project's `AGENTS.md`, Skill order and registered workflows. Use this Skill for remaining decisions. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
+**Project rules come first.** Follow the project's rules and registered workflows. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) when permitted and no project or registered shared owner governs Unity CLI.
 
-Route layout questions and proposed feature trees through the [existing-game architecture workflow](../unity-code-skill/references/unity-cli.md#existing-game-architecture).
+Read the selected headings by link or [section reader](../unity-code-skill/scripts/read_topic.py).
 
-For linked work, select `explain unity-project` for the shared Assets layout and checker or `explain texture-compression` for image intake. Bind the receiving project's declared asset owner, existing paths and actual consumers.
+Bind the receiving project's declared asset owner, existing paths and consumers. For linked layout use `explain unity-project`. For linked image work use `explain texture-compression`. For proposed feature trees use the [existing-game architecture workflow](../unity-code-skill/references/unity-cli.md#existing-game-architecture).
+
+For every image read, received, generated, edited or reused for Unity, audit its exact scope under the [project's import rules](references/texture-intake.md#select-the-workflow-and-scope). Apply verified improvements within the task's write scope. For a read-only request report the result and eligible changes.
+
+## Choose an operation
+
+| Operation | Read for this task |
+| --- | --- |
+| Place a Prefab, scene or tool | [Place by owner](#place-by-owner). |
+| Move, rename or remove an asset | [Move with identity](#move-with-identity). |
+| Decide world Sprite PPU or change existing geometry | [Size new world art](references/texture-intake.md#size-new-world-art) or [migrate an existing Sprite](references/texture-intake.md#migrate-an-existing-sprite). For new world art without a project convention, 1000 pixels = 1 Unity unit = 1 meter at effective scale 1. For a change [verify imported world size](references/texture-intake.md#verify-imported-world-size). |
+| Identify a source, atlas, material or consumer | [Bind source and receiver](references/texture-intake.md#bind-source-and-receiver). |
+| Choose settings for pixel art, UI, normal maps or other texture styles | [Settings by texture role](references/texture-intake.md#settings-by-texture-role). For a size cap or streamed mips use [resolution and mip streaming](references/texture-intake.md#resolution-and-mip-streaming). |
+| Compare platform compression, ASTC, ETC, BC or Crunch | [Target formats and Crunch](references/texture-intake.md#target-formats-and-crunch). |
+| Import or optimize actual artwork | Bind source and consumer, [check world Sprite scale](references/texture-intake.md#world-sprite-scale) when applicable, [choose settings by use and target](references/texture-intake.md#choose-settings-by-use-and-target), then [apply, reimport and verify](references/texture-intake.md#execute-and-verify-the-import). |
 
 ## Place by owner
 
@@ -26,6 +40,4 @@ Use the same consumer inventory before removing an unused asset, including retai
 
 ## Admit artwork and textures
 
-Whenever Unity work reads, receives, generates, edits or reuses an image, run the scoped [texture intake and import workflow](references/texture-intake.md). Apply the project's PPU and world scale first. The standalone default for world Sprites is **1000 pixels = 1 Unity unit = 1 meter** at effective Transform scale 1.
-
-Use the receiving project's native import workflow where declared. Otherwise, this Skill performs intake, reimport, compression and readback through Unity CLI using the linked reference, including without YoFaAssets. Apply verified improvements within the task's write scope. For read-only requests, report the audit and eligible changes.
+Select the matching image operation in the [asset menu](#choose-an-operation). For an import or optimization bind the [source and receiver](references/texture-intake.md#bind-source-and-receiver), apply project and role settings, then [reimport and verify](references/texture-intake.md#execute-and-verify-the-import). Use the receiving project's declared native workflow. In a standalone project this Skill performs the complete import and optimization through Unity CLI.

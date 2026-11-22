@@ -2,7 +2,7 @@
 
 Use this reference when changing Jobs, native data, Addressables, materials, pooled objects, recurring allocations, or teardown. Bind the installed package versions and the feature's actual lifecycle and runtime owner.
 
-Read [allocation and ownership patterns](allocation-and-ownership-patterns.md) for the affected operation and its regression case. Use the frame-callback section of [lifecycle and serialization](unity-lifecycle-and-serialization.md#frame-callbacks) to decide whether recurring work is needed at its current cadence.
+For a concrete allocation or retirement pattern, select its heading in [allocation and ownership patterns](allocation-and-ownership-patterns.md). For a cadence change use [frame callbacks](unity-lifecycle-and-serialization.md#frame-callbacks).
 
 ## Own acquisition and release
 

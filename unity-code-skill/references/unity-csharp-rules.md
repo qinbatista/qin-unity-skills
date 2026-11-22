@@ -24,3 +24,14 @@ Use the [Skill entry](../SKILL.md) to select the applicable Unity reference. The
 Use the C# string form supported by the project's language version. Preserve interpolation and escaping deliberately. Use the shared [prompt guidance](https://github.com/qinbatista/qin-codex-skills/blob/master/prompt-skill/SKILL.md) for prompt design.
 
 For Editor selector rows with contextual refresh or sync buttons, set explicit popup and button styles so both use the same row height.
+
+## Run the source checker
+
+From the receiving project, resolve `<skill-folder>` to the loaded Unity Code Skill. Use `--diff-from HEAD` for added Git lines or omit it for a whole-file check.
+
+```text
+macOS/Linux: python3 -B "<skill-folder>/scripts/csharp_rule_guard.py" --diff-from HEAD <changed-files>
+Windows PowerShell: py -3 -B "<skill-folder>\scripts\csharp_rule_guard.py" --diff-from HEAD <changed-files>
+```
+
+The checker returns JSON and exits 1 on findings. Review them against the project's compiler and runtime evidence for overloads, ownership and behavior.

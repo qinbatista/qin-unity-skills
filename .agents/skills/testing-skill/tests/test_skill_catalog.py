@@ -104,7 +104,9 @@ class PublicSkillCatalogTests(unittest.TestCase):
                     resolved = (document.parent / local_path).resolve()
                     with self.subTest(document=document.relative_to(PROJECT), target=target):
                         routed_entry = document == UNITY_ROUTING_GUIDE and resolved in entries
-                        self.assertTrue(routed_entry or resolved == UNITY_CLI_GUIDE or package in resolved.parents)
+                        shared_reader = resolved == PROJECT / "unity-code-skill/scripts/read_topic.py"
+                        image_audit = resolved == PROJECT / "unity-assets-skill/SKILL.md" and target.endswith("#admit-artwork-and-textures")
+                        self.assertTrue(routed_entry or shared_reader or image_audit or resolved == UNITY_CLI_GUIDE or package in resolved.parents)
                         self.assertTrue(resolved.is_file())
                         linked_files.add(resolved)
             with self.subTest(package=package.name):

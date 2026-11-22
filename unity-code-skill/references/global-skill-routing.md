@@ -1,23 +1,57 @@
 # Unity Skill routing
 
-Follow the receiving project's startup and source-owner rules first. For a linked game, read the current registered YoFaAssets workflow and the game's local contract. Open each installed Skill that matches the work.
+Apply project rules first. For a linked game read the registered YoFaAssets task entry, matching workflow and mandatory sources.
 
-| Work | Skill |
+## Choose by task
+
+Pick the result below, open its domain menu, then read the linked headings for that operation. Direct Skill calls start at their domain menu.
+
+| Requested result | Start here |
 | --- | --- |
-| Write, repair or review C#. For Unity this includes gameplay, serialized state, Jobs, native resources and SDK integrations. | [Unity Code](../SKILL.md). Outside Unity, use the common C# style and source checker with the project's actual runtime. |
-| Place or move serialized assets, or read, receive, generate, edit, reuse, import or optimize an image for Unity | [Unity Assets](../../unity-assets-skill/SKILL.md) applies the receiving project's rules and handles native texture intake, including standalone projects. |
-| Change UI Toolkit or Canvas bindings, screen layout, navigation, input or insets | [Unity UI](../../unity-ui-skill/SKILL.md) |
-| Change clips, Animator states, motion timing, bones or rig transfer | [Unity Animation](../../unity-animation-skill/SKILL.md) |
-| Change particles, VFX, shaders, material effects or emission | [Unity Effects](../../unity-effects-skill/SKILL.md) |
-| Verify Editor, Play Mode, Player, device, build or profiling behavior | [Unity Testing](../../unity-testing-skill/SKILL.md) selects the runner and runtime. |
-| Build a Player package for testing | [Unity Testing's packaging route](../../unity-testing-skill/SKILL.md#test-packaging) selects the producer and the Cache owner before the build. |
+| Implement, fix or review C#, gameplay ownership, Jobs, GC, SDKs or serialization | [Code](../SKILL.md) |
+| Place or move assets, or inspect, import or compress an image, including 2D Sprites, 3D textures and UI art | [Assets](../../unity-assets-skill/SKILL.md) |
+| Build or repair a screen, input, localization, layout or safe-area settings | [UI](../../unity-ui-skill/SKILL.md) |
+| Author motion, Animator states, 2D rigs, Spine or 3D clip playback | [Animation](../../unity-animation-skill/SKILL.md) |
+| Change particles, a shader, material lighting, emission or overdraw | [Effects](../../unity-effects-skill/SKILL.md) |
+| Reproduce a fault, choose a runner, profile a frame or verify runtime behavior | [Testing](../../unity-testing-skill/SKILL.md) |
+| Optimize CPU, GC, GPU time, texture size or an unexplained frame spike | [Optimization by cost](#optimize-by-cost) |
+| Build a Player for testing, or verify a package already produced | [Build](../../unity-testing-skill/SKILL.md#test-packaging) or [inspect an existing package](../../unity-testing-skill/SKILL.md#existing-test-package) |
+| Configure scene lighting, a 2D or 3D system, Player Settings or release distribution | [Project settings and release](#project-settings-and-release) |
+
+Add a second domain for an actual dependency, change or proof. Audit any Unity image touched through Assets. A lookup ends at the rule. A change includes prerequisites and verification at the real consumer. Follow the headings or pass a menu fragment such as `"#optimize-by-cost"` to the [section reader](#read-one-section).
+
+## Optimize by cost
+
+Pick the measured symptom. For a change bind the workload, target and acceptance metric, then replay under the same conditions.
+
+| Evidence or question | Next operation |
+| --- | --- |
+| Slow frame with unknown cause, cold start or growth on scene reentry | Use [Testing](../../unity-testing-skill/SKILL.md#choose-an-operation) for frame pacing and memory first. Use the observed CPU, GPU, loading or residency evidence to select one owner. |
+| Managed allocations, Job scheduling, recurring CPU work or unreleased leases | Use [Code](../SKILL.md#choose-an-operation) for the allocating operation, Job boundary or resource lifetime. Calibrate an allocation claim. |
+| Texture download size, GPU format, atlas residency or Crunch | Use [Assets](../../unity-assets-skill/SKILL.md#choose-an-operation) for the target format and actual consumer. Measure delivery bytes and residency separately. |
+| Shader cost, transparent overdraw, particles or concurrent effect load | Use [Effects](../../unity-effects-skill/SKILL.md#choose-an-operation) for the actual renderer and matched native load. |
+
+## Project settings and release
+
+Select the owner of the setting in the receiving project. For scene lights, Light2D or 3D light baking, use its lighting and render-pipeline workflow. For model import, physics or 2D/3D system configuration, resolve the project's importer, system or settings owner. For Player Settings, signing, store submission and release distribution, use the declared configuration or publishing workflow. A test build has its own [packaging route](../../unity-testing-skill/SKILL.md#test-packaging).
+
+Use the installed Unity or package version's official guidance for uncovered engine behavior. A material shading change, Sprite import or rig task can start at its existing Effects, Assets or Animation operation.
+
+## Read one section
+
+The [reader](../scripts/read_topic.py) takes no arguments for the task menu, a menu fragment on its own, a domain for its operation menu, or a domain and quoted link for a section and its inherited instructions. A bare Markdown reference lists headings. Open linked data, code or artwork directly when required. Domain names are `code`, `assets`, `ui`, `animation`, `effects` and `testing`. Resolve `<pack>` to the installed group or the plugin's `skills` directory.
+
+```text
+macOS/Linux: python3 -B "<pack>/unity-code-skill/scripts/read_topic.py" assets "references/texture-intake.md#size-new-world-art"
+Windows PowerShell: py -3 -B "<pack>/unity-code-skill/scripts/read_topic.py" assets "references/texture-intake.md#size-new-world-art"
+```
 
 ## Require routing across projects
 
 For a standalone installation, append this paragraph to your Codex user `developer_instructions`.
 
 ```text
-For Unity or C# work, follow the current project's startup and source-owner rules, then read ~/.agents/skills/qin-unity-skills/unity-code-skill/references/global-skill-routing.md and open each matching installed SKILL.md before its work.
+For Unity or C# work, follow the current project's startup and source-owner rules, then read ~/.agents/skills/qin-unity-skills/unity-code-skill/references/global-skill-routing.md and open the domain entry and sections for the task. Add a second owner only when needed for a dependency, change or verification.
 ```
 
-When the general Qin pack is installed, its routing guide also selects this pack. Use its Code and Verify entries for shared writing and evidence standards.
+The general Qin pack also discovers this guide. Use its Code and Verify entries for shared writing and evidence standards.

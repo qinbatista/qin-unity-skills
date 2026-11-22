@@ -14,17 +14,29 @@ Audit the exact images read, received, generated, edited or reused in the curren
 
 ## World Sprite scale
 
-Use the project's stated PPU and unit calibration wherever supplied. For new world-space Sprite art with no project-specific standard, author and import at **1000 PPU** and use **1 Unity world unit for 1 meter**. At effective Transform scale 1, 1000 authored pixels span 1 unit and 1 meter. A 0.35 m visible width takes 350 visible pixels under this default. Measure transparent padding separately and budget each frame of a Sprite sheet. Derive UI size from layout and rendered device pixels. Use the pixel and channel contract of ordinary textures and data maps. For UI Sprites, preserve the consumer's reference PPU, slicing and layout scale.
+Use the project's stated PPU and unit calibration wherever supplied.
+
+### Size new world art
+
+For new world-space Sprite art with no project-specific standard, author and import at **1000 PPU** and use **1 Unity world unit for 1 meter**. At effective Transform scale 1, 1000 authored pixels span 1 unit and 1 meter. A 0.35 m visible width takes 350 visible pixels under this default. Measure transparent padding separately and budget each frame of a Sprite sheet. Derive UI size from layout and rendered device pixels. Use the pixel and channel contract of ordinary textures and data maps. For UI Sprites, preserve the consumer's reference PPU, slicing and layout scale.
+
+### Verify imported world size
 
 Set authored PPU before placing new Sprites. Read the importer value, each native `Sprite.pixelsPerUnit` and the resulting bounds on both world axes under the actual hierarchy scale. A platform cap can change native dimensions and effective PPU. Convert any simulation coordinates using the project's calibration before choosing authored pixels.
 
+### Migrate an existing Sprite
+
 For an existing Sprite, migrate PPU only within a sizing change's authorized scope. Inspect actual world, UI, rig, animation, tiled, collider and baked consumers first. With identical pixels, a simple renderer-only leaf can preserve size by multiplying local XY scale by `new PPU / old PPU`. Verify the other consumers at their own geometry and lifecycle boundaries. Compare both axes, rounding, slices, local IDs, UVs, pivots, borders, render meshes and physics outlines. Keep the prior geometry whenever preservation cannot be established.
+
+### Trace sizing drift
 
 Locate sizing drift in the source canvas, export, copied file, importer or consumer. Preserve the correct original and version any corrected derivative. Recompute pixel-coordinate geometry and companion-map alignment where changed. Establish placement before comparing encodings.
 
 ## Choose settings by use and target
 
 Classify by the decoded image and its real use. Choose texture type, sRGB or linear sampling, alpha handling, filtering, wrap, mipmaps, readability, Max Size and platform overrides together. Use the strictest verified requirement across all consumers. Preserve readability and pixel dimensions for CPU reads, collision masks, lookup values, font/SDF data and coordinate-based crops until their owners prove a safe change.
+
+### Settings by texture role
 
 | Use | Import and quality checks |
 | --- | --- |
@@ -34,7 +46,11 @@ Classify by the decoded image and its real use. Choose texture type, sRGB or lin
 | Material color, backgrounds and VFX | Use sRGB for color and linear for data channels. Choose Clamp or Repeat from sampling, and mips from the real distance and minification range. Check gradients, seams, emission, soft edges and alpha in the actual material or effect. |
 | Normal, packed mask, HDR and other data textures | Select the actual importer type and required linear or HDR precision. Preserve channel semantics, alignment, bit depth, readability and dimensions as required. Keep the established representation while the data contract is unknown. |
 
+### Resolution and mip streaming
+
 Derive a safe Max Size from the largest evidenced display footprint, frames, transparent padding, camera zoom and reuse. Preserve source resolution and the current cap until evidence supports a size change. A declared test profile supports only its tested resolution and zoom. Keep exact pixel coordinates, non-power-of-two dimensions and geometry where required. For mip streaming, identify all consumers and their demand and quality settings before enabling it. Check actual residency and the displayed result.
+
+### Target formats and Crunch
 
 Start with the project's validated format or Unity's Automatic format for the target. Test supported candidates where compression is appropriate, such as ASTC on supported mobile devices, ETC2 on compatible Android fleets, and BC formats on compatible desktop targets. Choose block size and alpha support from the actual asset. Verify the target GPU and any fallback, including WebGL browser support. Review atlas platform overrides and the effective packed texture for atlas consumers.
 

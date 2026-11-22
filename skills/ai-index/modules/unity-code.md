@@ -6,4 +6,6 @@ The [completed Job batch contract](../../../unity-code-skill/references/unity-ga
 
 The [Job State Batches sample](../../../examples/job-state-batches/README.md#five-scenes) demonstrates the same contract in five independent systems. Each saved scene exercises movement while its presentation Controller is detached and applies the completed state when subscribed.
 
+The [pack task menu](../../../unity-code-skill/references/global-skill-routing.md#choose-by-task) handles mixed or unclassified Unity tasks. Its [section reader](../../../unity-code-skill/scripts/read_topic.py) resolves links relative to the selected domain and preserves enclosing instructions.
+
 The [C# checker](../../../unity-code-skill/scripts/csharp_rule_guard.py) reports lexical findings. It distinguishes wildcard arrows from discard assignments and same-name overloads or other receivers from likely self-recursion. Its [Git scope](../../../unity-code-skill/scripts/qin_rule_guard_common.py) and [hidden-process](../../../unity-code-skill/scripts/hidden_process.py) helpers mirror the shared [Code Skill scripts](https://github.com/qinbatista/qin-codex-skills/tree/master/code-skill/scripts) for standalone installation. Use the [test map](../../../.agents/skills/testing-skill/SKILL.md) for the checker and installed-package routes.

@@ -1,6 +1,6 @@
 # qin-unity-skills
 
-Six Skills for Unity code, assets, UI, animation, effects and testing. Add the [Codex Skill pack](https://github.com/qinbatista/qin-codex-skills) for general task execution and verification.
+One [Unity task menu](unity-code-skill/references/global-skill-routing.md#choose-by-task) routes to six domain Skills. Start there or invoke `$unity-code-skill` for mixed or unfamiliar Unity work. A known domain can start at its own Skill. Each operation links to its rules and verification. The [section reader](unity-code-skill/references/global-skill-routing.md#read-one-section) can return just those headings. Add the [Codex Skill pack](https://github.com/qinbatista/qin-codex-skills) for general task execution and verification.
 
 ## Install the global Skill pack
 
@@ -23,6 +23,8 @@ For manual setup, save [install_skill_pack.py](https://raw.githubusercontent.com
 Check `~/.agents/skills/qin-unity-skills/<skill>/SKILL.md` and select `$unity-code-skill` in Codex. `install_skill_pack.py update qin-unity-skills` replaces the whole directory from the published package. `install_skill_pack.py uninstall qin-unity-skills` removes the pack. [Shared installer guide](https://github.com/qinbatista/qin-codex-skills/blob/master/management-skill/SKILL.md#install) · [Codex Skill discovery](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)
 
 For automatic selection across projects, use the [installed Unity routing guide](unity-code-skill/references/global-skill-routing.md#require-routing-across-projects).
+
+To extend the pack with another operation or domain, follow the [catalog maintenance guide](skills/ai-index/modules/catalog.md#extend-the-task-menu).
 
 ## Examples
 

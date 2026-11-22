@@ -1,31 +1,29 @@
 ---
 name: unity-code-skill
-description: Explain or design Unity gameplay architecture and write, fix, refactor, or review Unity C# code, including runtime ownership, lifecycle, serialization, Jobs, pools, managed allocations, and SDK integration. The common C# style and source checker also apply outside Unity when compatible with its runtime.
+description: Start here for mixed or unclassified Unity requests and route to the pack's task menu. For C# use the code routes for gameplay architecture, lifecycle, Jobs, GC, serialization, SDKs and source checks, including ordinary C# outside Unity.
 ---
 
 # Unity Code
 
-**Project rules come first.** Follow the target project's `AGENTS.md`, Skill order and registered workflows. Use this Skill for remaining decisions. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) only where the project permits it and no project or registered shared owner governs Unity CLI.
+**Project rules come first.** Follow the project's rules and registered workflows. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) for Unity work when permitted and no project or registered shared owner governs Unity CLI.
 
-Use the [existing-game architecture workflow](references/unity-cli.md#existing-game-architecture) for questions, examples and implementation plans. The [Unity routing guide](references/global-skill-routing.md) selects companion Skills when the task spans other systems.
+For a mixed or unfamiliar Unity task open the [pack task menu](references/global-skill-routing.md#choose-by-task) first. For C# read the selected headings by link or [section reader](scripts/read_topic.py). Audit any Unity image touched via [Assets](../unity-assets-skill/SKILL.md#admit-artwork-and-textures).
 
-For linked game code, select `explain game-code-logic` through the registered workflow. Bind the owning type, actual callers and C# version through the project's system contract.
+For linked gameplay use `explain game-code-logic`, or `explain yofa-plugin` for the provider integration. Bind the owning type, callers and supported C# version. For ordinary C# outside Unity use the style and checker with the project's own runtime.
 
-- Call the real owner directly. Keep a method boundary for a distinct responsibility, current reuse or a required contract. Apply the [C# style](references/unity-csharp-rules.md).
-- Handle discrete work at request, state change or completion. Reserve `Update`, `FixedUpdate` and `LateUpdate` for their required cadence or phase under the [lifecycle and frame rules](references/unity-lifecycle-and-serialization.md#frame-callbacks).
-- Keep one authoritative state. Apply [runtime resources and GC](references/runtime-resources-and-gc.md) when changing Jobs, leases, pools, allocations or teardown.
-- For [centralized Job movement](references/unity-game-code-structure-design.md#completed-job-batches), the movement Job calculates and writes the root position through the supported native movement API. When Controllers need completed gameplay Job state for animation or other local behavior, publish one read-only state batch after completion.
-- Use [game code structure](references/unity-game-code-structure-design.md) for Controller, Manager and data ownership, and [service integration](references/unity-service-integration.md) for SDKs and providers.
+## Choose an operation
 
-Preserve serialized fields, public contracts and execution order. Verify the real entry and the affected failure, teardown or ordering case.
+| Operation | Read for this task |
+| --- | --- |
+| Plan folders or an existing game's feature | [Existing-game architecture](references/unity-cli.md#existing-game-architecture), then [Controller, Manager and data ownership](references/unity-game-code-structure-design.md#ownership) for a code design. |
+| Write or review C# | [Style and method boundaries](references/unity-csharp-rules.md#c-style) and the [source check](#c-source-checks). Call the real owner directly. |
+| Choose a callback, handle reentry or edit serialized state | [Frame cadence](references/unity-lifecycle-and-serialization.md#frame-callbacks), [async ownership](references/unity-lifecycle-and-serialization.md#async-and-main-thread-safety) or [serialization](references/unity-lifecycle-and-serialization.md#serialization-and-authored-data), according to the change. |
+| Schedule Jobs or move Controllers in batches | [Scheduling and reuse](references/runtime-resources-and-gc.md#schedule-data-and-bound-reuse). For centralized movement the Job writes root positions and the Manager publishes one read-only batch after completion when Controllers consume it. [Completed Job batches](references/unity-game-code-structure-design.md#completed-job-batches) |
+| Reduce hot-path allocations or retire assets and pools | For GC use [recurring operations](references/allocation-and-ownership-patterns.md#recurring-managed-work) and [calibrated measurement](references/runtime-resources-and-gc.md#measure-a-recurring-path). For leaks use [acquisition and release](references/runtime-resources-and-gc.md#own-acquisition-and-release). |
+| Integrate an SDK or handle a purchase | [Provider boundary](references/unity-service-integration.md#stable-boundary), then [dependencies](references/unity-service-integration.md#transfer-into-a-receiving-game) for a transfer or [durable side effects](references/unity-service-integration.md#purchase-and-durable-side-effects) for transactions. |
+
+Preserve serialized fields, public contracts and execution order. Verify the actual entry and affected failure, teardown or ordering case.
 
 ## C# source checks
 
-From the receiving project, resolve `<skill-folder>` to the loaded Unity Code Skill. Use `--diff-from HEAD` for added Git lines or omit it for a whole-file check.
-
-```text
-macOS/Linux: python3 -B "<skill-folder>/scripts/csharp_rule_guard.py" --diff-from HEAD <changed-files>
-Windows PowerShell: py -3 -B "<skill-folder>\scripts\csharp_rule_guard.py" --diff-from HEAD <changed-files>
-```
-
-The checker returns JSON and exits 1 on findings. Review them against the project's compiler and runtime evidence for overloads, ownership and behavior.
+Run the [packaged C# checker](references/unity-csharp-rules.md#run-the-source-checker) on the selected files or added Git lines. Review findings against compiler and runtime behavior.

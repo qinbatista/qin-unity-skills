@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "qin-unity-skills",
   "version": "1.0.0",
-  "description": "Six Unity skills covering C#, assets, UI, animation, effects, and focused native testing.",
+  "description": "One task menu for Unity code, optimization, asset import, UI, animation, effects, testing and test builds. Each domain routes to focused procedures.",
   "repository": "https://github.com/qinbatista/qin-unity-skills",
   "author": { "name": "Qin" },
   "extensions": {

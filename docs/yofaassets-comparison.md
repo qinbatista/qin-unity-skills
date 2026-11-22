@@ -14,6 +14,8 @@ Public Skills supplement the receiving project's rules. Start with the project's
 
 ## Select supplemental guidance
 
+The [pack task menu](../unity-code-skill/references/global-skill-routing.md#choose-by-task) and six domain menus select individual sections for the work at hand. The existing topic IDs, domain entry paths and source-owned reference files remain available to linked workflows. Read their mandatory originals when the registered workflow requires them.
+
 - Where the project leaves a method open, use Unity Code for C# structure and lifecycle or Unity Assets for Prefab placement and moves. Use Unity Testing for portable evidence methods within the project's acceptance contract.
 - Use Unity UI for its layout and navigation contract. Use Unity Animation for Clip, Animator or rig playback. Use Unity Effects for a visual effect's layer composition and rendering. Select a second Skill when the requested work actually crosses that boundary.
 
