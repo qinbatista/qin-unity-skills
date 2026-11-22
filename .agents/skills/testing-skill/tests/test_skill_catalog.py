@@ -54,7 +54,8 @@ class PublicSkillCatalogTests(unittest.TestCase):
         policy = json.loads((source / "assets/screen-layouts.json").read_text(encoding="utf-8"))
         self.assertEqual(policy["version"], 2)
         self.assertEqual(policy["edgeActions"]["sideCameraPlacement"], "shift-inward")
-        self.assertEqual(policy["edgeActions"]["sideCameraAppearance"], "black")
+        self.assertEqual(policy["edgeActions"]["sideCameraAppearance"], "artwork-ring")
+        self.assertEqual(policy["edgeActions"]["cameraRingDiameterInHubs"], 2.0)
         limits = [profile["maxWidthOverHeight"] for profile in policy["profiles"]]
         self.assertEqual(limits[-1], 0)
         self.assertGreater(limits[0], 0)

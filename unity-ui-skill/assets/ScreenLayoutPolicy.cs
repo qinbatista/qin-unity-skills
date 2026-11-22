@@ -23,6 +23,7 @@ namespace Qin.UnityUI
             public string sideCameraPlacement;
             public string sideCameraAppearance;
             public bool blendCompactCamera;
+            public float cameraRingDiameterInHubs;
             // Version 1 fields remain readable for existing projects.
             public bool dockBelowSideCamera;
             public string order;
@@ -51,7 +52,9 @@ namespace Qin.UnityUI
                 policy.landscapeReference.x <= 0 || policy.landscapeReference.y <= 0 ||
                 policy.edgeActions == null ||
                 (policy.version == 1 ? policy.edgeActions.order != "top-to-bottom" : policy.edgeActions.sideCameraPlacement != "shift-inward" ||
-                    (policy.edgeActions.sideCameraAppearance != "black" && policy.edgeActions.sideCameraAppearance != "authored")) ||
+                    (policy.edgeActions.sideCameraAppearance != "black" && policy.edgeActions.sideCameraAppearance != "authored" &&
+                     policy.edgeActions.sideCameraAppearance != "artwork-ring") ||
+                    (policy.edgeActions.sideCameraAppearance == "artwork-ring" && !(policy.edgeActions.cameraRingDiameterInHubs > 1f))) ||
                 policy.edgeActions.clearanceReferencePixels < 0 || policy.separatingFold == null ||
                 (policy.separatingFold.equalPanePreference != "top-or-left" && policy.separatingFold.equalPanePreference != "bottom-or-right"))
                 throw new ArgumentException("Invalid screen layout policy.", nameof(asset));
@@ -181,9 +184,14 @@ namespace Qin.UnityUI
         // A larger system region only displaces the button. The backing never owns input.
         public bool TryGetCameraCap(Rect pane, Rect button, IReadOnlyList<Rect> exclusions, bool rightEdge,
             out Rect cap)
+            => TryGetCameraCap(pane, button, exclusions, rightEdge, out cap, out _);
+
+        private bool TryGetCameraCap(Rect pane, Rect button, IReadOnlyList<Rect> exclusions, bool rightEdge,
+            out Rect cap, out Rect reservation)
         {
-            cap = default;
-            if (!edgeActions.blendCompactCamera || edgeActions.sideCameraAppearance != "black" ||
+            cap = reservation = default;
+            if (!edgeActions.blendCompactCamera ||
+                (edgeActions.sideCameraAppearance != "black" && edgeActions.sideCameraAppearance != "artwork-ring") ||
                 button.width <= 0 || button.height <= 0 || exclusions == null) return false;
             float nearest = button.width * 2f;
             foreach (Rect r in exclusions)
@@ -197,10 +205,51 @@ namespace Qin.UnityUI
                 float distance = Vector2.Distance(button.center, r.center);
                 if (distance > nearest) continue;
                 nearest = distance;
+                reservation = r;
                 float diameter = shortSide * .9f;
                 cap = new Rect(r.center - Vector2.one * diameter * .5f, Vector2.one * diameter);
             }
             return cap.width > 0;
+        }
+
+        public struct CameraRing
+        {
+            public Rect face, hub, reservation, clearTarget;
+
+            public Rect InputBounds => Rect.MinMaxRect(Mathf.Min(face.xMin, clearTarget.xMin),
+                Mathf.Min(face.yMin, clearTarget.yMin), Mathf.Max(face.xMax, clearTarget.xMax),
+                Mathf.Max(face.yMax, clearTarget.yMax));
+
+            public bool Accepts(Vector2 point)
+            {
+                if (reservation.Contains(point)) return false;
+                return clearTarget.Contains(point) || (point - face.center).sqrMagnitude <= face.width * face.width * .25f;
+            }
+        }
+
+        // Dress the static lens as the hub of a corner control. Retain a full-sized clear
+        // tap target inward of the system reservation, as well as the exposed rim.
+        public bool TryPlaceCameraRing(Rect pane, Rect lane, Rect button, IReadOnlyList<Rect> exclusions,
+            float scale, bool rightEdge, out CameraRing ring)
+        {
+            ring = default;
+            if (edgeActions.sideCameraAppearance != "artwork-ring" ||
+                !TryGetCameraCap(pane, button, exclusions, rightEdge, out Rect hub, out Rect reserved)) return false;
+            float gap = edgeActions.clearanceReferencePixels * scale;
+            float radius = Mathf.Min(hub.width * edgeActions.cameraRingDiameterInHubs * .5f,
+                Mathf.Min(Mathf.Min(hub.center.x - lane.xMin, lane.xMax - hub.center.x),
+                    Mathf.Min(hub.center.y - lane.yMin, lane.yMax - hub.center.y)) - gap);
+            // A tight top edge may leave no legible rim outside the system reservation.
+            if (radius < Mathf.Max(reserved.width, reserved.height) * .5f + button.height * .15f) return false;
+            Rect face = new Rect(hub.center - Vector2.one * radius, Vector2.one * (2f * radius));
+            button.center = new Vector2(rightEdge ? reserved.xMin - gap - button.width * .5f :
+                reserved.xMax + gap + button.width * .5f, hub.center.y);
+            if (!TryPlaceInRow(lane, button, exclusions, scale, rightEdge, out Rect tap) ||
+                !face.Overlaps(tap)) return false;
+            foreach (Rect other in exclusions)
+                if (other != reserved && other.width > 0 && other.height > 0 && face.Overlaps(other)) return false;
+            ring = new CameraRing { face = face, hub = hub, reservation = reserved, clearTarget = tap };
+            return true;
         }
 
         // Keep the authored Y and move a complete paint/hit envelope the least distance
