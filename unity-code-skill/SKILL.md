@@ -7,6 +7,8 @@ description: Route mixed Unity requests and changes to this Skill pack. For C# u
 
 **Project rules come first.** Follow the project's rules and registered workflows. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) for Unity work when permitted and no project or registered shared owner governs Unity CLI.
 
+Treat the Skill's methods as adaptable defaults. Use the approach that best fits the task and [share reusable improvements](references/contributing.md#submit-a-skill-change).
+
 For a mixed or unfamiliar Unity task open the [pack task menu](references/global-skill-routing.md#choose-by-task) first. For C# read the selected headings by link or [section reader](scripts/read_topic.py). Audit any Unity image touched via [Assets](../unity-assets-skill/SKILL.md#admit-artwork-and-textures).
 
 For linked gameplay use `explain game-code-logic`, or `explain yofa-plugin` for the provider integration. Bind the owning type, callers and supported C# version. For ordinary C# outside Unity use the style and checker with the project's own runtime.

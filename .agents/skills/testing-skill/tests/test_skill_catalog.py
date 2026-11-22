@@ -10,6 +10,7 @@ PROJECT = Path(__file__).resolve().parents[4]
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 UNITY_CLI_GUIDE = PROJECT / "unity-code-skill/references/unity-cli.md"
 UNITY_ROUTING_GUIDE = PROJECT / "unity-code-skill/references/global-skill-routing.md"
+SHARED_GUIDES = {UNITY_CLI_GUIDE, PROJECT / "unity-code-skill/references/contributing.md"}
 
 
 class PublicSkillCatalogTests(unittest.TestCase):
@@ -107,7 +108,7 @@ class PublicSkillCatalogTests(unittest.TestCase):
                         routed_entry = document == UNITY_ROUTING_GUIDE and resolved in entries
                         shared_reader = resolved == PROJECT / "unity-code-skill/scripts/read_topic.py"
                         image_audit = resolved == PROJECT / "unity-assets-skill/SKILL.md" and target.endswith("#admit-artwork-and-textures")
-                        self.assertTrue(routed_entry or shared_reader or image_audit or resolved == UNITY_CLI_GUIDE or package in resolved.parents)
+                        self.assertTrue(routed_entry or shared_reader or image_audit or resolved in SHARED_GUIDES or package in resolved.parents)
                         self.assertTrue(resolved.is_file())
                         linked_files.add(resolved)
             with self.subTest(package=package.name):

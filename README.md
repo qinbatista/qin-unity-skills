@@ -28,7 +28,7 @@ To extend the pack with another operation or domain, follow the [catalog mainten
 
 ## Contribute changes
 
-Everyone is welcome to use and test these Skills, suggest improvements, and submit fixes. Put each proposed change on a fresh branch and open a pull request against `master`. Fixes found while debugging or testing locally follow the same path. Keep the branch available for review. [Contribution workflow](unity-code-skill/references/contributing.md#submit-a-skill-change) · [GitHub Issues](https://github.com/qinbatista/qin-unity-skills/issues)
+Use this shared Skill library as a starting point and choose the best approach for the task within your project's requirements. Everyone is welcome to improve shared guidance while using the Skills. Submit the verified revision from a fresh branch in a pull request against `master`. Explain what the existing guidance leaves unresolved, why the new approach is worth sharing, and how you verified it. [Contribution workflow](unity-code-skill/references/contributing.md#submit-a-skill-change) · [GitHub Issues](https://github.com/qinbatista/qin-unity-skills/issues)
 
 ## Examples
 

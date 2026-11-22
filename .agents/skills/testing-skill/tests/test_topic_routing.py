@@ -56,10 +56,19 @@ class InstalledRoutingTests(unittest.TestCase):
         self.assertIn(f"({link.group(1).removeprefix('references/')})", pack_menu.stdout)
         contribution = run_reader("code", link.group(1))
         self.assertEqual(contribution.returncode, 0, contribution.stderr)
+        self.assertIn("shared library of Unity methods", contribution.stdout)
+        self.assertIn("problem its current guidance leaves unresolved", contribution.stdout)
         self.assertIn("fresh topic branch", contribution.stdout)
         self.assertIn("your fork", contribution.stdout)
         self.assertIn("local debugging or testing", contribution.stdout)
         self.assertIn("verifying the open PR", contribution.stdout)
+        for owner in json.loads((RELEASE / "skills.json").read_text(encoding="utf-8")):
+            domain = owner[len("unity-"):-len("-skill")]
+            with self.subTest(domain=domain):
+                menu = read_topic(domain, "#choose-an-operation")
+                reference = re.search(r"\(((?:\.\./unity-code-skill/)?references/contributing\.md#[^)]+)\)", menu)
+                self.assertIsNotNone(reference)
+                self.assertEqual(read_topic(domain, reference.group(1)), contribution.stdout)
 
     def test_published_files_match_their_sources(self):
         for owner in json.loads((RELEASE / "skills.json").read_text(encoding="utf-8")):

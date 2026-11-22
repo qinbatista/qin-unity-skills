@@ -2,13 +2,14 @@
 
 Apply project rules first. For a linked game read the registered YoFaAssets task entry, matching workflow and mandatory sources.
 
+The Skill library offers adaptable defaults. Use the approach that best solves the task and verify it against the receiving project's requirements. When the shared guidance falls short, [improve it and submit the change](contributing.md#submit-a-skill-change).
+
 ## Choose by task
 
 Pick the result below, open its domain menu, then read the linked headings for that operation. Direct Skill calls start at their domain menu.
 
 | Requested result | Start here |
 | --- | --- |
-| Report a problem or contribute a fix or improvement to this Skill pack | [Contribute to the pack](contributing.md#submit-a-skill-change). |
 | Implement, fix or review C#, gameplay ownership, Jobs, GC, SDKs or serialization | [Code](../SKILL.md) |
 | Place or move assets, or inspect, import or compress an image, including 2D Sprites, 3D textures and UI art | [Assets](../../unity-assets-skill/SKILL.md) |
 | Build or repair a screen, input, localization, layout or safe-area settings | [UI](../../unity-ui-skill/SKILL.md) |

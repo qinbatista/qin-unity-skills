@@ -7,6 +7,8 @@ description: Route Unity verification by Editor, Play Mode, Player, device, cras
 
 **Project rules come first.** Follow the project's rules and registered workflows. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) when permitted and no project or registered shared owner governs Unity CLI.
 
+Treat the Skill's methods as adaptable defaults. Use the approach that best fits the task and [share reusable improvements](../unity-code-skill/references/contributing.md#submit-a-skill-change).
+
 Read the selected headings by link or [section reader](../unity-code-skill/scripts/read_topic.py). Audit any Unity image touched via [Assets](../unity-assets-skill/SKILL.md#admit-artwork-and-textures).
 
 For linked work use `explain unity-game-testing` and the project's test map, runner and acceptance boundary. Bind the source, expected result and applicable runtime. Documentation uses saved source and resolved link readback. For an actual run apply [runtime selection](#prepare-and-run) and [evidence delivery](#interpret-and-deliver).
