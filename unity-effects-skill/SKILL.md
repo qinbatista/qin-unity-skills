@@ -24,7 +24,7 @@ For linked work select `explain game-effect` for references, the effect profile 
 
 ## Use an existing effect or reference
 
-When a design document or image supplies the brief, identify the exact ability and read that input before looking for effects. Use the receiving project's planning route to bind the version and page or image. Take the event and outcome from the game rules and describe the visible requirements from the design. When asked to pick an ability, choose one defined by that source.
+When a design document or image supplies the brief, identify the exact ability and read that input before looking for effects. Use the receiving project's planning route for a registered document, or record the exact file or attachment provided with the request. Take the event and outcome from the game rules and describe the visible requirements from the design. When asked to pick an ability, choose one defined by that source.
 
 Start with editable assets from the game’s named source. Open the exact Prefab, graph, material, mesh, texture or code and check that it can drive the effect in the receiving project. Adapt the usable source in place or in the game’s effect package. Use a motion GIF for a recorded gap in the registered library, or as the default when the game has no registered source. Follow the [source and component procedure](references/staged-effects.md#use-an-existing-effect-or-reference).
 
