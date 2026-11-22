@@ -15,6 +15,46 @@ Apply these rules to gameplay implementation, architecture proposals and code ex
 - Keep fields with the same identity, writer and lifetime in one record. Keep local runtime state with its owner. Create an unmanaged Job snapshot only for an actual execution boundary, using only the fields that Job reads or writes.
 - Keep immutable constants, protocol keys, shader names and enums in code. Store authored configuration in its existing asset owner.
 
+## Singleton Managers
+
+Reuse the receiving game's existing `Singleton<T>` when present. For a game without one, copy [Singleton.cs](../assets/Singleton.cs) into its shared runtime assembly. This SpriteTamer base keeps one `Instance` per concrete type. `Awake` registers the first component and schedules a duplicate's whole GameObject for destruction. Put the Manager on a dedicated GameObject. The instance lives with its scene unless the game explicitly owns a longer lifetime.
+
+Call `base.Awake()` before acquiring resources. A duplicate can finish running `Awake` before Unity destroys it, so check `Instance != this` before starting work that belongs to the registered owner. Release only the resources this component acquired and call `base.OnDestroy()` even if release fails. Other components can read `Instance` after registration, usually in `Start`. The public setter supports existing fixture bindings. Gameplay code leaves registration to the base.
+
+This Manager creates one runtime [settings object](unity-lifecycle-and-serialization.md#scriptableobject-local-files). A caller can change the volume through `AudioPreferencesManager.Instance.Settings.SetVolume(value)`.
+
+```csharp
+using UnityEngine;
+
+public sealed class AudioPreferencesManager : Singleton<AudioPreferencesManager>
+{
+    private SOAudioPreferences _settings;
+    public SOAudioPreferences Settings => _settings;
+
+    public override void Awake()
+    {
+        base.Awake();
+        if (Instance != this) return;
+        _settings = ScriptableObject.CreateInstance<SOAudioPreferences>();
+    }
+
+    public override void OnDestroy()
+    {
+        try
+        {
+            if (_settings != null) _settings.SaveWhenOwnerDestroyed();
+        }
+        finally
+        {
+            if (_settings != null) Destroy(_settings);
+            base.OnDestroy();
+        }
+    }
+}
+```
+
+Verify in Play with two separate GameObjects of the same Manager type. The second must retire without acquiring settings or clearing the first `Instance`. Destroy the first, wait for destruction, then create a replacement and check its registration and loaded settings.
+
 ## Completed Job batches
 
 Use this default when Controllers consume state from a gameplay Job. Apply it in gameplay designs, implementations and examples. Follow the receiving project's established movement backend, event and slot contract.
@@ -37,7 +77,7 @@ Use patterns only for a demonstrated coordination or lifecycle need:
 | Command | Queueing, replay, undo, serialization, or deferred execution |
 | Observer | One publisher has multiple independent consumers |
 | Prototype | Copy semantics beyond prefab/Addressables instantiation |
-| Singleton | A real feature-wide lifetime and coordination owner |
+| [Singleton](#singleton-managers) | A real feature-wide lifetime and coordination owner |
 
 Keep direct calls when they already meet the requirement. A public method or event needs a current caller or an actual framework or compatibility contract. A new assembly definition needs a concrete dependency, isolation or Editor/test boundary.
 

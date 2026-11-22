@@ -40,6 +40,8 @@ In Charge Pulse, follow the button binding to the controller that admits the req
 
 The [Job State Batches sample](examples/job-state-batches/README.md) contains five Unity scenes and native tests for Job-owned movement, completed-state events and Controller-owned presentation.
 
+For a reusable gameplay foundation, the [Singleton Manager](unity-code-skill/references/unity-game-code-structure-design.md#singleton-managers) owns one runtime [ScriptableObject with a local save file](unity-code-skill/references/unity-lifecycle-and-serialization.md#scriptableobject-local-files). Both references include the C# base and a working consumer.
+
 | Skill | What to inspect |
 | --- | --- |
 | [Unity Code](unity-code-skill/SKILL.md) | [C# style and runtime ownership](examples/charge-pulse/CASEBOOK.md#unity-code) · [Charge controller](examples/charge-pulse/Assets/Scripts/ChargePulse/ChargePulseController.cs) |

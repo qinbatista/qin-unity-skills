@@ -38,6 +38,41 @@ Apply [current-operation and lifetime ownership](https://github.com/qinbatista/q
 - Preserve serialized field compatibility. Use Unity's supported rename migration when an existing serialized name changes; do not silently orphan prefab or scene data.
 - Treat ScriptableObjects as authored/shared configuration unless the project explicitly owns mutable runtime state there. Do not use a mutable ScriptableObject as an accidental save file or hidden singleton.
 
+For an authored `.asset` change in Editor tooling, edit the existing asset with `SerializedObject`, call `ApplyModifiedProperties()`, then `AssetDatabase.SaveAssetIfDirty(asset)` when the tool owns the save. For direct field edits, call `Undo.RecordObject` before the change and `EditorUtility.SetDirty` before saving. Reimport and read the serialized field from the same asset. Keep these APIs in an Editor assembly.
+
+## ScriptableObject local files
+
+For player-owned values, reuse the game's save base or copy [SOLocalData.cs](../assets/SOLocalData.cs) into its shared runtime assembly. This port of SpriteTamer's `SOLocalData` writes UTF-8 JSON under `Application.persistentDataPath`. Keep one live writer per file. Use a stable file name for each save and preserve the names, serialized fields and checksum format of existing saves. The original default file name is the concrete type name with no extension.
+
+```csharp
+using UnityEngine;
+
+public sealed class SOAudioPreferences : SOLocalData
+{
+    [SerializeField] private float _volume;
+    public float Volume => _volume;
+
+    public override void SetPathName() => FileName = "audio-preferences.json";
+    public override void InitialValue() => _volume = 1f;
+
+    public void SetVolume(float volume)
+    {
+        float next = Mathf.Clamp01(volume);
+        if (_volume == next) return;
+        _volume = next;
+        RequestAutoSave();
+    }
+}
+```
+
+The [Manager example](unity-game-code-structure-design.md#singleton-managers) creates this object once. In Play, `OnEnable` loads an existing file or calls `InitialValue()` and saves the first-use defaults. Keep `SetPathName()` a managed name assignment because `OnAfterDeserialize` can run on Unity's serialization thread. In Edit mode, loading or importing an asset leaves the player file alone. Editor code can call `LoadLocalData()` explicitly. For isolated Editor tests, set `AI_MANAGER_PERSISTENCE_ROOT` to an absolute task directory before creating the object.
+
+`RequestAutoSave()` writes on an admitted change using unscaled time. Changes during the cooldown stay in memory until the next save. Call `SaveDataAtLocal()` at a required checkpoint, including the game's pause/suspend boundary when appropriate. `SaveWhenOwnerDestroyed()` flushes the last value during Play teardown. A save writes a sibling temporary file and replaces the committed file after serialization succeeds.
+
+Persist value fields and stable IDs. Keep Prefab, scene and other `UnityEngine.Object` references in their authored owner. A type with a separate save schema can override `SerializeLocalData()` and `RestoreLocalData()` together. The paired prepare/restore hooks and before/after load hooks support existing subclasses. The default format preserves `_fileName`, `_timeStamp` and the lowercase SHA-256 of the pretty JSON with `_hashValue` empty. It also reads the original legacy wrapper containing one Base64-encoded JSON string. The next save writes plain JSON. When changing a shipped schema, validate and migrate an actual old file before writing the new layout.
+
+Only an absent file initializes defaults automatically. A failed read or checksum mismatch leaves the file in place, restores the previous serialized values and blocks writes for that object. Retry `LoadLocalData()` after repair, or call `Clean()` when the caller explicitly wants to reset and persist defaults. Verify a first launch, a fresh instance reading a changed value, and a damaged file surviving a failed reload and teardown.
+
 ## Parallel work
 
 Take immutable snapshots on the main thread, parallelize pure data work, and apply the results on the main thread. Keep Unity objects, scenes, transforms, physics, Editor APIs, and frame timing on their proper thread and phase. Use the project's existing Tasks or Job System and preserve its ownership boundaries.

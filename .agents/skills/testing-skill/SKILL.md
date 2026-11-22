@@ -13,6 +13,7 @@ Use the smallest maintained case that can establish the change. Run from the rep
 | Release and discovery routes agree, screen profile data and reader match the published package, and Skill entries resolve project precedence, architecture and standalone CLI guidance | 2 | `unittest`, [test_skill_catalog.py](tests/test_skill_catalog.py), repository Testing |
 | Installed task menus resolve scoped references, including half-speed gait acceptance and the owner and contributor delivery routes from each domain | 2 | Python `unittest`, [test_topic_routing.py](tests/test_topic_routing.py), against the packaged reader. |
 | Legacy game checkout roots keep their canonical memory owners in the published catalog | 2 | Python `unittest`, [test_project_memory_owners.py](tests/test_project_memory_owners.py). |
+| Scene Singleton admission and teardown, authored SO editing, player save round trips, corruption and legacy recovery | 2 | [UnityFoundationTests.cs](tests/Editor/UnityFoundationTests.cs) compiles the two packaged bases and the C# examples returned by the published reader. Use the [foundation fixture](#run-the-foundation-fixture). |
 | Charge Pulse sample saved bindings, nonlinear clip timing, Toolkit layout and input, visible release, cancellation and replay | 2 | Native Unity CLI EditMode with the Play transition in [ChargePulseTests.cs](../../../examples/charge-pulse/Assets/Editor/Tests/ChargePulseTests.cs). Use a task-owned example snapshot and the [sample commands](../../../examples/charge-pulse/README.md#run-the-focused-tests). |
 | Virtual character locomotion, loaded foot, root motion and control defects | 2 | Native Unity CLI EditMode with Play transitions in [GroundTravelCases.cs](../../../examples/charge-pulse/Assets/Editor/Tests/GroundTravelCases.cs) and [GroundContactCases.cs](../../../examples/charge-pulse/Assets/Editor/Tests/GroundContactCases.cs). Follow the [animation fixture command](../../../examples/charge-pulse/README.md#virtual-character-animation-tests). |
 | Five Job State Batches scenes exercise movement with the presentation Controller detached, one completed state publication and scene-specific results after reattachment | 2 | Native Unity CLI EditMode with Play transitions in [CompletedBatchCases.cs](../../../examples/job-state-batches/Assets/Editor/Tools/JobStateBatches/Tests/CompletedBatchCases.cs). Use the [standalone sample command](../../../examples/job-state-batches/README.md#run-the-five-cases). |
@@ -31,3 +32,12 @@ Windows PowerShell: py -3 -B -m unittest discover -s .agents\skills\testing-skil
 Run the [Codex C# writing regression](references/codex-writing-regression.md) for Level 2 Skill-behavior verification. Its four independent prompts exercise frame admission, texture ownership, Job slots and a warmed filter against the existing Charge Pulse assertions.
 
 For checker changes, run its CLI on representative source and a tracked diff. For package changes, read back the built or installed package. Run the native example for changes to its behavior or assets.
+
+## Run the foundation fixture
+
+From the repository root, use the [fixture preparer](tests/prepare_foundation_tests.py) with a fresh allocated task Cache directory. Bind child temporary storage and UPM cache to that run. On macOS verify the [short native temp path](../../../unity-testing-skill/references/runtime-and-artifact-evidence.md#macos-batch-startup). Use `py -3` for Python 3 on Windows.
+
+```text
+python3 -B .agents/skills/testing-skill/tests/prepare_foundation_tests.py "<task-cache>"
+python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<task-cache>/foundations" --non-interactive --no-pager --mode EditMode --filter UnityFoundationTests --output "<task-cache>/foundations.xml" -- -nographics -logFile "<task-cache>/foundations.log"
+```

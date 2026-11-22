@@ -8,13 +8,34 @@
   "modules": [
     {
       "id": "unity-code",
-      "summary": "Pack task menu and section reader, C# checks, Jobs, resource lifetimes, SDK integration and the daily CLI launcher",
+      "summary": "Pack task menu, portable Singleton and local ScriptableObject saves, C# checks, Jobs, resource lifetimes, SDK integration and the daily CLI launcher",
       "document": "skills/ai-index/modules/unity-code.md",
       "sources": [
         "unity-code-skill"
       ],
       "dependencies": [],
       "code_targets": [
+        {
+          "id": "register-singleton",
+          "file": "unity-code-skill/assets/Singleton.cs",
+          "symbol": "Singleton<T>.Awake",
+          "anchor": "public virtual void Awake()",
+          "summary": "Register the first scene component for each concrete type and retire a duplicate host."
+        },
+        {
+          "id": "save-local-data",
+          "file": "unity-code-skill/assets/SOLocalData.cs",
+          "symbol": "SOLocalData.SaveDataAtLocal",
+          "anchor": "public void SaveDataAtLocal()",
+          "summary": "Write the checksummed JSON to a sibling file and commit it to the owning save path."
+        },
+        {
+          "id": "load-local-data",
+          "file": "unity-code-skill/assets/SOLocalData.cs",
+          "symbol": "SOLocalData.LoadLocalData",
+          "anchor": "public void LoadLocalData()",
+          "summary": "Restore current JSON or the original legacy string, initialize a missing file and protect a rejected save."
+        },
         {
           "id": "read-installed-topic",
           "file": "unity-code-skill/scripts/read_topic.py",
