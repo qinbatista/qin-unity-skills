@@ -24,12 +24,12 @@ For linked work select `explain game-effect` for references, the effect profile 
 
 ## Use an existing effect or reference
 
-Start with the game’s named reference source, or a motion GIF when the game has no source. Follow the [reference selection and component review](references/staged-effects.md#use-an-existing-effect-or-reference) before authoring.
+Start with editable assets from the game’s named source. Open the exact Prefab, graph, material, mesh, texture or code and check that it can drive the effect in the receiving project. Adapt the usable source in place or in the game’s effect package. Use a motion GIF for a recorded gap in the registered library, or as the default when the game has no registered source. Follow the [source and component procedure](references/staged-effects.md#use-an-existing-effect-or-reference).
 
 ## Create or revise an effect
 
-1. Break the selected motion into its independently visible effects. State the count and the job, anchor and time window of each. A single effect is a valid result.
-2. Build and play each effect alone. Choose a Particle System or VFX Graph for emission and travel, or a shader and bound material for reveal, lighting and distortion. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and the receiving project's lifecycle. Keep exclusive assets in the owning package and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
+1. Inspect the editable source and its behavior. Break the selected motion into its independently visible effects. State the count and the job, anchor, time window and source asset for each. A single effect is a valid result.
+2. Adapt and play each effect alone. Retain compatible source emitters, curves, shader logic and materials, and build only a contribution the usable source does not supply. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and the receiving project's lifecycle. Keep exclusive assets in the owning package and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
 3. Play the complete composition from the real trigger at game speed and scale. Compare it to the reference. Tune an individual effect when its shape or timing is wrong. When the combined gesture still reads incorrectly, return to step 1, revise the count or responsibilities and rebuild the affected effects. Replay the same case until its observable criteria pass.
 
 ## Verify the native result
