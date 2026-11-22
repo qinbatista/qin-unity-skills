@@ -70,8 +70,24 @@
       "id": "unity-animation",
       "summary": "Ground-relative gait speed, step counts, planted feet and jitter checks, Clip and Animator playback, rig reuse and Spine transfer",
       "document": "skills/ai-index/modules/unity-animation.md",
-      "sources": ["unity-animation-skill"],
-      "dependencies": []
+      "sources": [
+        "unity-animation-skill",
+        "examples/charge-pulse/Assets/Editor/Tests/AnimationCases.cs",
+        "examples/charge-pulse/Assets/Editor/Tests/GroundTravelCases.cs",
+        "examples/charge-pulse/Assets/Editor/Tests/GroundContactCases.cs",
+        "examples/charge-pulse/Assets/Editor/Tests/VirtualWalker.cs",
+        "examples/charge-pulse/Assets/Editor/Tests/GaitCamera.cs"
+      ],
+      "dependencies": [],
+      "code_targets": [
+        {
+          "id": "grounded-gait-acceptance",
+          "file": "examples/charge-pulse/Assets/Editor/Tests/GroundTravelCases.cs",
+          "symbol": "GroundTravelCases.RenderedWalkAndRunKeepTheirFootprintsAtFullAndHalfSpeed",
+          "anchor": "public IEnumerator RenderedWalkAndRunKeepTheirFootprintsAtFullAndHalfSpeed()",
+          "summary": "Replay native walk and run clips and measure visible footfalls, footprint drift, flight and the half-speed comparison."
+        }
+      ]
     },
     {
       "id": "unity-effects",

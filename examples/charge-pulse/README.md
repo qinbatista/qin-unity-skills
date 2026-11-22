@@ -53,6 +53,16 @@ Set `CHARGE_PULSE_EVIDENCE` to an allocated task directory to capture native HUD
 python3 -B unity-code-skill/scripts/unity_cli_daily.py run "<task-project>" --non-interactive --no-pager --log-file "<task-cache>/authoring.log" -- -executeMethod Qin.UnitySamples.ChargePulseSampleAuthoring.Rebuild
 ```
 
+## Virtual character animation tests
+
+Use the same task-owned Unity project copy and graphics-enabled CLI as the focused tests. The filter selects the virtual character's travel and contact cases. Use the `AnimationCases` filter for the saved Blend Trees, overrides, loop curves and skinned mesh, and `ChargePulseTests` for the timed events, cancellation and reentry.
+
+```text
+python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<task-project>" --non-interactive --no-pager --mode EditMode --filter Qin.UnitySamples.Tests.Ground --output "<task-cache>/ground.xml" -- -logFile "<task-cache>/ground.log"
+```
+
+With `CHARGE_PULSE_EVIDENCE` set, the fixture writes per-frame shoe positions and landing counts under `ground-travel`, plus fixed-camera PNGs for steady walking, running, the turn and the two injected defects. The motor advances at 50 Hz. The Play Mode observer evaluates the native animation and interpolated root at controlled 30 and 60 Hz and renders both cadences. Read the [case descriptions](CASEBOOK.md#m11) for the injected defects and contact checks.
+
 ## Run a macOS package smoke test
 
 Use a fresh registered run under the repository's `Cache/temp-*` for each build. Copy this sample's saved `Assets`, `Packages`, and `ProjectSettings` into `<run>/charge-pulse` and verify their bytes against the source. Keep `UPM_CACHE_ROOT` and build outputs in the run. Set `TMP`, `TEMP`, and `TMPDIR` to its verified short native temporary path when Bee needs one. Follow the [test packaging lifecycle](../../unity-testing-skill/references/runtime-and-artifact-evidence.md#isolated-test-packaging).

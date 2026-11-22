@@ -49,9 +49,9 @@ namespace Qin.UnitySamples.Tests
         public void Animation04_BlendModesRetainTheirActualParametersAndBindings(BlendTreeType mode)
         {
             using EditorCaseAssets assets = new EditorCaseAssets();
-            AnimationClip idle = SavePose(assets.Folder, "IdlePose", 0f);
-            AnimationClip raised = SavePose(assets.Folder, "RaisedPose", 2f);
-            AnimationClip variant = SavePose(assets.Folder, "VariantPose", 4f);
+            AnimationClip idle = SavePose(assets.Folder, "IdlePose", 0f, "Hand");
+            AnimationClip raised = SavePose(assets.Folder, "RaisedPose", 2f, "Hand");
+            AnimationClip variant = SavePose(assets.Folder, "VariantPose", 4f, "Hand");
             string path = $"{assets.Folder}/Example.controller";
             AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(path);
             controller.AddParameter("Horizontal", AnimatorControllerParameterType.Float);
@@ -66,6 +66,9 @@ namespace Qin.UnitySamples.Tests
             {
                 tree.AddChild(idle, Vector2.zero);
                 tree.AddChild(raised, Vector2.up);
+                tree.AddChild(idle, Vector2.right);
+                tree.AddChild(idle, Vector2.down);
+                tree.AddChild(idle, Vector2.left);
             }
             else
             {
@@ -96,7 +99,9 @@ namespace Qin.UnitySamples.Tests
             AnimatorStateMachine savedStates = saved.layers[0].stateMachine;
             BlendTree observed = (BlendTree)savedStates.states.Single(child => child.state.name == "Motion").state.motion;
             Assert.That(observed.blendType, Is.EqualTo(mode));
-            Assert.That(observed.children.Select(child => child.motion), Is.EqualTo(new Motion[] { idle, raised }));
+            Motion[] expected = mode == BlendTreeType.SimpleDirectional2D
+                ? new Motion[] { idle, raised, idle, idle, idle } : new Motion[] { idle, raised };
+            Assert.That(observed.children.Select(child => child.motion), Is.EqualTo(expected));
             if (mode == BlendTreeType.Simple1D) Assert.That(observed.children[1].threshold, Is.EqualTo(1f));
             if (mode == BlendTreeType.SimpleDirectional2D) Assert.That(observed.children[1].position, Is.EqualTo(Vector2.up));
             if (mode == BlendTreeType.Direct) Assert.That(observed.children[1].directBlendParameter, Is.EqualTo("Vertical"));
@@ -109,10 +114,55 @@ namespace Qin.UnitySamples.Tests
                 replacement["RaisedPose"] = variant;
                 Assert.That(replacement["RaisedPose"], Is.SameAs(variant));
                 Assert.That(observed.children[1].motion, Is.SameAs(raised));
+                ObserveController(saved, mode, 2f);
+                ObserveController(replacement, mode, 4f);
             }
             finally
             {
                 Object.DestroyImmediate(replacement);
+            }
+        }
+
+        private static void ObserveController(RuntimeAnimatorController saved, BlendTreeType mode, float highPose)
+        {
+            GameObject actor = new GameObject("Gesture actor");
+            Transform hand = new GameObject("Hand").transform;
+            hand.SetParent(actor.transform, false);
+            Animator animator = actor.AddComponent<Animator>();
+            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            PlayableGraph graph = PlayableGraph.Create("Reopened gesture controller");
+            try
+            {
+                graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
+                AnimatorControllerPlayable control = AnimatorControllerPlayable.Create(graph, saved);
+                AnimationPlayableOutput.Create(graph, "Gesture", animator).SetSourcePlayable(control);
+                graph.Play();
+                control.Play("Base Layer.Motion", 0, 0f);
+                foreach (float weight in new[] { 0f, 0.25f, 1f })
+                {
+                    float horizontal = mode == BlendTreeType.Simple1D ? weight : 0f;
+                    if (mode == BlendTreeType.Direct) horizontal = 1f - weight;
+                    control.SetFloat("Horizontal", horizontal);
+                    control.SetFloat("Vertical", weight);
+                    graph.Evaluate(1f / 60f);
+                    Assert.That(hand.localPosition.x, Is.EqualTo(highPose * weight).Within(0.002f), $"{mode} at {weight}");
+                }
+                if (mode == BlendTreeType.SimpleDirectional2D)
+                {
+                    control.SetFloat("Horizontal", 1f);
+                    control.SetFloat("Vertical", 0f);
+                    graph.Evaluate(1f / 60f);
+                    Assert.That(hand.localPosition.x, Is.EqualTo(0f).Within(0.002f));
+                }
+                control.SetTrigger("Recover");
+                for (int frame = 0; frame < 12; frame++) graph.Evaluate(1f / 60f);
+                Assert.That(control.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.Settle"), Is.True);
+                Assert.That(hand.localPosition.x, Is.EqualTo(0f).Within(0.002f));
+            }
+            finally
+            {
+                graph.Destroy();
+                Object.DestroyImmediate(actor);
             }
         }
 
@@ -195,10 +245,61 @@ namespace Qin.UnitySamples.Tests
             }
         }
 
-        private static AnimationClip SavePose(string folder, string name, float position)
+        [Test]
+        public void MaskedGestureLeavesTheIndependentFootPoseIntact()
+        {
+            using EditorCaseAssets assets = new EditorCaseAssets();
+            AnimationClip rest = SavePose(assets.Folder, "Rest", 0f, "Hand");
+            AnimationClip gesture = SavePose(assets.Folder, "Gesture", 2f, "Hand");
+            EditorCurveBinding footBinding = EditorCurveBinding.FloatCurve("Foot", typeof(Transform), "m_LocalPosition.x");
+            AnimationUtility.SetEditorCurve(rest, footBinding, AnimationCurve.Constant(0f, 1f, 0.3f));
+            AnimationUtility.SetEditorCurve(gesture, footBinding, AnimationCurve.Constant(0f, 1f, 4f));
+            AvatarMask mask = new AvatarMask { transformCount = 3 };
+            mask.SetTransformPath(0, "");
+            mask.SetTransformPath(1, "Hand");
+            mask.SetTransformPath(2, "Foot");
+            for (int i = 0; i < mask.transformCount; i++) mask.SetTransformActive(i, i == 1);
+            string maskPath = assets.Folder + "/Hand.mask";
+            AssetDatabase.CreateAsset(mask, maskPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.ImportAsset(maskPath, ImportAssetOptions.ForceSynchronousImport);
+            AvatarMask saved = AssetDatabase.LoadAssetAtPath<AvatarMask>(maskPath);
+            GameObject actor = new GameObject("Layered gesture actor");
+            Transform hand = new GameObject("Hand").transform;
+            hand.SetParent(actor.transform, false);
+            Transform foot = new GameObject("Foot").transform;
+            foot.SetParent(actor.transform, false);
+            Animator animator = actor.AddComponent<Animator>();
+            PlayableGraph graph = PlayableGraph.Create("Upper-body mask");
+            try
+            {
+                AnimationLayerMixerPlayable layers = AnimationLayerMixerPlayable.Create(graph, 2);
+                graph.Connect(AnimationClipPlayable.Create(graph, rest), 0, layers, 0);
+                graph.Connect(AnimationClipPlayable.Create(graph, gesture), 0, layers, 1);
+                layers.SetInputWeight(0, 1f);
+                layers.SetLayerMaskFromAvatarMask(1, saved);
+                AnimationPlayableOutput.Create(graph, "Masked actor", animator).SetSourcePlayable(layers);
+                graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
+                graph.Play();
+                foreach (float weight in new[] { 0f, 0.5f, 1f, 0f })
+                {
+                    layers.SetInputWeight(1, weight);
+                    graph.Evaluate(1f / 60f);
+                    Assert.That(hand.localPosition.x, Is.EqualTo(2f * weight).Within(0.001f));
+                    Assert.That(foot.localPosition.x, Is.EqualTo(0.3f).Within(0.001f));
+                }
+            }
+            finally
+            {
+                graph.Destroy();
+                Object.DestroyImmediate(actor);
+            }
+        }
+
+        private static AnimationClip SavePose(string folder, string name, float position, string bonePath = "")
         {
             AnimationClip clip = new AnimationClip { name = name };
-            EditorCurveBinding binding = EditorCurveBinding.FloatCurve("", typeof(Transform), "m_LocalPosition.x");
+            EditorCurveBinding binding = EditorCurveBinding.FloatCurve(bonePath, typeof(Transform), "m_LocalPosition.x");
             AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Constant(0f, 1f, position));
             AssetDatabase.CreateAsset(clip, $"{folder}/{name}.anim");
             return clip;
