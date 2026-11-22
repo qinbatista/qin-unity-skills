@@ -1,11 +1,13 @@
 ---
 name: unity-code-skill
-description: Start here for mixed or unclassified Unity requests and route to the pack's task menu. For C# use the code routes for gameplay architecture, lifecycle, Jobs, GC, serialization, SDKs and source checks, including ordinary C# outside Unity.
+description: Route mixed Unity requests and changes to this Skill pack. For C# use the code routes for gameplay architecture, lifecycle, Jobs, GC, serialization, SDKs and source checks, including ordinary C# outside Unity.
 ---
 
 # Unity Code
 
 **Project rules come first.** Follow the project's rules and registered workflows. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) for Unity work when permitted and no project or registered shared owner governs Unity CLI.
+
+Treat the Skill's methods as adaptable defaults. Use the approach that best fits the task and [share reusable improvements](references/contributing.md#submit-a-skill-change).
 
 For a mixed or unfamiliar Unity task open the [pack task menu](references/global-skill-routing.md#choose-by-task) first. For C# read the selected headings by link or [section reader](scripts/read_topic.py). Audit any Unity image touched via [Assets](../unity-assets-skill/SKILL.md#admit-artwork-and-textures).
 
@@ -15,6 +17,7 @@ For linked gameplay use `explain game-code-logic`, or `explain yofa-plugin` for 
 
 | Operation | Read for this task |
 | --- | --- |
+| Fix or extend this Skill pack, including findings from a local test | [Submit a Skill change](references/contributing.md#submit-a-skill-change). |
 | Plan folders or an existing game's feature | [Existing-game architecture](references/unity-cli.md#existing-game-architecture), then [Controller, Manager and data ownership](references/unity-game-code-structure-design.md#ownership) for a code design. |
 | Write or review C# | [Style and method boundaries](references/unity-csharp-rules.md#c-style) and the [source check](#c-source-checks). Call the real owner directly. |
 | Choose a callback, handle reentry or edit serialized state | [Frame cadence](references/unity-lifecycle-and-serialization.md#frame-callbacks), [async ownership](references/unity-lifecycle-and-serialization.md#async-and-main-thread-safety) or [serialization](references/unity-lifecycle-and-serialization.md#serialization-and-authored-data), according to the change. |

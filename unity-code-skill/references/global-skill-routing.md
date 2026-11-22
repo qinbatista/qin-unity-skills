@@ -2,6 +2,8 @@
 
 Apply project rules first. For a linked game read the registered YoFaAssets task entry, matching workflow and mandatory sources.
 
+The Skill library offers adaptable defaults. Use the approach that best solves the task and verify it against the receiving project's requirements. When the shared guidance falls short, [improve it and submit the change](contributing.md#submit-a-skill-change).
+
 ## Choose by task
 
 Pick the result below, open its domain menu, then read the linked headings for that operation. Direct Skill calls start at their domain menu.
