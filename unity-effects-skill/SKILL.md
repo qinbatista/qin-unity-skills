@@ -36,4 +36,4 @@ Make and inspect a timed target GIF, or use a reviewed GIF that matches the curr
 
 ## Verify the native result
 
-Run the smallest native case on the intended render path. Check rendered pixels, lifecycle and cleanup. Measure simultaneous load for performance claims. For a fidelity delivery, verify the receiving project's documented replay and comparison commands from fresh task output.
+Run the smallest native case on the intended render path. [Check rendered pixels, lifecycle and cleanup](references/rendering-and-verification.md#observe-the-actual-render-path-and-lifetime). Measure simultaneous load for performance claims. For a fidelity delivery, verify the receiving project's documented replay and comparison commands from fresh task output.
