@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "portraitReference": { "x": 2160, "y": 3840 },
   "landscapeReference": { "x": 3840, "y": 2160 },
   "profiles": [
@@ -9,6 +9,6 @@
     { "id": "landscape", "maxWidthOverHeight": 2.0, "body": "side-by-side", "header": "fit-row" },
     { "id": "ultrawide", "maxWidthOverHeight": 0, "body": "bounded-center-and-wings", "header": "fit-row" }
   ],
-  "edgeActions": { "dockBelowSideCamera": true, "order": "top-to-bottom", "clearanceReferencePixels": 8 },
+  "edgeActions": { "sideCameraPlacement": "shift-inward", "sideCameraAppearance": "black", "blendCompactCamera": true, "clearanceReferencePixels": 8 },
   "separatingFold": { "equalPanePreference": "top-or-left" }
 }

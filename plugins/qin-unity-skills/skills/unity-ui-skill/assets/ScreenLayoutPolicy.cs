@@ -20,6 +20,10 @@ namespace Qin.UnityUI
         [Serializable]
         public sealed class EdgeActions
         {
+            public string sideCameraPlacement;
+            public string sideCameraAppearance;
+            public bool blendCompactCamera;
+            // Version 1 fields remain readable for existing projects.
             public bool dockBelowSideCamera;
             public string order;
             public float clearanceReferencePixels;
@@ -42,10 +46,12 @@ namespace Qin.UnityUI
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
             var policy = JsonUtility.FromJson<ScreenLayoutPolicy>(asset.text);
-            if (policy == null || policy.version != 1 || policy.profiles == null || policy.profiles.Length == 0 ||
+            if (policy == null || (policy.version != 1 && policy.version != 2) || policy.profiles == null || policy.profiles.Length == 0 ||
                 policy.portraitReference.x <= 0 || policy.portraitReference.y <= 0 ||
                 policy.landscapeReference.x <= 0 || policy.landscapeReference.y <= 0 ||
-                policy.edgeActions == null || policy.edgeActions.order != "top-to-bottom" ||
+                policy.edgeActions == null ||
+                (policy.version == 1 ? policy.edgeActions.order != "top-to-bottom" : policy.edgeActions.sideCameraPlacement != "shift-inward" ||
+                    (policy.edgeActions.sideCameraAppearance != "black" && policy.edgeActions.sideCameraAppearance != "authored")) ||
                 policy.edgeActions.clearanceReferencePixels < 0 || policy.separatingFold == null ||
                 (policy.separatingFold.equalPanePreference != "top-or-left" && policy.separatingFold.equalPanePreference != "bottom-or-right"))
                 throw new ArgumentException("Invalid screen layout policy.", nameof(asset));
@@ -128,6 +134,104 @@ namespace Qin.UnityUI
                         left = pane.xMin;
                 }
             return Rect.MinMaxRect(left, top, right, bottom);
+        }
+
+        // A known local side camera can explain the inset at this end of a top row.
+        // Other known system exclusions must also be supplied to the placement pass.
+        public Rect TopRowLane(Rect pane, Rect safe, IReadOnlyList<Rect> exclusions, bool rightEdge) =>
+            TopRowLane(pane, safe, exclusions, rightEdge, out _);
+
+        public Rect TopRowLane(Rect pane, Rect safe, IReadOnlyList<Rect> exclusions, bool rightEdge, out bool sideCamera)
+        {
+            sideCamera = false;
+            Rect lane = Rect.MinMaxRect(Mathf.Max(pane.xMin, safe.xMin), Mathf.Max(pane.yMin, safe.yMin),
+                Mathf.Min(pane.xMax, safe.xMax), Mathf.Min(pane.yMax, safe.yMax));
+            if (lane.width <= 0 || lane.height <= 0) return Rect.zero;
+            if (exclusions == null) return lane;
+            foreach (Rect r in exclusions)
+            {
+                if (r.width <= 0 || r.height <= 0 || !pane.Overlaps(r) || r.yMax >= pane.center.y) continue;
+                bool corner = rightEdge
+                    ? r.xMin >= pane.center.x && pane.xMax - r.xMax <= Mathf.Max(r.width, r.height)
+                    : r.xMax <= pane.center.x && r.xMin - pane.xMin <= Mathf.Max(r.width, r.height);
+                if (!corner) continue;
+                sideCamera = true;
+                if (rightEdge && r.xMax > lane.xMax) lane.xMax = pane.xMax;
+                if (!rightEdge && r.xMin < lane.xMin) lane.xMin = pane.xMin;
+            }
+            return lane;
+        }
+
+        // A short corner obstruction does not consume a full-height body column.
+        // Keep persistent side bars and the system's top and bottom boundaries.
+        public Rect BodyAroundCorner(Rect pane, Rect safe, IReadOnlyList<Rect> exclusions, bool rightEdge)
+        {
+            Rect lane = TopRowLane(pane, safe, exclusions, rightEdge, out bool sideCamera);
+            if (!sideCamera || lane.width <= 0) return safe;
+            float edge = rightEdge ? safe.xMax : safe.xMin;
+            foreach (Rect r in exclusions)
+                if (r.width > 0 && r.height > 0 && pane.Overlaps(r) && r.yMax >= pane.center.y &&
+                    (rightEdge ? r.xMax > edge : r.xMin < edge)) return safe;
+            if (rightEdge) safe.xMax = lane.xMax;
+            else safe.xMin = lane.xMin;
+            return safe;
+        }
+
+        // A compact localized camera can share a black backing with an adjacent button.
+        // A larger system region only displaces the button. The backing never owns input.
+        public bool TryGetCameraCap(Rect pane, Rect button, IReadOnlyList<Rect> exclusions, bool rightEdge,
+            out Rect cap)
+        {
+            cap = default;
+            if (!edgeActions.blendCompactCamera || edgeActions.sideCameraAppearance != "black" ||
+                button.width <= 0 || button.height <= 0 || exclusions == null) return false;
+            float nearest = button.width * 2f;
+            foreach (Rect r in exclusions)
+            {
+                float shortSide = Mathf.Min(r.width, r.height);
+                if (shortSide <= 0 || Mathf.Max(r.width, r.height) > 1.26f * shortSide ||
+                    shortSide > 1.4f * button.height || r.yMax > pane.center.y ||
+                    r.yMin - pane.yMin > shortSide || !pane.Overlaps(r)) continue;
+                if (rightEdge ? r.xMin < button.xMax || pane.xMax - r.xMax > shortSide
+                              : r.xMax > button.xMin || r.xMin - pane.xMin > shortSide) continue;
+                float distance = Vector2.Distance(button.center, r.center);
+                if (distance > nearest) continue;
+                nearest = distance;
+                float diameter = shortSide * .9f;
+                cap = new Rect(r.center - Vector2.one * diameter * .5f, Vector2.one * diameter);
+            }
+            return cap.width > 0;
+        }
+
+        // Keep the authored Y and move a complete paint/hit envelope the least distance
+        // away from its physical edge. Bound the lane at stationary peers on the same row.
+        public bool TryPlaceInRow(Rect lane, Rect candidate, IReadOnlyList<Rect> exclusions, float scale,
+            bool rightEdge, out Rect placed)
+        {
+            placed = candidate;
+            if (scale <= 0 || candidate.width <= 0 || candidate.height <= 0 ||
+                lane.width < candidate.width || candidate.yMin < lane.yMin || candidate.yMax > lane.yMax)
+                return false;
+            if (rightEdge ? candidate.xMin < lane.xMin : candidate.xMax > lane.xMax) return false;
+            placed.x = Mathf.Clamp(placed.x, lane.xMin, lane.xMax - placed.width);
+            float gap = edgeActions.clearanceReferencePixels * scale;
+            for (int pass = 0; pass <= (exclusions?.Count ?? 0); pass++)
+            {
+                float next = placed.x;
+                if (exclusions != null)
+                    foreach (Rect r in exclusions)
+                    {
+                        if (r.width <= 0 || r.height <= 0 || placed.yMax <= r.yMin - gap ||
+                            placed.yMin >= r.yMax + gap || placed.xMax <= r.xMin - gap ||
+                            placed.xMin >= r.xMax + gap) continue;
+                        next = rightEdge ? Mathf.Min(next, r.xMin - gap - placed.width)
+                                         : Mathf.Max(next, r.xMax + gap);
+                    }
+                if (next == placed.x) return true;
+                if (next < lane.xMin || next + placed.width > lane.xMax) return false;
+                placed.x = next;
+            }
+            return false;
         }
 
         // 'lane' already includes the relevant safe margins. The candidate contains painting and hits
