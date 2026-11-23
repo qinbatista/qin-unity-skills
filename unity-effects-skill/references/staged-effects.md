@@ -20,6 +20,8 @@ Resource readiness can precede the cycle. Verify first visible preparation as we
 
 ### Continuous visible envelopes
 
+Separate persistent actors from effects introduced by the cast. Keep an existing actor visible through its animation and restore leased material state. If a standalone preview introduces the actor into an empty frame, ease its own coverage on entry and from its current exposure on early stop. Measure the live receiver and the standalone preview independently.
+
 **HARD REQUIREMENT.** Give every visible onset and retirement a normalized weight. At the receiving design frame rate, the isolated contribution must show `0 → intermediate → 1` on entry and `1 → intermediate → 0` on exit, including fast strikes. One rendered value strictly between the endpoints gives two followable steps. Apply the weight to the actual alpha, emission, density, width, scale, mix or heat that makes the job visible. Keep its authored HDR peak and world-unit dimensions. Ease by elapsed time and choose a duration that exposes the intermediate at each supported design rate.
 
 For a timed transition, sample the weight actually being drawn at the event. For duration in seconds, use `u = saturate((time - eventTime) / duration)` and `w = lerp(weightAtEvent, targetWeight, u*u*(3 - 2*u))`. Clamp only the normalized progress. Keep heat, flow, angular motion and world dimensions in their authored units. At 30 Hz, a 0.10 s transition aligned to a frame yields weights near 0, 0.26, 0.74 and 1. Calibrate the duration against the receiving native frames and actual trigger phase.
