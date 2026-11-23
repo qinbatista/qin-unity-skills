@@ -37,4 +37,6 @@ Before building or revising the runtime, make and inspect a [full motion study](
 
 ## Verify the native result
 
+**HARD REQUIREMENT.** Apply [continuous visible envelopes](references/staged-effects.md#continuous-visible-envelopes) to every visible contribution and confirm the [adjacent frames in both native replays](references/rendering-and-verification.md#verify-visible-envelopes).
+
 Run the smallest native case on the intended render path. [Check rendered pixels, lifecycle and cleanup](references/rendering-and-verification.md#observe-the-actual-render-path-and-lifetime). For moving media or stochastic particles, [check internal motion and seed variation](references/rendering-and-verification.md#verify-internal-motion-and-seed-variation). Measure simultaneous load for performance claims. For a fidelity delivery, verify the receiving project's documented replay and comparison commands from fresh task output.

@@ -8,7 +8,7 @@ Use these phases on one native timeline for the complete linked profile or when 
 
 | Phase | Visible contribution | Runtime boundary |
 | --- | --- | --- |
-| Prepare | Establish the origin and initial seed with zero or minimal coverage. | Acquire or reset the instance, bind anchors and establish the actual start condition. |
+| Prepare | Establish the origin and seed at zero visible weight for newly born material. | Acquire the instance, bind anchors and establish the actual start condition. |
 | Preparing | Gather, draw, grow or assemble partial forms. | Advance the nonlinear shape and separate contributions over their authored windows. |
 | Prepared | Hold a readable charged state. | Wait for the real release gate after visible preparation is complete. |
 | Releasing | Extend lines, open arcs, expand surfaces or scatter particles. | Start from the prepared state when the actual release is accepted. |
@@ -16,7 +16,15 @@ Use these phases on one native timeline for the complete linked profile or when 
 | Retracting | Unwind, reverse-draw, shrink, absorb or disperse. | Stop new work at the correct event and retract from the current values. |
 | Recycled | Return to the authored rest state with no effect coverage or stale tail. | Reset and release or return the exact acquisition. |
 
-Resource readiness can precede the cycle. Verify first visible preparation as well as warm playback. On interruption, retract the current partial shape and record which stages were reached. Preserve immediate owner destruction where it is required and distinguish it from natural completion. Exercise normal completion, early and late cancellation, disable and another use of the same pooled slot.
+Resource readiness can precede the cycle. Verify first visible preparation as well as warm playback. On interruption, record which stages were reached. If gameplay must destroy the host immediately, transfer the visible tail with its current state to an effect owner that can finish it. Exercise normal completion, early and late cancellation, rebind and pooled reuse.
+
+### Continuous visible envelopes
+
+**HARD REQUIREMENT.** Give every visible onset and retirement a normalized weight. At the receiving design frame rate, the isolated contribution must show `0 → intermediate → 1` on entry and `1 → intermediate → 0` on exit, including fast strikes. One rendered value strictly between the endpoints gives two followable steps. Apply the weight to the actual alpha, emission, density, width, scale, mix or heat that makes the job visible. Keep its authored HDR peak and world-unit dimensions. Ease by elapsed time and choose a duration that exposes the intermediate at each supported design rate.
+
+For a timed transition, sample the weight actually being drawn at the event. For duration in seconds, use `u = saturate((time - eventTime) / duration)` and `w = lerp(weightAtEvent, targetWeight, u*u*(3 - 2*u))`. Clamp only the normalized progress. Keep heat, flow, angular motion and world dimensions in their authored units. At 30 Hz, a 0.10 s transition aligned to a frame yields weights near 0, 0.26, 0.74 and 1. Calibrate the duration against the receiving native frames and actual trigger phase.
+
+At a moving front, start the envelope when the front reaches each location. New material starts at zero while existing particles may coast on their own ages. Interruptions, rebinds and recasts continue from the current visible weight and motion phase toward the new target. A gameplay hit or stop may occur on one tick. Disable the draw, kill its particles or return its slot only after its visible weight reaches zero. Check the [adjacent native samples](rendering-and-verification.md#verify-visible-envelopes).
 
 ## Progressive formation and layers
 

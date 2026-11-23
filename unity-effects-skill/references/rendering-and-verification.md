@@ -33,6 +33,10 @@ For example, two outer droplets in a recorded splash nearly tripled their separa
 
 For tracers carried by a pressure front, compare the front's arrival at each tracer with its first deflection. On a shared surface, trigger a second contact while the first wave or spray is visible and follow both tails from their own impact points. For fire, compare the hot core and thin tongues in separate brightness samples and track their positions relative to one another through fuel cutoff. When a sustained field stops emitting, follow the live population through its remaining lifetimes. Sample coverage at the center and edges through the drain to catch a whole field shrinking into a rectangle.
 
+### Verify visible envelopes
+
+Use the [continuous visible envelope rule](staged-effects.md#continuous-visible-envelopes) on two independently started native takes. Isolate each contribution at the receiving design frame rate. At its local origin or advancing front, record consecutive frame times and the visible weight relative to its own off and full values. Include the neighbors of the first and last visible samples and of an interruption, rebind or retrigger. Verify an interior sample at both edges and continuity of the carried weight and phase on both takes. For a negative control, substitute `0, 1, 1, 0` in the same measured region. Reject both instantaneous edges even when the peak and final blank match.
+
 ## Observe the actual render path and lifetime
 
 1. Run the affected passes and VFX Graph kernels on the required graphics backend. Inspect shader diagnostics and rendered pixels for errors, NaNs, missing textures or variants, bad normals, clipping, sorting and transparency. Exercise zero and full coverage, UV boundaries, property limits and existing assigned materials.
