@@ -188,3 +188,12 @@ class InstalledRoutingTests(unittest.TestCase):
     def test_heading_fragments_ignore_fenced_examples_and_disambiguate_repeats(self):
         lines = ["# Guide", "## C# checks", "````text", "## Example", "```", "## Still fenced", "````", "### C# checks", "~~~", "## Other example", "~~~"]
         self.assertEqual([heading.anchor for heading in markdown_headings(lines)], ["guide", "c-checks", "c-checks-1"])
+
+    def test_effect_motion_menu_reaches_design_graph_and_native_control(self):
+        menu = read_topic("effects", "#choose-an-operation")
+        row = next(line for line in menu.splitlines() if "appears frozen" in line)
+        design, graph, replay = [read_topic("effects", link) for link in re.findall(r"\]\(([^)]+)\)", row)]
+        self.assertIn("thorax", design)
+        self.assertIn("Custom Function", graph)
+        self.assertIn("Master Stack", graph)
+        self.assertIn("frozen-object control", replay)

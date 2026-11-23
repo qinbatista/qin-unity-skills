@@ -26,6 +26,19 @@ For a timed transition, sample the weight actually being drawn at the event. For
 
 At a moving front, start the envelope when the front reaches each location. New material starts at zero while existing particles may coast on their own ages. Interruptions, rebinds and recasts continue from the current visible weight and motion phase toward the new target. A gameplay hit or stop may occur on one tick. Disable the draw, kill its particles or return its slot only after its visible weight reaches zero. Check the [adjacent native samples](rendering-and-verification.md#verify-visible-envelopes).
 
+## Decompose every visible object
+
+Inventory what the viewer can follow in the original and the timed GIF. Split each object again wherever a part has a distinct driver, pivot, phase, surface flow, contact or tail. There is no fixed layer count. Jobs can share a graph, renderer or atlas. Keep one recipe row per independently observable motion and identify its parent, attachment or simulation space, force or event, response through entry/hold/release, visible landmark, implementation owner and isolated replay.
+
+| Object | Motion to draw in the GIF and implement | Landmark to follow |
+| --- | --- | --- |
+| Flying butterfly | The thorax hovers and recoils from the cast. Each wing folds about its own thorax hinge, its tip trailing the stroke reversal. Trailing light retains its earlier world positions. | Track both tip excursions in thorax space and the thorax against the emitter. Keep the hinges attached. |
+| Loose leaf or fragment | A gust accelerates the center. Drag and orientation alter the fall. A flexible leaf bends from stem to tip. | Follow center and heading against the wind, then the tip against the stem through a reversal. |
+| Bead, sphere or star | Carry the center along its physical path. A wet bead stretches before contact and its reflection responds to the surface. A magical star can emit rays that grow and decay with its pulse. | Track center and a source-supported highlight, contour or ray relative to it. |
+| Fixed-direction beam | Keep the gameplay axis locked. Move successive packets down the shaft, vary the filament cross-section and let the last packet clear the endpoint after cutoff. | Track one identifiable crest across two longitudinal stations while checking that the aim stays fixed. |
+
+Give repeated pieces stable individual variation in phase, orientation or response to a shared force. A rigid part may keep its shape while its center and orientation respond to acceleration or contact. A planted or locked anchor can stay in place while its visible material or attached parts evolve. Preserve anatomical pivots and the collision contract. Review these motions at gameplay size in the [full study](#review-the-full-motion-study).
+
 ## Progressive formation and layers
 
 - For lines, use an advancing path, extension from an origin or ordered assembly. Leave the unreached path absent and shape width, emission and accents separately.
@@ -35,7 +48,7 @@ At a moving front, start the envelope when the front reaches each location. New 
 
 Test early, middle and late geometry separately from opacity. Trace path coverage, angle, radius or assembly in the native output. Use the `unity-animation-skill` motion-curve rules for the actual resulting time response of each independent control. Preserve the real clock and action events while shaping the visual progression.
 
-For a layered complete effect, give the composition distinct independently controllable contributions. A surface or silhouette, directional energy and particulate accents provide three distinct roles for a profile that requires them. Add impact or residual layers as the brief and budget permit. Choose depth, occlusion, contrasting scale and foreground/background balance to keep the subject readable. Compare attribute variants in grayscale by silhouette, flow, start, main timing and finish. Verify bound body or world anchors throughout the action and preserve the underlying collision or hit behavior.
+For a layered complete effect, give the composition distinct independently controllable contributions. A silhouette, directional energy, particulate accents, contact and residual material can each have different drivers. Split or combine draws to preserve the required motions within the rendering budget. Choose depth, occlusion, contrasting scale and foreground/background balance to keep the subject readable. Compare attribute variants in grayscale by silhouette, flow, start, main timing and finish. Verify bound body or world anchors throughout the action and preserve the underlying collision or hit behavior.
 
 ### Continue a free surface through occlusion
 

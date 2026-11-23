@@ -1,6 +1,6 @@
 ---
 name: unity-effects-skill
-description: Create Unity gameplay effects with VFX Graph and shaders. Adapt editable Particle Systems, compare the native appearance with the original artwork or footage, and verify repeatable playback.
+description: Create Unity gameplay effects with VFX Graph and Shader Graph. Adapt editable Particle Systems, animate each visible part, and compare repeatable native playback with the original.
 ---
 
 # Unity Effects
@@ -18,6 +18,7 @@ For linked work select `explain game-effect` for references, the effect profile 
 | Operation | Read for this task |
 | --- | --- |
 | Find or adapt a reference | [Use an existing effect or reference](#use-an-existing-effect-or-reference). |
+| A visible object, wing, leaf or light shaft appears frozen | [Plan each object's local motion](references/staged-effects.md#decompose-every-visible-object), [build the two graphs](references/graph-and-shader.md#author-the-live-graphs) and [test the individual parts](references/rendering-and-verification.md#verify-local-motion-per-object). |
 | Translate an editable Particle System or design a new GPU effect | [Graph and shader production](references/graph-and-shader.md). Use the [conversion table](references/graph-and-shader.md#translate-the-executing-source) for source ports and the [paired replay](references/graph-and-shader.md#compare-two-independent-replays) for both entry paths. |
 | Build emission, travel, formation or tails | [Create or revise an effect](#create-or-revise-an-effect). Use [lifecycle](references/staged-effects.md#native-lifecycle) for start/stop, [formation and layers](references/staged-effects.md#progressive-formation-and-layers) for changing shape, and [material motion](references/graph-and-shader.md#animate-fire-water-and-local-variation) for flow and particle variation. |
 | An organic effect has a flat end, notch or visible image seam | [Trace the edge in the original and native frames](references/rendering-and-verification.md#trace-an-unexplained-straight-edge) and [rebuild the free surface](references/staged-effects.md#continue-a-free-surface-through-occlusion). |
@@ -32,11 +33,13 @@ Before building or revising the runtime, make and inspect a [full motion study](
 
 ## Create or revise an effect
 
-1. Break down the GIF's independently visible jobs. For each one, record its anchor, cause, timing and ending, the relevant reference principle, the receiving-game adaptation and any source assets actually reused. Author new gameplay effects and source conversions with a live VFX Graph and Shader Graph or HLSL. Keep Unity Particle System components in the editable reference only.
+1. [Decompose every visible object](references/staged-effects.md#decompose-every-visible-object) in the GIF, including parts inside one image. Record each job's reference principle and receiving-game adaptation. Author new and revised gameplay VFX and source conversions with [VFX Graph and Shader Graph](references/graph-and-shader.md#author-the-live-graphs). Keep Unity Particle System components in the editable donor only.
 2. Adapt each numbered effect and play it alone. Apply the principle to compatible source emitters, curves, shader logic or game-owned materials. Check whether the source's axes, timing, camera and lifetime still make sense for this ability. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
 3. Compare the complete effect with the GIF at the same trigger, scale and playback speed. For a likeness request or source conversion, also [compare the native effect directly with the original](references/rendering-and-verification.md#compare-the-native-effect-with-the-original). Drive the documented gameplay action and observe its outcome and cue on the same instance. Repair a failing layer and replay. When the layers pass alone and the whole gesture still reads incorrectly, revisit their roles, overlap and order.
 
 ## Verify the native result
+
+**HARD REQUIREMENT.** Every visible effect object must exhibit its own physically motivated motion throughout its active interval, including a sustained hold. Verify this [per object in the final rendering](references/rendering-and-verification.md#verify-local-motion-per-object).
 
 **HARD REQUIREMENT.** Apply [continuous visible envelopes](references/staged-effects.md#continuous-visible-envelopes) to every visible contribution and confirm the [adjacent frames in both native replays](references/rendering-and-verification.md#verify-visible-envelopes).
 
