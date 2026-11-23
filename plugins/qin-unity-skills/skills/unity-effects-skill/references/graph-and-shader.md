@@ -6,6 +6,15 @@ For a design-led effect, locate the exact ability, form and version in the game 
 
 Map donor emitters and painted components to [independent motion jobs](staged-effects.md#decompose-every-visible-object). Keep the true gameplay clock and [author both live graphs](#author-the-live-graphs). Check the receiving prefab and its nested dependencies, including inactive children, for legacy Particle System components and renderers.
 
+## Rebuild from declared inputs
+
+When a reviewer asks whether an effect can be reproduced, list the exact requested outputs and the files allowed as inputs. Record the owning Skill, versioned recipe or authoring command, reference identity and required Editor and package versions for **each case**. Identify any hand-authored Shader Graph, VFX Graph, texture, prefab or controller among the inputs.
+
+1. Rebuild the timing study twice from its declared artwork, donor or procedural recipe in empty output folders. Compare the decoded frame sequence and exposure times. Keep an encoded reference or screenshot outside the generator inputs unless it is the declared source for a crop or transcode.
+2. For a generated runtime asset, run its authoring entry twice with that destination, its importer cache and any cached copy absent. In each receiving project, select and save the target render pipeline before graph compilation. Read back a compiled property and the actual shader binding. Record the input and output identities. Compare events and visible landmarks with the original and the two independently generated results. Fresh Unity assets can have different GUIDs or local file IDs. Verify the references resolve within each build and disclose any byte differences.
+3. A hand-authored asset can be tested by two clean imports and independent plays, and by a separate receiving project for a portability claim. Include transitive shader files referenced by path inside serialized VFX custom code. Decode embedded strings so escaped newlines before `#include` are visible. Include controller types stored inline in prefab serialization along with script GUID dependencies. In the empty project select the pipeline, reimport Shader Graphs before their VFX Graph consumers, then check the compiled bindings and visible output. Name each editable input and the parts that still need an author.
+4. For a batch, keep one row per case with its source, build command, native actor or effect, case-specific negative control and result. Keep reference fidelity, reconstruction, clean playback, transfer and reviewer approval as distinct claims. Record each missing step alongside that case.
+
 ## Author the live graphs
 
 1. Read the receiving project's Editor revision, pipeline, renderer and locked VFX Graph and Shader Graph versions. Inspect a working graph and the installed package's output and target types. Use the current supported node model for those versions. Record the selected types and versions. A planned package upgrade has its own project scope.

@@ -197,3 +197,15 @@ class InstalledRoutingTests(unittest.TestCase):
         self.assertIn("Custom Function", graph)
         self.assertIn("Master Stack", graph)
         self.assertIn("frozen-object control", replay)
+
+    def test_effect_case_reproduction_routes_to_rebuild_and_native_replay(self):
+        menu = read_topic("effects", "#choose-an-operation")
+        row = next(line for line in menu.splitlines() if "audit a set of examples" in line)
+        rebuild, replay = [read_topic("effects", link) for link in re.findall(r"\]\(([^)]+)\)", row)]
+        self.assertIn("generator inputs", rebuild)
+        self.assertIn("destination, its importer cache", rebuild)
+        self.assertIn("one row per case", rebuild)
+        self.assertIn("escaped newlines before `#include`", rebuild)
+        self.assertIn("controller types stored inline", rebuild)
+        self.assertIn("reimport Shader Graphs before their VFX Graph consumers", rebuild)
+        self.assertIn("seed", replay.lower())
