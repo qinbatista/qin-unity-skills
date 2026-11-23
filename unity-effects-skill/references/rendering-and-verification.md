@@ -35,7 +35,9 @@ For tracers carried by a pressure front, compare the front's arrival at each tra
 
 ### Verify visible envelopes
 
-Use the [continuous visible envelope rule](staged-effects.md#continuous-visible-envelopes) on two independently started native takes. Isolate each contribution at the receiving design frame rate. At its local origin or advancing front, record consecutive frame times and the visible weight relative to its own off and full values. Include the neighbors of the first and last visible samples and of an interruption, rebind or retrigger. Verify an interior sample at both edges and continuity of the carried weight and phase on both takes. For a negative control, substitute `0, 1, 1, 0` in the same measured region. Reject both instantaneous edges even when the peak and final blank match.
+Apply the [visible envelope rule](staged-effects.md#continuous-visible-envelopes) to the frozen GIF at its original exposure times and playback speed. Resample it at each receiving design frame rate over every distinct sampling phase (two for a 60 Hz study at 30 Hz). For irregular holds, test every interval between exposure boundaries modulo the receiver frame period and include the boundaries. An intermediate must survive every phase.
+
+On two independently started native takes, isolate each contribution and measure consecutive rendered brightness or coverage at the same local point as the front passes. Normalize against that contribution’s own off and full output. A whole-frame light sum can stay smooth while this point jumps. Include the neighbors of the first and last visible samples and of an interruption, rebind or retrigger. Verify an interior sample at both edges and continuity of the carried weight and phase on both takes. For a negative control, substitute `0, 1, 1, 0` in the same measured region. Reject both instantaneous edges even when the peak and final blank match.
 
 ## Observe the actual render path and lifetime
 
