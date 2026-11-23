@@ -27,6 +27,12 @@ Count the visual jobs before authoring. A donor with three emitters can represen
 | Inward channel, orbit or sustained aura | Advance a phase around the correct anchor, bind inward motion to that center and give the core and outer travel distinct clocks. Shade front and back at their appropriate depths. | The center stays registered on a moving subject. Releasing the input stops new material and the tail drains. |
 | Delayed strike or echo | Start the second emission from the specified event, place it on its own path and carry the first tail through the gap. Give each contact a local shader response. | Two distinct contacts survive at gameplay speed and the first tail does not obscure the second startup. |
 
+## Animate fire, water and local variation
+
+Assign regions to the motion visible in the source. Fire can feed from an anchored core, stretch tongues along the flow, erode their flanks and release cooling embers with separate ages. Water can carry a coherent crest into contact, break its lip into falling droplets and spread a thin rim along the surface while the interior clears. Let the Graph drive birth, transport and lifetime. Let the shader carry surface detail along the local flow, with a different rate or correlation length across it. Use particle density, overlap, depth and coverage to convey the material's volume at the receiving camera.
+
+Seed each region and particle at birth. Vary local timing, velocity, phase, width or lifetime within the source's range while retaining coherent travel and the gameplay clock. A rotating carrier can convey the overall gesture. A flame, spray or fluid surface also needs visible internal flow, breakup or replacement over its life. Check both with the [motion and seed comparison](rendering-and-verification.md#verify-internal-motion-and-seed-variation).
+
 ## Compare two independent replays
 
 Inspect the serialized initial-event name before choosing a reset sequence. Reinitializing a Graph can submit its initial event, so a subsequent explicit Play can produce a second burst. Measure the first birth and the last live particle across disable, stop and reuse. A delayed echo is another distinct clock. Take its offset from the actual primary release, keeping any projectile travel time and contact event separate.

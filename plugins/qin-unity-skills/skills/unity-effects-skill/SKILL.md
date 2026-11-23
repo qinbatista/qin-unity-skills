@@ -19,7 +19,7 @@ For linked work select `explain game-effect` for references, the effect profile 
 | --- | --- |
 | Find or adapt a reference | [Use an existing effect or reference](#use-an-existing-effect-or-reference). |
 | Translate an editable Particle System or design a new GPU effect | [Graph and shader production](references/graph-and-shader.md). Use the [conversion table](references/graph-and-shader.md#translate-the-executing-source) for source ports and the [paired replay](references/graph-and-shader.md#compare-two-independent-replays) for both entry paths. |
-| Build emission, travel, formation or tails | [Create or revise an effect](#create-or-revise-an-effect). Use [lifecycle](references/staged-effects.md#native-lifecycle) for start/stop or [formation and layers](references/staged-effects.md#progressive-formation-and-layers) for changing shape. |
+| Build emission, travel, formation or tails | [Create or revise an effect](#create-or-revise-an-effect). Use [lifecycle](references/staged-effects.md#native-lifecycle) for start/stop, [formation and layers](references/staged-effects.md#progressive-formation-and-layers) for changing shape, and [material motion](references/graph-and-shader.md#animate-fire-water-and-local-variation) for flow and particle variation. |
 | Fix material lighting, transparent emission, VFX binding or sorting | [Renderer and source](references/rendering-and-verification.md#bind-the-renderer-and-source). For common HLSL and Shader Graph math use [shared calculations](references/rendering-and-verification.md#share-rendering-calculations). |
 | Reduce overdraw or verify appearance, lifetime or GPU cost | [Actual render path and lifetime](references/rendering-and-verification.md#observe-the-actual-render-path-and-lifetime). Recheck at the same trigger, camera and simultaneous load. |
 
@@ -37,4 +37,4 @@ Make and inspect a timed target GIF, or use a reviewed GIF that matches the curr
 
 ## Verify the native result
 
-Run the smallest native case on the intended render path. [Check rendered pixels, lifecycle and cleanup](references/rendering-and-verification.md#observe-the-actual-render-path-and-lifetime). Measure simultaneous load for performance claims. For a fidelity delivery, verify the receiving project's documented replay and comparison commands from fresh task output.
+Run the smallest native case on the intended render path. [Check rendered pixels, lifecycle and cleanup](references/rendering-and-verification.md#observe-the-actual-render-path-and-lifetime). For moving media or stochastic particles, [check internal motion and seed variation](references/rendering-and-verification.md#verify-internal-motion-and-seed-variation). Measure simultaneous load for performance claims. For a fidelity delivery, verify the receiving project's documented replay and comparison commands from fresh task output.
