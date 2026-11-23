@@ -10,7 +10,7 @@ Select from the current app window or usable pane. The supplied breakpoints are 
 | --- | --- | --- |
 | Tall portrait | Extend the background and scrollable content vertically. Keep persistent actions within reach. | Use one row at the authored scale when the painted groups fit. |
 | Portrait | Use one content column between the header and bottom actions. | Align clear corner actions and status on their authored row. |
-| Wide portrait or square | Center a readable content column. Use the extra width for the scene, grid or margins. | Use a second status row under the corner controls by default. The confirmed Duo outer display uses its single-row override. |
+| Wide portrait or square | Center a readable content column. Use the extra width for the scene, grid or margins. | Use the authored top row when it fits. A second status row clears crowding or a centered obstruction. The confirmed Duo outer display uses its single-row override. |
 | Landscape | Arrange compatible body regions side by side. | Fit the status and actions to the usable width. Reflow if the measured groups collide. |
 | Ultrawide | Keep the primary interaction in a bounded central area. Extend scenery and optional secondary content into the wings. | Anchor persistent controls to their declared reachable region. Preserve readable text and touch sizes. |
 
@@ -88,6 +88,22 @@ Replay the five compositions and relevant overlays through the real screen. Capt
 Run the receiving game's existing layout replay from its actual entry. Include a clear window, both sides of the affected aspect breakpoint and the relevant centered or corner regions. Compare a before → changed → restored sequence in the same live state. Check the original artwork proportions, readable text, painted and interactive bounds, and button destinations after each transition.
 
 For Duo, include outer portrait → both landscape turns → outer portrait, and an outer → inner transfer at the same viewport size. Compare the restored anchors with the first visit, and check the same-size inner destination against its clean safe-area baseline. A change in the native reservation alone must also refresh placement. Replay supported locales and panes. Record Editor geometry replay, named simulator observations and physical device results with their actual runtime scope.
+
+## Portrait game UI matrix
+
+Record the supported upright window range, active UI hosts, authored reference, languages and page states. For a YoFaAssets-linked game use the 2160 × 3840 portrait acceptance reference and record its logical scale. Replay a smaller 9:16 window, a compact window at the supported minimum, a matched long window clear and under a central obstruction, a corner cutout, and a clear wide portrait such as 1200 × 1600. Vary the bottom gesture inset independently. Add each supported foldable panel and any window or inset change that can occur during play. On iPhone Duo, test the outer right-lens top row and the inner clear corner separately. Include a same-size outer-to-inner transfer if supported.
+
+| UI region | Layout rule | Native acceptance |
+| --- | --- | --- |
+| Full-screen scenery and world UI | Use proportional cover for the backing. Keep characters and gameplay shapes proportional and give the play surface its own anchor and input region. | Inspect a full frame, the playable bounds and the complete gesture travel at the supported extremes. |
+| Header, resources and status | Align the clear corners on their authored line. Fit readable resources in the remaining space, then place the pair below a central obstruction when needed. | Measure painted and hit bounds. Verify corner alignment, full values, reserved-region clearance and the real destinations. |
+| Primary action, guidance and progress | Keep the primary action within its content region. Give progress text and its track a common alignment. Give temporary guidance a bounded region. | Verify the action, all relevant progress or completion states, and clearance around the playfield and surrounding controls. |
+| Bottom navigation and tools | Anchor to the declared bottom edge, account for the gesture inset once, and move the decorative plate with its controls. | Check both end targets, equal alignment, and availability after an inset-only or display change. Check the system gesture on the device when it overlaps the layout. |
+| Content pages, lists and grids | Bound the readable content column. Let variable content scroll inside its region. Keep persistent actions and labels with their owners. | Exercise tab changes, the last reachable item, and return while retaining state. Include empty and long-content cases where reachable. |
+| Dialogs, sheets and transient states | Cover the window with the scrim. Fit the interactive panel to the usable region and reserve reachable close and confirm targets. | Open, close and reopen the real panel. Check that it shields underlying actions and preserves loading, error and success semantics. |
+| Text and input | Scale artwork and hit targets uniformly. Allocate space for actual localized text. Reflow the owning group at a measured breakpoint. | Inspect original-size glyphs, full numbers and native picks across supported locales. Exercise destination, cancel and return. |
+
+Freeze the receiving game's source, profile fixture and observer. Run the portrait cases twice from its actual entry in separate runtime launches. Match scene, page state, locale, viewport, display and obstruction source. Resolve actions through the mounted panel and its actual pick result when an embedded page reuses navigation names. Compare stable painted and interactive geometry within the declared raster tolerance. Record representative child pages and modals with the exact configuration used for each. Keep transient game data and timestamps out of the geometry comparison. Build one review sheet from the current native captures. Use separate captions for geometry replay, measured device inputs, and actual device behavior.
 
 ### Capture each iPhone Duo display separately
 
