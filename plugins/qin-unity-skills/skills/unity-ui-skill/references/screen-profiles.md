@@ -121,6 +121,12 @@ Complete the upright pass and the wide pass independently. For the wide pass, in
 
 Capture full scenes in addition to header crops. Include the tablet and inner-foldable pages in the same runtime used for the main flow. Device labels describe verified geometry. An Editor replay establishes layout and input for those viewports. A named device or simulator Player run establishes the exported window and rotation contract.
 
+### Present portrait and landscape together
+
+For a whole-game adaptation review, use the results of both orientation passes to deliver one image. Put portrait and landscape side by side. Give clear phones, phones with obstructions, clear tablets, and each supported foldable display or pose their own comparable rows. Include both landscape obstruction edges when applicable. Add compact windows and separating folds when they affect the game.
+
+In each case show the game at the tested window size and state what happens to the header, primary content and footer. Label any detail crop or geometry diagram. Show full frames for the main compositions and keep viewport dimensions, overlay markings and the runtime scope on the sheet.
+
 ### Capture each iPhone Duo display separately
 
 Capture a full frame per supported pose and scene. Label each with its display, orientation and geometry source. The default policy has five cases.

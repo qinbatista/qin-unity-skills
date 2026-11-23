@@ -10,7 +10,7 @@ The [installed task menu](../../../unity-code-skill/references/global-skill-rout
 
 ## Extend the task menu
 
-The [portrait game UI matrix](../../../unity-ui-skill/references/screen-profiles.md#portrait-game-ui-matrix) owns the reusable screen and UI-region checklist. Its [wide-window pass](../../../unity-ui-skill/references/screen-profiles.md#verify-the-wide-window-of-a-portrait-game) covers tablet, unfolded and ultrawide layouts, including representative pages. Each receiving game owns its concrete viewports, scenes, route assertions, and screenshot export.
+The [portrait game UI matrix](../../../unity-ui-skill/references/screen-profiles.md#portrait-game-ui-matrix) owns the reusable screen and UI-region checklist. Its [wide-window pass](../../../unity-ui-skill/references/screen-profiles.md#verify-the-wide-window-of-a-portrait-game) covers tablet, unfolded and ultrawide layouts, including representative pages. Use the [combined review sheet](../../../unity-ui-skill/references/screen-profiles.md#present-portrait-and-landscape-together) to show the cases from both orientations in one image. Each receiving game owns its concrete viewports, scenes, route assertions, and screenshot export.
 
 Each domain links to the same [contribution workflow](../../../unity-code-skill/references/contributing.md#submit-a-skill-change). Use the better approach in the current task. Record the gap, rationale, and verification when sharing a revision. The verified repository owner delivers directly, and contributors submit a PR.
 
