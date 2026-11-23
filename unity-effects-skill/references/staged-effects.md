@@ -37,6 +37,12 @@ Test early, middle and late geometry separately from opacity. Trace path coverag
 
 For a layered complete effect, give the composition distinct independently controllable contributions. A surface or silhouette, directional energy and particulate accents provide three distinct roles for a profile that requires them. Add impact or residual layers as the brief and budget permit. Choose depth, occlusion, contrasting scale and foreground/background balance to keep the subject readable. Compare attribute variants in grayscale by silhouette, flow, start, main timing and finish. Verify bound body or world anchors throughout the action and preserve the underlying collision or hit behavior.
 
+### Continue a free surface through occlusion
+
+Identify what occupies each side of the contour in the source. An actor can hide part of a water film, and a ground mask can remove paint from its lower edge. A separate, free-standing effect needs material behind that occluder. Let the receiving actor or terrain supply its own occlusion at render time.
+
+In the motion GIF, trace the unobstructed strands into and out of the missing sector. For a curved film, carry texture detail along the tangent while preserving distance across its thickness. Sample clean neighboring sectors, blend their coverage and premultiplied color across an overlap, and keep advection, local variation and the open interior. For a moving free tip, vary arrival time across the thickness where the flow supports it. The thicker core can lead the shoulders as the film gathers and drains. Preserve a level waterline, a real contact plane or a designed geometric edge when the source supports it. [Check the original, the isolated surface and the native composite](rendering-and-verification.md#trace-an-unexplained-straight-edge).
+
 ## Review the full motion study
 
 Trace each moving contribution from its cause and anchor through travel, response and decay. A falling drop accelerates into contact, which launches spray and a spreading rim. A magical pull can bend paths toward its moving source, then release them with residual momentum. Choose the driver the brief supports. Use the editable simulation or timed footage for delay, direction, speed and lifetime. A still establishes the pictured shape at one instant. Label timing and transitions supplied by the author.

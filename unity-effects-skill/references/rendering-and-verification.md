@@ -22,6 +22,13 @@ When a code shader and Shader Graph both use a calculation, share it in one guar
 
 For overlapping luminous tracks, follow particle age through size, color and alpha, then check their combined brightness after blending at the recorded camera exposure. For contracting rings, sample distinct arcs of the younger, larger ring and the older, smaller one in the same frame at both the dim phase and the peak. Record which arc is brighter in both the original and native take. A matching core or whole-frame total can hide the wrong brightness order.
 
+### Trace an unexplained straight edge
+
+1. Register the reported image to its native frame using a scene landmark, uniform scale and the event clock. Inspect the neighboring frames and the same region during formation, established flow, contact and release. A cut that persists after closure has a different cause from a squared-off advancing tip.
+2. Isolate the contributing draw. Compare its RGB and alpha on light and dark backgrounds with the uncropped artwork. Trace any actor-shaped hole, ground extraction line or atlas border. If the sampled material is continuous, inspect the reveal mask, UV limits, mesh bounds, stencil, depth and actual scene contact. Find which space the edge follows as the material or camera moves.
+3. [Reconstruct the affected material](staged-effects.md#continue-a-free-surface-through-occlusion), then capture the same region at gameplay scale and at a readable magnification. Put the rejected and revised clips on one clock. Show two independent revised native replays and the composite with its real occluders. Keep the original silhouette and local motion visible outside the repair.
+4. Measure the reported defect locally. For a closed liquid rim, sample across its radial thickness and measure the longest contiguous arc lacking the strand signal seen on its flanks. Check that the interior remains open and that strands still travel during the hold. Calibrate on the reported cut and on an intact stretch. Record the frames, scale and values for both runs. Preserve intentional contacts and leave visual sign-off with the reviewer.
+
 ## Verify internal motion and seed variation
 
 Give each stochastic gameplay cast a fresh detail seed before its first event, including two instances started on the same tick and a returned instance played again. Derive each visual job’s seed from the cast seed and a stable job identifier. Keep actor timing and gameplay events on their own clock. Exercise all three activations through the real trigger and check their effective seeds and visible local differences.

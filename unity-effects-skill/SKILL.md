@@ -20,6 +20,7 @@ For linked work select `explain game-effect` for references, the effect profile 
 | Find or adapt a reference | [Use an existing effect or reference](#use-an-existing-effect-or-reference). |
 | Translate an editable Particle System or design a new GPU effect | [Graph and shader production](references/graph-and-shader.md). Use the [conversion table](references/graph-and-shader.md#translate-the-executing-source) for source ports and the [paired replay](references/graph-and-shader.md#compare-two-independent-replays) for both entry paths. |
 | Build emission, travel, formation or tails | [Create or revise an effect](#create-or-revise-an-effect). Use [lifecycle](references/staged-effects.md#native-lifecycle) for start/stop, [formation and layers](references/staged-effects.md#progressive-formation-and-layers) for changing shape, and [material motion](references/graph-and-shader.md#animate-fire-water-and-local-variation) for flow and particle variation. |
+| An organic effect has a flat end, notch or visible image seam | [Trace the edge in the original and native frames](references/rendering-and-verification.md#trace-an-unexplained-straight-edge) and [rebuild the free surface](references/staged-effects.md#continue-a-free-surface-through-occlusion). |
 | Fix material lighting, transparent emission, VFX binding or sorting | [Renderer and source](references/rendering-and-verification.md#bind-the-renderer-and-source). For common HLSL and Shader Graph math use [shared calculations](references/rendering-and-verification.md#share-rendering-calculations). |
 | Reduce overdraw or verify appearance, lifetime or GPU cost | [Actual render path and lifetime](references/rendering-and-verification.md#observe-the-actual-render-path-and-lifetime). Recheck at the same trigger, camera and simultaneous load. |
 
@@ -38,5 +39,7 @@ Before building or revising the runtime, make and inspect a [full motion study](
 ## Verify the native result
 
 **HARD REQUIREMENT.** Apply [continuous visible envelopes](references/staged-effects.md#continuous-visible-envelopes) to every visible contribution and confirm the [adjacent frames in both native replays](references/rendering-and-verification.md#verify-visible-envelopes).
+
+**HARD REQUIREMENT.** Every persistent straight cut in a free material boundary must have a cause in the brief or the receiving scene. Trace suspect edges through the source, shader and composite, repair accidental clipping, and [show the registered region through motion in two native runs](references/rendering-and-verification.md#trace-an-unexplained-straight-edge).
 
 Run the smallest native case on the intended render path. [Check rendered pixels, lifecycle and cleanup](references/rendering-and-verification.md#observe-the-actual-render-path-and-lifetime). For moving media or stochastic particles, [check internal motion and seed variation](references/rendering-and-verification.md#verify-internal-motion-and-seed-variation). Measure simultaneous load for performance claims. For a fidelity delivery, verify the receiving project's documented replay and comparison commands from fresh task output.

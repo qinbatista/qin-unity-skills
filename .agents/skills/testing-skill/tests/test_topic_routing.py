@@ -179,6 +179,11 @@ class InstalledRoutingTests(unittest.TestCase):
         rendering = read_topic("effects", "references/rendering-and-verification.md#observe-the-actual-render-path-and-lifetime")
         self.assertIn("rendered pixels", rendering)
         self.assertIn("actual workload and platform", rendering)
+        edge_review = read_topic("effects", "references/rendering-and-verification.md#trace-an-unexplained-straight-edge")
+        self.assertIn("longest contiguous arc", edge_review)
+        repair = re.search(r"\(staged-effects\.md(#[^)]+)\)", edge_review)
+        self.assertIsNotNone(repair)
+        self.assertIn("premultiplied color", read_topic("effects", "references/staged-effects.md" + repair.group(1)))
 
     def test_heading_fragments_ignore_fenced_examples_and_disambiguate_repeats(self):
         lines = ["# Guide", "## C# checks", "````text", "## Example", "```", "## Still fenced", "````", "### C# checks", "~~~", "## Other example", "~~~"]
