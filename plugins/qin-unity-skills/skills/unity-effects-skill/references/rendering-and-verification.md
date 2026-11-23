@@ -14,6 +14,12 @@ Inspect the actual SpriteRenderer, UI, mesh, fullscreen pass or particle host an
 
 When a code shader and Shader Graph both use a calculation, share it in one guarded HLSL include. Pass inputs explicitly and define the returned opacity, tint and emission contract. Each renderer keeps its own passes, blend, depth and lighting. Verify both callers through the installed Graph's supported function import and compare RGB and alpha at matching fixed and animated inputs.
 
+## Compare the native effect with the original
+
+1. Select the exact design panel or the editable effect's own recorded view that defines the appearance. Label a mechanism-only donor and the derived timing GIF separately. Before reviewing the native take, select the cues that make the original recognizable, the evidence for each and any redesign the brief explicitly allows. A still supports the pictured pose, silhouette and surface. A claim about visual motion needs a timed original showing it.
+2. Put the original and final native composite side by side at the corresponding event. Keep both full frames and the same cue cropped from each, with its source page or timestamp, native frame and crop coordinates. Register on the same subject, contact or scene landmark using translation and one uniform scale. Preserve aspect, facing and tonal relationships. Disclose camera or exposure differences. Do not stretch, mirror or recolor evidence to obtain a match.
+3. At normal viewing size compare the characteristic contour, direction, spacing, palette, texture and edge against the original. Measure the traits that distinguish the cue. A thin arrow and a round spot can have identical color and pixel count. With footage, also compare the path, ordering and intervals. Report **original-to-native fidelity** and **native replay A/B repeatability** independently. A missing or stylistically different required cue fails fidelity even when both replays match the GIF. Mark unavailable evidence unverified. Name the failing cue and phase, fix its Graph, shader or composition, then recapture and compare against the same original.
+
 ## Observe the actual render path and lifetime
 
 1. Run the affected passes and VFX Graph kernels on the required graphics backend. Inspect shader diagnostics and rendered pixels for errors, NaNs, missing textures or variants, bad normals, clipping, sorting and transparency. Exercise zero and full coverage, UV boundaries, property limits and existing assigned materials.

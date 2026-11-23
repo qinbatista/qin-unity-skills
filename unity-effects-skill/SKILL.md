@@ -1,6 +1,6 @@
 ---
 name: unity-effects-skill
-description: Create and verify Unity gameplay effects with VFX Graph and shaders. Adapt editable Particle System references, separate motion from shading and compare repeated native renders.
+description: Create Unity gameplay effects with VFX Graph and shaders. Adapt editable Particle Systems, compare the native appearance with the original artwork or footage, and verify repeatable playback.
 ---
 
 # Unity Effects
@@ -33,7 +33,7 @@ Make and inspect a timed target GIF, or use a reviewed GIF that matches the curr
 
 1. Break down the GIF's independently visible jobs. For each one, record its anchor, cause, timing and ending, the relevant reference principle, the receiving-game adaptation and any source assets actually reused. Author new gameplay effects and source conversions with a live VFX Graph and Shader Graph or HLSL. Keep Unity Particle System components in the editable reference only.
 2. Adapt each numbered effect and play it alone. Apply the principle to compatible source emitters, curves, shader logic or game-owned materials. Check whether the source's axes, timing, camera and lifetime still make sense for this ability. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
-3. Compare the complete effect with the GIF at the same trigger, scale and playback speed. Drive the documented gameplay action and observe its outcome and cue on the same instance. Repair a failing layer and replay. When the layers pass alone and the whole gesture still reads incorrectly, revisit their roles, overlap and order.
+3. Compare the complete effect with the GIF at the same trigger, scale and playback speed. For a likeness request or source conversion, also [compare the native effect directly with the original](references/rendering-and-verification.md#compare-the-native-effect-with-the-original). Drive the documented gameplay action and observe its outcome and cue on the same instance. Repair a failing layer and replay. When the layers pass alone and the whole gesture still reads incorrectly, revisit their roles, overlap and order.
 
 ## Verify the native result
 
