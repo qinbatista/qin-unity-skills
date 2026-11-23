@@ -199,6 +199,7 @@ class InstalledRoutingTests(unittest.TestCase):
         self.assertIn("frozen-object control", replay)
         self.assertIn("trackable motion in the wrong direction", replay)
         self.assertIn("coverage over the full cast before encoding", replay)
+        self.assertIn("stationary fading shape", replay)
 
     def test_effect_case_reproduction_routes_to_rebuild_and_native_replay(self):
         menu = read_topic("effects", "#choose-an-operation")
