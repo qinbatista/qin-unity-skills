@@ -30,6 +30,8 @@ At a moving front, start the envelope when the front reaches each location. New 
 
 ## Decompose every visible object
 
+Apply [the single-subject scope](../SKILL.md#scope-one-subject) first. A visible character, scene object or neighboring effect can provide scale, contrast or a contact landmark for the selected subject. Keep those reference objects outside its motion inventory.
+
 Inventory what the viewer can follow in the original and the timed GIF. Split each object again wherever a part has a distinct driver, pivot, phase, surface flow, contact or tail. There is no fixed layer count. Jobs can share a graph, renderer or atlas. Keep one recipe row per independently observable motion and identify its parent, attachment or simulation space, force or event, response through entry/hold/release, visible landmark, implementation owner and isolated replay.
 
 | Object | Motion to draw in the GIF and implement | Landmark to follow |

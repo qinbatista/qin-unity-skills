@@ -13,6 +13,14 @@ Read the selected headings by link or [section reader](../unity-code-skill/scrip
 
 For linked work select `explain game-effect` for references, the effect profile and library handoff. Bind the effect or material, trigger, camera, scale, renderer and target. For a change [verify the native result](#verify-the-native-result).
 
+## Scope one subject
+
+**HARD REQUIREMENT.** Before making the motion study or searching for donors, name one subject for the current work unit. It can be a particular ability and form, one visual behavior inside an ability, or one character-bound or scene object. Record its trigger or physical driver, attachment, the cue to achieve and what will prove completion. A concept sheet supplies context for that subject. Its other characters, props, environment and effects retain their existing owners and presentation.
+
+Decompose as finely as necessary within the selected subject. Each job must contribute to its appearance or motion. A shader revision may affect one surface in a larger cast. Keep surrounding assets and gameplay stable, and compare any shared draw or binding at the same native tick. Use the complete cast only as far as needed to demonstrate how the selected subject reads in context.
+
+When a request names several subjects, keep them in order. Finish the GIF, reference readback, native iteration and evidence for the current subject before starting another. If the user requires a visual decision before continuing, keep that subject open until they give it.
+
 ## Choose an operation
 
 | Operation | Read for this task |
@@ -34,7 +42,7 @@ Before building or revising the runtime, make and inspect a [full motion study](
 
 ## Create or revise an effect
 
-1. [Decompose every visible object](references/staged-effects.md#decompose-every-visible-object) in the GIF, including parts inside one image. Record each job's reference principle and receiving-game adaptation. Author new and revised gameplay VFX and source conversions with [VFX Graph and Shader Graph](references/graph-and-shader.md#author-the-live-graphs). Keep Unity Particle System components in the editable donor only.
+1. [Decompose every visible object of the selected subject](references/staged-effects.md#decompose-every-visible-object) in the GIF, including parts inside one image. Record each job's reference principle and receiving-game adaptation. Author new and revised gameplay VFX and source conversions with [VFX Graph and Shader Graph](references/graph-and-shader.md#author-the-live-graphs). Keep Unity Particle System components in the editable donor only.
 2. Adapt each numbered effect and play it alone. Apply the principle to compatible source emitters, curves, shader logic or game-owned materials. Check whether the source's axes, timing, camera and lifetime still make sense for this ability. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
 3. Compare the complete effect with the GIF at the same trigger, scale and playback speed. For a likeness request or source conversion, also [compare the native effect directly with the original](references/rendering-and-verification.md#compare-the-native-effect-with-the-original). Drive the documented gameplay action and observe its outcome and cue on the same instance. Repair a failing layer and replay. When the layers pass alone and the whole gesture still reads incorrectly, revisit their roles, overlap and order.
 

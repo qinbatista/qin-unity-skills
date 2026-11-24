@@ -62,6 +62,8 @@ On two independently started native takes, isolate each contribution and measure
 
 ## Observe the actual render path and lifetime
 
+For a [single-subject revision](../SKILL.md#scope-one-subject) inside a larger effect, use matched-time captures of the subject alone, the surrounding context with that subject omitted, and the intact receiver. Verify that the intended cue changes and that other draws keep their footprint, events and timing. Treat any requested approval as a separate result.
+
 1. Run the affected passes and VFX Graph kernels on the required graphics backend. Inspect shader diagnostics and rendered pixels for errors, NaNs, missing textures or variants, bad normals, clipping, sorting and transparency. Exercise zero and full coverage, UV boundaries, property limits and existing assigned materials.
 2. Calibrate visual thresholds on the frozen target at matching scale and phase. If a threshold rejects the intended appearance, correct the measurement before tuning the effect. Compare individual contributions where the visual jobs overlap, using a region that follows the subject. Verify sustained motion separately in its own region. Restore borrowed layer visibility in guaranteed cleanup, then check subject, contact and silhouette readability in the full composite and on a second trigger at the same camera and inputs.
 3. Measure native first use separately from warm runs. If first-load rendering consumes an authored phase, verify the relevant readiness in its production owner and preserve the true trigger, timing and cancellation. Record observed frame gaps as well as warmed samples.
