@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9744ba927cec53f5a337a8d1eec457b0, type: 3}
+  m_Name: RockImpact
+  m_EditorClassIdentifier:
+  _feed: 2
+  _responses: 7
+  _origin: {x: -1.85, y: 1.05, z: 0}
+  _velocity: {x: 3.2, y: 1.75, z: 0.07}
+  _obstacleCenter: {x: -0.15, y: 0.84, z: 0}
+  _obstacleRadius: 0.45
+  _gravity: 8
+  _strength: 1
+  _pressure: 1
+  _swirl: 1
+  _feedDuration: 1.25
+  _duration: 2.7
+  _playOnEnable: 1

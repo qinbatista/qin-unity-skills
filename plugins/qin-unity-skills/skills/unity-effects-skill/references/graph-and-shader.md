@@ -83,6 +83,8 @@ Check the full gesture in the two native replays. Record a state sample appropri
 
 #### Compose fluid from a source, moving body and responses
 
+Use the [seven bundled water recipes](fluid-mixer.md#choose-and-combine) when the subject fits. The [installed replay](fluid-mixer.md#reproduce-twice-from-the-installed-skill) recreates the graphs, state and controls in two blank receivers.
+
 Classify each local example by its inlet, state and dimensionality, applied force, boundary, and visible outputs. Count a parent effect and its material or timing variants once. Open the editable source for each transferred mechanism. List locally available bytes separately from catalog identifiers and downloadable archives.
 
 Keep the water recipe editable independently of its renderer. Carry an impact position and momentum into a receiving height field. Reconstruct falling or colliding volumes from the same moving state that feeds spray. Expose only the boundaries the solver handles. Distinguish the dimension of that state from its projection in the camera.

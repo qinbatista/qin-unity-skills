@@ -1,0 +1,12 @@
+{
+    "name": "Qin.FluidReplay.Tests",
+    "includePlatforms": ["Editor"],
+    "references": [
+        "Qin.UnityEffects.Fluids",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime",
+        "Unity.VisualEffectGraph.Runtime"
+    ],
+    "optionalUnityReferences": ["TestAssemblies"]
+}

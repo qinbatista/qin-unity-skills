@@ -1,0 +1,650 @@
+#pragma kernel ResetLiquid
+#pragma kernel ResetWave
+#pragma kernel StepWave
+#pragma kernel PredictPositions
+#pragma kernel ClearCells
+#pragma kernel IndexParticles
+#pragma kernel MeasureDensity
+#pragma kernel ProjectPressure
+#pragma kernel UpdateVelocities
+#pragma kernel ReconstructFilm
+
+// A fixed-size spatial grid stores sorted membership in a bitset. Iteration order is
+// independent of thread execution order, and dense cells cannot drop neighbors.
+#define PARTICLES 384
+#define CELL_COUNT_X 25
+#define CELL_COUNT_Y 18
+#define WORDS_PER_CELL 13
+#define CELL_COUNT (CELL_COUNT_X * CELL_COUNT_Y)
+#define CELL_WORDS (CELL_COUNT * WORDS_PER_CELL)
+#define MASK_WORDS (PARTICLES / 32)
+#define AXIS_BINS 96
+#define GRID_WORDS (CELL_WORDS + 3 * AXIS_BINS * MASK_WORDS)
+#define FIELD_WIDTH 256
+#define FIELD_HEIGHT 176
+#define WAVE_WIDTH 128
+#define WAVE_HEIGHT 64
+
+static const float StepSeconds = 1.0 / 90.0;
+static const float Start = .10;
+static const float CellSize = .25;
+static const float Radius = .182;
+static const float RestDensity = 4.6;
+static const float Floor = .040;
+static const float2 FieldOrigin = float2(-3.0, -.68);
+static const float2 FieldSize = float2(6.0, 4.18);
+
+struct Particle
+{
+    float4 placement;   // Position and birth time. A negative time is inactive.
+    float4 motion;      // Velocity and amount carried into the airborne spray.
+};
+
+struct NeighborCursor
+{
+    int2 cell;
+    uint offset;
+    uint cellIndex;
+    uint words;
+    uint bits;
+    uint wordIndex;
+    uint3 supportBase;
+};
+
+RWStructuredBuffer<Particle> _Particles;
+RWStructuredBuffer<float4> _Predictions;
+RWStructuredBuffer<float4> _Corrections;
+RWStructuredBuffer<float2> _Density;
+RWStructuredBuffer<uint> _Cells;
+RWTexture2D<float4> _Film;
+RWTexture2D<float4> _Spray;
+RWStructuredBuffer<uint> _Impulses;
+Texture2D<float2> _WaveRead;
+RWTexture2D<float2> _WaveWrite;
+
+float _Seconds;
+float _AdmissionUntil;
+uint _Seed;
+int _Feed;
+int _WavesEnabled;
+int _SprayEnabled;
+int _FreeFlight;
+int _BuildSupportMasks;
+float _Duration;
+float _FeedDuration;
+float _Strength;
+float _Gravity;
+float _Swirl;
+float3 _Origin;
+float3 _Velocity;
+float4 _Obstacle;
+float _PressureScale;
+
+float2 ProjectToFilm(float3 p)
+{
+    return float2(p.x, p.y + .32 * p.z);
+}
+
+float Uniform(uint i, uint channel)
+{
+    uint hash = (_Seed ^ (i + 9u) * 747796405u) + channel * 2891336453u;
+    hash = ((hash >> ((hash >> 28u) + 4u)) ^ hash) * 277803737u;
+    return float((hash >> 22u) ^ hash) * (1.0 / 4294967295.0);
+}
+
+int2 GridCell(float2 position)
+{
+    return int2(floor((position - FieldOrigin) / CellSize));
+}
+
+NeighborCursor BeginSearch(float2 position)
+{
+    NeighborCursor cursor = (NeighborCursor)0;
+    cursor.cell = GridCell(position) - 1;
+    return cursor;
+}
+
+uint AxisBin(float coordinate)
+{
+    return (uint)clamp((int)floor((coordinate + 3.0) * 16.0), 0, AXIS_BINS - 1);
+}
+
+uint MaskAddress(uint axis, uint bin)
+{
+    return CELL_WORDS + (axis * AXIS_BINS + bin) * MASK_WORDS;
+}
+
+NeighborCursor BeginPressureSearch(float3 position)
+{
+    NeighborCursor cursor = BeginSearch(ProjectToFilm(position));
+    if (_BuildSupportMasks != 0)
+        cursor.supportBase = uint3(MaskAddress(0u, AxisBin(position.x)), MaskAddress(1u, AxisBin(position.y)),
+            MaskAddress(2u, AxisBin(position.z)));
+    return cursor;
+}
+
+bool NextNeighbor(inout NeighborCursor cursor, out uint id)
+{
+    while (cursor.bits != 0u || cursor.words != 0u || cursor.offset < 9u)
+    {
+        if (cursor.bits != 0u)
+        {
+            uint bit = firstbitlow(cursor.bits);
+            cursor.bits &= cursor.bits - 1u;
+            id = cursor.wordIndex * 32u + bit;
+            return true;
+        }
+        if (cursor.words != 0u)
+        {
+            cursor.wordIndex = firstbitlow(cursor.words);
+            cursor.words &= cursor.words - 1u;
+            cursor.bits = _Cells[cursor.cellIndex + cursor.wordIndex + 1u];
+            if (cursor.supportBase.x != 0u)
+                cursor.bits &= _Cells[cursor.supportBase.x + cursor.wordIndex]
+                    & _Cells[cursor.supportBase.y + cursor.wordIndex] & _Cells[cursor.supportBase.z + cursor.wordIndex];
+            continue;
+        }
+        int2 cell = cursor.cell + int2(cursor.offset % 3u, cursor.offset / 3u);
+        cursor.offset++;
+        if (any(cell < 0) || any(cell >= int2(CELL_COUNT_X, CELL_COUNT_Y)))
+            continue;
+        cursor.cellIndex = uint(cell.y * CELL_COUNT_X + cell.x) * WORDS_PER_CELL;
+        cursor.words = _Cells[cursor.cellIndex];
+    }
+    id = 0u;
+    return false;
+}
+
+float2 WaveUv(float2 xz)
+{
+    return xz / float2(6.0, 3.2) + .5;
+}
+
+int2 WavePixel(float2 xz)
+{
+    return clamp(int2(WaveUv(xz) * float2(WAVE_WIDTH, WAVE_HEIGHT)), 0, int2(WAVE_WIDTH - 1, WAVE_HEIGHT - 1));
+}
+
+float3 Contain(float3 predicted)
+{
+    if (_Obstacle.w > 0.0)
+    {
+        float3 difference = predicted - _Obstacle.xyz;
+        float distance = length(difference);
+        float radius = _Obstacle.w + .028;
+        if (distance < radius)
+        {
+            float3 normal = distance > .0001 ? difference / distance : float3(0.0, 1.0, 0.0);
+            predicted += (radius - distance) * normal;
+        }
+    }
+    predicted.y = max(Floor, predicted.y);
+    return predicted;
+}
+
+float Birth(uint id)
+{
+    // Smooth the admission rate near the head and tail of a feed.
+    float u = (float(id) + .5) / PARTICLES;
+    float phase = lerp(u, (asin(2.0 * u - 1.0) / 3.14159265) + .5, .63);
+    float first = min(Start, .47 * _FeedDuration);
+    return lerp(first, _FeedDuration, phase);
+}
+
+float3 DropOffset(uint id)
+{
+    // Equal-volume shells filled with approximately equidistant Fibonacci sites.
+    // The permutation admits every shell throughout the fill and has no duplicate site.
+    uint site = (id * 73u) % PARTICLES;
+    uint shell = site < 3u ? 0u : site < 25u ? 1u : site < 83u ? 2u : site < 197u ? 3u : 4u;
+    uint first = shell == 0u ? 0u : shell == 1u ? 3u : shell == 2u ? 25u : shell == 3u ? 83u : 197u;
+    uint count = shell == 0u ? 3u : shell == 1u ? 22u : shell == 2u ? 58u : shell == 3u ? 114u : 187u;
+    float height = 1.0 - 2.0 * (float(site - first) + .5) / float(count);
+    float angle = (site - first) * 2.39996323 + shell * 1.412 + 6.28318531 * Uniform(0u, 11u);
+    float radius = shell == 0u ? .151 : shell == 1u ? .322 : shell == 2u ? .513 : shell == 3u ? .710 : .907;
+    float ring = sqrt(saturate(1.0 - height * height));
+    return (radius + .008 * (Uniform(id, 2u) - .5)) * float3(ring * cos(angle), height, ring * sin(angle));
+}
+
+Particle Emit(uint id, float birth)
+{
+    float angle = float(id) * 2.39996323 + .24 * (Uniform(id, 1u) - .5);
+    float2 direction = float2(cos(angle), sin(angle));
+    float2 disk = direction * sqrt(Uniform(id, 2u));
+    float vertical = 2.0 * Uniform(id, 3u) - 1.0;
+    float3 position = _Origin;
+    float3 velocity = _Velocity * sqrt(_Strength);
+    if (_Feed == 1)
+    {
+        float3 site = DropOffset(id);
+        float sinceOpening = birth - min(Start, .47 * _FeedDuration);
+        // Inlet sites travel with the falling mass during admission; older sites do not overlap newborn ones.
+        position += site * float3(.37, .35, .32) + velocity * sinceOpening;
+        position.y -= .5 * _Gravity * sinceOpening * sinceOpening;
+        velocity.y -= _Gravity * sinceOpening;
+        velocity.xz += .075 * float2(site.z, -site.x);
+    }
+    else if (_Feed == 2 || _Feed == 3)
+    {
+        // A round nozzle section is perpendicular to the actual launch vector.
+        float3 axis = length(velocity) > .002 ? normalize(velocity) : float3(1, 0, 0);
+        float3 hint = abs(axis.z) < .85 ? float3(0, 0, 1) : float3(0, 1, 0);
+        float3 up = normalize(cross(hint, axis));
+        float3 side = cross(axis, up);
+        float width = _Feed == 3 ? .116 : .139;
+        position += (up * disk.x + side * disk.y) * width + axis * (.045 * vertical);
+        velocity += up * (.12 * disk.x) + side * (.19 * disk.y);
+        if (_Feed == 3 && (id & 1u) != 0u)
+        {
+            position.x = -position.x;
+            velocity.x = -velocity.x;
+        }
+    }
+    else if (_Feed == 4)
+    {
+        float span = 2.0 * frac((float(id) + .5) * .61803399) - 1.0;
+        position.x += span * .70;
+        position.y += .046 * disk.x;
+        position.z += .109 * disk.y + .039 * sin(4.3 * span + 3.2 * birth);
+        velocity.z += .18 * span + .11 * sin(5.4 * span + 2.2 * birth);
+    }
+    else if (_Feed == 5)
+    {
+        // A main inlet and a slender side inlet supply unequal arcs at the basin rim.
+        // Their finite cross sections travel into a drain instead of filling a ring on admission.
+        bool sideInlet = (id % 5u) == 2u;
+        float inletAngle = (sideInlet ? 1.76 : -.48) + .15 * sin(3.6 * birth + Uniform(0u, 17u) * 6.28);
+        inletAngle += .084 * vertical;
+        float2 radial = float2(cos(inletAngle), sin(inletAngle));
+        float2 tangent = float2(-radial.y, radial.x);
+        float radius = (sideInlet ? .95 : 1.18) + .125 * disk.x;
+        position.xz += radius * radial;
+        position.y += (sideInlet ? .39 : .47) + .094 * disk.y;
+        velocity.xz += ((sideInlet ? 2.39 : 2.85) * _Swirl * tangent - .66 * radial) * sqrt(_Strength);
+        velocity.y += .10 * disk.y;
+    }
+    Particle p;
+    p.placement = float4(Contain(position), birth);
+    p.motion = float4(velocity, 0.0);
+    return p;
+}
+
+float3 Force(float3 position, float3 velocity)
+{
+    float3 acceleration = float3(0., -_Gravity, 0.);
+    if (_Feed == 5)
+    {
+        float2 offset = position.xz - _Origin.xz;
+        float distance = length(offset);
+        float2 radial = offset / max(.09, distance);
+        float2 tangent = float2(-radial.y, radial.x);
+        float imposedFlow = 1.0 - smoothstep(_FeedDuration + .48, max(_FeedDuration + .60, _Duration), _Seconds);
+        float radialSpeed = dot(velocity.xz, radial);
+        float azimuthalSpeed = dot(velocity.xz, tangent);
+        float strength = sqrt(_Strength);
+        float inflow = -lerp(.88, .67, smoothstep(.12, 1.1, distance)) * strength;
+        float spin = min(3.30, 2.65 * rsqrt(max(.16, distance))) * _Swirl * strength;
+        // The radial pressure gradient supplies centripetal acceleration and inward transport.
+        float radialForce = 5.2 * (inflow - radialSpeed) - azimuthalSpeed * azimuthalSpeed / max(.12, distance);
+        acceleration.xz += (radialForce * radial + 3.5 * (spin - azimuthalSpeed) * tangent) * imposedFlow;
+        float basinHeight = _Origin.y + Floor + .40 * smoothstep(.075, 1.15, distance);
+        acceleration.y += (_Gravity + 37.0 * (basinHeight - position.y) - 8.8 * velocity.y) * imposedFlow;
+    }
+    return acceleration;
+}
+
+void DepositImpact(float2 position, float momentum)
+{
+    // Positive integer accumulation is deterministic across GPU execution orders.
+    float2 gridPosition = WaveUv(position) * float2(WAVE_WIDTH, WAVE_HEIGHT) - .5;
+    int2 center = int2(floor(gridPosition));
+    [unroll] for (int y = -1; y <= 2; y++)
+    {
+        [unroll] for (int x = -1; x <= 2; x++)
+        {
+            int2 pixel = center + int2(x, y);
+            if (any(pixel < 0) || any(pixel >= int2(WAVE_WIDTH, WAVE_HEIGHT)))
+                continue;
+            float2 offset = float2(pixel) - gridPosition;
+            float2 weight = saturate(1.0 - abs(offset) * .5);
+            uint impulse = (uint)round(min(12.0, momentum) * 1024.0 * .25 * weight.x * weight.y);
+            InterlockedAdd(_Impulses[pixel.y * WAVE_WIDTH + pixel.x], impulse);
+        }
+    }
+}
+
+[numthreads(64, 1, 1)]
+void ResetLiquid(uint id : SV_DispatchThreadID)
+{
+    Particle inactive = (Particle)0;
+    inactive.placement.w = -1.0;
+    _Particles[id] = inactive;
+    _Density[id] = 0.;
+    _Spray[uint2(id, 0)] = 0.0;
+    _Spray[uint2(id, 1)] = 0.0;
+}
+
+[numthreads(8, 8, 1)]
+void ResetWave(uint2 pixel : SV_DispatchThreadID)
+{
+    _WaveWrite[pixel] = 0.0;
+    _Impulses[pixel.y * WAVE_WIDTH + pixel.x] = 0u;
+}
+
+[numthreads(64, 1, 1)]
+void PredictPositions(uint id : SV_DispatchThreadID)
+{
+    Particle p = _Particles[id];
+    if (p.placement.w < 0.0)
+    {
+        float birth = Birth(id);
+        if (_Strength <= .0001 || p.placement.w < -1.5 || birth > min(_Seconds, _AdmissionUntil))
+        {
+            _Predictions[id] = p.placement;
+            return;
+        }
+        p = Emit(id, birth);
+        _Particles[id] = p;
+    }
+
+    float3 velocity = (p.motion.xyz + Force(p.placement.xyz, p.motion.xyz) * StepSeconds) * (1.0 - .13 * StepSeconds);
+    float3 expected = p.placement.xyz + StepSeconds * velocity;
+    if (_Feed == 5 && length(expected.xz - _Origin.xz) < .092)
+    {
+        if (_WavesEnabled != 0)
+            DepositImpact(expected.xz, .12 * length(velocity));
+        p.placement = float4(expected, -2.0);
+        p.motion = 0.0;
+        _Particles[id] = p;
+        _Predictions[id] = p.placement;
+        return;
+    }
+    if (_WavesEnabled != 0)
+    {
+        float2 water = _WaveRead.Load(int3(WavePixel(expected.xz), 0));
+        float surface = Floor + clamp(water.x, 0.0, .10);
+        if (velocity.y < -.59 && p.placement.y >= surface && expected.y < surface)
+            DepositImpact(expected.xz, -velocity.y);
+        // The height/vertical velocity of the receiving film lifts already settled water.
+        if (expected.y < surface && velocity.y > -.59)
+            expected.y += min(.018, (surface - expected.y) * .24 + max(0.0, water.y) * .001);
+    }
+    _Predictions[id] = float4(Contain(expected), p.placement.w);
+}
+
+[numthreads(64, 1, 1)]
+void ClearCells(uint id : SV_DispatchThreadID)
+{
+    if (id < GRID_WORDS)
+        _Cells[id] = 0u;
+}
+
+[numthreads(64, 1, 1)]
+void IndexParticles(uint id : SV_DispatchThreadID)
+{
+    float4 predicted = _Predictions[id];
+    if (predicted.w < 0.0)
+        return;
+    int2 cell = GridCell(ProjectToFilm(predicted.xyz));
+    if (any(cell < 0) || any(cell >= int2(CELL_COUNT_X, CELL_COUNT_Y)))
+        return;
+    uint header = uint(cell.y * CELL_COUNT_X + cell.x) * WORDS_PER_CELL;
+    uint word = id >> 5u;
+    uint memberBit = 1u << (id & 31u);
+    InterlockedOr(_Cells[header + word + 1u], memberBit);
+    InterlockedOr(_Cells[header], 1u << word);
+    if (_BuildSupportMasks != 0)
+    {
+        // Insert the parcel into every query bin within support on each axis.
+        // Intersecting the three words can reject only zero-weight neighbors. Clamped edge bins overinclude.
+        [unroll] for (uint axis = 0u; axis < 3u; axis++)
+        {
+            float coordinate = predicted[axis];
+            uint low = AxisBin(coordinate - Radius - .0001);
+            uint high = AxisBin(coordinate + Radius + .0001);
+            for (uint bin = low; bin <= high; bin++)
+                InterlockedOr(_Cells[MaskAddress(axis, bin) + word], memberBit);
+        }
+    }
+}
+
+float Kernel(float3 difference)
+{
+    return saturate(1.0 - dot(difference, difference) / (Radius * Radius));
+}
+
+float ReferenceDensity()
+{
+    // The dense released volume has 384 stratified 3D sites. A nozzle emits a much thinner cross section.
+    return _Feed == 1 ? 10.4 : RestDensity;
+}
+
+float3 DensityGradient(float3 difference, float kernel)
+{
+    return (-6.0 / (ReferenceDensity() * Radius * Radius)) * kernel * kernel * difference;
+}
+
+[numthreads(64, 1, 1)]
+void MeasureDensity(uint id : SV_DispatchThreadID)
+{
+    float4 predicted = _Predictions[id];
+    if (predicted.w < 0.0)
+    {
+        _Density[id] = 0.0;
+        return;
+    }
+
+    float density = 1.0;
+    float3 gradient = 0.0;
+    float gradientEnergy = 0.0;
+    NeighborCursor neighbors = BeginPressureSearch(predicted.xyz);
+    uint other;
+    while (NextNeighbor(neighbors, other))
+    {
+        if (other == id)
+            continue;
+        float3 difference = predicted.xyz - _Predictions[other].xyz;
+        float k = Kernel(difference);
+        if (k <= 0.0)
+            continue;
+        float3 g = DensityGradient(difference, k);
+        density += k * k * k;
+        gradient += g;
+        gradientEnergy += dot(g, g);
+    }
+
+    // Only compressed neighborhoods need pressure. Free surfaces remain free.
+    float compression = max(0.0, density / ReferenceDensity() - 1.0);
+    _Density[id] = float2(-compression / (gradientEnergy + dot(gradient, gradient) + 15.0), density);
+}
+
+[numthreads(64, 1, 1)]
+void ProjectPressure(uint id : SV_DispatchThreadID)
+{
+    float4 predicted = _Predictions[id];
+    if (predicted.w < 0.0)
+    {
+        _Corrections[id] = predicted;
+        return;
+    }
+
+    float3 displacement = 0.0;
+    float pressure = _Density[id].x;
+    NeighborCursor neighbors = BeginPressureSearch(predicted.xyz);
+    uint other;
+    while (NextNeighbor(neighbors, other))
+    {
+        if (other == id)
+            continue;
+        float3 difference = predicted.xyz - _Predictions[other].xyz;
+        float k = Kernel(difference);
+        if (k <= 0.0)
+            continue;
+        float tensile = (k * k * k) / .68;
+        float repel = (_Feed == 1 ? .00011 : .00086) * tensile * tensile * tensile * tensile;
+        float cohesion = .012 * k * (1.0 - k);
+        displacement += (pressure + _Density[other].x - repel) * DensityGradient(difference, k) - cohesion * difference;
+    }
+
+    displacement *= _PressureScale * min(1.0, .025 * rsqrt(max(.0000001, dot(displacement, displacement))));
+    _Corrections[id] = float4(Contain(predicted.xyz + displacement), predicted.w);
+}
+
+float Envelope(Particle p)
+{
+    float age = smoothstep(0.0, .073, _Seconds - p.placement.w);
+    float release = 1.0 - smoothstep(_Duration - .39, _Duration, _Seconds);
+    // Material can leave through either open side without a square wall or a cropped bright streak.
+    float perimeter = (1.0 - smoothstep(2.51, 2.83, abs(p.placement.x)))
+                    * (1.0 - smoothstep(1.34, 1.66, abs(p.placement.z)));
+    if (_Feed == 5)
+        perimeter *= smoothstep(.105, .244, length(p.placement.xz - _Origin.xz));
+    return age * release * perimeter;
+}
+
+[numthreads(64, 1, 1)]
+void UpdateVelocities(uint id : SV_DispatchThreadID)
+{
+    float4 predicted = _Predictions[id];
+    if (predicted.w < 0.0)
+    {
+        if (predicted.w < -1.5)
+            _Spray[uint2(id, 0)] = 0.0;
+        return;
+    }
+    Particle p = _Particles[id];
+    float3 velocity = (predicted.xyz - p.placement.xyz) / StepSeconds;
+    if (_Feed == 1 && predicted.y > Floor + .15)
+    {
+        // Accumulate only part of the positional pressure correction as kinetic energy in free flight.
+        float3 ballistic = (p.motion.xyz + float3(0., -_Gravity * StepSeconds, 0.)) * (1.0 - .13 * StepSeconds);
+        velocity = lerp(ballistic, velocity, .19);
+    }
+    velocity *= min(1.0, 9.0 * rsqrt(max(.0001, dot(velocity, velocity))));
+    if (predicted.y <= Floor + .002)
+    {
+        if (_Feed == 1 && p.motion.y < -.85)
+        {
+            float sinceOpening = max(0., _Seconds - min(Start, .47 * _FeedDuration));
+            float2 contactAxis = _Origin.xz + _Velocity.xz * sqrt(_Strength) * sinceOpening;
+            float2 offset = predicted.xz - contactAxis;
+            float radius = length(offset);
+            velocity.xz += offset / max(.04, radius) * smoothstep(.025, .23, radius) * (-.31 * p.motion.y);
+        }
+        velocity.y = max(0.0, velocity.y);
+        float floorRetention = _Feed == 5 ? .994 : _Feed == 1 ? .940 : .973;
+        velocity.xz *= floorRetention;
+    }
+    float freeSurface = _FreeFlight != 0 ? 0.0 : 1.0 - smoothstep(1.20, 2.42, _Density[id].y);
+    float kinetic = smoothstep(1.8, 3.9, length(velocity)) * smoothstep(.085, .31, predicted.y);
+    float head = smoothstep(.15, .31, _Seconds - predicted.w);
+    float separation = _SprayEnabled != 0 ? freeSurface * kinetic * head : 0.;
+    float spray = lerp(p.motion.w, separation, separation > p.motion.w ? .115 : .056);
+    p.placement = predicted;
+    p.motion = float4(velocity, spray);
+    _Particles[id] = p;
+
+    float weight = (1.0 - step(.64, Uniform(id, 8u))) * spray * Envelope(p);
+    _Spray[uint2(id, 0)] = float4(predicted.xyz, weight);
+    _Spray[uint2(id, 1)] = float4(velocity.xy, Uniform(id, 9u), Uniform(id, 10u));
+}
+
+float SourcePulse(float2 position, float2 center, float seconds, float start, float span)
+{
+    float phase = saturate((seconds - start) / span);
+    float2 offset = position - center;
+    float bell = sin(3.14159265 * phase);
+    return bell * bell * exp(-dot(offset, offset) / .032);
+}
+
+[numthreads(8, 8, 1)]
+void StepWave(uint2 pixel : SV_DispatchThreadID)
+{
+    int2 cell = int2(pixel);
+    int2 last = int2(WAVE_WIDTH - 1, WAVE_HEIGHT - 1);
+    float2 water = _WaveRead.Load(int3(cell, 0));
+    float left = _WaveRead.Load(int3(max(cell - int2(1, 0), 0), 0)).x;
+    float right = _WaveRead.Load(int3(min(cell + int2(1, 0), last), 0)).x;
+    float back = _WaveRead.Load(int3(max(cell - int2(0, 1), 0), 0)).x;
+    float front = _WaveRead.Load(int3(min(cell + int2(0, 1), last), 0)).x;
+    const float2 inverseSpacing = float2(WAVE_WIDTH / 6.0, WAVE_HEIGHT / 3.2);
+    float laplacian = (left + right - 2.0 * water.x) * inverseSpacing.x * inverseSpacing.x
+                    + (back + front - 2.0 * water.x) * inverseSpacing.y * inverseSpacing.y;
+    float2 world = ((float2(pixel) + .5) / float2(WAVE_WIDTH, WAVE_HEIGHT) - .5) * float2(6.0, 3.2);
+    float drive = 0.0;
+    if (_Feed == 0 && _Seconds <= _AdmissionUntil)
+    {
+        drive = SourcePulse(world, _Origin.xz, _Seconds, .115, .145);
+        float secondaryStrength = lerp(.60, .84, Uniform(0u, 15u));
+        float secondaryDuration = lerp(.118, .151, Uniform(0u, 16u));
+        drive += secondaryStrength * SourcePulse(world, _Origin.xz + float2(1.18, .43), _Seconds, .52, secondaryDuration);
+        drive *= 34.5 * _Strength;
+    }
+    uint index = pixel.y * WAVE_WIDTH + pixel.x;
+    float impact = min(3.1, (float)_Impulses[index] * (.17 / 1024.0));
+    _Impulses[index] = 0u;
+    // Make the outer band absorb energy before it reaches the texture boundary.
+    float2 margin = min(float2(pixel), float2(last - cell));
+    float edge = 1.0 - smoothstep(0., 9., min(margin.x, margin.y));
+    float damping = exp(-(1.03 + 9.0 * edge * edge) * StepSeconds);
+    float velocity = (water.y + StepSeconds * (3.7 * laplacian - drive) - impact) * damping;
+    _WaveWrite[pixel] = float2(water.x + StepSeconds * velocity, velocity);
+}
+
+[numthreads(8, 8, 1)]
+void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
+{
+    float2 position = FieldOrigin + (float2(pixel) + .5) / float2(FIELD_WIDTH, FIELD_HEIGHT) * FieldSize;
+    float thickness = 0.0;
+    float depth = 0.0;
+    float activity = 0.0;
+    float capillary = 0.0;
+    NeighborCursor neighbors = BeginSearch(position);
+    uint other;
+    while (NextNeighbor(neighbors, other))
+    {
+        Particle p = _Particles[other];
+        float2 delta = position - ProjectToFilm(p.placement.xyz);
+        float2 projectedVelocity = ProjectToFilm(p.motion.xyz);
+        float speed = length(projectedVelocity);
+        float2 axis = speed > .04 ? projectedVelocity / speed : float2(1.0, 0.0);
+        float2 across = float2(-axis.y, axis.x);
+        float stretch = smoothstep(.28, 4.1, speed);
+        float onGround = 1.0 - smoothstep(Floor + .018, Floor + .18, p.placement.y);
+        // The footprint is a reconstruction radius, not a rendered particle radius.
+        float lengthwise = lerp(.183, .239, stretch);
+        float widthwise = lerp(.168, .122, stretch);
+        float u = dot(delta, axis) / lengthwise;
+        float v = dot(delta, across) / widthwise;
+        // A resting parcel lies in XZ. Its reconstructed patch projects as a shallow ellipse,
+        // while its center still retains the depth and width of the physical footprint.
+        float groundLength = .231;
+        float groundHeight = .061;
+        float2 ground = delta / float2(groundLength, groundHeight);
+        float support = lerp(u * u + v * v, dot(ground, ground), onGround);
+        float kernel = saturate(1.0 - support);
+        if (kernel <= 0.0)
+            continue;
+        float mass = kernel * kernel * kernel * Envelope(p) * (1.0 - .70 * p.motion.w);
+        mass *= .026 / lerp(lengthwise * widthwise, groundLength * groundHeight, onGround);
+        float reach = lerp(.075, .035, onGround) * sqrt(kernel);
+        // Upper envelope in camera depth, softened so overlapping bodies form one optical surface.
+        float frontDepth = reach - p.placement.z;
+        depth += mass * exp2(clamp(3.2 * frontDepth, -8.0, 8.0));
+        thickness += mass;
+        activity += mass * saturate(length(p.motion.xyz) / 5.0);
+        // Material phases follow the parcels. Local coordinates align the fine folds with their current flow.
+        float age = _Seconds - p.placement.w;
+        float phase = 5.2 * p.placement.w + 2.6 * (Uniform(other, 12u) - .5);
+        float shear = .63 * sin(2.1 * age + p.placement.z * 3.2 + u);
+        float acrossSurface = lerp(7.6 * v + 1.35 * u, 5.6 * ground.y + 1.35 * ground.x, onGround);
+        capillary += mass * sin(acrossSurface + phase + shear);
+    }
+    if (thickness < .0001)
+    {
+        _Film[pixel] = 0.;
+        return;
+    }
+    float frontDepth = log2(max(.000001, depth / thickness)) / 3.2;
+    _Film[pixel] = float4(thickness, frontDepth, activity / thickness, capillary / thickness);
+}

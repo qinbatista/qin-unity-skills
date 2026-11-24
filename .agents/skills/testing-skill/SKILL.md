@@ -9,6 +9,8 @@ Use the smallest maintained case that can establish the change. Run from the rep
 
 | Purpose | Level | Runner and owner |
 | --- | --- | --- |
+| Fluid template installs atomically, handles an identical reinstall, protects custom data and GUID bindings | 1 | [Installer cases](tests/test_fluid_mixer.py), Python unittest. |
+| Seven editable water recipes reproduce from the installed release in two blank URP projects | 2 | [Native replay and forces](../../../unity-effects-skill/references/fluid-mixer.md#reproduce-twice-from-the-installed-skill) using Unity 6000.6.7f1 with graphics. |
 | C# checker finds actual discards and forwarding, distinguishes valid syntax, and filters changed lines | 1 | `unittest`, [test_csharp_rule_guard.py](../../../unity-code-skill/tests/test_csharp_rule_guard.py), Unity Code |
 | Release and discovery routes agree, screen profile data and reader match the published package, and Skill entries resolve project precedence, architecture and standalone CLI guidance | 2 | `unittest`, [test_skill_catalog.py](tests/test_skill_catalog.py), repository Testing |
 | Installed task menus resolve scoped references, including half-speed gait acceptance and the owner and contributor delivery routes from each domain | 2 | Python `unittest`, [test_topic_routing.py](tests/test_topic_routing.py), against the packaged reader. |

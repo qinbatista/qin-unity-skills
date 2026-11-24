@@ -1,0 +1,5 @@
+{
+    "name": "Qin.UnityEffects.Fluids",
+    "rootNamespace": "Qin.UnityEffects.Fluids",
+    "references": ["Unity.VisualEffectGraph.Runtime"]
+}

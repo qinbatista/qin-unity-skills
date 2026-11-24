@@ -2,6 +2,8 @@
 
 One [Unity task menu](unity-code-skill/references/global-skill-routing.md#choose-by-task) routes to six domain Skills. Start there or invoke `$unity-code-skill` for mixed or unfamiliar Unity work. A known domain can start at its own Skill. Each operation links to its rules and verification. The [section reader](unity-code-skill/references/global-skill-routing.md#read-one-section) can return just those headings. Add the [Codex Skill pack](https://github.com/qinbatista/qin-codex-skills) for general task execution and verification.
 
+The global Effects Skill can [install and reproduce seven editable GPU fluids](unity-effects-skill/references/fluid-mixer.md) in an independent Unity project.
+
 ## Install the global Skill pack
 
 Paste this into an AI assistant with a local terminal.
