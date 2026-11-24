@@ -53,6 +53,14 @@ Assign regions to the motion visible in the source. Fire can feed from an anchor
 
 Seed each region and particle at birth. Vary local timing, velocity, phase, width or lifetime within the source's range while retaining coherent travel and the gameplay clock. A rotating carrier can convey the overall gesture. A flame, spray or fluid surface also needs visible internal flow, breakup or replacement over its life. Check both with the [motion and seed comparison](rendering-and-verification.md#verify-internal-motion-and-seed-variation).
 
+### Build water as moving material
+
+**HARD REQUIREMENT FOR WATER.** In the standalone GIF, trace where the water comes from, how the main volume moves, what bends or tears its edge and where it goes after contact or release. Show every applicable phase through the last visible water. Choose editable Shader and VFX references for the specific mechanisms and record the parts already supported by the game's renderer. Use an article or the reviewed GIF for an uncovered mechanism.
+
+- Guide highlights, thickness and gaps in the local direction of transport. Parameterize curved sheets and rims along their surface and vary velocity across their width. Keep a readable transparent region. Add foam selectively at an active crest, tear or contact, and use a soft, curved free edge. A level edge needs support from the actual waterline or contact plane.
+- Give detached liquid the position and momentum of the parent region where appropriate. Apply bounded inertia, gravity, drag and individual age or size variation. A contact ripple or spray appears only after its own contact, spreads in the receiving plane and decays separately. A vessel, pool or sustained surface may conserve its outline while the water flows inside it.
+- Inspect the isolated film, each responding draw and the composite in two independent native runs at the same times. During an established interval, compare local detail direction with the shader flow frozen while the runtime carrier keeps moving. Check for repeated bright lanes that read as fabric and for uniform shrinkage where the brief calls for a moving collision, rupture or spill. Compare a changed seed without retiming the event. Record the verified timing and geometry as well as any pixel tolerance.
+
 ## Compare two independent replays
 
 Inspect the serialized initial-event name before choosing a reset sequence. Reinitializing a Graph can submit its initial event, so a subsequent explicit Play can produce a second burst. Measure the first birth and the last live particle across disable, stop and reuse. A delayed echo is another distinct clock. Take its offset from the actual primary release, keeping any projectile travel time and contact event separate.

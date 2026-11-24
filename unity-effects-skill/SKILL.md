@@ -46,6 +46,8 @@ Before building or revising the runtime, make and inspect a [full motion study](
 2. Adapt each numbered effect and play it alone. Apply the principle to compatible source emitters, curves, shader logic or game-owned materials. Check whether the source's axes, timing, camera and lifetime still make sense for this ability. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
 3. Compare the complete effect with the GIF at the same trigger, scale and playback speed. For a likeness request or source conversion, also [compare the native effect directly with the original](references/rendering-and-verification.md#compare-the-native-effect-with-the-original). Drive the documented gameplay action and observe its outcome and cue on the same instance. Repair a failing layer and replay. When the layers pass alone and the whole gesture still reads incorrectly, revisit their roles, overlap and order.
 
+For a liquid surface or effect, follow the [water motion and isolated playback requirements](references/graph-and-shader.md#build-water-as-moving-material).
+
 ## Verify the native result
 
 **HARD REQUIREMENT.** Every visible effect object must exhibit its own physically motivated motion throughout its active interval, including a sustained hold. Verify this [per object in the final rendering](references/rendering-and-verification.md#verify-local-motion-per-object).
