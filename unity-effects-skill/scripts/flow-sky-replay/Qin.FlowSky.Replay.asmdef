@@ -1,0 +1,6 @@
+{
+    "name": "Qin.FlowSky.Replay",
+    "includePlatforms": ["Editor"],
+    "references": ["Qin.UnityEffects.FlowSky2D"],
+    "optionalUnityReferences": ["TestAssemblies"]
+}

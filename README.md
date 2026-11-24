@@ -6,6 +6,8 @@ Every Unity task ends with a [runtime cost review](unity-performance-skill/SKILL
 
 The global Effects Skill can [install and reproduce seven editable GPU fluids](unity-effects-skill/references/fluid-mixer.md) in an independent Unity project. The [side-view replays](examples/fluid-mixer/SideView.json) cover the seven starting forms, a hit-triggered curtain and a continuously fed waterfall. [Author a channel prefab](unity-effects-skill/references/channel-water.md#author-another-water-body) for rivers, shoreline advance and return, or water sloshing inside a basin. [Generate rain, a ledge drip or a fountain from a parameter brief](unity-effects-skill/references/fluid-mixer.md#author-a-water-effect-from-parameters). The [generation receipt](examples/fluid-mixer/SideWaterGeneration.json) records the native physics, authored asset identities and films. The two native receivers verify depth-invariant framing and match the solver states across the renderer change.
 
+The [2D water, sky and spell catalog](unity-effects-skill/references/flow-sky-2d.md) pairs 24 editable surfaces with an XY prefab, an optional URP Shader Graph and a per-subject graphics replay. Watch the [chaptered film](unity-effects-skill/assets/flow-sky-2d.mp4) or use the [numbered frame index](examples/flow-sky-2d/Subjects.jpg) and [native results](examples/flow-sky-2d/Replay.json).
+
 ## Install the global Skill pack
 
 Paste this into an AI assistant with a local terminal.

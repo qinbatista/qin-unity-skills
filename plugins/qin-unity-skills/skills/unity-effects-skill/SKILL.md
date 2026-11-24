@@ -1,6 +1,6 @@
 ---
 name: unity-effects-skill
-description: Create Unity gameplay effects with VFX Graph and Shader Graph. Install and reproduce seven editable GPU water forms, a hit-triggered 2D water curtain and a continuous waterfall drawn in the side-view XY plane, adapt Particle System references, animate each visible part, and compare native playback with the original.
+description: Create Unity gameplay effects with VFX Graph and Shader Graph. Install and reproduce seven editable GPU water forms, a hit-triggered 2D water curtain and a continuous waterfall drawn in the side-view XY plane, play 24 water, sky and spell materials, adapt Particle System references, animate each visible part, and compare native playback with the original.
 ---
 
 # Unity Effects
@@ -30,6 +30,7 @@ Keep the full requested subject list and its order. The single-subject requireme
 | Create 2D rain hitting water, a ledge drip or a fountain from a brief | [Author the bound recipe and prefab](references/fluid-mixer.md#author-a-water-effect-from-parameters), then run the native inlet cases. |
 | Create a custom 2D river, shore or sloshing basin | [Choose the boundary, author a named prefab and reproduce its motion](references/channel-water.md#author-another-water-body). |
 | Adapt water to a side-scrolling 2D game | [Match the gameplay plane](references/fluid-mixer.md#side-view-contract), then [compose a hit-triggered curtain or continuous waterfall](references/fluid-mixer.md#2d-application-replays). |
+| Select a stream, aurora, star field or water/stellar spell for a 2D camera | [24 material subjects, prefab and native replay](references/flow-sky-2d.md#pick-a-subject). |
 | Reproduce a case or audit a set of examples | [Rebuild from declared inputs](references/graph-and-shader.md#rebuild-from-declared-inputs) and [compare independent native replays](references/graph-and-shader.md#compare-two-independent-replays). Give each example its own result. |
 | A visible object, wing, leaf or light shaft appears frozen | [Plan each object's local motion](references/staged-effects.md#decompose-every-visible-object), [build the two graphs](references/graph-and-shader.md#author-the-live-graphs) and [test the individual parts](references/rendering-and-verification.md#verify-local-motion-per-object). |
 | Translate an editable Particle System or design a new GPU effect | [Graph and shader production](references/graph-and-shader.md). Use the [conversion table](references/graph-and-shader.md#translate-the-executing-source) for source ports and the [paired replay](references/graph-and-shader.md#compare-two-independent-replays) for both entry paths. |

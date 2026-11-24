@@ -14,7 +14,7 @@ Pick the result below, open its domain menu, then read the linked headings for t
 | Place or move assets, or inspect, import or compress an image, including 2D Sprites, 3D textures and UI art | [Assets](../../unity-assets-skill/SKILL.md) |
 | Build or repair a screen, input, localization, layout or safe-area settings | [UI](../../unity-ui-skill/SKILL.md) |
 | Author motion, fix a jittering gait or sliding foot, or change Animator, 2D rig, Spine or 3D clip playback | [Animation](../../unity-animation-skill/SKILL.md) |
-| Reproduce water ripples, jets, collisions, a waterfall or a vortex in another game | [Effects operations](../../unity-effects-skill/SKILL.md#choose-an-operation) |
+| Reproduce water ripples, jets, collisions, a waterfall or a vortex, or preview 2D water, skies and spells | [Effects operations](../../unity-effects-skill/SKILL.md#choose-an-operation) |
 | Change particles, VFX Graph, Shader Graph, material lighting, emission, overdraw or motion inside an effect | [Effects](../../unity-effects-skill/SKILL.md) |
 | Reproduce a fault, choose a runner, profile a frame or verify runtime behavior | [Testing](../../unity-testing-skill/SKILL.md) |
 | Choose a simulation or physics model, remove recurring work, reuse effects, or manage asset lifetimes | [Performance](../../unity-performance-skill/SKILL.md) |

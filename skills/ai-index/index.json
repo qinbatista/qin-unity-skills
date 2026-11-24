@@ -112,11 +112,18 @@
     },
     {
       "id": "unity-effects",
-      "summary": "Unity VFX and shaders, effect composition, transferable fluids and native replay",
+      "summary": "Unity VFX and shaders, transferable fluids, planar water and sky materials, spell playback and native replay",
       "document": "skills/ai-index/modules/unity-effects.md",
-      "sources": ["unity-effects-skill", "examples/fluid-mixer"],
+      "sources": ["unity-effects-skill", "examples/fluid-mixer", "examples/flow-sky-2d"],
       "dependencies": [{"module": "unity-code", "reason": "The fluid replay uses the installed Unity CLI launcher for both blank receivers."}],
       "code_targets": [
+        {
+          "id": "advance-flow-sky-subject",
+          "file": "unity-effects-skill/assets/FlowSky2D/FlowSky2DPlayer.cs",
+          "symbol": "Advance",
+          "anchor": "public void Advance(float seconds)",
+          "summary": "Drive the ambient phase, single cast, interruptible drain and renderer recycling on one world-space instance."
+        },
         {
           "id": "install-fluid-mixer",
           "file": "unity-effects-skill/scripts/fluid_mixer.py",

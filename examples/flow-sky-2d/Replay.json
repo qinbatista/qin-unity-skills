@@ -1,0 +1,246 @@
+{
+  "editor": "6000.6.7f1",
+  "graphics": "Metal",
+  "width": 640,
+  "height": 360,
+  "fps": 30,
+  "cases": [
+    {
+      "subject": "Stream",
+      "frames": 120,
+      "peakPixels": 58654,
+      "changedFrames": 118,
+      "maxChangingPixels": 36742,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "ShoreWaves",
+      "frames": 120,
+      "peakPixels": 145632,
+      "changedFrames": 118,
+      "maxChangingPixels": 81757,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "Waterfall",
+      "frames": 120,
+      "peakPixels": 48044,
+      "changedFrames": 118,
+      "maxChangingPixels": 30855,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "CeilingDrips",
+      "frames": 120,
+      "peakPixels": 27966,
+      "changedFrames": 118,
+      "maxChangingPixels": 5942,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "RainPuddle",
+      "frames": 120,
+      "peakPixels": 74704,
+      "changedFrames": 118,
+      "maxChangingPixels": 22135,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "Whirlpool",
+      "frames": 120,
+      "peakPixels": 77233,
+      "changedFrames": 118,
+      "maxChangingPixels": 44971,
+      "urpGraphMaximumChannelError8Bit": 1
+    },
+    {
+      "subject": "RisingFlood",
+      "frames": 120,
+      "peakPixels": 159511,
+      "changedFrames": 118,
+      "maxChangingPixels": 53278,
+      "urpGraphMaximumChannelError8Bit": 1
+    },
+    {
+      "subject": "Wake",
+      "frames": 120,
+      "peakPixels": 59695,
+      "changedFrames": 118,
+      "maxChangingPixels": 21233,
+      "urpGraphMaximumChannelError8Bit": 1
+    },
+    {
+      "subject": "ParallaxStars",
+      "frames": 120,
+      "peakPixels": 105189,
+      "changedFrames": 118,
+      "maxChangingPixels": 34442,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "ShootingStars",
+      "frames": 120,
+      "peakPixels": 94770,
+      "changedFrames": 118,
+      "maxChangingPixels": 11086,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "Constellation",
+      "frames": 120,
+      "peakPixels": 100156,
+      "changedFrames": 118,
+      "maxChangingPixels": 12383,
+      "urpGraphMaximumChannelError8Bit": 1
+    },
+    {
+      "subject": "Aurora",
+      "frames": 120,
+      "peakPixels": 118577,
+      "changedFrames": 118,
+      "maxChangingPixels": 77682,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "SpiralGalaxy",
+      "frames": 120,
+      "peakPixels": 78621,
+      "changedFrames": 118,
+      "maxChangingPixels": 23610,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "Nebula",
+      "frames": 120,
+      "peakPixels": 121879,
+      "changedFrames": 118,
+      "maxChangingPixels": 51021,
+      "urpGraphMaximumChannelError8Bit": 1
+    },
+    {
+      "subject": "EclipseCorona",
+      "frames": 120,
+      "peakPixels": 59709,
+      "changedFrames": 118,
+      "maxChangingPixels": 16420,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "StarShower",
+      "frames": 120,
+      "peakPixels": 43912,
+      "changedFrames": 118,
+      "maxChangingPixels": 30108,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "WaterBolt",
+      "frames": 73,
+      "peakPixels": 6872,
+      "changedFrames": 67,
+      "maxChangingPixels": 7576,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "TidalSlash",
+      "frames": 73,
+      "peakPixels": 25996,
+      "changedFrames": 67,
+      "maxChangingPixels": 9754,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "Geyser",
+      "frames": 73,
+      "peakPixels": 33139,
+      "changedFrames": 66,
+      "maxChangingPixels": 15192,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "WaterShield",
+      "frames": 73,
+      "peakPixels": 57004,
+      "changedFrames": 69,
+      "maxChangingPixels": 25450,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "HealingSpring",
+      "frames": 73,
+      "peakPixels": 30121,
+      "changedFrames": 69,
+      "maxChangingPixels": 17785,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "StarLance",
+      "frames": 73,
+      "peakPixels": 18090,
+      "changedFrames": 66,
+      "maxChangingPixels": 11556,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "GravityWell",
+      "frames": 73,
+      "peakPixels": 57513,
+      "changedFrames": 68,
+      "maxChangingPixels": 32453,
+      "urpGraphMaximumChannelError8Bit": 0
+    },
+    {
+      "subject": "MeteorImpact",
+      "frames": 73,
+      "peakPixels": 17173,
+      "changedFrames": 66,
+      "maxChangingPixels": 11684,
+      "urpGraphMaximumChannelError8Bit": 0
+    }
+  ],
+  "test": "FlowSkyNativeReplay.PlayEachSubject",
+  "result": "Passed",
+  "pipeline": "Built-in",
+  "runtime": "Unity Editor Play Mode on macOS",
+  "frameCount": 2504,
+  "sourceSha256": {
+    "FlowSky2D.cginc": "811ea7eb69c2cd3e6bd09645161558c023b19cf4dc2c6d4c7a7177b424b22fb2",
+    "FlowSky2D.mat": "65e86fef6fce60e65889fe8ae0e381dd14d9a9cf1a5ea25c4868f100f77a196c",
+    "FlowSky2D.prefab": "f825ad62acf1f3c98f564abae4b03d2ed6714d3b86db9792233de4212d686c60",
+    "FlowSky2D.shader": "de2d031c3231bf082a1447338271ab05bcc1c74f125e080b337df53938a0ddc0",
+    "FlowSky2DPlayer.cs": "45f61a1d49116f7531a41470245b49349b20e07781f0d3cee27439ee9bc45ca5",
+    "Qin.UnityEffects.FlowSky2D.asmdef": "975554af3de7c5937f720779775e934c4a43bd954e2df377fdee66aea137fd5e"
+  },
+  "filmSha256": "98b598fedd6046d0c71e98857454cf2498e8de6563dda8edc0c81bc58c8aaf96",
+  "filmSeconds": 83.467,
+  "coverage": "Public prefab rendering, pooled replay and cancellation on an isolated XY stage. No game assets in these captures.",
+  "urpGraphComparison": {
+    "editor": "6000.6.7f1",
+    "urp": "17.6.0",
+    "renderer": "Renderer2D",
+    "backend": "Metal",
+    "device": "Apple M3 Max",
+    "colorSpace": "Gamma",
+    "width": 384,
+    "height": 216,
+    "fps": 30,
+    "hiddenDifference": 0,
+    "test": "FlowSkyUrpReplay.CompareMaterials",
+    "samples": 120,
+    "ticks": [
+      0,
+      8,
+      23,
+      41,
+      56
+    ],
+    "maximumChannelError8Bit": 1,
+    "maximumVisibleMeanChannelError8Bit": 2.39920354943024e-05,
+    "maximumCoveragePixelCountDifference": 0,
+    "sourceSha256": {
+      "FlowSkySurface.shadergraph": "5dd09fef7a6fa81236ae2f7617be34c3b55270e7a4ec4da4bff91357de9ddc47",
+      "FlowSkyUrpReplay.cs": "a28b69aa6129f2e2423100789e13546614c728a26ec7dfbe6cccaed0fc179104",
+      "Qin.FlowSky.UrpReplay.Tests.asmdef": "456b7f741d04fb0016aa4594726997574dd4bb07ac709af07797e793ffdcfbd1"
+    }
+  }
+}

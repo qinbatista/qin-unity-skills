@@ -1,0 +1,11 @@
+{
+    "name": "Qin.FlowSky.UrpReplay.Tests",
+    "includePlatforms": ["Editor"],
+    "references": [
+        "Qin.UnityEffects.FlowSky2D",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime"
+    ],
+    "optionalUnityReferences": ["TestAssemblies"]
+}
