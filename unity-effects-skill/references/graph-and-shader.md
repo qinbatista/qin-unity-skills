@@ -65,6 +65,8 @@ Seed each region and particle at birth. Vary local timing, velocity, phase, widt
 
 A play-timed curtain, cascade or wave can use a shared, bounded mesh with a Shader Graph vertex deformation and a separate surface-flow phase. Shape its advancing edge, crest, closing folds and floor response from the contact time. Keep the overlapping faces transparent and concentrate grazing reflections in narrow, varying bands. Inspect the surface over the intended subject. Broad glossy forms and opaque interior highlights can make a thin film read as oil.
 
+When the brief calls for a rupture, release local regions at different times. Begin each detached piece at its current surface position and velocity. Carry its surface detail with the moving geometry and start runoff where it reaches the receiving plane. Compare the isolated sheet at the same time with reduced gravity or a moved receiving plane. The comparison should change its falling silhouette and contact time while the attached motion stays aligned.
+
 Use VFX Graph for detached beads and spray at the required count. Launch them from the current sheet or contact plane, stagger their birth and bound their lifetime and live population. Compare flow with its phase held while the sheet still deforms. Confirm that a stopped cast gates new births and drains its visible tail. Review the complete frame at the intended camera, then measure the old and new implementations at the same resolution, action and representative overlap. Record transparent draw count, allocations, texture or simulation work, and the timing statistic with its actual backend and runtime scope.
 
 #### Simulate the body when its motion depends on fluid interaction
