@@ -22,6 +22,8 @@ Read a side water surface as a horizontal waterline that changes height, with ti
 
 For an obstacle that should read as solid in profile, align its sprite and contact boundary. Match the blocker to the mixer radius, including the soft visible edge. A transparent curtain can deliberately sit in front of a recipient and refract its colors. Inspect that layering on the actual target. Use the [native side-view comparison](#reproduce-twice-from-the-installed-skill) to distinguish physical motion from a viewpoint issue.
 
+For a continuously filled river, a wetting and drying bank, or water sloshing between walls, [author a channel from its boundary and physical inputs](channel-water.md#author-another-water-body).
+
 ## Choose and combine
 
 | Starting recipe | Input and response | What to follow in motion |
@@ -37,6 +39,18 @@ For an obstacle that should read as solid in profile, align its sprite and conta
 Duplicate one recipe. Set **Feed**, **Origin**, **Velocity**, **Strength** and **Feed Duration**. Independently enable **Surface Waves**, **Solid Obstacle** or **Spray** in **Responses**. Set **Gravity**, **Pressure**, **Swirl** and **Duration** for the gesture. For a jet deflecting off a moving target, start with FreeJet, enable Solid Obstacle and set **Obstacle Anchor** and the recipe's local sphere radius. For a waterfall feeding a quiet pool, retain Surface Waves and reduce spray as the brief requires.
 
 The solver advances 384 XYZ parcels at 90 Hz. Its shallow field spans six metres in X and 3.2 in Z at unit scale. The side-view film covers six metres in X and 4.18 in Y. A 128 × 1 texture supplies the visible waterline. The solver's transverse state still transfers impact momentum to the receiving field. Separate instances own separate simulation states. OpposedJets supplies two interacting streams in one state. The package supports the floor and a spherical solid. Other boundaries require their own contact implementation.
+
+## Author a water effect from parameters
+
+Use [the water composer](../scripts/compose_water.py) after installing the template. A parcel profile creates a game-owned recipe and a bound prefab with stable identities. The [channel profiles](channel-water.md#author-another-water-body) create variants with their bed and boundary overrides. Keep the effect name with its brief and seed so a fresh receiver can generate it again.
+
+```sh
+python3 -B scripts/compose_water.py --project "/path/to/MyGame" --template Assets/Effects/Water --destination Assets/GameWater --name RainOnPool --profile rain --count 70 --span 4.2
+```
+
+Use `--profile drip` for a point-fed leak and `--profile fountain` for an upward jet. The [three-inlet motion study](../assets/drop-feed-study.gif) shows falling, releasing from a ledge, and rising into an arc. The [native inlet film](../assets/water-inlets.mp4) plays the authored prefabs together. Wind-leaning rain distributes its individual birth times and origins across the source span. A point inlet gathers a hanging bead, releases one parcel under gravity, and transfers landing momentum to the same water surface. A fountain uses a narrow ballistic nozzle just above the surface. Its positive vertical velocity falls to zero at the apex before gravity returns the stream to the pool. Check the change in vertical velocity on either side of the apex. For a source conversion, trace the original inlet, velocity, contact event and wet-surface response in the local editable reference before mapping them to these controls.
+
+The composer also accepts `ripple`, `mass`, `jet`, `impact`, `opposed`, `waterfall`, `vortex`, `needle`, `curtain` and `falls`. Select a starting form and override gravity, strength, feed time or cast duration as required. Use `--span` and integer `--count` for rain and drips. Set the game-specific position and trigger on the resulting prefab. For the three authored airborne inlets, use `--case inlets --preview --video` with the replay runner. It generates each recipe and prefab independently at both receiving asset paths and checks the falling trajectory or apex, impact time, wave-off response, seed variation and retirement.
 
 ## Bind the rendering and trigger
 
@@ -70,7 +84,7 @@ Use a detailed receiving backdrop to check refraction and local colour reversal 
 
 ## Reproduce twice from the installed Skill
 
-Run the [replay command](../scripts/replay_fluids.py) from this Skill with a new output directory under the current task Cache. It only sets up its own two blank receivers. It invokes the Unity Code launcher's graphics-enabled batch mode and installs the same template at two different Assets paths. Both receivers use procedural lighting and their own 2D colour capture. Use `--case all` for the gallery and both applications, or select `--case curtain` or `--case waterfall` to replay one application. Python's standard library suffices for the tests. Add Pillow for the optional GIF and install ffmpeg on PATH for the 30 fps MP4.
+Run the [replay command](../scripts/replay_fluids.py) from this Skill with a new output directory under the current task Cache. It only sets up its own two blank receivers. It invokes the Unity Code launcher's graphics-enabled batch mode and installs the same template at two different Assets paths. Both receivers use procedural lighting and their own 2D colour capture. Use `--case all` for the gallery, both applications and the generated side-view channels, or select `--case curtain` or `--case waterfall` to replay one application. Python's standard library suffices for the tests. Add Pillow for the optional GIF and install ffmpeg on PATH for the 30 fps MP4.
 
 ```sh
 python3 -B scripts/replay_fluids.py --editor "/path/to/Unity.app" --work "/path/to/task/Cache/temp-run/fluids" --case all --preview --video

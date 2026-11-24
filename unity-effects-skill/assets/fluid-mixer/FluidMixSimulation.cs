@@ -38,6 +38,8 @@ namespace Qin.UnityEffects.Fluids
         private static readonly int DurationId = Shader.PropertyToID("_Duration");
         private static readonly int CurtainHoldId = Shader.PropertyToID("_CurtainHold");
         private static readonly int FeedDurationId = Shader.PropertyToID("_FeedDuration");
+        private static readonly int DropCountId = Shader.PropertyToID("_DropCount");
+        private static readonly int DropSpanId = Shader.PropertyToID("_DropSpan");
         private static readonly int StrengthId = Shader.PropertyToID("_Strength");
         private static readonly int GravityId = Shader.PropertyToID("_Gravity");
         private static readonly int SwirlId = Shader.PropertyToID("_Swirl");
@@ -162,6 +164,8 @@ namespace Qin.UnityEffects.Fluids
             _commands.SetComputeFloatParam(_program, DurationId, recipe.Duration);
             _commands.SetComputeFloatParam(_program, CurtainHoldId, recipe.CurtainHold);
             _commands.SetComputeFloatParam(_program, FeedDurationId, recipe.FeedDuration);
+            _commands.SetComputeIntParam(_program, DropCountId, recipe.DropCount);
+            _commands.SetComputeFloatParam(_program, DropSpanId, recipe.DropSpan);
             _commands.SetComputeFloatParam(_program, StrengthId, Mathf.Max(0f, recipe.Strength));
             _commands.SetComputeFloatParam(_program, GravityId, Mathf.Abs(recipe.Gravity));
             _commands.SetComputeFloatParam(_program, SwirlId, Mathf.Clamp(recipe.Swirl, 0f, 2f));
@@ -254,7 +258,7 @@ namespace Qin.UnityEffects.Fluids
 
         private static int BallisticThroughStep(SOFluidMixRecipe recipe)
         {
-            if (recipe.Feed == SOFluidMixRecipe.Inlet.Needle)
+            if (recipe.Feed == SOFluidMixRecipe.Inlet.Needle || recipe.Feed == SOFluidMixRecipe.Inlet.FallingDrops)
                 return Mathf.CeilToInt(recipe.Duration * StepsPerSecond);
             if (recipe.Feed != SOFluidMixRecipe.Inlet.FallingMass || recipe.SolidObstacle)
                 return 0;

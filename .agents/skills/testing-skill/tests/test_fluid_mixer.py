@@ -10,6 +10,7 @@ REPO = Path(__file__).resolve().parents[4]
 SCRIPTS = REPO / "unity-effects-skill/scripts"
 sys.path.insert(0,str(SCRIPTS))
 import fluid_mixer
+from compose_water import compose
 
 
 class FluidInstallTests(unittest.TestCase):
@@ -36,6 +37,43 @@ class FluidInstallTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"preserved"):
             fluid_mixer.install(self.project,"Assets/Owner/Water")
         self.assertIn("_gravity: 4",pellet.read_text())
+
+    def test_author_custom_channel_identity_and_preserve_artist_work(self):
+        base = "Assets/Second/Water"
+        fluid_mixer.install(self.project, base)
+        settings = {"bank": 1.12, "period": 2.6}
+        def make(folder="Assets/Spells", name="SmallCove", values=None):
+            return compose(self.project, base, folder, name, "shore", settings if values is None else values)
+        prefab, status = make()
+        self.assertEqual(status, "composed")
+        self.assertIn("propertyPath: _period\n      value: 2.6", prefab.read_text())
+        self.assertEqual(make(), (prefab, "already composed"))
+        with self.assertRaisesRegex(ValueError, "GUID"):
+            make("Assets/Other")
+        for key, value in (("period", float("nan")), ("bank", 2)):
+            with self.assertRaises(ValueError): make(name="Invalid", values={key: value})
+        with self.assertRaises(ValueError): make(folder=base)
+        prefab.write_text(prefab.read_text().replace("value: 2.6", "value: 4.0"))
+        with self.assertRaisesRegex(ValueError, "preserved"): make()
+        self.assertIn("value: 4.0", prefab.read_text())
+
+    def test_author_rain_owns_its_recipe_and_preserves_the_donor(self):
+        relative = "Assets/Installed/Water"
+        base, _ = fluid_mixer.install(self.project, relative)
+        donor = base / "Presets/FreeJet.asset"
+        original = donor.read_bytes()
+        def rain(settings):
+            return compose(self.project, relative, "Assets/GameWater", "NarrowRain", "rain", settings)
+        path, status = rain({"count": 12, "span": 1.4})
+        self.assertEqual(status, "composed")
+        recipe = path.with_suffix(".asset")
+        self.assertIn("_dropCount: 12", recipe.read_text())
+        self.assertIn("_dropSpan: 1.4", recipe.read_text())
+        self.assertIn(fluid_mixer.meta_guid(Path(str(recipe) + ".meta")), path.read_bytes())
+        self.assertEqual(rain({"span": 1.4, "count": 12}), (path, "already composed"))
+        with self.assertRaisesRegex(ValueError, "Invalid count"): rain({"count": 3.5})
+        with self.assertRaisesRegex(ValueError, "duration"): rain({"duration": .5})
+        self.assertEqual(donor.read_bytes(), original)
 
     def test_conflict_in_embedded_package_and_path_escape(self):
         packages=self.project/"Packages/some.other.package"

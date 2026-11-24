@@ -1,0 +1,150 @@
+{
+  "authoredVariants": {
+    "CoveWash": {
+      "CoveWash.prefab": "bc7d8690d922031227d278be3a9c5c30b406a6f22531a2504201cd10b685bc1d",
+      "CoveWash.prefab.meta": "9c6317342fe8c00b9240a9105b673cf1500425882358f93d85ede553e4cc1f2f"
+    },
+    "LedgeDrip": {
+      "LedgeDrip.asset": "8936bd89abe533e93ab52378afa751409621d0b2a4de2de772b1b02521fb8686",
+      "LedgeDrip.asset.meta": "ff2fda8b3e73fc8771d7cbbe0f2becf5e08b28fa5d00296b761599e87c61d8b0",
+      "LedgeDrip.prefab": "a57d8da5be96a5414b1cc476612b6cd8dd531f53b8014682a8d5adbf0610ab96",
+      "LedgeDrip.prefab.meta": "dbef24242f4048f5e6792f01d9d65a2fb8b2572304239754ed0e1a4ad1d7b2a0"
+    },
+    "RainOnPool": {
+      "RainOnPool.asset": "40e03eac429badd8ff41b0980f34061fcbd08f1edaa00f424a2367555791920d",
+      "RainOnPool.asset.meta": "0f4f5deff257f617d1e06897fff0194b83c519fa7fb80d50eab336b3195c5bb7",
+      "RainOnPool.prefab": "d6bf1b7ca2f9158b1dae0b5463309bba7daa133389a0ee2b3e933c303d36bd6f",
+      "RainOnPool.prefab.meta": "62443ba1baf2747018ca8e48153c8e8ed686760a89e362198dfe29b8348cd4ee"
+    },
+    "SpringFountain": {
+      "SpringFountain.asset": "86277ce87695b37134b32fa2cb0be8a411014c0f55357e698663786246f5aa1d",
+      "SpringFountain.asset.meta": "ffef54bda98567366268ebd7a736d3c930ee30c7f5883ab55714d3885d4f1bb0",
+      "SpringFountain.prefab": "dc4abf38dbb4931c52a801d7b5d99c912938d83d725a9cf4d50e634ea9ae1ec7",
+      "SpringFountain.prefab.meta": "1e77b26a301ad9e7efae07e267357852f38793f9e4de1487632ead7f60592502"
+    }
+  },
+  "baseline": "SideView.json",
+  "channels": {
+    "BasinSlosh": {
+      "matchedFrames": 256,
+      "matchedNormalStates": 41,
+      "maxStillSpeed": 0.0,
+      "maxVolumeDrift": 1.6205012798309326e-07,
+      "visual": {
+        "chromaReversalPixels": 5404,
+        "peakMovingPixelsOverThreeFrames": 24399,
+        "seedVariationPixels": 28159,
+        "transmissionPixels": 58864,
+        "wetPixels": 81578
+      },
+      "wallHeightDifferenceRange": [
+        -0.4004582971334457,
+        0.5803382724523545
+      ]
+    },
+    "CoveWash": {
+      "firstPeakSeconds": 3.2,
+      "matchedFrames": 256,
+      "matchedNormalStates": 41,
+      "maxStillSpeed": 1.5243865618685959e-06,
+      "shoreAdvanceMetres": 1.96875,
+      "subsequentRetreatMetres": 1.96875,
+      "visual": {
+        "chromaReversalPixels": 1637,
+        "peakMovingPixelsOverThreeFrames": 19969,
+        "seedVariationPixels": 17110,
+        "transmissionPixels": 25128,
+        "wetPixels": 37686
+      }
+    },
+    "RiverCurrent": {
+      "matchedFrames": 256,
+      "matchedNormalStates": 41,
+      "maxStillSpeed": 2.336710167583078e-06,
+      "minimumLateDownstreamSpeed": 0.6037103844725568,
+      "visual": {
+        "chromaReversalPixels": 5938,
+        "peakMovingPixelsOverThreeFrames": 17013,
+        "seedVariationPixels": 37054,
+        "transmissionPixels": 67173,
+        "wetPixels": 93797
+      }
+    },
+    "ShoreWash": {
+      "firstPeakSeconds": 2.6,
+      "matchedFrames": 256,
+      "matchedNormalStates": 41,
+      "maxStillSpeed": 1.1060201359214261e-06,
+      "shoreAdvanceMetres": 2.109375,
+      "subsequentRetreatMetres": 3.421875,
+      "visual": {
+        "chromaReversalPixels": 14115,
+        "peakMovingPixelsOverThreeFrames": 26907,
+        "seedVariationPixels": 39782,
+        "transmissionPixels": 56337,
+        "wetPixels": 83931
+      }
+    }
+  },
+  "graphics": {
+    "api": "Metal",
+    "device": "Apple M3 Max",
+    "editor": "6000.6.7f1",
+    "urp": "17.6.0"
+  },
+  "inlets": {
+    "LedgeDrip": {
+      "airborneSpanMetres": 0.09600061178207397,
+      "distinctBirths": 4,
+      "firstMeasuredImpactSeconds": 1.0,
+      "matchedFrames": 114,
+      "matchedNormalStates": 33,
+      "peakHeightSum": 3.4007107379220542
+    },
+    "RainOnPool": {
+      "airborneSpanMetres": 4.431546926498413,
+      "distinctBirths": 70,
+      "firstMeasuredImpactSeconds": 0.8,
+      "matchedFrames": 114,
+      "matchedNormalStates": 33,
+      "peakHeightSum": 39.24544317368418
+    },
+    "SpringFountain": {
+      "airborneSpanMetres": 1.7392991185188293,
+      "apexMetres": 2.144334316253662,
+      "firstMeasuredImpactSeconds": 1.6,
+      "matchedFrames": 114,
+      "matchedNormalStates": 33,
+      "peakHeightSum": 26.57395905100541
+    }
+  },
+  "media": {
+    "side-channels.mp4": {
+      "avg_frame_rate": "30/1",
+      "codec_name": "h264",
+      "height": 720,
+      "nb_read_frames": "256",
+      "sha256": "100f24fb3ad434e0fd996c86c0bc1b6b74314853ef12002682bc615f639d2922",
+      "width": 1280
+    },
+    "water-inlets.mp4": {
+      "avg_frame_rate": "30/1",
+      "codec_name": "h264",
+      "height": 720,
+      "nb_read_frames": "114",
+      "sha256": "446f8e62e676b4b31582ecfec0238f69ad34d2bc33b85c3c3e48bb87e51b1043",
+      "width": 1280
+    }
+  },
+  "pairedNativeFrames": {
+    "channels": 1024,
+    "inlets": 342
+  },
+  "publishedTemplateSha256": "e00016f2ba43f4a7537df1e61d2e047dd217ba761ca938397a51abc21cadd0ad",
+  "receiverPaths": [
+    "Assets/QinFluidMixer",
+    "Assets/Effects/Liquid"
+  ],
+  "scope": "Two independent URP 2D receivers with the same XY side-view camera. The seven new cases cover four constructed game prefabs and three channel starting presets.",
+  "seed": 29411
+}

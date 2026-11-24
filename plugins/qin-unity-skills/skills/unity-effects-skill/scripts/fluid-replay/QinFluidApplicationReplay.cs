@@ -209,9 +209,9 @@ public sealed partial class QinFluidReplay
         camera.transform.position = new Vector3(0f, SurfaceY + 1.24f, -10f);
     }
 
-    private FluidMixController OpenVariant(string name, Vector3 position)
+    private FluidMixController OpenVariant(string name, Vector3 position, string path = null)
     {
-        var asset = AssetDatabase.LoadAssetAtPath<GameObject>($"{Imported}/Variants/{name}.prefab");
+        var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path ?? $"{Imported}/Variants/{name}.prefab");
         Assert.That(asset, Is.Not.Null, name);
         Assert.That(PrefabUtility.GetPrefabAssetType(asset), Is.EqualTo(PrefabAssetType.Variant));
         var instance = Object.Instantiate(asset, stage.transform, false);

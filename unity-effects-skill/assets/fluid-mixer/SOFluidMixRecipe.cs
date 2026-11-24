@@ -6,7 +6,7 @@ namespace Qin.UnityEffects.Fluids
     [CreateAssetMenu(menuName = "Qin/Fluids/Recipe")]
     public sealed class SOFluidMixRecipe : ScriptableObject
     {
-        public enum Inlet { SurfaceImpulse, FallingMass, Jet, OpposedJets, Waterfall, Vortex, Curtain, Needle }
+        public enum Inlet { SurfaceImpulse, FallingMass, Jet, OpposedJets, Waterfall, Vortex, Curtain, Needle, FallingDrops }
 
         [Flags]
         public enum Response { None = 0, SurfaceWaves = 1, SolidObstacle = 2, Spray = 4 }
@@ -29,6 +29,11 @@ namespace Qin.UnityEffects.Fluids
         [Tooltip("For the Waterfall inlet, replenish the falling sheet while the source is open.")]
         [SerializeField] private bool _continuousFeed;
 
+        [SerializeField, Range(1, 160)] private int _dropCount = 48;
+        [SerializeField, Range(0f, 5f)] private float _dropSpan = 3.8f;
+
+        public int DropCount => Mathf.Clamp(_dropCount, 1, 160);
+        public float DropSpan => Mathf.Clamp(_dropSpan, 0f, 5f);
         public bool PlayOnEnable => _playOnEnable;
         public bool ContinuousFeed => _feed == Inlet.Waterfall && _continuousFeed;
         public Inlet Feed => _feed;

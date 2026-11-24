@@ -1,0 +1,125 @@
+#pragma kernel Initialize
+#pragma kernel Integrate
+#pragma kernel Present
+
+// A six-metre XY section. Conservative state is depth, discharge and two transported dyes.
+#define CELLS 128
+static const float dx = 6.0 / CELLS;
+static const float dt = 1.0 / 150.0;
+static const float g = 9.81;
+Texture2D<float4> _Read;
+RWTexture2D<float4> _Write;
+RWTexture2D<float4> _Presentation;
+int _Boundary;
+float _PoolDepth, _BankRise, _Drive, _Phase, _Clock, _StartWeight, _Kick;
+
+float Bed(int i)
+{
+    float s = (clamp(i, 0, CELLS - 1) + .5) / CELLS;
+    if (_Boundary == 1) return -_PoolDepth + _BankRise * s * s;
+    if (_Boundary == 2) return -_PoolDepth;
+    float bar = (s - .58) / .13;
+    return -_PoolDepth - .11 * s + _BankRise * exp(-bar * bar);
+}
+
+float2 Dyes(float x)
+{
+    return .5 + .5 * sin(float2(5.3, 2.1) * x + float2(_Phase, 1.4 * _Phase));
+}
+
+[numthreads(32, 1, 1)]
+void Initialize(uint i : SV_DispatchThreadID)
+{
+    float h = max(0., -Bed(i));
+    float x = (i + .5) * dx - 3.;
+    _Write[uint2(i, 0)] = float4(h, 0., h * Dyes(x));
+}
+
+float Velocity(float4 state)
+{
+    return state.y / max(.003, state.x);
+}
+
+float4 LoadCell(int i)
+{
+    int inner = clamp(i, 0, CELLS - 1);
+    float4 state = _Read.Load(int3(inner, 0, 0));
+    if (i == inner) return state;
+    if (_Boundary == 2 || (_Boundary == 1 && i > inner))
+        return float4(state.x, -state.y, state.zw);
+    if (i > inner) return state;
+    float start = _Drive * _StartWeight;
+    float baseDepth = -Bed(0);
+    // Impose one incoming characteristic at an open inlet. The outgoing wave leaves freely.
+    float referenceHeight = baseDepth;
+    float incomingSpeed = start;
+    if (_Boundary == 1)
+    {
+        referenceHeight += start * (.28 * sin(_Clock) + .050 * sin(2. * _Clock));
+        incomingSpeed = 2. * (sqrt(g * max(.02, referenceHeight)) - sqrt(g * baseDepth));
+    }
+    float incoming = incomingSpeed + 2. * sqrt(g * max(.02, referenceHeight));
+    float outgoing = Velocity(state) - 2. * sqrt(g * max(0., state.x));
+    float speed = .5 * (incoming + outgoing);
+    float h = pow(max(0., incoming - outgoing), 2.) / (16. * g);
+    float2 dye = speed >= 0. ? .5 + .5 * sin(float2(3., 1.) * _Clock + _Phase) : state.zw / max(.001, state.x);
+    return float4(h, h * speed, h * dye);
+}
+
+float4 Flux(float4 a, float4 b, float ba, float bb, out float2 bedPressure)
+{
+    // Hydrostatic face reconstruction balances the two pressure terms for a still lake on a slope.
+    float stepBed = max(ba, bb);
+    float ha = max(0., a.x + ba - stepBed);
+    float hb = max(0., b.x + bb - stepBed);
+    float ua = Velocity(a), ub = Velocity(b);
+    float qa = ha * ua, qb = hb * ub;
+    float speed = max(abs(ua) + sqrt(g * ha), abs(ub) + sqrt(g * hb));
+    float mass = .5 * (qa + qb - speed * (hb - ha));
+    float momentum = .5 * (qa * ua + qb * ub + .5 * g * (ha * ha + hb * hb) - speed * (qb - qa));
+    bedPressure = .5 * g * (float2(a.x * a.x, b.x * b.x) - float2(ha * ha, hb * hb));
+    float2 dye = mass >= 0. ? a.zw / max(.001, a.x) : b.zw / max(.001, b.x);
+    return float4(mass, momentum, mass * saturate(dye));
+}
+
+[numthreads(32, 1, 1)]
+void Integrate(uint index : SV_DispatchThreadID)
+{
+    int i = int(index);
+    float4 state = LoadCell(i);
+    float2 previousCorrection, nextCorrection;
+    float bed = Bed(i);
+    float4 previous = Flux(LoadCell(i - 1), state, Bed(i - 1), bed, previousCorrection);
+    float4 next = Flux(state, LoadCell(i + 1), bed, Bed(i + 1), nextCorrection);
+    previous.y += previousCorrection.y;
+    next.y += nextCorrection.x;
+    state += (dt / dx) * (previous - next);
+    state.x = max(0., state.x);
+    state.y = (state.y + dt * _Kick * state.x) / (1. + dt * .12 * abs(Velocity(state)));
+    state.y = clamp(state.y, -2.8 * state.x, 2.8 * state.x);
+    state.zw = clamp(state.zw, 0., state.x);
+    _Write[uint2(i, 0)] = state;
+}
+
+[numthreads(32, 1, 1)]
+void Present(uint i : SV_DispatchThreadID)
+{
+    float4 state = _Read.Load(int3(i, 0, 0));
+    float4 next = _Read.Load(int3(min(i + 1, CELLS - 1), 0, 0));
+    float top = state.x + Bed(i);
+    float nextTop = next.x + Bed(i + 1);
+    float slope = (nextTop - top) / dx;
+    float speed = Velocity(state), wet = smoothstep(.002, .043, state.x);
+    float2 pigment = state.zw / max(.001, state.x);
+    float2 nextPigment = next.zw / max(.001, next.x);
+    // A glint follows an advected dye contour. Complementary weights cross-fade adjacent cells.
+    float band = saturate(1. - abs(pigment.x - .58) / .14);
+    float gradient = nextPigment.x - pigment.x;
+    float offset = clamp((.58 - pigment.x) * gradient / max(.0001, gradient * gradient), -.48, .48);
+    float foam = wet * band * band * smoothstep(.05, .78, abs(speed) + .8 * abs(slope));
+    float position = (i + .5 + offset) * dx - 3.;
+    _Presentation[uint2(i, 0)] = float4(position, top + slope * dx * offset + .009, 0., .59 * foam);
+    _Presentation[uint2(i, 1)] = float4(speed, slope * speed, pigment.y, pigment.x);
+    _Presentation[uint2(i, 2)] = float4(top, Bed(i), pigment);
+    _Presentation[uint2(i, 3)] = float4(speed, slope, foam, wet);
+}

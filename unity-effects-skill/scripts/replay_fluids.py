@@ -13,6 +13,9 @@ import xml.etree.ElementTree as ET
 
 from fluid_application_checks import APPLICATIONS, review_application
 from fluid_mixer import MANIFEST, install
+from compose_water import compose
+from channel_replay_checks import CHANNELS, COVE, review_channels
+from inlet_replay_checks import INLETS, review_inlets
 from fluid_replay_checks import FORMS, review
 
 HERE = Path(__file__).resolve().parent
@@ -60,6 +63,19 @@ def lane(label, work, editor, seed, case):
     (project / "Packages/manifest.json").write_text(json.dumps({"dependencies": PACKAGES},indent=2))
     relative = "Assets/QinFluidMixer" if label == "A" else "Assets/Effects/Liquid"
     installed, _ = install(project, relative)
+    authored = {}
+    briefs = {}
+    if case in ("all", "channels"):
+        briefs["CoveWash"] = ("shore", COVE)
+    if case in ("all", "inlets"):
+        briefs.update({name: (profile, {}) for name, profile in INLETS.items()})
+    for name, (profile, overrides) in briefs.items():
+        path, result = compose(project, relative, "Assets/GameWater", name, profile, overrides)
+        if result != "composed":
+            raise RuntimeError("Expected independent authoring in this receiver")
+        authored[name] = {p.name: digest(p) for p in sorted(path.parent.iterdir()) if p.is_file()}
+    if authored:
+        (base / "authored.json").write_text(json.dumps(authored, sort_keys=True))
     shutil.copytree(HERE / "fluid-replay", project / "Assets/Editor/FluidReplay")
     captures = base / "captures"
     captures.mkdir()
@@ -69,7 +85,7 @@ def lane(label, work, editor, seed, case):
                QIN_FLUID_SEED=str(seed), CFFIXED_USER_HOME=str(base / "home"),
                UPM_CACHE_ROOT=str(work / "upm"), DOTNET_PROCESSOR_COUNT="3")
     common = ["--editor-path",str(editor),"--timeout","1470","--non-interactive","--no-pager"]
-    filters = {"gallery": "QinFluidReplay.Replay", "all": "QinFluidReplay"}
+    filters = {"gallery": "QinFluidReplay.Replay", "all": "QinFluidReplay", "channels": "QinFluidReplay.FlowChannel", "inlets": "QinFluidReplay.CastWaterVariant"}
     selected = filters[case] if case in filters else "QinFluidReplay." + APPLICATIONS[case][0]
     with tempfile.TemporaryDirectory(prefix="temp-f-", dir=native_parent(work)) as scratch:
         env.update(TMPDIR=scratch,TEMP=scratch,TMP=scratch)
@@ -82,7 +98,8 @@ def lane(label, work, editor, seed, case):
                      "--filter",selected,"--output",str(base/"tests.xml"),"--",
                      "-job-worker-count","3","-logFile",str(base/"play.log")],project,env,base/"play-cli.log")
     tests = list(ET.parse(base/"tests.xml").iter("test-case"))
-    expected_cases = {"gallery": len(FORMS), "all": len(FORMS) + len(APPLICATIONS)}
+    expected_cases = {"gallery": len(FORMS), "all": len(FORMS) + len(APPLICATIONS) + len(CHANNELS) + len(INLETS),
+                      "channels": len(CHANNELS), "inlets": len(INLETS)}
     if len(tests) != expected_cases.get(case, 1) or any(t.get("result") != "Passed" for t in tests):
         raise RuntimeError(f"A native case failed. See {base/'tests.xml'}")
     actual = json.loads((project/"Packages/packages-lock.json").read_text())["dependencies"]
@@ -98,8 +115,8 @@ def main():
     parser.add_argument("--editor",type=Path,required=True,help="Unity 6000.6.7f1 editor (.app on macOS)")
     parser.add_argument("--work",type=Path,required=True,help="New output directory inside the active task Cache")
     parser.add_argument("--seed",type=int,default=29411)
-    parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "all"), default="gallery",
-                        help="Select the seven-form gallery, an individual 2D application, or both")
+    parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "channels", "inlets", "all"), default="gallery",
+                        help="Select gallery, attack, waterfall, channel generation or the complete suite")
     parser.add_argument("--preview",action="store_true",help="Also write FluidMixer.gif; requires Pillow")
     parser.add_argument("--video", action="store_true", help="Also write a full-rate H.264 reference. Requires Pillow and ffmpeg")
     args=parser.parse_args()
@@ -125,7 +142,7 @@ def main():
         raise RuntimeError("The imported asset bytes differ from the release manifest or the second receiver.")
     captures = work / "A/captures"
     gallery = args.case in ("gallery", "all")
-    application_cases = {"gallery": (), "all": tuple(APPLICATIONS)}.get(args.case, (args.case,))
+    application_cases = {"gallery": (), "channels": (), "inlets": (), "all": tuple(APPLICATIONS)}.get(args.case, (args.case,))
     device_record = "FreeJet/device.txt" if gallery else "device.txt"
     device = (captures / device_record).read_text().splitlines()
     report = {"editor": EDITOR_VERSION, "packages": PACKAGES, "seed": args.seed, "files": first,
@@ -146,6 +163,23 @@ def main():
                 app["visual"] = fluid_preview.review_application_images(captures / name, case, app["physics"])
                 fluid_preview.export_application(captures / name, work / name, args.video)
             report["applications"][case] = app
+    if args.case in ("all", "channels", "inlets"):
+        authored = [(work / label / "authored.json").read_bytes() for label in ("A", "B")]
+        if authored[0] != authored[1]:
+            raise RuntimeError("The two authored cove prefabs have different identities or parameters")
+        report["authoredVariants"] = json.loads(authored[0])
+    if args.case in ("all", "channels"):
+        report["channels"] = review_channels(work)
+        if media:
+            from channel_preview import export_channels, visible
+            for name in CHANNELS:
+                report["channels"][name]["visual"] = visible(captures, name)
+            export_channels(captures, work, args.video)
+    if args.case in ("all", "inlets"):
+        report["inlets"] = review_inlets(work)
+        if media:
+            from channel_preview import export_inlets
+            export_inlets(captures, work, args.video)
     (work / "FluidVerification.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(f"Verified {args.case} in both receivers. Evidence: {work / 'FluidVerification.json'}")
 

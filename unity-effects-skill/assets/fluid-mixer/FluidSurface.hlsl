@@ -2,6 +2,7 @@
 #define QIN_FLUID_SURFACE_INCLUDED
 
 #include "WaterStudyOptics.hlsl"
+#include "Channels/ChannelInterface.hlsl"
 
 float4 FluidField(UnityTexture2D field, float2 uv)
 {
@@ -37,6 +38,11 @@ void FluidInterface_float(float4 UV, UnityTexture2D Film, float NearSide, out fl
     out float Reflectance, out float WetAlpha, out float2 Slope, out float Crest)
 {
     float2 uv = UV.xy;
+    if (NearSide > 1.5)
+    {
+        ChannelInterface(uv, Film, Depth, Reflectance, WetAlpha, Slope, Crest);
+        return;
+    }
     if (NearSide < .5)
     {
         SideWaterline(uv, Film, Depth, Reflectance, WetAlpha, Slope, Crest);

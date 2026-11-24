@@ -1,0 +1,161 @@
+"""Author an editable side-view water prefab from a source, boundary and physical inputs."""
+import argparse
+import math
+import os
+from pathlib import Path
+import re
+import tempfile
+import uuid
+
+from fluid_mixer import DEFAULT, TEMPLATE, digest, meta_guid, project_lock
+
+CHANNEL_BASES = {"river": "RiverCurrent", "shore": "ShoreWash", "basin": "BasinSlosh"}
+RANGES = {"depth": ("_poolDepth", .25, .78), "bank": ("_bankRise", 0, 1.55),
+          "drive": ("_drive", 0, 1.4), "period": ("_period", 2.2, 6)}
+
+PARCEL_BASES = {"ripple": "PlanarRipples", "mass": "FallingMass", "jet": "FreeJet", "impact": "RockImpact",
+                "opposed": "OpposedJets", "waterfall": "Waterfall", "vortex": "Vortex", "needle": "WaterNeedle2D",
+                "curtain": "WaterCurtain2D", "falls": "ContinuousWaterfall", "rain": "FreeJet", "drip": "FreeJet",
+                "fountain": "WaterNeedle2D"}
+PARCEL_RANGES = {"gravity": ("_gravity", .1, 18), "strength": ("_strength", .05, 2),
+                 "feed": ("_feedDuration", .18, 10), "duration": ("_duration", .4, 16),
+                 "span": ("_dropSpan", 0, 5), "count": ("_dropCount", 1, 160)}
+DROP_DEFAULTS = {
+    "rain": {"_feed": 8, "_origin": "{x: -0.21, y: 2.25, z: 0}", "_velocity": "{x: 0.63, y: -1.25, z: 0}",
+             "_dropSpan": 4.2, "_dropCount": 70, "_feedDuration": 2.35, "_duration": 3.6},
+    "drip": {"_feed": 8, "_origin": "{x: -0.58, y: 1.67, z: 0}", "_velocity": "{x: 0.09, y: -0.08, z: 0}",
+             "_dropSpan": 0.035, "_dropCount": 4, "_feedDuration": 2.15, "_duration": 3.6},
+    "fountain": {"_gravity": 8, "_responses": 5, "_playOnEnable": 1, "_origin": "{x: -0.94, y: 0.09, z: 0}", "_velocity": "{x: 1.32, y: 5.9, z: 0}",
+                 "_feedDuration": 1.55, "_duration": 3.6}
+}
+
+
+def in_assets(project, relative):
+    path = Path(relative)
+    if path.is_absolute() or not path.parts or path.parts[0] != "Assets" or ".." in path.parts:
+        raise ValueError("Use a project-relative Assets path.")
+    target = project / path
+    if target.resolve() != target:
+        raise ValueError(f"Choose an Assets path without filesystem links: {target}")
+    return target
+
+
+def compose(project, template, destination, name, profile, settings):
+    project = Path(project).resolve(strict=True)
+    version = project / "ProjectSettings/ProjectVersion.txt"
+    if not version.is_file() or not (project / "Assets").is_dir():
+        raise ValueError("A Unity receiving project is required.")
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,59}", name):
+        raise ValueError("Use an asset identifier of up to 60 ASCII letters, digits and underscores.")
+    base = in_assets(project, template)
+    output = in_assets(project, destination) / name
+    if output.resolve() != output or base == output or base in output.parents or output in base.parents:
+        raise ValueError("Keep the new variant in its own game-owned folder outside the template.")
+    if profile in CHANNEL_BASES:
+        files = channel_files(base, name, profile, settings)
+    elif profile in PARCEL_BASES:
+        files = parcel_files(base, name, profile, settings)
+    else:
+        raise ValueError(f"Unknown water profile: {profile}")
+    owned_guids = {re.search(rb"(?m)^guid: ([0-9a-f]+)$", data)[1]
+                   for filename, data in files.items() if filename.endswith(".meta")}
+    with project_lock(version):
+        if output.exists():
+            if output.is_dir() and all((output / file).is_file() and (output / file).read_bytes() == data
+                                       for file, data in files.items()):
+                return output / (name + ".prefab"), "already composed"
+            raise ValueError(f"Existing artist changes or a different recipe were preserved at {output}.")
+        for root in (project / "Assets", project / "Packages"):
+            for path in root.rglob("*.meta"):
+                if path.is_file() and meta_guid(path) in owned_guids:
+                    raise ValueError(f"The same variant GUID already exists at {path}. Use a new name.")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        cache = project / "Cache"
+        cache.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="temp-channel-", dir=cache) as temporary:
+            staged = Path(temporary) / name
+            staged.mkdir()
+            for file, data in files.items():
+                (staged / file).write_bytes(data)
+            os.rename(staged, output)
+    return output / (name + ".prefab"), "composed"
+
+
+def channel_files(base, name, profile, settings):
+    source = Path("Channels") / (CHANNEL_BASES[profile] + ".prefab")
+    for relative in (source, Path("Channels/ChannelWater2D.prefab"), Path("Channels/ChannelWater2D.prefab.meta")):
+        if not (base / relative).is_file() or digest(base / relative) != digest(TEMPLATE / relative):
+            raise ValueError(f"Install this release of the channel template before composing: {relative}")
+    definition = (base / source).read_text(encoding="utf-8").replace("value: " + CHANNEL_BASES[profile], "value: " + name)
+    for key, value in settings.items():
+        if key not in RANGES: raise ValueError(f"{key} applies to parcel water only.")
+        field, low, high = RANGES[key]
+        if not math.isfinite(value) or not low <= value <= high:
+            raise ValueError(f"{key} must be between {low} and {high}.")
+        definition, changed = re.subn(r"(propertyPath: " + field + r"\n      value: )[^\n]+",
+                                      lambda match: match[1] + format(value, ".7g"), definition)
+        if changed != 1:
+            raise ValueError(f"The source variant has no unique setting for {field}.")
+    guid = uuid.uuid5(uuid.NAMESPACE_URL, "qin-unity-skills/author-channel/" + name).hex
+    meta = (TEMPLATE / (str(source) + ".meta")).read_text(encoding="utf-8")
+    files = {name + ".prefab": definition.encode(), name + ".prefab.meta":
+             re.sub(r"(?m)^guid: [0-9a-f]+$", "guid: " + guid, meta).encode()}
+    return files
+
+def parcel_files(base, name, profile, settings):
+    donor = PARCEL_BASES[profile]
+    preset = Path("Presets") / (donor + ".asset")
+    prefab = Path("Variants") / (donor + ".prefab")
+    for path in (preset, prefab, Path("WaterFluidMixer.prefab.meta")):
+        if not (base / path).is_file() or digest(base / path) != digest(TEMPLATE / path):
+            raise ValueError(f"Install this release of the fluid template before composing: {path}")
+    new_fields = dict(DROP_DEFAULTS.get(profile, {}))
+    for key, value in settings.items():
+        if key not in PARCEL_RANGES: raise ValueError(f"{key} applies to channel water only.")
+        if key in ("span", "count") and profile not in ("drip", "rain"):
+            raise ValueError(f"{key} applies to a falling drop inlet.")
+        field, low, high = PARCEL_RANGES[key]
+        if not math.isfinite(value) or not low <= value <= high or (key == "count" and value != int(value)):
+            raise ValueError(f"Invalid {key}. Expected a value from {low} through {high}.")
+        new_fields[field] = int(value) if key == "count" else format(value, ".7g")
+    recipe = (base / preset).read_text(encoding="utf-8").replace("m_Name: " + donor, "m_Name: " + name)
+    for key, value in new_fields.items():
+        pattern = r"(?m)^  " + key + r": [^\n]*$"
+        if re.search(pattern, recipe):
+            recipe = re.sub(pattern, lambda _: "  " + key + ": " + str(value), recipe)
+        else:
+            recipe += "  " + key + ": " + str(value) + "\n"
+    feed = float(re.search(r"(?m)^  _feedDuration: (.+)$", recipe)[1])
+    duration = float(re.search(r"(?m)^  _duration: (.+)$", recipe)[1])
+    if feed > duration: raise ValueError("Feed duration must fit inside the cast duration.")
+    recipe_guid = uuid.uuid5(uuid.NAMESPACE_URL, "qin-unity-skills/author-water-recipe/" + name).hex
+    prefab_guid = uuid.uuid5(uuid.NAMESPACE_URL, "qin-unity-skills/author-channel/" + name).hex
+    definition = (base / prefab).read_text(encoding="utf-8").replace("value: " + donor, "value: " + name)
+    donor_guid = meta_guid(TEMPLATE / (str(preset) + ".meta")).decode()
+    files = {name + ".asset": recipe.encode(), name + ".prefab": definition.replace(donor_guid, recipe_guid).encode()}
+    for path, guid in ((preset, recipe_guid), (prefab, prefab_guid)):
+        meta = (TEMPLATE / (str(path) + ".meta")).read_text(encoding="utf-8")
+        files[name + path.suffix + ".meta"] = re.sub(r"(?m)^guid: [0-9a-f]+$", "guid: " + guid, meta).encode()
+    return files
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--project", type=Path, required=True)
+    parser.add_argument("--template", default=DEFAULT)
+    parser.add_argument("--destination", default="Assets/GameWater")
+    parser.add_argument("--name", required=True)
+    parser.add_argument("--profile", choices=(*CHANNEL_BASES, *PARCEL_BASES), required=True)
+    for key, (_, low, high) in (RANGES | PARCEL_RANGES).items():
+        parser.add_argument("--" + key, type=float, help=f"Override the profile value ({low} to {high}).")
+    args = parser.parse_args()
+    overrides = {key: getattr(args, key) for key in (RANGES | PARCEL_RANGES) if getattr(args, key) is not None}
+    try:
+        path, result = compose(args.project, args.template, args.destination, args.name, args.profile, overrides)
+    except (ValueError, OSError) as error:
+        parser.exit(1, str(error) + "\n")
+    print(f"{result}: {path}")
+
+
+if __name__ == "__main__":
+    main()

@@ -82,6 +82,8 @@ int _BuildSupportMasks;
 int _IndexPressure;
 float _Duration;
 float _FeedDuration;
+int _DropCount;
+float _DropSpan;
 float _CurtainHold;
 float _Strength;
 float _Gravity;
@@ -197,11 +199,13 @@ float3 Contain(float3 predicted)
 
 float Birth(uint id)
 {
-    // Smooth the admission rate near the head and tail of a feed.
     float u = (float(id) + .5) / PARTICLES;
     float phase = lerp(u, (asin(2.0 * u - 1.0) / 3.14159265) + .5, .63);
     float first = min(Start, .47 * _FeedDuration);
-    return lerp(first, _FeedDuration, phase);
+    float birth = lerp(first, _FeedDuration, phase);
+    if (_Feed == 8)
+        birth = .14 + (id + .25 + .35 * Uniform(id, 29u)) / max(1, _DropCount) * max(.01, _FeedDuration - .14);
+    return birth;
 }
 
 float3 DropOffset(uint id)
@@ -297,6 +301,12 @@ Particle Emit(uint id, float birth)
         position.y += Floor + .024 + .032 * disk.y;
         velocity.xz += .27 * float2(cos(a), sin(a));
         velocity.y += lerp(1.20, 6.25, Uniform(id, 21u)) * sqrt(_Strength);
+    }
+    else if (_Feed == 8)
+    {
+        position.x += _DropSpan * (Uniform(id, 30u) - .5);
+        position.z += .09 * disk.y;
+        velocity.xy += float2(.10 * disk.x, .17 * disk.y);
     }
     Particle p;
     p.placement = float4(Contain(position), birth);
@@ -433,7 +443,7 @@ void PredictPositions(uint id : SV_DispatchThreadID)
     {
         float birth = Birth(id);
         if (_Strength <= .0001 || p.placement.w < -1.5 || birth > min(_Seconds, _AdmissionUntil)
-            || (_Feed == 7 && id % 6u != 0u))
+            || (_Feed == 7 && id % 6u != 0u) || (_Feed == 8 && id >= (uint)_DropCount))
         {
             _Predictions[id] = p.placement;
             return;
@@ -459,7 +469,7 @@ void PredictPositions(uint id : SV_DispatchThreadID)
         float2 water = _WaveRead.Load(int3(WavePixel(expected.xz), 0));
         float surface = Floor + clamp(water.x, 0.0, .10);
         if (velocity.y < -.59 && p.placement.y >= surface && expected.y < surface)
-            DepositImpact(expected.xz, -velocity.y);
+            DepositImpact(expected.xz, -velocity.y * (_Feed == 8 ? lerp(2.4, 1.4, saturate(_DropSpan)) : 1.));
         // The height/vertical velocity of the receiving film lifts already settled water.
         if (expected.y < surface && velocity.y > -.59)
             expected.y += min(.018, (surface - expected.y) * .24 + max(0.0, water.y) * .001);
@@ -603,10 +613,10 @@ float Envelope(Particle p)
 float SolidAir2D(float2 position)
 {
     // Contacts read as a side silhouette. The spell film can intentionally pass in front of its target.
-    if (_Obstacle.w <= 0.0 || _Feed == 6)
-        return 1.0;
-    float distance = length(position - _Obstacle.xy) - _Obstacle.w;
-    return smoothstep(-.013, .024, distance);
+    float air = 1.0;
+    if (_Obstacle.w > 0.0 && _Feed != 6)
+        air = smoothstep(-.013, .024, length(position - _Obstacle.xy) - _Obstacle.w);
+    return air;
 }
 
 [numthreads(64, 1, 1)]
@@ -642,7 +652,7 @@ void UpdateVelocities(uint id : SV_DispatchThreadID)
         float floorRetention = _Feed == 5 ? .994 : _Feed == 1 ? .940 : .973;
         velocity.xz *= floorRetention;
     }
-    float freeSurface = _FreeFlight != 0 ? 0.0 : 1.0 - smoothstep(1.20, 2.42, _Density[id].y);
+    float freeSurface = _Feed == 8 ? 1.0 : (_FreeFlight != 0 ? 0.0 : 1.0 - smoothstep(1.20, 2.42, _Density[id].y));
     float kinetic = smoothstep(1.8, 3.9, length(velocity)) * smoothstep(.085, .31, predicted.y);
     float head = smoothstep(.15, .31, ParticleAge(predicted.w));
     float separation = _SprayEnabled != 0 ? freeSurface * kinetic * head : 0.;
@@ -821,6 +831,11 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
         // The footprint is a reconstruction radius, not a rendered particle radius.
         float lengthwise = _Feed == 7 ? .277 : lerp(.172, .236, stretch);
         float widthwise = _Feed == 7 ? .039 : lerp(.148, .125, stretch);
+        if (_Feed == 8)
+        {
+            lengthwise = lerp(.056, .137, stretch);
+            widthwise = lerp(.052, .026, stretch) * lerp(.75, 1.25, Uniform(other, 31u));
+        }
         float u = dot(delta, axis) / lengthwise;
         float v = dot(delta, across) / widthwise;
         // A resting parcel lies in XZ. Its reconstructed patch projects as a shallow ellipse,
@@ -840,6 +855,13 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
         }
         if (_Feed == 7)
             mass *= .25;
+        if (_Feed == 8)
+        {
+            float vy = _Velocity.y * sqrt(_Strength);
+            float flight = (vy + sqrt(vy * vy + 2. * _Gravity * max(0., _Origin.y - Floor))) / max(.001, _Gravity);
+            float landingAge = ParticleAge(p.placement.w) - flight;
+            mass *= .38 * (1. - onGround * smoothstep(-.045, .115, landingAge));
+        }
         if (_ContinuousFeed != 0)
             mass *= lerp(.41, .30, onGround);
         mass *= .026 / lerp(lengthwise * widthwise, groundLength * groundHeight, onGround);
@@ -860,6 +882,21 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
         {
             float2 radial = p.placement.xz - _Origin.xz;
             angularMomentum += mass * (radial.x * p.motion.z - radial.y * p.motion.x);
+        }
+    }
+    // A sparse point inlet gathers a hanging bead before its corresponding parcel detaches.
+    if (_Feed == 8 && _DropSpan < .12 && abs(position.x - _Origin.x) < .12 && abs(position.y - _Origin.y) < .16)
+    {
+        for (int drop = 0; drop < _DropCount; drop++)
+        {
+            float birth = Birth(drop);
+            float phase = _Seconds - birth;
+            if (phase < -.27 || phase > .08 || birth > _AdmissionUntil) continue;
+            float grow = smoothstep(-.27, -.006, phase);
+            float2 local = (position - _Origin.xy - float2(0, -.016 * grow)) / float2(.052, .071);
+            float bead = grow * (1. - smoothstep(.40, 1.03, length(local))) * (1. - smoothstep(-.008, .075, phase));
+            thickness += .91 * bead;
+            capillary += .48 * bead * local.y;
         }
     }
     if (_Feed == 6 || _ContinuousFeed != 0)

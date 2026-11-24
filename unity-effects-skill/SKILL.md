@@ -27,6 +27,8 @@ Keep the full requested subject list and its order. The single-subject requireme
 | --- | --- |
 | Find or adapt a reference | [Use an existing effect or reference](#use-an-existing-effect-or-reference). |
 | Make or reuse water, ripples, a falling mass, jets, impacts, a waterfall or a vortex | [Install and compose the seven fluid recipes](references/fluid-mixer.md#install-into-a-receiving-game) and [replay them twice from this Skill](references/fluid-mixer.md#reproduce-twice-from-the-installed-skill). |
+| Create 2D rain hitting water, a ledge drip or a fountain from a brief | [Author the bound recipe and prefab](references/fluid-mixer.md#author-a-water-effect-from-parameters), then run the native inlet cases. |
+| Create a custom 2D river, shore or sloshing basin | [Choose the boundary, author a named prefab and reproduce its motion](references/channel-water.md#author-another-water-body). |
 | Adapt water to a side-scrolling 2D game | [Match the gameplay plane](references/fluid-mixer.md#side-view-contract), then [compose a hit-triggered curtain or continuous waterfall](references/fluid-mixer.md#2d-application-replays). |
 | Reproduce a case or audit a set of examples | [Rebuild from declared inputs](references/graph-and-shader.md#rebuild-from-declared-inputs) and [compare independent native replays](references/graph-and-shader.md#compare-two-independent-replays). Give each example its own result. |
 | A visible object, wing, leaf or light shaft appears frozen | [Plan each object's local motion](references/staged-effects.md#decompose-every-visible-object), [build the two graphs](references/graph-and-shader.md#author-the-live-graphs) and [test the individual parts](references/rendering-and-verification.md#verify-local-motion-per-object). |
