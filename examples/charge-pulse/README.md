@@ -1,6 +1,6 @@
 # Charge Pulse
 
-A Unity 6000.6.7f1 example that traces one button action through the six Skills. The focused native test loads [ChargePulse.unity](Assets/Scenes/ChargePulse.unity) and invokes **Charge** in batch mode. The center gathers, the ring expands with a burst of sparks, and the effect returns to its original pose. The button becomes available again after the effect has recycled.
+A Unity 6000.6.7f1 example that traces one button action from input through animation, effects and recycling. The focused native test loads [ChargePulse.unity](Assets/Scenes/ChargePulse.unity) and invokes **Charge** in batch mode. The center gathers, the ring expands with a burst of sparks, and the effect returns to its original pose. The button becomes available again after the effect has recycled.
 
 The [case-by-case code review](CASEBOOK.md) links the runnable Skill cases, negative controls, findings and integration examples. It includes the native and host test commands.
 
@@ -11,6 +11,7 @@ The [case-by-case code review](CASEBOOK.md) links the runnable Skill cases, nega
 | [Unity UI](../../unity-ui-skill/SKILL.md) | [UXML](Assets/Prefabs/ChargePulse/ChargePulseHud.uxml), [USS](Assets/Prefabs/ChargePulse/ChargePulseHud.uss), [HUD controller](Assets/Scripts/ChargePulse/ChargePulseHudController.cs) | UI Toolkit owns layout and input. The 3840 × 2160 design scales uniformly through PanelSettings. State text and input availability follow the controller. |
 | [Unity Animation](../../unity-animation-skill/SKILL.md) | [Pulse.anim](Assets/Prefabs/ChargePulse/Pulse.anim), [ChargePulse.controller](Assets/Prefabs/ChargePulse/ChargePulse.controller) | A one-shot clip controls ring and core scale independently. Timed events advance the pulse and return to the idle pose. |
 | [Unity Effects](../../unity-effects-skill/SKILL.md) | [PulseGlow.shader](Assets/Prefabs/ChargePulse/PulseGlow.shader), [Particle System authoring](Assets/Editor/ChargePulseSampleAuthoring.cs) | The shader supplies an outer rim and core glow with separate materials. The controller starts a bounded spark burst at release and clears it at retirement. |
+| [Unity Performance](../../unity-performance-skill/SKILL.md) | [Code cases](Assets/Editor/Tests/CodeCases.cs) and [effect cases](Assets/Editor/Tests/EffectCases.cs) | A warm scan reuses its list, the material pool handles exhaustion, and one world-space emitter places overlapping impacts independently and retires them. |
 | [Unity Testing](../../unity-testing-skill/SKILL.md) | [ChargePulseTests.cs](Assets/Editor/Tests/ChargePulseTests.cs) | One Editor case checks the saved asset bindings and curve timing. A second case enters Play Mode, submits the UI Toolkit button, reads rendered pixels, and checks duplicate admission, cancellation and replay. |
 
 ## Responsive UI cases

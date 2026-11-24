@@ -6,7 +6,7 @@ The Skill library offers adaptable defaults. Use the approach that best solves t
 
 ## Choose by task
 
-Pick the result below, open its domain menu, then read the linked headings for that operation. Direct Skill calls start at their domain menu.
+Pick the result below, open its domain menu, then read the linked headings for that operation. Direct Skill calls start at their domain menu. Before finishing a Unity task, [review the affected runtime costs](../../unity-performance-skill/SKILL.md#review-every-unity-task).
 
 | Requested result | Start here |
 | --- | --- |
@@ -17,7 +17,8 @@ Pick the result below, open its domain menu, then read the linked headings for t
 | Reproduce water ripples, jets, collisions, a waterfall or a vortex in another game | [Effects operations](../../unity-effects-skill/SKILL.md#choose-an-operation) |
 | Change particles, VFX Graph, Shader Graph, material lighting, emission, overdraw or motion inside an effect | [Effects](../../unity-effects-skill/SKILL.md) |
 | Reproduce a fault, choose a runner, profile a frame or verify runtime behavior | [Testing](../../unity-testing-skill/SKILL.md) |
-| Optimize CPU, GC, GPU time, texture size or an unexplained frame spike | [Optimization by cost](#optimize-by-cost) |
+| Choose a simulation or physics model, remove recurring work, reuse effects, or manage asset lifetimes | [Performance](../../unity-performance-skill/SKILL.md) |
+| Diagnose CPU, GC, GPU time, texture size or an unexplained frame spike | [Optimization by cost](#optimize-by-cost) |
 | Build a Player for testing, or verify a package already produced | [Build](../../unity-testing-skill/SKILL.md#test-packaging) or [inspect an existing package](../../unity-testing-skill/SKILL.md#existing-test-package) |
 | Configure scene lighting, a 2D or 3D system, Player Settings or release distribution | [Project settings and release](#project-settings-and-release) |
 
@@ -25,7 +26,7 @@ Add a second domain for an actual dependency, change or proof. Audit any Unity i
 
 ## Optimize by cost
 
-Pick the measured symptom. For a change bind the workload, target and acceptance metric, then replay under the same conditions.
+Use [Unity Performance](../../unity-performance-skill/SKILL.md#choose-an-operation) for runtime code and architecture decisions. Pick the measured symptom. For a change bind the workload, target and acceptance metric, then replay under the same conditions.
 
 | Evidence or question | Next operation |
 | --- | --- |
@@ -42,7 +43,7 @@ Use the installed Unity or package version's official guidance for uncovered eng
 
 ## Read one section
 
-The [reader](../scripts/read_topic.py) takes no arguments for the task menu, a menu fragment on its own, a domain for its operation menu, or a domain and quoted link for a section and its inherited instructions. A bare Markdown reference lists headings. Open linked data, code or artwork directly when required. Domain names are `code`, `assets`, `ui`, `animation`, `effects` and `testing`. Resolve `<pack>` to the installed group or the plugin's `skills` directory.
+The [reader](../scripts/read_topic.py) takes no arguments for the task menu, a menu fragment on its own, a domain for its operation menu, or a domain and quoted link for a section and its inherited instructions. A bare Markdown reference lists headings. Open linked data, code or artwork directly when required. Domain names are `code`, `assets`, `ui`, `animation`, `effects`, `testing` and `performance`. Resolve `<pack>` to the installed group or the plugin's `skills` directory.
 
 ```text
 macOS/Linux: python3 -B "<pack>/unity-code-skill/scripts/read_topic.py" assets "references/texture-intake.md#size-new-world-art"
@@ -54,7 +55,7 @@ Windows PowerShell: py -3 -B "<pack>/unity-code-skill/scripts/read_topic.py" ass
 For a standalone installation, append this paragraph to your Codex user `developer_instructions`.
 
 ```text
-For Unity or C# work, follow the current project's startup and source-owner rules, then read ~/.agents/skills/qin-unity-skills/unity-code-skill/references/global-skill-routing.md and open the domain entry and sections for the task. Add a second owner only when needed for a dependency, change or verification.
+For Unity or C# work, follow the current project's startup and source-owner rules, then read ~/.agents/skills/qin-unity-skills/unity-code-skill/references/global-skill-routing.md and open the domain entry and sections for the task. Before completing any Unity task, follow the runtime cost review in unity-performance-skill. Use the specialist sections that fit the affected path.
 ```
 
 The general Qin pack also discovers this guide. Use its Code and Verify entries for shared writing and evidence standards.

@@ -141,6 +141,17 @@
       "dependencies": []
     },
     {
+      "id": "unity-performance",
+      "summary": "Completion review for every Unity task, C# hot paths and content lifetime, 2D simulation and rendering choices, and matched performance verification",
+      "document": "skills/ai-index/modules/unity-performance.md",
+      "sources": ["unity-performance-skill"],
+      "dependencies": [
+        {"module": "unity-code", "reason": "Reuses the existing callback, managed allocation and resource ownership procedures."},
+        {"module": "unity-effects", "reason": "Checks native effect behavior and the affected renderer."},
+        {"module": "unity-testing", "reason": "Binds comparisons to the actual workload and target."}
+      ]
+    },
+    {
       "id": "catalog",
       "summary": "Public task and domain routing, extension ownership, plugin distribution, YoFaAssets comparison and repository tests",
       "document": "skills/ai-index/modules/catalog.md",

@@ -88,6 +88,56 @@ namespace Qin.UnitySamples.Tests
             }
         }
 
+        [Test]
+        public void Effects08_SharedEmitterKeepsOverlappingImpactsAtTheirWorldPositions()
+        {
+            GameObject host = new GameObject("Impact emitter");
+            try
+            {
+                ParticleSystem emitter = host.AddComponent<ParticleSystem>();
+                emitter.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+                ParticleSystem.MainModule main = emitter.main;
+                main.simulationSpace = ParticleSystemSimulationSpace.World;
+                ParticleSystem.EmissionModule emission = emitter.emission;
+                emission.rateOverTime = 0f;
+                emitter.Play(false);
+
+                Vector3 left = new Vector3(-3f, 2f, 0f);
+                Vector3 right = new Vector3(4f, -1f, 0f);
+                ParticleSystem.EmitParams burst = new ParticleSystem.EmitParams
+                {
+                    position = left,
+                    velocity = Vector3.zero,
+                    startLifetime = 0.125f
+                };
+                emitter.Emit(burst, 2);
+                burst.position = right;
+                emitter.Emit(burst, 1);
+
+                host.transform.position = new Vector3(12f, 5f, 0f);
+                emitter.Simulate(0.03125f, withChildren: false, restart: false, fixedTimeStep: false);
+                ParticleSystem.Particle[] particles = new ParticleSystem.Particle[4];
+                int count = emitter.GetParticles(particles);
+                Assert.That(count, Is.EqualTo(3));
+                Vector3[] worldPositions = new Vector3[count];
+                for (int i = 0; i < count; i++)
+                {
+                    Vector3 position = particles[i].position;
+                    worldPositions[i] = main.simulationSpace == ParticleSystemSimulationSpace.Local
+                        ? host.transform.TransformPoint(position)
+                        : position;
+                }
+                Assert.That(worldPositions, Is.EquivalentTo(new[] { left, left, right }));
+
+                emitter.Simulate(0.25f, withChildren: false, restart: false, fixedTimeStep: false);
+                Assert.That(emitter.GetParticles(particles), Is.Zero);
+            }
+            finally
+            {
+                Object.DestroyImmediate(host);
+            }
+        }
+
         private static Texture2D Pixel(Color color)
         {
             Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA32, false, true);

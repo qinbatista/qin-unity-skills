@@ -7,7 +7,7 @@ description: Route mixed Unity requests and changes to this Skill pack. For C# u
 
 **Project rules come first.** Follow the project's rules and registered workflows. Use the [standalone CLI gate](references/unity-cli.md#standalone-cli) for Unity work when permitted and no project or registered shared owner governs Unity CLI.
 
-Treat the Skill's methods as adaptable defaults. Use the approach that best fits the task and [share reusable improvements](references/contributing.md#submit-a-skill-change).
+Treat the Skill's methods as adaptable defaults. Use the approach that best fits the task and [share reusable improvements](references/contributing.md#submit-a-skill-change). Before finishing Unity work, [review the affected runtime costs](../unity-performance-skill/SKILL.md#review-every-unity-task).
 
 For a mixed or unfamiliar Unity task open the [pack task menu](references/global-skill-routing.md#choose-by-task) first. For C# read the selected headings by link or [section reader](scripts/read_topic.py). Audit any Unity image touched via [Assets](../unity-assets-skill/SKILL.md#admit-artwork-and-textures).
 

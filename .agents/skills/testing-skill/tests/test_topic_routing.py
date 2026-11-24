@@ -77,6 +77,37 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertIsNotNone(reference)
                 self.assertEqual(read_topic(domain, reference.group(1)), contribution.stdout)
 
+    def test_each_domain_reaches_the_same_performance_review(self):
+        review = read_topic("performance", "#review-every-unity-task")
+        for owner in json.loads((RELEASE / "skills.json").read_text(encoding="utf-8")):
+            domain = owner.removeprefix("unity-").removesuffix("-skill")
+            if domain == "performance":
+                continue
+            with self.subTest(domain=domain):
+                menu = read_topic(domain, "#choose-an-operation")
+                link = re.search(r"\]\(([^)]+#review-every-unity-task)\)", menu)
+                self.assertIsNotNone(link, "The direct domain menu must reach the performance review")
+                self.assertEqual(read_topic(domain, link.group(1)), review)
+
+    def test_performance_menu_opens_implementation_and_measurement_sections(self):
+        menu = run_reader("performance")
+        self.assertEqual(menu.returncode, 0, menu.stderr)
+        scenarios = (
+            ("addressables", "runtime-code.md", ("LoadAssetAsync", "ReleaseInstance")),
+            ("followers", "simulation-and-effects.md", ("GameObject", "Entities", "Burst", "VFX Graph")),
+            ("frame spike", "measure-and-verify.md", ("CPU", "GPU", "p95")),
+        )
+        for symptom, guide, decisions in scenarios:
+            with self.subTest(symptom=symptom):
+                rows = [line for line in menu.stdout.splitlines() if line.startswith("|") and symptom in line.lower()]
+                self.assertEqual(len(rows), 1)
+                link = re.search(r"\]\((references/[^)]+#[^)]+)\)", rows[0])
+                self.assertIsNotNone(link)
+                self.assertEqual(link.group(1).partition("#")[0], "references/" + guide)
+                section = read_topic("performance", link.group(1))
+                for decision in decisions:
+                    self.assertIn(decision, section)
+
     def test_published_files_match_their_sources(self):
         for owner in json.loads((RELEASE / "skills.json").read_text(encoding="utf-8")):
             source = PROJECT / owner
