@@ -83,6 +83,8 @@ Check the full gesture in the two native replays. Record a state sample appropri
 
 #### Compose fluid from a source, moving body and responses
 
+For a side-view game, [match the actual gameplay plane](fluid-mixer.md#side-view-contract) before adapting fluid art. Use XY for projected liquid and spray and make a shallow pool respond along a shared waterline at the receiver's baseline. Verify depth-invariant framing at matched times in both takes.
+
 Use the [seven bundled water recipes](fluid-mixer.md#choose-and-combine) when the subject fits. The [installed replay](fluid-mixer.md#reproduce-twice-from-the-installed-skill) recreates the graphs, state and controls in two blank receivers.
 
 Classify each local example by its inlet, state and dimensionality, applied force, boundary, and visible outputs. Count a parent effect and its material or timing variants once. Open the editable source for each transferred mechanism. List locally available bytes separately from catalog identifiers and downloadable archives.

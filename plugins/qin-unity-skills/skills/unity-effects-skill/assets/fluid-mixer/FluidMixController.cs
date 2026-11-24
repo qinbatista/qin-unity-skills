@@ -89,7 +89,7 @@ namespace Qin.UnityEffects.Fluids
             double admission = _stoppedAt < 0 ? feedEnd : System.Math.Min(_stoppedAt, feedEnd);
             _simulation.Advance(_seconds, admission, obstacle, _recipe.Pressure);
             if (_recipe.SurfaceWaves)
-                BindField(_surface, _simulation.Waves, 0f, weight);
+                BindField(_surface, _simulation.Waterline, 0f, weight);
             if (_recipe.Feed != SOFluidMixRecipe.Inlet.SurfaceImpulse)
                 BindField(_volume, _simulation.Film, 1f, weight);
             if (_sprayStarted)

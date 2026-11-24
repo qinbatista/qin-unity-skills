@@ -103,6 +103,10 @@ public sealed partial class QinFluidReplay
         view.transform.position = new Vector3(0,-.7f,-10f);
         camera = view.GetComponent<Camera>();
         camera.orthographic = true;
+        Assert.That(camera.transform.forward, Is.EqualTo(Vector3.forward));
+        Vector3 near = camera.WorldToViewportPoint(new Vector3(1f, 1f, -.5f));
+        Vector3 far = camera.WorldToViewportPoint(new Vector3(1f, 1f, .5f));
+        Assert.That((Vector2)near, Is.EqualTo((Vector2)far));
         camera.orthographicSize = 4f;
         camera.clearFlags = CameraClearFlags.SolidColor;
         camera.backgroundColor = new Color(.08f,.14f,.18f);
@@ -224,8 +228,33 @@ public sealed partial class QinFluidReplay
             File.WriteAllBytes(Path.Combine(folder,"alternate.bin"),State(owner));
             File.WriteAllBytes(Path.Combine(folder,"alternate.png"),Capture());
             File.WriteAllText(Path.Combine(folder,"device.txt"),Application.unityVersion + "\n" + SystemInfo.graphicsDeviceName + "\n" + SystemInfo.graphicsDeviceType);
+            if (form == "FallingMass")
+                yield return VerifyDepthDoesNotShiftImage(owner, recipe, folder);
         }
         finally { Object.Destroy(control); }
+    }
+
+    private IEnumerator VerifyDepthDoesNotShiftImage(FluidMixController owner, SOFluidMixRecipe recipe, string folder)
+    {
+        SOFluidMixRecipe moved = Object.Instantiate(recipe);
+        applicationResources.Add(moved);
+        SerializedObject data = new(moved);
+        data.FindProperty("_origin").vector3Value += new Vector3(0f, 0f, .52f);
+        data.ApplyModifiedPropertiesWithoutUndo();
+        string path = Path.Combine(folder, "depth-check");
+        Directory.CreateDirectory(path);
+
+        foreach (var sample in new[] { (Name: "base", Recipe: recipe), (Name: "offset", Recipe: moved) })
+        {
+            owner.SetRecipe(sample.Recipe);
+            owner.BeginCast(Seed);
+            const float inFlight = .4f;
+            owner.SetCastTime(inFlight);
+            yield return null;
+            owner.SetCastTime(inFlight);
+            File.WriteAllBytes(Path.Combine(path, sample.Name + ".png"), Capture());
+            File.WriteAllBytes(Path.Combine(path, sample.Name + ".bin"), State(owner));
+        }
     }
 
     private byte[] Capture()
@@ -278,14 +307,16 @@ public sealed partial class QinFluidReplay
         {
             for (int x = 0; x < width; x++)
             {
-                float u = x / (float)width, v = y / (float)height;
-                float light = Mathf.Exp(-4f * ((u-.32f)*(u-.32f) + (v-.9f)*(v-.9f)));
-                float noise = Mathf.PerlinNoise(9f*u + 1.3f*v, 24f*v) * .7f + .3f * Mathf.PerlinNoise(34f*u, 38f*v);
-                Color air = Color.Lerp(new Color(.034f,.073f,.107f), new Color(.135f,.260f,.300f), .58f*light + .27f*noise);
-                float grain = Mathf.PerlinNoise(28f*u + 1.6f*Mathf.Sin(9f*v), 145f*v);
-                Color bed = Color.Lerp(new Color(.055f,.104f,.125f), new Color(.21f,.29f,.29f), .68f*grain + .19f*noise);
-                float boundary = plane + .005f*Mathf.Sin(22f*u + .8f) + .0017f*Mathf.Sin(97f*u);
-                pixels[y*width+x] = Color.Lerp(bed,air,Mathf.SmoothStep(0f,1f,(v-boundary+.006f)/.012f));
+                float u = x / (float)width;
+                float v = y / (float)height;
+                float grain = Mathf.PerlinNoise(20f * u + 9f, 30f * v + 11f);
+                float muted = .5f + .5f * Mathf.Sin(31f * u + .82f * Mathf.Sin(7f * v));
+                Color sky = Color.Lerp(new Color(.025f, .071f, .117f), new Color(.081f, .167f, .210f),
+                    .48f * grain + .24f * muted + .20f * Mathf.SmoothStep(0f, 1f, v));
+                Color bank = Color.Lerp(new Color(.023f, .055f, .084f), new Color(.063f, .127f, .151f), grain * .63f);
+                float seam = Mathf.SmoothStep(0f, 1f, (v - plane) * 95f);
+                Color waterline = new Color(.063f, .088f, .079f) * Mathf.Exp(-Mathf.Abs(v - plane) * 116f);
+                pixels[y * width + x] = Color.Lerp(bank, sky, seam) + waterline;
             }
         }
         texture.SetPixels32(pixels);
@@ -312,22 +343,18 @@ public sealed partial class QinFluidReplay
             for (int x = 0; x < size; x++)
             {
                 Vector2 uv = new Vector2(2f * (x + .5f) / size - 1f, 2f * (y + .5f) / size - 1f);
-                float r2 = uv.sqrMagnitude;
-                float z = Mathf.Sqrt(Mathf.Max(0f, 1f - r2));
-                float lit = Mathf.Clamp01(-.42f * uv.x + .66f * uv.y + .58f * z);
-                Color pigment = Color.Lerp(new Color(.13f,.18f,.20f), new Color(.56f,.60f,.56f), lit);
-                pigment.a = Mathf.Clamp01((1f - Mathf.Sqrt(r2)) * size);
+                Color pigment = SideStoneColor(uv.x, uv.y, Mathf.PerlinNoise(1.8f * uv.x + 8f, 2f * uv.y + 7f));
+                pigment.a = Mathf.Clamp01((1f - uv.magnitude) * size);
                 colors[y * size + x] = pigment;
             }
         }
         texture.SetPixels32(colors);
         texture.Apply(false);
-        var obstacle = new GameObject("Spherical boundary", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
+        SpriteRenderer obstacle = new GameObject("Side sprite boundary", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
         obstacle.transform.SetParent(stage.transform,false);
-        obstacle.transform.localPosition = new Vector3(center.x, center.y + .32f * center.z + SurfaceY, 0f);
+        obstacle.transform.localPosition = new Vector3(center.x, center.y + SurfaceY, 0f);
         var sprite = Sprite.Create(texture,new Rect(0,0,size,size),Vector2.one * .5f,size / (2f * radius));
         obstacle.sprite = sprite;
-        obstacle.transform.localScale = new Vector3(1f, Mathf.Sqrt(1f + .32f * .32f), 1f);
         obstacle.sharedMaterial = spriteMaterial;
         obstacle.sortingLayerName = "Default";
         obstacle.sortingOrder = -10;

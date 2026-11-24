@@ -1,6 +1,6 @@
 ---
 name: unity-effects-skill
-description: Create Unity gameplay effects with VFX Graph and Shader Graph. Install and reproduce seven editable GPU water forms, a hit-triggered 2D water curtain and a continuous waterfall, adapt Particle System references, animate each visible part, and compare native playback with the original.
+description: Create Unity gameplay effects with VFX Graph and Shader Graph. Install and reproduce seven editable GPU water forms, a hit-triggered 2D water curtain and a continuous waterfall drawn in the side-view XY plane, adapt Particle System references, animate each visible part, and compare native playback with the original.
 ---
 
 # Unity Effects
@@ -27,7 +27,7 @@ Keep the full requested subject list and its order. The single-subject requireme
 | --- | --- |
 | Find or adapt a reference | [Use an existing effect or reference](#use-an-existing-effect-or-reference). |
 | Make or reuse water, ripples, a falling mass, jets, impacts, a waterfall or a vortex | [Install and compose the seven fluid recipes](references/fluid-mixer.md#install-into-a-receiving-game) and [replay them twice from this Skill](references/fluid-mixer.md#reproduce-twice-from-the-installed-skill). |
-| Adapt a 2D water attack or a continuously fed scene waterfall | [Compose the 2D applications](references/fluid-mixer.md#2d-application-replays) and test the hit or source shutoff. |
+| Adapt water to a side-scrolling 2D game | [Match the gameplay plane](references/fluid-mixer.md#side-view-contract), then [compose a hit-triggered curtain or continuous waterfall](references/fluid-mixer.md#2d-application-replays). |
 | Reproduce a case or audit a set of examples | [Rebuild from declared inputs](references/graph-and-shader.md#rebuild-from-declared-inputs) and [compare independent native replays](references/graph-and-shader.md#compare-two-independent-replays). Give each example its own result. |
 | A visible object, wing, leaf or light shaft appears frozen | [Plan each object's local motion](references/staged-effects.md#decompose-every-visible-object), [build the two graphs](references/graph-and-shader.md#author-the-live-graphs) and [test the individual parts](references/rendering-and-verification.md#verify-local-motion-per-object). |
 | Translate an editable Particle System or design a new GPU effect | [Graph and shader production](references/graph-and-shader.md). Use the [conversion table](references/graph-and-shader.md#translate-the-executing-source) for source ports and the [paired replay](references/graph-and-shader.md#compare-two-independent-replays) for both entry paths. |

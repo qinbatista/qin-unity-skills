@@ -107,6 +107,17 @@ def match_receivers(a, b, name):
         require((a / file).read_bytes() == (b / file).read_bytes(), f"{name} receiver mismatch at {file}")
 
 
+def side_depth_check(folder):
+    near, _ = read_state(folder / "base.bin")
+    shifted, _ = read_state(folder / "offset.bin")
+    paired = [(a, b) for a, b in zip(near, shifted) if a[3] >= 0]
+    require(paired and all(b[3] >= 0 and a[:2] == b[:2] and abs(b[2] - a[2] - .52) < 1e-5
+                           for a, b in paired), "Depth control did not move only the parcel Z anchor")
+    require((folder / "base.png").read_bytes() == (folder / "offset.png").read_bytes(),
+            "Changing only Z shifted or shaded water in the side view")
+    return {"depthOffsetMetres": .52, "identicalPixels": True, "occupiedParcels": len(paired)}
+
+
 def review(work):
     results = {}
     for form in FORMS:
@@ -122,8 +133,10 @@ def review(work):
         require(len(set(optical))==4,form+" optics, displacement or colour reversal went missing")
         require(any((a/"frames"/p.name).read_bytes()!=p.read_bytes() for p in (a/"control").glob("*.png")),
                 form+" force control did not change the image")
-        results[form] = {"equalFrames":len(frames),"equalStateSamples":len(list(a.rglob("*.bin"))),
-                         "physics":physical(form,a)}
+        state_samples = sum(1 for mode in ("normal", "control") for _ in (a / mode).glob("*.bin")) + 1
+        results[form] = {"equalFrames": len(frames), "equalStateSamples": state_samples, "physics": physical(form,a)}
+        if form == "FallingMass":
+            results[form]["sideDepthCheck"] = side_depth_check(a / "depth-check")
     base=Path(work)/"A/captures"
     require(all(p.read_bytes()==(base/"RockImpact/control"/p.name).read_bytes()
                 for p in (base/"FreeJet/normal").glob("*.bin")), "The sphere-off case changed its source jet")

@@ -28,6 +28,7 @@ namespace Qin.UnityEffects.Fluids
         private static readonly int ImpulsesId = Shader.PropertyToID("_Impulses");
         private static readonly int FilmId = Shader.PropertyToID("_Film");
         private static readonly int SprayId = Shader.PropertyToID("_Spray");
+        private static readonly int WaterlineId = Shader.PropertyToID("_Waterline");
         private static readonly int WaveReadId = Shader.PropertyToID("_WaveRead");
         private static readonly int WaveWriteId = Shader.PropertyToID("_WaveWrite");
         private static readonly int TimeId = Shader.PropertyToID("_Seconds");
@@ -45,6 +46,7 @@ namespace Qin.UnityEffects.Fluids
         private static readonly int ObstacleId = Shader.PropertyToID("_Obstacle");
         private static readonly int PressureId = Shader.PropertyToID("_PressureScale");
         private static readonly int FreeFlightId = Shader.PropertyToID("_FreeFlight");
+        private static readonly int IndexPressureId = Shader.PropertyToID("_IndexPressure");
         private static readonly int BuildSupportMasksId = Shader.PropertyToID("_BuildSupportMasks");
         private static readonly int ContinuousFeedId = Shader.PropertyToID("_ContinuousFeed");
         private static readonly int FeedOpenId = Shader.PropertyToID("_FeedOpen");
@@ -70,6 +72,7 @@ namespace Qin.UnityEffects.Fluids
         private readonly int _project;
         private readonly int _velocity;
         private readonly int _stepWave;
+        private readonly int _projectWaterline;
         private readonly int _reconstruct;
 
         private int _waveIndex;
@@ -84,6 +87,7 @@ namespace Qin.UnityEffects.Fluids
 
         internal RenderTexture Film { get; }
         internal RenderTexture Waves => _waves[_waveIndex];
+        internal RenderTexture Waterline { get; }
         internal RenderTexture Spray { get; }
         internal GraphicsBuffer Particles { get; }
         internal long Step { get; private set; }
@@ -105,6 +109,7 @@ namespace Qin.UnityEffects.Fluids
                 _project = _program.FindKernel("ProjectPressure");
                 _velocity = _program.FindKernel("UpdateVelocities");
                 _stepWave = _program.FindKernel("StepWave");
+                _projectWaterline = _program.FindKernel("ProjectWaterline");
                 _reconstruct = _program.FindKernel("ReconstructFilm");
                 _commands = new CommandBuffer { name = "Fluid mixer fixed steps" };
                 Particles = new GraphicsBuffer(GraphicsBuffer.Target.Structured, ParticleCount, 32);
@@ -117,6 +122,7 @@ namespace Qin.UnityEffects.Fluids
                     GraphicsFormat.R16G16B16A16_SFloat, FilterMode.Bilinear);
                 Spray = CreateTexture("Fluid spray state", ParticleCount, 2,
                     GraphicsFormat.R32G32B32A32_SFloat, FilterMode.Point);
+                Waterline = CreateTexture("Side-view waterline", WaveWidth, 1, GraphicsFormat.R32G32_SFloat, FilterMode.Bilinear);
                 for (int i = 0; i < _waves.Length; i++)
                     _waves[i] = CreateTexture("Fluid wave state", WaveWidth, WaveHeight,
                         GraphicsFormat.R32G32_SFloat, FilterMode.Bilinear);
@@ -177,8 +183,10 @@ namespace Qin.UnityEffects.Fluids
                 _commands.SetComputeTextureParam(_program, _resetWave, WaveWriteId, _waves[i]);
                 _commands.DispatchCompute(_program, _resetWave, WaveWidth / 8, WaveHeight / 8, 1);
             }
+            _commands.SetComputeVectorParam(_program, ObstacleId, Vector4.zero);
             ClearCells();
             ReconstructFilm();
+            ProjectWaterline();
             Graphics.ExecuteCommandBuffer(_commands);
         }
 
@@ -223,6 +231,8 @@ namespace Qin.UnityEffects.Fluids
                 Index(_positions);
                 ReconstructFilm();
             }
+            if (_hasWaves)
+                ProjectWaterline();
             Graphics.ExecuteCommandBuffer(_commands);
             return true;
         }
@@ -278,6 +288,7 @@ namespace Qin.UnityEffects.Fluids
         private void Index(GraphicsBuffer positions, bool forPressure = false)
         {
             ClearCells();
+            _commands.SetComputeIntParam(_program, IndexPressureId, forPressure ? 1 : 0);
             _commands.SetComputeIntParam(_program, BuildSupportMasksId, forPressure && _denseVolume ? 1 : 0);
             Bind(_index, CellsId, _cells);
             Bind(_index, PredictionsId, positions);
@@ -329,6 +340,13 @@ namespace Qin.UnityEffects.Fluids
             _waveIndex = next;
         }
 
+        private void ProjectWaterline()
+        {
+            _commands.SetComputeTextureParam(_program, _projectWaterline, WaveReadId, Waves);
+            _commands.SetComputeTextureParam(_program, _projectWaterline, WaterlineId, Waterline);
+            _commands.DispatchCompute(_program, _projectWaterline, WaveWidth / 32, 1, 1);
+        }
+
         private void ReconstructFilm()
         {
             Bind(_reconstruct, ParticlesId, Particles);
@@ -368,6 +386,7 @@ namespace Qin.UnityEffects.Fluids
             _cells?.Dispose();
             _impulses?.Dispose();
             ReleaseTexture(Film);
+            ReleaseTexture(Waterline);
             ReleaseTexture(Spray);
             foreach (RenderTexture wave in _waves)
                 ReleaseTexture(wave);

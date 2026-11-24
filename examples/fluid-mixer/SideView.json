@@ -1,0 +1,217 @@
+{
+  "applications": {
+    "curtain": {
+      "equalFrames": 92,
+      "equalStateSamples": 14,
+      "physics": {
+        "anchorX": 0.92,
+        "closingMedianHalfWidthMetres": 0.25185005366802216,
+        "closureStartAfterImpactSeconds": 0.5,
+        "floorParcelFractionAt150sAfterHit": 0.9921875,
+        "impactFrame": 24,
+        "openMedianHalfWidthMetres": 0.750870406627655,
+        "opticsFrame": 38
+      },
+      "visual": {
+        "chromaReversalPixels": 7441,
+        "transmissionPixels": 9865,
+        "upperWaterPixelsAfterImpact": [
+          1263,
+          41587,
+          15084
+        ]
+      }
+    },
+    "waterfall": {
+      "equalFrames": 292,
+      "equalStateSamples": 39,
+      "physics": {
+        "feedOpenSeconds": 7.4,
+        "minimumDistanceFromRockCentreMetres": 0.5479998783067733,
+        "minimumFallingParcelsAtInlet": 56,
+        "minimumPoolHeightMagnitude": 48.9633912816098,
+        "opticsFrame": 162,
+        "parcelsAfterShutoff": [
+          317,
+          161,
+          0
+        ],
+        "settledFractionAt843s": 0.9875776397515528,
+        "steadySamples": 7
+      },
+      "visual": {
+        "chromaReversalPixels": 456,
+        "steadyInletPixels": [
+          11741,
+          15626
+        ],
+        "steadyMinimumChangingPixels": 8760,
+        "transmissionPixels": 3357
+      }
+    }
+  },
+  "gallery": {
+    "FallingMass": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "floorFractionAt080s": 0.9895833333333334,
+        "widthAt040s": 0.5210298657417297,
+        "widthAt057s": 0.5259067632257939,
+        "widthAt080s": 0.9934301435947417
+      },
+      "sideDepthCheck": {
+        "depthOffsetMetres": 0.52,
+        "identicalPixels": true,
+        "occupiedParcels": 384
+      }
+    },
+    "FreeJet": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "heightSumAt157s": 29.811313628895157
+      }
+    },
+    "OpposedJets": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "meanPressureDisplacementAt127s": 0.6016732170946854
+      }
+    },
+    "PlanarRipples": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "distantHeightAt020s": 3.432570259289479e-07,
+        "distantHeightAt080s": 57.31104454309609
+      }
+    },
+    "RockImpact": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "freeControlInsideAt080s": 81,
+        "minimumCenterDistanceAt080s": 0.47799991689543764
+      }
+    },
+    "Vortex": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "drainedAt157s": 11,
+        "medianAngularMomentumAt080s": 2.6698713685982387,
+        "medianRadiusAt040s": 1.0647428793950893,
+        "medianRadiusAt157s": 0.40886149187868615,
+        "torqueOffAngularMomentumAt080s": -0.034603067065728244
+      }
+    },
+    "Waterfall": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "gravityHeightDifferenceAt080s": 0.4845275282859802,
+        "sheetWidthAt080s": 1.3691737055778503
+      }
+    }
+  },
+  "galleryReferenceMinIoU": 1.0,
+  "graphics": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal"
+  ],
+  "inputManifestSha256": "876ed19e46ecacfb6f557e9619b380e292183033aa6dd80c8e82d1eb5a51261e",
+  "receiverPaths": [
+    "Assets/QinFluidMixer",
+    "Assets/Effects/Liquid"
+  ],
+  "seed": 29411,
+  "solverComparison": {
+    "identicalStateSamples": 242,
+    "matchedByCase": {
+      "Curtain": 14,
+      "FallingMass": 27,
+      "FreeJet": 27,
+      "OpposedJets": 27,
+      "PlanarRipples": 27,
+      "RockImpact": 27,
+      "Vortex": 27,
+      "Waterfall": 27,
+      "Waterfall2D": 39
+    },
+    "referenceCommit": "e22d1a6340ca905b9ca507a900268a8d5d6b2ba3"
+  },
+  "testsByReceiver": {
+    "A": 9,
+    "B": 9
+  },
+  "video": {
+    "curtain": {
+      "avg_frame_rate": "30/1",
+      "codec_name": "h264",
+      "height": 540,
+      "nb_read_frames": "92",
+      "seconds": 3.066667,
+      "sha256": "f77e8a32a03066cf49d168cf1476a70ddfa4bfc268204c9e14ec47579acaab6e",
+      "width": 960
+    },
+    "gallery": {
+      "avg_frame_rate": "30/1",
+      "codec_name": "h264",
+      "height": 468,
+      "nb_read_frames": "336",
+      "seconds": 11.2,
+      "sha256": "844f3bdeea891b36dc74aadda5727be3cff8518ac9b369e22cb89f33e8b4675f",
+      "width": 832
+    },
+    "waterfall": {
+      "avg_frame_rate": "30/1",
+      "codec_name": "h264",
+      "height": 540,
+      "nb_read_frames": "292",
+      "seconds": 9.733333,
+      "sha256": "7c8a787e949ee78face7c3e57af4ec0c85b0a06cd85354c5ca2b3566aaf979ea",
+      "width": 960
+    }
+  },
+  "view": {
+    "camera": "orthographic, forward +Z",
+    "coordinatePlane": "XY",
+    "depthControl": {
+      "depthOffsetMetres": 0.52,
+      "identicalPixels": true,
+      "occupiedParcels": 384
+    },
+    "orientationReference": "Side-scrolling gameplay camera. TrainingGround uses a zero-rotation orthographic camera.",
+    "visibleWaterline": [
+      {
+        "frame": 12,
+        "heightPixels": 18,
+        "widthPixels": 101
+      },
+      {
+        "frame": 24,
+        "heightPixels": 19,
+        "widthPixels": 227
+      },
+      {
+        "frame": 38,
+        "heightPixels": 16,
+        "widthPixels": 339
+      },
+      {
+        "frame": 47,
+        "heightPixels": 15,
+        "widthPixels": 382
+      },
+      {
+        "frame": 57,
+        "heightPixels": 13,
+        "widthPixels": 391
+      }
+    ],
+    "waterSurface": "Horizontal 128-sample height profile reconstructed from the existing shallow field."
+  }
+}

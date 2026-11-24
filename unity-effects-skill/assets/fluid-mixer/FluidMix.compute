@@ -1,6 +1,7 @@
 #pragma kernel ResetLiquid
 #pragma kernel ResetWave
 #pragma kernel StepWave
+#pragma kernel ProjectWaterline
 #pragma kernel PredictPositions
 #pragma kernel ClearCells
 #pragma kernel IndexParticles
@@ -65,6 +66,7 @@ RWTexture2D<float4> _Spray;
 RWStructuredBuffer<uint> _Impulses;
 Texture2D<float2> _WaveRead;
 RWTexture2D<float2> _WaveWrite;
+RWTexture2D<float2> _Waterline;
 
 float _Seconds;
 float _AdmissionUntil;
@@ -77,6 +79,7 @@ int _ContinuousFeed;
 int _FeedOpen;
 uint _FeedTick;
 int _BuildSupportMasks;
+int _IndexPressure;
 float _Duration;
 float _FeedDuration;
 float _CurtainHold;
@@ -89,7 +92,8 @@ float4 _Obstacle;
 float _PressureScale;
 float2 _FlowTimes;
 
-float2 ProjectToFilm(float3 p)
+// Broadphase bins for the solver are private to the pressure pass.
+float2 PressureCoordinate(float3 p)
 {
     return float2(p.x, p.y + .32 * p.z);
 }
@@ -125,7 +129,7 @@ uint MaskAddress(uint axis, uint bin)
 
 NeighborCursor BeginPressureSearch(float3 position)
 {
-    NeighborCursor cursor = BeginSearch(ProjectToFilm(position));
+    NeighborCursor cursor = BeginSearch(PressureCoordinate(position));
     if (_BuildSupportMasks != 0)
         cursor.supportBase = uint3(MaskAddress(0u, AxisBin(position.x)), MaskAddress(1u, AxisBin(position.y)),
             MaskAddress(2u, AxisBin(position.z)));
@@ -476,7 +480,8 @@ void IndexParticles(uint id : SV_DispatchThreadID)
     float4 predicted = _Predictions[id];
     if (predicted.w < 0.0)
         return;
-    int2 cell = GridCell(ProjectToFilm(predicted.xyz));
+    float2 coordinate = _IndexPressure != 0 ? PressureCoordinate(predicted.xyz) : predicted.xy;
+    int2 cell = GridCell(coordinate);
     if (any(cell < 0) || any(cell >= int2(CELL_COUNT_X, CELL_COUNT_Y)))
         return;
     uint header = uint(cell.y * CELL_COUNT_X + cell.x) * WORDS_PER_CELL;
@@ -595,6 +600,15 @@ float Envelope(Particle p)
     return age * release * perimeter;
 }
 
+float SolidAir2D(float2 position)
+{
+    // Contacts read as a side silhouette. The spell film can intentionally pass in front of its target.
+    if (_Obstacle.w <= 0.0 || _Feed == 6)
+        return 1.0;
+    float distance = length(position - _Obstacle.xy) - _Obstacle.w;
+    return smoothstep(-.013, .024, distance);
+}
+
 [numthreads(64, 1, 1)]
 void UpdateVelocities(uint id : SV_DispatchThreadID)
 {
@@ -638,7 +652,7 @@ void UpdateVelocities(uint id : SV_DispatchThreadID)
     _Particles[id] = p;
 
     float weight = (1.0 - step(.64, Uniform(id, 8u))) * spray * Envelope(p);
-    _Spray[uint2(id, 0)] = float4(predicted.xyz, weight);
+    _Spray[uint2(id, 0)] = float4(predicted.xyz, weight * SolidAir2D(predicted.xy));
     _Spray[uint2(id, 1)] = float4(velocity.xy, Uniform(id, 9u), Uniform(id, 10u));
 }
 
@@ -690,11 +704,29 @@ void StepWave(uint2 pixel : SV_DispatchThreadID)
     _WaveWrite[pixel] = float2(water.x + StepSeconds * velocity, velocity);
 }
 
+[numthreads(32, 1, 1)]
+void ProjectWaterline(uint pixel : SV_DispatchThreadID)
+{
+    // Condense transverse waves to a visible horizontal profile. The source field still drives contact.
+    float2 sum = 0.0;
+    float2 front = 0.0;
+    float weightSum = 0.0;
+    for (int z = 2; z < WAVE_HEIGHT; z += 4)
+    {
+        float2 sample = _WaveRead.Load(int3(pixel, z, 0));
+        float weight = 0.30 + 0.70 * (1.0 - abs((z + .5 - .5 * WAVE_HEIGHT) / (.5 * WAVE_HEIGHT)));
+        sum += weight * sample;
+        weightSum += weight;
+        if (abs(sample.x) > abs(front.x)) front = sample;
+    }
+    _Waterline[uint2(pixel, 0)] = lerp(sum / weightSum, front, .34);
+}
+
 // A thin supported film bridges the gaps between nearby parcels during formation.
 // It enters from the floor and loses support from the top as detached parcels take over.
 float4 CurtainFilm(float2 position)
 {
-    float2 p = position - ProjectToFilm(_Origin);
+    float2 p = position - _Origin.xy;
     float t = _Seconds;
     float formation = smoothstep(.035, .42, t);
     float closeAge = t - _CurtainHold;
@@ -716,16 +748,15 @@ float4 CurtainFilm(float2 position)
     float lip = .36 * (1.0 - smoothstep(.021, .138, top)) + .34 * smoothstep(.70, .98, u);
     float mass = (film + lip) * retire * formation * smoothstep(-.034, .049, p.y) *
         smoothstep(-.014, .076, top) * (1.0 - smoothstep(.94, 1.025, r));
-    float depth = .39 * sqrt(max(0.0, 1.0 - u * u)) + .014 * folds;
     float capillary = sin(30.0 * p.x + .75 * sin(19.0 * vertical) + .45 * sin(25.3 * vertical));
-    return float4(mass, depth, .35 + .33 * filaments, capillary);
+    return float4(mass, 0.0, .35 + .33 * filaments, capillary);
 }
 
 // A coherent ribbon is the advective limit of the dense inlet. The parcel film
 // still carries separate drops, actual contact, downstream thickness and spray.
 float4 FallingRibbon(float2 p)
 {
-    float drop = _Origin.y + .32 * _Origin.z - p.y;
+    float drop = _Origin.y - p.y;
     float g = max(0.025, _Gravity);
     float speed = max(.05, -_Velocity.y * sqrt(_Strength));
     float age = 2.0 * max(0.0, drop) / (speed + sqrt(speed * speed + 2.0 * g * max(0.0, drop)));
@@ -745,7 +776,7 @@ float4 FallingRibbon(float2 p)
     if (_Obstacle.w > 0.0)
     {
         // Trace two turn paths around the projected solid. Unbound strands remain in the solver.
-        float h = p.y - (_Obstacle.y + .32 * _Obstacle.z);
+        float h = p.y - _Obstacle.y;
         float r = _Obstacle.w;
         float around = sqrt(saturate(1.0 - (h / (r + .045)) * (h / (r + .045))));
         float turn = 1.0 - smoothstep(.08, r + .11, h);
@@ -754,7 +785,7 @@ float4 FallingRibbon(float2 p)
         float xoff = p.x - center - wind;
         float outer = abs(abs(xoff) - reach - .075 * sin(15.0 * moving + 14.0 * p.y));
         float branches = 1.0 - smoothstep(.094, .267, outer);
-        float solid = length(float2(p.x - _Obstacle.x, h / 1.05)) - r;
+        float solid = length(float2(p.x - _Obstacle.x, h)) - r;
         branches *= lerp(.16, 1.0, smoothstep(-.055, .110, solid));
         shoulder = lerp(shoulder, branches, turn);
     }
@@ -764,7 +795,7 @@ float4 FallingRibbon(float2 p)
     float filament = .5 + .5 * sin(49.0 * p.x + .65 * fold + 3.0 * moving);
     float flow = shoulder * spread * ends * hasArrived * (1.0 - hasDrained);
     float mass = flow * (.30 + .42 * filament * filament);
-    return float4(mass, .23 * shoulder + .026 * fold, .65, .60 * fold + .24 * filament);
+    return float4(mass, 0.0, .65, .60 * fold + .24 * filament);
 }
 
 [numthreads(8, 8, 1)]
@@ -772,30 +803,30 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
 {
     float2 position = FieldOrigin + (float2(pixel) + .5) / float2(FIELD_WIDTH, FIELD_HEIGHT) * FieldSize;
     float thickness = 0.0;
-    float depth = 0.0;
     float activity = 0.0;
     float capillary = 0.0;
+    float angularMomentum = 0.0;
     NeighborCursor neighbors = BeginSearch(position);
     uint other;
     while (NextNeighbor(neighbors, other))
     {
         Particle p = _Particles[other];
-        float2 delta = position - ProjectToFilm(p.placement.xyz);
-        float2 projectedVelocity = ProjectToFilm(p.motion.xyz);
+        float2 delta = position - p.placement.xy;
+        float2 projectedVelocity = p.motion.xy;
         float speed = length(projectedVelocity);
         float2 axis = speed > .04 ? projectedVelocity / speed : float2(1.0, 0.0);
         float2 across = float2(-axis.y, axis.x);
         float stretch = smoothstep(.28, 4.1, speed);
         float onGround = 1.0 - smoothstep(Floor + .018, Floor + .18, p.placement.y);
         // The footprint is a reconstruction radius, not a rendered particle radius.
-        float lengthwise = _Feed == 7 ? .277 : lerp(.183, .239, stretch);
-        float widthwise = _Feed == 7 ? .046 : lerp(.168, .122, stretch);
+        float lengthwise = _Feed == 7 ? .277 : lerp(.172, .236, stretch);
+        float widthwise = _Feed == 7 ? .039 : lerp(.148, .125, stretch);
         float u = dot(delta, axis) / lengthwise;
         float v = dot(delta, across) / widthwise;
         // A resting parcel lies in XZ. Its reconstructed patch projects as a shallow ellipse,
         // while its center still retains the depth and width of the physical footprint.
         float groundLength = .231;
-        float groundHeight = .061;
+        float groundHeight = .044;
         float2 ground = delta / float2(groundLength, groundHeight);
         float support = lerp(u * u + v * v, dot(ground, ground), onGround);
         float kernel = saturate(1.0 - support);
@@ -812,10 +843,6 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
         if (_ContinuousFeed != 0)
             mass *= lerp(.41, .30, onGround);
         mass *= .026 / lerp(lengthwise * widthwise, groundLength * groundHeight, onGround);
-        float reach = lerp(.075, .035, onGround) * sqrt(kernel);
-        // Upper envelope in camera depth, softened so overlapping bodies form one optical surface.
-        float frontDepth = reach - p.placement.z;
-        depth += mass * exp2(clamp(3.2 * frontDepth, -8.0, 8.0));
         thickness += mass;
         activity += mass * saturate(length(p.motion.xyz) / 5.0);
         // Material phases follow the parcels. Local coordinates align the fine folds with their current flow.
@@ -826,15 +853,19 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
             uint birth = (_FeedTick + FeedClockTicks - (uint)round(age / StepSeconds)) % FeedClockTicks;
             phase = 6.2831853 * Uniform(other + 419u * (birth / FeedLifeTicks), 12u);
         }
-        float shear = .63 * sin(2.1 * age + p.placement.z * 3.2 + u);
+        float shear = .63 * sin(2.1 * age + p.motion.y * .23 + u);
         float acrossSurface = lerp(7.6 * v + 1.35 * u, 5.6 * ground.y + 1.35 * ground.x, onGround);
         capillary += mass * sin(acrossSurface + phase + shear);
+        if (_Feed == 5)
+        {
+            float2 radial = p.placement.xz - _Origin.xz;
+            angularMomentum += mass * (radial.x * p.motion.z - radial.y * p.motion.x);
+        }
     }
     if (_Feed == 6 || _ContinuousFeed != 0)
     {
         float4 sheet = _ContinuousFeed != 0 ? FallingRibbon(position) : CurtainFilm(position);
         thickness += sheet.x;
-        depth += sheet.x * exp2(3.2 * sheet.y);
         activity += sheet.x * sheet.z;
         capillary += sheet.x * sheet.w;
     }
@@ -843,6 +874,15 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
         _Film[pixel] = 0.;
         return;
     }
-    float frontDepth = log2(max(.000001, depth / thickness)) / 3.2;
-    _Film[pixel] = float4(thickness, frontDepth, activity / thickness, capillary / thickness);
+    if (_Feed == 5)
+    {
+        // A side section shows the circulating water through moving streamlines inside the actual wet body.
+        float spin = smoothstep(.17, 1.28, abs(angularMomentum) / thickness);
+        float2 section = position - _Origin.xy - float2(0.0, .32);
+        float phase = 2.0 * atan2(section.y, section.x + .0001) - 16.5 * length(section);
+        phase += _Seconds * min(_Swirl, 1.40) * 13.2;
+        capillary = lerp(capillary, sin(phase) * thickness, .76 * spin);
+    }
+    float coverage = SolidAir2D(position);
+    _Film[pixel] = float4(thickness * coverage, 0.0, activity / thickness, capillary / thickness);
 }

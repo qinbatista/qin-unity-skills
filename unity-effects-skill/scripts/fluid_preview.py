@@ -144,6 +144,27 @@ def mask_area(mask):
     return mask.histogram()[255]
 
 
+def verify_side_waterline(captures):
+    folder = captures / "PlanarRipples"
+    with Image.open(folder / "dry.png") as picture:
+        dry = picture.convert("RGB")
+    spans = []
+    for tick in (12, 24, 38, 47, 57):
+        with Image.open(folder / "frames" / f"{tick:04d}.png") as picture:
+            mask = frame_mask(picture.convert("RGB"), dry, minimum=7)
+        bounds = mask.getbbox()
+        if bounds is None:
+            raise ValueError(f"No visible waterline at frame {tick}")
+        left, top, right, bottom = bounds
+        height = bottom - top
+        if height > 27 or not 332 <= top <= 362:
+            raise ValueError(f"Ripple left the side-view waterline near frame {tick}")
+        spans.append({"frame": tick, "widthPixels": right - left, "heightPixels": height})
+    if spans[2]["widthPixels"] < 2.0 * spans[0]["widthPixels"]:
+        raise ValueError("The ripple did not travel along the horizontal waterline")
+    return spans
+
+
 def review_application_images(folder, case, physics):
     with Image.open(folder / "dry.png") as reference:
         dry = reference.convert("RGB")
@@ -151,8 +172,9 @@ def review_application_images(folder, case, physics):
     with Image.open(folder / "no-chroma-reversal.png") as reference:
         reversal = frame_mask(optical_frame, reference.convert("RGB"), minimum=3)
     with Image.open(folder / "no-optics.png") as reference:
-        transmission = frame_mask(optical_frame, reference.convert("RGB"), minimum=3)
-    wet = frame_mask(optical_frame, dry, minimum=3)
+        flat = reference.convert("RGB")
+    transmission = frame_mask(optical_frame, flat, minimum=3)
+    wet = ImageChops.lighter(frame_mask(optical_frame, dry, minimum=2), frame_mask(flat, dry, minimum=2))
     for optical in (reversal, transmission):
         changed = mask_area(optical)
         if changed < 80 or mask_area(ImageChops.multiply(wet, optical)) < .70 * changed:

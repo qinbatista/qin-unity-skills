@@ -133,6 +133,7 @@ def main():
     if gallery:
         report["cases"] = review(work)
         if media:
+            report["sideWaterline"] = fluid_preview.verify_side_waterline(captures)
             if args.seed == 29411:
                 report["referenceSilhouetteIoU"] = fluid_preview.compare_silhouettes(captures)
             fluid_preview.export(captures, work / "FluidMixer.gif", work / "FluidMixer.mp4" if args.video else None)

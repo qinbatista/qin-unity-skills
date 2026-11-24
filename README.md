@@ -4,7 +4,7 @@ One [Unity task menu](unity-code-skill/references/global-skill-routing.md#choose
 
 Every Unity task ends with a [runtime cost review](unity-performance-skill/SKILL.md#review-every-unity-task). For example, a coin can follow the player within pickup range while the CPU owns its reward. A burst of decorative sparks can share an effect emitter. Unity Performance explains how to choose those designs and test the busiest frame, overlapping events and teardown.
 
-The global Effects Skill can [install and reproduce seven editable GPU fluids](unity-effects-skill/references/fluid-mixer.md) in an independent Unity project. The [gallery replay](examples/fluid-mixer/Verification.json) covers the seven starting forms. The [2D application replay](examples/fluid-mixer/Applications.json) covers a swept hit into a water curtain and a waterfall with continuous feed and drain.
+The global Effects Skill can [install and reproduce seven editable GPU fluids](unity-effects-skill/references/fluid-mixer.md) in an independent Unity project. The [side-view replays](examples/fluid-mixer/SideView.json) cover the seven starting forms, a hit-triggered curtain and a continuously fed waterfall. The two native receivers verify depth-invariant framing and match the solver states across the renderer change.
 
 ## Install the global Skill pack
 

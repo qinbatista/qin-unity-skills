@@ -224,9 +224,9 @@ public sealed partial class QinFluidReplay
         {
             Assert.That(AssetDatabase.GetAssetPath(draw.sharedMaterial.shader), Does.EndWith(".shadergraph"));
             Material material = new(draw.sharedMaterial);
-            material.SetColor(ReflectionTint, new Color(.73f, .91f, .94f, 1f));
-            material.SetColor(DepthTint, new Color(.023f, .126f, .207f, 1f));
-            material.SetVector(WaterOptics, new Vector4(.91f, .73f, 0f, 0f));
+            material.SetColor(ReflectionTint, new Color(.65f, .94f, .98f, 1f));
+            material.SetColor(DepthTint, new Color(.030f, .226f, .356f, 1f));
+            material.SetVector(WaterOptics, new Vector4(.74f, .83f, 0f, 0f));
             draw.sharedMaterial = material;
             applicationResources.Add(material);
         }
@@ -323,52 +323,71 @@ public sealed partial class QinFluidReplay
 
     private static Color PaintGrotto(float x, float y)
     {
-        float stone = .64f * Mathf.PerlinNoise(2.3f * x + 8f, 2.7f * y + 13f)
-            + .36f * Mathf.PerlinNoise(17f * x + 40f, 12f * y + 10f);
-        float xRidge = x + .115f * Mathf.Sin(y * 4.7f + .9f) + .038f * Mathf.Sin(y * 14.1f);
-        float crevice = .5f + .5f * Mathf.Sin(xRidge * 21.42f + .9f * Mathf.Sin(xRidge * 5f));
-        float open = Mathf.Exp(-.76f * (x + .28f) * (x + .28f) - .29f * (y - 1.65f) * (y - 1.65f));
-        Color color = Color.Lerp(new Color(.046f, .088f, .116f), new Color(.33f, .37f, .29f),
-            .09f + .34f * stone + .22f * open + .12f * crevice * open);
-        float quartz = Mathf.SmoothStep(0f, 1f, (crevice - .89f) * 7f) * .1f;
-        color += quartz * new Color(.24f, .18f, .12f);
+        float grain = Mathf.PerlinNoise(x * 2.85f + 21f, y * 3.9f + 39f);
+        float nearCliff = .53f + .16f * Mathf.Sin(3.5f * x) + .09f * Mathf.Sin(7.1f * x + 1f);
+        float remoteCliff = 1.44f + .16f * Mathf.Sin(2.21f * x + .9f) + .10f * Mathf.Sin(4.7f * x);
+        Color color = Color.Lerp(new Color(.071f, .162f, .224f), new Color(.133f, .304f, .359f), grain * .52f);
+        if (y < remoteCliff)
+            color = Color.Lerp(new Color(.066f, .150f, .182f), new Color(.11f, .24f, .253f), .24f + .42f * grain);
+        if (y < nearCliff)
+            color = Color.Lerp(new Color(.045f, .115f, .148f), new Color(.083f, .180f, .192f), .21f + .39f * grain);
 
-        // The water opens below a chipped shelf. The lower basin has a dry reference plate.
-        float lip = 2.59f + .076f * Mathf.Sin(x * 3.5f) + .042f * Mathf.Sin(x * 14.5f + 1.2f);
-        float wall = Mathf.Abs(x + .27f * Mathf.Sin(y * 2.3f)) - (2.11f + .35f * Mathf.Sin(y * 1.7f));
-        float surface = Mathf.Max(y - lip, wall);
-        float vein = .5f + .5f * Mathf.Sin(14f * y + 1.5f * x + .42f * Mathf.Sin(7f * x));
-        Color ledge = Color.Lerp(new Color(.073f, .126f, .153f), new Color(.46f, .421f, .288f),
-            .51f * stone + .22f * vein);
-        color = Color.Lerp(color, ledge, Mathf.SmoothStep(0f, 1f, (surface + .05f) / .18f));
-        if (y >= lip && y < lip + .10f && Mathf.Abs(x) < 2.25f)
-            color += new Color(.079f, .087f, .053f) * (1f - (y - lip) * 10f);
-        float shore = .057f - .24f * Mathf.Pow(Mathf.Abs(x) * .34f, 2f) + .026f * Mathf.Sin(8.5f * x);
-        if (y < shore)
+        float seamX = x + .39f - .16f * Mathf.Sin(5.2f * y + .8f);
+        float paintedStone = (1f - Mathf.SmoothStep(0f, 1f, (Mathf.Abs(seamX) - .085f) / .23f))
+            * Mathf.SmoothStep(0f, 1f, (y - .88f) / .46f);
+        color = Color.Lerp(color, new Color(.419f, .263f, .147f), paintedStone * (.49f + .25f * grain));
+
+        // A faceted cutaway shows the shelf and the pool on the same vertical plane.
+        float ledgeTop = 2.57f + .047f * Mathf.Sin(7.1f * x) + .025f * Mathf.Sin(21.1f * x);
+        float leftWall = Mathf.Abs(x + 3.07f + .22f * Mathf.Sin(y * 4f)) - (.74f + .12f * Mathf.Sin(y));
+        if ((y > ledgeTop && x < .32f + .17f * Mathf.Sin(5f * y)) || leftWall < 0f)
         {
-            float grain = Mathf.PerlinNoise(4.1f * x + 24f, 26f * y + 23f);
-            float lit = .46f * grain + .31f * stone + .23f * open;
-            color = Color.Lerp(new Color(.035f, .125f, .160f), new Color(.14f, .32f, .33f), lit);
-            if (y > shore - .021f)
-                color += new Color(.048f, .097f, .081f) * stone;
+            float strata = Mathf.Repeat(y + .22f * x + .035f * Mathf.Sin(x * 3.6f), .28f);
+            Color shade = Color.Lerp(new Color(.105f, .144f, .180f), new Color(.196f, .255f, .255f),
+                .23f + .56f * grain);
+            float face = Mathf.SmoothStep(0f, 1f, (strata - .055f) * 48f);
+            color = shade * (.82f + .21f * face);
+            if (y > ledgeTop + .015f && y < ledgeTop + .074f && leftWall >= 0f)
+                color = Color.Lerp(color, new Color(.38f, .50f, .31f), .53f);
         }
-        color = PaintRock(color, x, y, -.37f, .25f, .64f, .62f, stone * .83f);
-        color = PaintRock(color, x, y, -.26f, .79f, .52f, .546f, stone);
-        color = PaintRock(color, x, y, -2.23f, .12f, .88f, .42f, stone);
-        return PaintRock(color, x, y, 2.14f, -.19f, .93f, .31f, stone);
+
+        const float line = .040f;
+        if (y < line)
+        {
+            float broken = Mathf.SmoothStep(0f, 1f, (Mathf.PerlinNoise(x * 9f + 6f, y * 19f + 15f) - .56f) * 7f);
+            float bands = Mathf.SmoothStep(0f, 1f, (Mathf.Sin(39f * y + .40f * Mathf.Sin(6.6f * x)) - .72f) * 5f)
+                * broken;
+            float fade = Mathf.SmoothStep(0f, 1f, (y - line + .71f) * 1.34f);
+            color = Color.Lerp(new Color(.028f, .089f, .156f), new Color(.057f, .252f, .319f),
+                .56f * fade + .21f * bands);
+            if (y > line - .013f)
+                color += new Color(.049f, .141f, .141f);
+        }
+        color = PaintRock(color, x, y, -2.86f, -.16f, 1.12f, .44f, grain);
+        color = PaintRock(color, x, y, 2.85f, -.24f, 1.05f, .49f, grain);
+        color = PaintRock(color, x, y, -.26f, .24f, .43f, .59f, grain * .84f);
+        return PaintRock(color, x, y, -.26f, .79f, .52f, .52f, grain);
     }
 
-    private static Color PaintRock(Color beneath, float x, float y, float cx, float cy, float rx, float ry, float grain)
+    private static Color PaintRock(Color background, float x, float y, float cx, float cy, float rx, float ry, float grain)
     {
         float nx = (x - cx) / rx;
         float ny = (y - cy) / ry;
-        float radius = nx * nx + ny * ny;
-        if (radius >= 1f) return beneath;
-        float nz = Mathf.Sqrt(1f - radius);
-        float light = Mathf.Clamp01(.66f * ny - .31f * nx + .53f * nz);
-        float layer = .5f + .5f * Mathf.Sin(16.8f * (ny + .30f * nx) + .6f * nz);
-        float moss = .28f * Mathf.SmoothStep(0f, 1f, (ny - .10f) * 2.8f) * (.22f + .78f * grain);
-        return Color.Lerp(new Color(.090f, .135f, .158f), new Color(.57f, .46f, .30f),
-            .54f * light + .11f * layer + .23f * grain) + moss * new Color(.10f, .28f, .057f);
+        float coverage = 1f - Mathf.SmoothStep(0f, 1f, (nx * nx + ny * ny - .94f) / .08f);
+        return Color.Lerp(background, SideStoneColor(nx, ny, grain), coverage);
     }
+
+    private static Color SideStoneColor(float x, float y, float grain)
+    {
+        float facet = y - .27f * x - .11f * Mathf.Abs(1.7f * x - .25f);
+        Color baseColor = Color.Lerp(new Color(.073f, .104f, .160f), new Color(.21f, .267f, .286f), .43f * grain);
+        Color plane = Color.Lerp(new Color(.156f, .237f, .272f), new Color(.33f, .392f, .365f), .64f * grain);
+        Color top = Color.Lerp(new Color(.221f, .337f, .324f), new Color(.44f, .52f, .37f), .68f * grain);
+        Color color = Color.Lerp(baseColor, plane, Mathf.SmoothStep(0f, 1f, (facet + .17f) * 23f));
+        color = Color.Lerp(color, top, Mathf.SmoothStep(0f, 1f, (facet - .21f) * 23f));
+        float seam = Mathf.Abs(y + .42f * x - .24f);
+        if (x > -.33f && seam < .021f) color *= .71f;
+        return color;
+    }
+
 }
