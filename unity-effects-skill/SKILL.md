@@ -19,7 +19,7 @@ For linked work select `explain game-effect` for references, the effect profile 
 
 Decompose as finely as necessary within the selected subject. Each job must contribute to its appearance or motion. A shader revision may affect one surface in a larger cast. Keep surrounding assets and gameplay stable, and compare any shared draw or binding at the same native tick. Use the complete cast only as far as needed to demonstrate how the selected subject reads in context.
 
-When a request names several subjects, keep them in order. Finish the GIF, reference readback, native iteration and evidence for the current subject before starting another. If the user requires a visual decision before continuing, keep that subject open until they give it.
+Keep the full requested subject list and its order. The single-subject requirement limits active production. A batch delivers every requested subject. Finish the GIF, reference readback, native iteration and evidence for the current subject, then move to the next one. Close the batch only when each requested subject has a recorded result. If the user requires a visual decision between subjects, keep that subject open until they give it.
 
 ## Choose an operation
 
