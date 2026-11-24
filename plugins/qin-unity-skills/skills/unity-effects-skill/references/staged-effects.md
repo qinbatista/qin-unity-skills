@@ -28,6 +28,8 @@ For a timed transition, sample the weight actually being drawn at the event. For
 
 At a moving front, start the envelope when the front reaches each location. New material starts at zero while existing particles may coast on their own ages. Interruptions, rebinds and recasts continue from the current visible weight and motion phase toward the new target. A gameplay hit or stop may occur on one tick. Disable the draw, kill its particles or return its slot only after its visible weight reaches zero. Check the [adjacent native samples](rendering-and-verification.md#verify-visible-envelopes).
 
+Check conditional draws at their own admission time. A cast canceled before admission keeps that draw at zero throughout the drain, even while the parent clock advances. Cancel an admitted draw separately and follow its local motion and gradual fade from the current state. Capture the isolated contribution in both runs so neighboring tails cannot hide a late flash.
+
 ## Decompose every visible object
 
 Apply [the single-subject scope](../SKILL.md#scope-one-subject) first. A visible character, scene object or neighboring effect can provide scale, contrast or a contact landmark for the selected subject. Keep those reference objects outside its motion inventory.
