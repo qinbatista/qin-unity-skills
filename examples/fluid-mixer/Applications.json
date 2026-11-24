@@ -20,7 +20,7 @@
             }
           ]
         },
-        "sha256": "7ba1d272a8352d93b09d4a4910030190b67eb10ff7bbe45b933f395a04c4e99b"
+        "sha256": "d4e299c251a259cdf013e891fbc8c7828433debac3693934cd8e8f670e1e1ffd"
       },
       "physics": {
         "anchorX": 0.92,
@@ -104,5 +104,11 @@
     "Assets/Effects/Liquid"
   ],
   "replay": "scripts/replay_fluids.py --case all --preview --video",
+  "replayedInstalledRuntime": {
+    "commit": "ed0ca1eb3f9d6d5f326018b2c6ea238a199e0d1c",
+    "inputSource": "The CLI under the installed global package created both empty URP 2D receivers.",
+    "nativePlayCases": 18,
+    "results": "The application reports and distributed movies match the fresh native run."
+  },
   "seed": 29411
 }

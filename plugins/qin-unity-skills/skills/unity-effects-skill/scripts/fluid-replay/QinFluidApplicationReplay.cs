@@ -27,7 +27,7 @@ public sealed partial class QinFluidReplay
         string root = ApplicationCapture("Curtain");
         SetApplicationCamera();
         DrawApplicationStage(false);
-        var anchor = new GameObject("Contact anchor").transform;
+        Transform anchor = new GameObject("Contact anchor").transform;
         anchor.SetParent(stage.transform, false);
         anchor.position = new Vector3(.92f, SurfaceY + 1.02f, 0f);
         var collider = anchor.gameObject.AddComponent<CircleCollider2D>();
@@ -59,7 +59,7 @@ public sealed partial class QinFluidReplay
             if (misses)
             {
                 missRecipe = Object.Instantiate(needle.Recipe);
-                var data = new SerializedObject(missRecipe);
+                SerializedObject data = new(missRecipe);
                 data.FindProperty("_responses").intValue = (int)SOFluidMixRecipe.Response.Spray;
                 data.ApplyModifiedPropertiesWithoutUndo();
             }
@@ -122,7 +122,7 @@ public sealed partial class QinFluidReplay
             Assert.That(gather.CurrentStage, Is.EqualTo(FluidMixController.VisualStage.Recycled));
             Assert.That(needle.CurrentStage, Is.EqualTo(FluidMixController.VisualStage.Recycled));
             Assert.That(curtain.CurrentStage, Is.EqualTo(FluidMixController.VisualStage.Recycled));
-            Assert.That(Capture(), Is.EqualTo(dry), "Both water contributions must return to the dry frame");
+            Assert.That(Capture(), Is.EqualTo(dry), "All water contributions must return to the dry frame");
             File.WriteAllLines(Path.Combine(folder, "contact.txt"), new[] { hitFrame.ToString(), targetX.ToString("R", System.Globalization.CultureInfo.InvariantCulture) });
             if (missRecipe)
             {
@@ -152,7 +152,7 @@ public sealed partial class QinFluidReplay
 
         var stillPool = Object.Instantiate(original);
         applicationResources.Add(stillPool);
-        var settings = new SerializedObject(stillPool);
+        SerializedObject settings = new(stillPool);
         settings.FindProperty("_responses").intValue &= ~(int)SOFluidMixRecipe.Response.SurfaceWaves;
         settings.ApplyModifiedPropertiesWithoutUndo();
         int[] samples = { 12, 23, 32, 66, 81, 96, 132, 162, 190, 221, 231, 253, 279 };
@@ -223,7 +223,7 @@ public sealed partial class QinFluidReplay
         foreach (var draw in instance.GetComponentsInChildren<MeshRenderer>(true))
         {
             Assert.That(AssetDatabase.GetAssetPath(draw.sharedMaterial.shader), Does.EndWith(".shadergraph"));
-            var material = new Material(draw.sharedMaterial);
+            Material material = new(draw.sharedMaterial);
             material.SetColor(ReflectionTint, new Color(.73f, .91f, .94f, 1f));
             material.SetColor(DepthTint, new Color(.023f, .126f, .207f, 1f));
             material.SetVector(WaterOptics, new Vector4(.91f, .73f, 0f, 0f));
@@ -258,7 +258,7 @@ public sealed partial class QinFluidReplay
         const int height = 432;
         float viewHeight = 2f * camera.orthographicSize;
         float viewWidth = viewHeight * Width / Height;
-        var pixels = new Color32[width * height];
+        Color32[] pixels = new Color32[width * height];
         for (int py = 0; py < height; py++)
         {
             float y = 1.24f + ((py + .5f) / height - .5f) * viewHeight;
@@ -268,11 +268,11 @@ public sealed partial class QinFluidReplay
                 pixels[py * width + px] = waterfall ? PaintGrotto(x, y) : PaintCourtyard(x, y);
             }
         }
-        var texture = new Texture2D(width, height, TextureFormat.RGB24, false) { filterMode = FilterMode.Bilinear };
+        Texture2D texture = new(width, height, TextureFormat.RGB24, false) { filterMode = FilterMode.Bilinear };
         texture.SetPixels32(pixels);
         texture.Apply(false, true);
         var sprite = Sprite.Create(texture, new Rect(0, 0, width, height), Vector2.one * .5f, height / viewHeight);
-        var plate = new GameObject("Application plate", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
+        SpriteRenderer plate = new GameObject("Application plate", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
         plate.transform.SetParent(stage.transform, false);
         plate.transform.position = new Vector3(0f, camera.transform.position.y, 1f);
         plate.sprite = sprite;
