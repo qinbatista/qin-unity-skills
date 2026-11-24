@@ -1,0 +1,135 @@
+{
+  "editor": "6000.6.7f1",
+  "scope": "Unity Editor native simulation",
+  "packageVersions": {
+    "com.unity.test-framework": "1.8.0",
+    "com.unity.addressables": "2.11.2",
+    "com.unity.entities": "6.6.0",
+    "com.unity.burst": "2.0.0",
+    "com.unity.physics": "6.6.0",
+    "com.unity.modules.physics2d": "1.0.0",
+    "com.unity.modules.physicscore2d": "1.0.0",
+    "com.unity.modules.animation": "1.0.0",
+    "com.unity.render-pipelines.universal": "17.6.0",
+    "com.unity.visualeffectgraph": "17.6.0",
+    "com.unity.modules.imageconversion": "1.0.0",
+    "com.unity.modules.particlesystem": "1.0.0"
+  },
+  "fixtureSha256": "4383f4764f16c5388eb016d50d2536d6db02c6ff3ec3214365b1d915f6d5d7c5",
+  "cases": {
+    "AddressableCases.ClosedRequestReleasesLateArrivalAndMissingKeyCanRetry": {
+      "result": "Passed",
+      "observations": [
+        "same missing key retried after catalog registration; stale instance released once, replacement stayed active through old completion"
+      ]
+    },
+    "AddressableCases.ColdLoadAndWarmReuseHoldDependenciesThroughLastClone": {
+      "result": "Passed",
+      "observations": [
+        "Editor Play Mode, first keyed load=100.958 ms, warm keyed load=0.379 ms, clone two=0.468 ms, activate one=0.062 ms; 2 acquisitions returned the same asset, 2 clones retired before final release"
+      ]
+    },
+    "AddressableCases.InstantiatedPeersRetainIndependentLeases": {
+      "result": "Passed",
+      "observations": [
+        "provider=UnityEngine.ResourceManagement.ResourceProviders.AssetDatabaseProvider; instances=2, independent retirements=2, idle peer reused"
+      ]
+    },
+    "AdjacentCostCases.DisabledDiagnosticsSkipPerActorFormattingAndEnabledLogsStillArrive": {
+      "result": "Passed",
+      "observations": [
+        "Disabled formatting calls fell from 128 to 0. One enabled message reached the sink."
+      ]
+    },
+    "AdjacentCostCases.SharedSpriteMaterialSurvivesIndependentTintAndActorRetirement": {
+      "result": "Passed",
+      "observations": [
+        "Two independently tinted sprites shared one material. Retiring one retained the other binding."
+      ]
+    },
+    "BuiltContentCases.LightweightCatalogLeavesOptionalBundleUnloadedThroughReentry": {
+      "result": "Passed",
+      "observations": [
+        "native bundle visit=1, local catalog and selected prefab load=3.158 ms, instantiate/activate=0.589 ms, hard optional dependencies=1, light optional dependencies=0, loaded at return=0",
+        "native bundle visit=2, local catalog and selected prefab load=1.106 ms, instantiate/activate=0.015 ms, hard optional dependencies=1, light optional dependencies=0, loaded at return=0"
+      ]
+    },
+    "MeasurementCases.MatchedTicksReportTailCostAndPreserveEveryOutcome": {
+      "result": "Passed",
+      "observations": [
+        "full scan | samples=128 visits=524288 median_us=3.200 p95_us=4.000 max_us=8.100 worst_tick=43",
+        "active range | samples=128 visits=65984 median_us=0.000 p95_us=2.800 max_us=3.600 worst_tick=80"
+      ]
+    },
+    "RenderingCases.CombinedShaderPreservesOverlappingCuesWithFewerSubmittedDraws": {
+      "result": "Passed",
+      "observations": [
+        "Metal: 836 overlapping pixels, maximum RGB difference 1.788139E-07, 16 vs 8 submitted draws. GPU duration unmeasured."
+      ]
+    },
+    "RenderingCases.SharedImpactKeepsConcurrentPayloadsAtTheirHitPositions": {
+      "result": "Passed",
+      "observations": [
+        "One Metal VFX host. Active red, green, blue pixels 256, 256, 160. Panned blue pixels 240. All particles retired."
+      ]
+    },
+    "RenderingCases.WorldSpaceEmitterPreservesOldBurstWhenHostMoves": {
+      "result": "Passed",
+      "observations": [
+        "One world-space ParticleSystem retained two colored positions across host movement, expired both particles and accepted a new burst."
+      ]
+    },
+    "RuntimeCases.ActiveSetMatchesFullScanAcrossSpawnsAndRetirements": {
+      "result": "Passed",
+      "observations": [
+        "actor slots visited: full=2048, active=45; positions and ordered updates matched on 16 ticks"
+      ]
+    },
+    "RuntimeCases.ColdGrowthAndTransientFilteringAllocateWhileWarmReusePreservesResults": {
+      "result": "Passed",
+      "observations": [
+        "main-thread GC.Alloc events: idle=0, control=1, cold=1, warm=0, transient=128; repeated calls=64, checksum=1658"
+      ]
+    },
+    "RuntimeCases.HudRefreshesOnChangeAndReadsCurrentValueOnReattach": {
+      "result": "Passed",
+      "observations": [
+        "visible frames=60, continuous polling writes=60, event writes over the same interval=2, all attach/change writes=4"
+      ]
+    },
+    "RuntimeCases.PrewarmedProjectilesMatchRepeatedSpawnsAndRejectStaleHits": {
+      "result": "Passed",
+      "observations": [
+        "bursts=8, hits=16, transient creations=16, pooled creations=2, exhaustion checked once per burst"
+      ]
+    },
+    "SimulationCases.ChunkJobMatchesIndependentAndSharedTargetMovement": {
+      "result": "Passed",
+      "observations": [
+        "Actors=3000, chunks=24, ticks=3, player snapshots=2 follower ticks."
+      ]
+    },
+    "SimulationCases.ComponentAndLowLevelWorldsResolveTheirOwnContacts": {
+      "result": "Passed",
+      "observations": []
+    },
+    "SimulationCases.PickupReservationSurvivesTargetLossAndSlotReuse": {
+      "result": "Passed",
+      "observations": []
+    },
+    "SimulationCases.PlanarDotsColliderRequiresMatchingDepth": {
+      "result": "Passed",
+      "observations": []
+    },
+    "SimulationCases.SmallAuthoredActorsKeepIndependentPresentation": {
+      "result": "Passed",
+      "observations": []
+    },
+    "SimulationCases.SweptGridMatchesAllPairsAcrossCellBoundaries": {
+      "result": "Passed",
+      "observations": [
+        "All pairs=1378, candidates=70, confirmed=68."
+      ]
+    }
+  }
+}

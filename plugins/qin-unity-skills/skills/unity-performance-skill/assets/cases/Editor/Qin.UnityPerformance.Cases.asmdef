@@ -1,0 +1,36 @@
+{
+  "name": "Qin.UnityPerformance.Cases",
+  "rootNamespace": "Qin.UnityPerformance.Cases",
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "references": [
+    "Unity.Addressables",
+    "Unity.Addressables.Editor",
+    "Unity.ResourceManager",
+    "Unity.Entities",
+    "Unity.Burst",
+    "Unity.Collections",
+    "Unity.Mathematics",
+    "Unity.Physics",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.VisualEffectGraph.Runtime"
+  ],
+  "allowUnsafeCode": true,
+  "versionDefines": [
+    {
+      "name": "com.unity.addressables",
+      "expression": "",
+      "define": "QIN_HAS_ADDRESSABLES"
+    },
+    {
+      "name": "com.unity.visualeffectgraph",
+      "expression": "",
+      "define": "QIN_HAS_VFX"
+    }
+  ]
+}

@@ -10,7 +10,7 @@ This repository owns the Unity Skills listed in the [catalog](README.md), their 
 - The [installed task menu](unity-code-skill/references/global-skill-routing.md#choose-by-task) routes to domain operation menus and scoped sections. Extend the [owning menu](skills/ai-index/modules/catalog.md#extend-the-task-menu) when adding a capability. It also documents [standalone Codex routing](unity-code-skill/references/global-skill-routing.md#require-routing-across-projects).
 
 - Use the [project AI index](skills/ai-index/SKILL.md) at task start and finish. Refresh related index guidance after changing source or ownership.
-- Keep the [runtime cost review](unity-performance-skill/SKILL.md#review-every-unity-task) reachable from the installed task menu and every Unity domain entry.
+- Keep the [runtime cost review](unity-performance-skill/SKILL.md#review-every-unity-task) reachable from the installed task menu and every Unity domain entry. Map each new optimization recommendation to a runnable case or an existing case that demonstrates it.
 - Write durable instructions and project documentation in English. Keep cross-game rules in the current shared owner and concrete game contracts in their receiving project.
 - Keep each Skill's references with its source folder. Maintain the [YoFaAssets comparison](docs/yofaassets-comparison.md) and the release list when ownership changes.
 - For YoFaAssets-linked work, resolve the current source through its documented project connection or configured `YOFA_ASSETS_ROOT` and follow its task entry before game work.

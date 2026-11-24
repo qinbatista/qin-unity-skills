@@ -1,0 +1,39 @@
+# Unity performance casebook
+
+## Select cases from the change
+
+Start with what an ordinary player action makes the game do. A request to add a loot burst can touch object creation, asset loading, pickup eligibility, inventory updates and the impact renderer even if the request mentions only the art. Run a case for each affected path. Use the nearest portable example to design a regression in the receiving game.
+
+| What the action does | Cases to run | What to compare or break |
+| --- | --- | --- |
+| Changes a HUD value or active population | `RuntimeCases` | Count writes or records visited. Reopen a HUD after its source changed. Add and retire actors while the active set changes. |
+| Filters data, spawns projectiles or recycles an object | `RuntimeCases` | Compare fresh allocation with warmed caller-owned storage. Exceed pool capacity and deliver an old callback to a reused slot. Check output order, accepted hits and creation counts. |
+| Opens optional content, closes the scene, or retries a request | `AddressableCases` and `BuiltContentCases` | Check ordinary clones against per-instance leases. Close during loading, fail and retry. Inspect the dependencies in locally built bundles and verify optional content, activation and reentry. |
+| Adds a few complex characters or thousands of similar followers | `SimulationCases` | Compare authored GameObjects and data processed in batches. Keep independent state, snapshot one player input for the whole tick and check every actor against a serial reference. |
+| Makes actors hit each other, cross a cell, or chase a pickup | `SimulationCases` | Compare candidate pairs with exhaustive results, step actual 2D physics, check the selected world and depth. Challenge a pickup with two claimants, a missing target and immediate reuse. |
+| Adds a burst or changes a shader | `RenderingCases` | Send simultaneous world positions with one host, move or retire the source, and observe expiry. Compare the actual pixels and submitted draws of two shader approaches under overlap. |
+| Adds diagnostics or tints many sprites | `AdjacentCostCases` | Count formatting even when logging is disabled. Exercise per-sprite appearance and ownership of shared or copied materials when one sprite retires. |
+| Proposes a speedup or reports an intermittent spike | `MeasurementCases` | Alternate the implementations on the same seeded inputs. Inspect per-tick equality, work counts, median, p95 and worst samples. The timer covers the measured operation. |
+
+The [case inventory](../assets/casebook.json) lists each executable method. For example, if opening the loot screen also sorts a leaderboard, add a case through the actual screen with stable scores, changed scores and ties. Compare the sort count and visible order before and after the change. The portable pickup and rendering cases alone cannot prove the leaderboard behavior.
+
+## Run the installed casebook
+
+Use the receiving project's authorized background workflow. The portable replay creates an isolated Unity 6000.6.7f1 project with pinned package versions. It needs Python 3, the Unity CLI, an installed licensed Editor, and access to its package dependencies. Rendering cases require a compatible graphics device, URP and VFX Graph compute support. The built-in Particle System case exercises a separate emitter implementation. Device frame budgets use captures from the game's target.
+
+Use the [runner](../scripts/replay_cases.py) from the installed pack. On macOS or Linux use `python3`, or use `py -3` on Windows. Replace `<skill>` with the installed `unity-performance-skill` directory and `<task-run>` with an allocated `Cache/temp-*` in the project. Each invocation that runs Unity needs a fresh child directory.
+
+```text
+python3 -B "<skill>/scripts/replay_cases.py" --list
+python3 -B "<skill>/scripts/replay_cases.py" --work "<task-run>/all"
+python3 -B "<skill>/scripts/replay_cases.py" --case RuntimeCases --case SimulationCases.PickupReservationSurvivesTargetLossAndSlotReuse --work "<task-run>/loot"
+```
+
+The runner resolves the pinned Editor or accepts `--editor <path>`. It copies the selected fixture families into the task run, resolves their package dependencies, configures the required providers, and executes the requested cases. It checks the resolved packages and compares the individual passed NUnit leaves with the requested inventory. A missing, duplicate, skipped or failed case fails the replay. Read `case-results.json` for each case result and its recorded observations, `results.xml` for the full NUnit output, `test.log` for engine diagnostics, and case output under `evidence/`. On a setup failure read `run.log` and `run-cli.log`.
+
+## Add a case for a new cost
+
+1. Capture the real trigger, owners, target, usual count and peak. Identify what the user must still see or receive. Reproduce the observed issue or run a control known to expose it.
+2. Hold the inputs constant and exercise the existing and proposed paths. Assert outcomes such as which actor was hit or what item was awarded, then inspect a cost such as bytes, visits, contacts, leases, draws or frame time. Use a control that can distinguish the bad implementation.
+3. Add interruption, resource retirement, simultaneous events or a second entry where those can change the result. Run the case after the fix and inspect its output. Separate measured time, structural work counts and estimated costs in the report.
+4. Keep a game-specific case with the project's testing owner. To add a portable case, place an Editor test in the packaged fixture, register its unique class and method in the inventory, describe its workload here, and run it with the installed reader and replay command. Reuse existing infrastructure and keep test-only packages in the disposable receiver.

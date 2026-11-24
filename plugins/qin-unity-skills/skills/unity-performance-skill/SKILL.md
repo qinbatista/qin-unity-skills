@@ -1,6 +1,6 @@
 ---
 name: unity-performance-skill
-description: Review runtime cost before completing any Unity task. Use for C# hot paths, pooling, asset loading and release, 2D simulation architecture, ECS and Jobs, physics, shader cost, reusable VFX and matched performance measurements.
+description: Review runtime cost on every Unity task, including requests that omit performance. Select, create and run behavioral optimization cases. Use for C# hot paths, pooling, asset loading and release, 2D simulation architecture, ECS and Jobs, physics, shader cost, reusable VFX and matched performance measurements.
 ---
 
 # Unity Performance
@@ -11,10 +11,11 @@ Use the [completion review](#review-every-unity-task) for every Unity request. F
 
 ## Review every Unity task
 
-1. Trace the affected path from its trigger to its consumers and teardown. Include helpers, callbacks, loaded assets and visual work that the change activates. For a documentation, lookup or Editor-only task, identify any effect on the running game. When there is none, the review ends there.
-2. Ask what runs each frame, what scales with the number of actors or simultaneous events, what allocates or blocks, and who can release what is cached. Inspect the relevant paths with the operation below. An occasional spawn and a small active loop can already be the right implementation.
-3. Fix evidenced waste within the task's edit scope. Start with removing unnecessary work, then consider reusing data, changing cadence or switching the simulation or rendering technology. Preserve gameplay authority, timing, ordering, lifetimes and visible behavior. For an analysis-only request, describe the smallest change and how to test it.
-4. Exercise the affected behavior and its peak or teardown case. Report the workload, the decision and the evidence in a sentence. Quantify gains only after a [matched comparison](references/measure-and-verify.md#compare-the-same-workload). With source evidence alone, name the suspected cost and the measurement that would settle it.
+1. Trace the change from its entry through the helpers, callbacks, data, presentation and teardown it activates. Check runtime cost even when the request mentions only a feature, bug or visual change. For a documentation or Editor-only task, establish whether it changes the running game. If the runtime path is untouched, record that and finish.
+2. Consider each cost that can arise on that path: per-frame or fixed-step work, peak population, allocations and object churn, load and release, shared simulation data, contacts, presentation and GPU work. Include costs introduced by the proposed fix, such as retained pool memory or a Job completion wait. Select each applicable family in the [casebook](references/performance-cases.md#select-cases-from-the-change). Trace additional project-specific costs in the same way.
+3. Give each applicable cost a case: input and load, existing behavior, proposed change, an observable cost, and a failure or lifecycle boundary. Reuse a maintained case when it proves that contract. For an uncovered path, create a case through the receiving project's actual entry. Exercise normal play, a representative peak, and applicable cancellation, reentry or exhaustion. Run each case, inspect its actual output, and repair failures within the requested edit scope.
+4. Fix evidenced waste with the smallest change that preserves gameplay authority, timing, ordering and appearance. A small bounded loop or an occasional spawn may already fit. For a read-only review, report the finding and use permitted simulations. If the real target is unavailable, report which simulations passed and exactly which target behavior or cost still needs proof.
+5. Record each case with its workload, decision, result and evidence. Use a [matched comparison](references/measure-and-verify.md#compare-the-same-workload) for a speed or memory claim. The [installed replay](references/performance-cases.md#run-the-installed-casebook) exercises portable examples. Apply the same method to the receiving game's implementation before claiming its behavior or performance.
 
 ## Choose an operation
 

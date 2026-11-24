@@ -1,0 +1,36 @@
+{
+  "RuntimeCases": {
+    "HudRefreshesOnChangeAndReadsCurrentValueOnReattach": "Compare polling and event-driven updates across disable, value changes and reopening.",
+    "ActiveSetMatchesFullScanAcrossSpawnsAndRetirements": "Compare actor visits and results as active membership changes.",
+    "ColdGrowthAndTransientFilteringAllocateWhileWarmReusePreservesResults": "Calibrate managed allocation and compare fresh and reused result storage.",
+    "PrewarmedProjectilesMatchRepeatedSpawnsAndRejectStaleHits": "Burst spawn beyond capacity and reuse a slot with a callback from its previous lifetime."
+  },
+  "AddressableCases": {
+    "ColdLoadAndWarmReuseHoldDependenciesThroughLastClone": "Keep the source lease through active and pooled clones.",
+    "InstantiatedPeersRetainIndependentLeases": "Release two Addressables-created instances independently.",
+    "ClosedRequestReleasesLateArrivalAndMissingKeyCanRetry": "Close the owner during loading, then exercise failed and successful requests."
+  },
+  "SimulationCases": {
+    "SmallAuthoredActorsKeepIndependentPresentation": "Preserve independent character presentation for a small GameObject population.",
+    "ChunkJobMatchesIndependentAndSharedTargetMovement": "Compare CPU movement with ECS and Burst under independent and shared-player inputs.",
+    "SweptGridMatchesAllPairsAcrossCellBoundaries": "Compare broadphase candidates and real pairs with an exhaustive moving-pair reference.",
+    "ComponentAndLowLevelWorldsResolveTheirOwnContacts": "Step real classic and low-level 2D physics with independent contact ownership.",
+    "PlanarDotsColliderRequiresMatchingDepth": "Query a DOTS physics collider on and away from the gameplay plane.",
+    "PickupReservationSurvivesTargetLossAndSlotReuse": "Exercise proximity, competing claims, presentation loss and recycled pickup slots."
+  },
+  "AdjacentCostCases": {
+    "DisabledDiagnosticsSkipPerActorFormattingAndEnabledLogsStillArrive": "Trace work in a disabled logger and verify the enabled message.",
+    "SharedSpriteMaterialSurvivesIndependentTintAndActorRetirement": "Verify two sprite tints and retirement with shared versus owned materials."
+  },
+  "MeasurementCases": {
+    "MatchedTicksReportTailCostAndPreserveEveryOutcome": "Replay normal and peak ticks, compare every outcome and report median, p95 and worst ticks."
+  },
+  "RenderingCases": {
+    "SharedImpactKeepsConcurrentPayloadsAtTheirHitPositions": "Send distinct same-frame events to one GPU VFX host and verify positions and retirement.",
+    "WorldSpaceEmitterPreservesOldBurstWhenHostMoves": "Place overlapping Particle System bursts with one moving world-space emitter.",
+    "CombinedShaderPreservesOverlappingCuesWithFewerSubmittedDraws": "Compare rendered overlapping cues from separate and combined shader passes."
+  },
+  "BuiltContentCases": {
+    "LightweightCatalogLeavesOptionalBundleUnloadedThroughReentry": "Build local bundles, compare hard and key-only dependencies, and replay deferred load, activation and teardown."
+  }
+}

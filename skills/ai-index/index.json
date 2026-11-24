@@ -149,9 +149,9 @@
     },
     {
       "id": "unity-performance",
-      "summary": "Completion review for every Unity task, C# hot paths and content lifetime, 2D simulation and rendering choices, and matched performance verification",
+      "summary": "Completion review for every Unity task, C# hot paths and content lifetime, 2D simulation and rendering choices, executable optimization casebook, and matched performance verification",
       "document": "skills/ai-index/modules/unity-performance.md",
-      "sources": ["unity-performance-skill"],
+      "sources": ["unity-performance-skill", "examples/performance-cases"],
       "dependencies": [
         {"module": "unity-code", "reason": "Reuses the existing callback, managed allocation and resource ownership procedures."},
         {"module": "unity-effects", "reason": "Checks native effect behavior and the affected renderer."},
