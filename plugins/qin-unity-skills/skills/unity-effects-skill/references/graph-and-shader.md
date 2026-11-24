@@ -89,6 +89,10 @@ Keep the water recipe editable independently of its renderer. Carry an impact po
 
 In the timed GIF mark the last free-flight frame, first contact and the following response. Record the same inlet with and without the boundary. For a swirl, remove torque while retaining gravity and the same inlet. For a ripple, withhold the impulse and measure travel away from the source. Check that a falling mass stays together until contact, that the reference reads at gameplay size, and that the shader has no visible rectangular cutoff. Use a second native replay, a new seed, and a pooled interruption. Profile a single instance and the expected overlap on the actual backend. Keep project-specific materials, thresholds, videos and budgets with the receiving game.
 
+When a finite drop expands before contact, check the initial neighbour spacing and rest density. Advect the incoming sites with the falling body during admission. For a visible whirlpool, localize the inlet, transport an asymmetric tongue toward the centre and fade outgoing water as it actually crosses the drain. A symmetric rotating ring can hide the motion even when angular momentum is correct.
+
+Profile the contact interval separately from free flight. Dense neighbourhoods can dominate overlapping casts. Preserve the physical support radius and iteration order when filtering candidate neighbours. Re-render the final GPU program and compare its solved state, silhouette and cost against the preceding version.
+
 ## Compare two independent replays
 
 Inspect the serialized initial-event name before choosing a reset sequence. Reinitializing a Graph can submit its initial event, so a subsequent explicit Play can produce a second burst. Measure the first birth and the last live particle across disable, stop and reuse. A delayed echo is another distinct clock. Take its offset from the actual primary release, keeping any projectile travel time and contact event separate.
