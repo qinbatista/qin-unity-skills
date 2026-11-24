@@ -16,7 +16,7 @@ using UnityEngine.TestTools;
 using UnityEngine.VFX;
 using Object = UnityEngine.Object;
 
-public sealed class QinFluidReplay
+public sealed partial class QinFluidReplay
 {
     private const float SurfaceY = -1.88f;
     private const string WaterLayer = "Fluid replay water";
@@ -340,6 +340,9 @@ public sealed class QinFluidReplay
     {
         if (camera) camera.targetTexture = null;
         if (stage) Object.DestroyImmediate(stage);
+        foreach (Object resource in applicationResources)
+            if (resource) Object.DestroyImmediate(resource);
+        applicationResources.Clear();
         foreach (Object item in new Object[] { backdropSprite,fixtureFluidSprite,backdropTexture,fixtureFluidTexture,spriteMaterial,pixels })
             if (item) Object.DestroyImmediate(item);
         if (target) { target.Release(); Object.DestroyImmediate(target); }

@@ -17,7 +17,11 @@ def require(condition, message):
 
 
 def state(folder, frame, mode="normal"):
-    data = (folder/mode/f"{frame:04d}.bin").read_bytes()
+    return read_state(folder / mode / f"{frame:04d}.bin")
+
+
+def read_state(path):
+    data = path.read_bytes()
     require(len(data) == PARCEL_BYTES + 64*128*8, "Unexpected native state layout")
     parcels = list(struct.iter_unpack("<8f",data[:PARCEL_BYTES]))
     waves = array("f")
@@ -95,14 +99,19 @@ def physical(form, folder):
             "medianRadiusAt040s":first,"medianRadiusAt157s":last,"drainedAt157s":drained}
 
 
+def match_receivers(a, b, name):
+    files = sorted(p.relative_to(a) for p in a.rglob("*") if p.is_file())
+    require(files and set(files) == {p.relative_to(b) for p in b.rglob("*") if p.is_file()},
+            name + " incomplete second receiver")
+    for file in files:
+        require((a / file).read_bytes() == (b / file).read_bytes(), f"{name} receiver mismatch at {file}")
+
+
 def review(work):
     results = {}
     for form in FORMS:
-        a,b = (Path(work)/lane/"captures"/form for lane in ("A","B"))
-        files = sorted(p.relative_to(a) for p in a.rglob("*") if p.is_file())
-        require(set(files)=={p.relative_to(b) for p in b.rglob("*") if p.is_file()},form+" incomplete second receiver")
-        for name in files:
-            require((a/name).read_bytes()==(b/name).read_bytes(),f"{form} receiver mismatch at {name}")
+        a, b = (Path(work) / lane / "captures" / form for lane in ("A", "B"))
+        match_receivers(a, b, form)
         frames = sorted((a/"frames").glob("*.png"))
         require(len(frames)==84 and frames[0].read_bytes()==frames[-1].read_bytes()==(a/"dry.png").read_bytes(),
                 form+" incomplete or uncleared recording")

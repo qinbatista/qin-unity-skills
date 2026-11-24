@@ -128,3 +128,82 @@ def export(captures, output, video=None):
     # GIF durations use centiseconds. Repeat 70/60/70 ms for a true 15 fps mean.
     encoded[0].save(output, save_all=True, append_images=encoded[1:],
                     duration=[70, 60, 70] * (len(encoded) // 3), loop=0, disposal=1, optimize=False)
+
+
+def frame_mask(first, second, minimum=10):
+    delta = ImageChops.difference(first, second).convert("L")
+    return delta.point(lambda value: 255 if value >= minimum else 0)
+
+
+def application_frame(folder, tick, mode="normal"):
+    with Image.open(folder / mode / f"{tick:04d}.png") as picture:
+        return picture.convert("RGB")
+
+
+def mask_area(mask):
+    return mask.histogram()[255]
+
+
+def review_application_images(folder, case, physics):
+    with Image.open(folder / "dry.png") as reference:
+        dry = reference.convert("RGB")
+    optical_frame = application_frame(folder, physics["opticsFrame"])
+    with Image.open(folder / "no-chroma-reversal.png") as reference:
+        reversal = frame_mask(optical_frame, reference.convert("RGB"), minimum=3)
+    with Image.open(folder / "no-optics.png") as reference:
+        transmission = frame_mask(optical_frame, reference.convert("RGB"), minimum=3)
+    wet = frame_mask(optical_frame, dry, minimum=3)
+    for optical in (reversal, transmission):
+        changed = mask_area(optical)
+        if changed < 80 or mask_area(ImageChops.multiply(wet, optical)) < .70 * changed:
+            raise ValueError(f"{case} wet optics did not stay inside the active water")
+
+    visual = {"chromaReversalPixels": mask_area(reversal), "transmissionPixels": mask_area(transmission)}
+    if case == "curtain":
+        impact = physics["impactFrame"]
+        drawn = (420, 146, 780, 358)
+        masks = [frame_mask(application_frame(folder, impact + i), dry).crop(drawn) for i in (4, 14, 26)]
+        before, open_coverage, closed = map(mask_area, masks)
+        if before > .19 * open_coverage or open_coverage < 9_000 or closed > .61 * open_coverage:
+            raise ValueError("The shown curtain fails progressive formation or closure")
+        miss = frame_mask(application_frame(folder, impact + 14, "miss"), dry).crop(drawn)
+        if mask_area(miss) > .10 * open_coverage:
+            raise ValueError("Visible curtain without contact")
+        visual["upperWaterPixelsAfterImpact"] = [before, open_coverage, closed]
+    else:
+        inlet = (365, 128, 585, 237)
+        source = [mask_area(frame_mask(application_frame(folder, k), dry).crop(inlet)) for k in range(66, 222)]
+        if min(source) < 2_250 or max(source) > min(source) * 2.15:
+            raise ValueError("The visible falling sheet has too little water or an interruption")
+        draining = frame_mask(application_frame(folder, 253), dry).crop(inlet)
+        if mask_area(draining) > 80:
+            raise ValueError("The source kept drawing after the water reached the basin")
+        movement = [mask_area(frame_mask(application_frame(folder, k), application_frame(folder, k + 1), minimum=6).crop(inlet))
+                    for k in (77, 81, 96, 132, 162, 190, 215, 216, 217, 220)]
+        if min(movement) < 200:
+            raise ValueError("The steady waterfall has a frozen upper sheet")
+        visual.update({"steadyInletPixels": [min(source), max(source)], "steadyMinimumChangingPixels": min(movement)})
+    return visual
+
+
+def export_application(folder, output, video):
+    source = folder / "normal"
+    if video:
+        encoder = shutil.which("ffmpeg")
+        options = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}
+        subprocess.run([encoder, "-nostdin", "-loglevel", "error", "-framerate", "30", "-start_number", "0",
+                        "-i", str(source / "%04d.png"), "-an", "-c:v", "libx264", "-threads", "3",
+                        "-crf", "15", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+                        str(output.with_suffix(".mp4"))], check=True, timeout=120, **options)
+    frames = []
+    for path in sorted(source.glob("*.png"))[::2]:
+        with Image.open(path) as frame:
+            frames.append(frame.convert("RGB").resize((768, 432), Image.Resampling.LANCZOS))
+    swatches = Image.new("RGB", (192, len(frames[::7]) * 108))
+    for index, frame in enumerate(frames[::7]):
+        swatches.paste(frame.resize((192, 108), Image.Resampling.BOX), (0, index * 108))
+    palette = swatches.quantize(colors=256, method=Image.Quantize.MEDIANCUT)
+    encoded = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]
+    delays = (70, 60, 70)
+    encoded[0].save(output.with_suffix(".gif"), save_all=True, append_images=encoded[1:],
+                    duration=[delays[k % 3] for k in range(len(frames))], loop=0, disposal=1, optimize=False)

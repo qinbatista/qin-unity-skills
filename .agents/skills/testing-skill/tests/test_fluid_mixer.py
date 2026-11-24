@@ -24,7 +24,10 @@ class FluidInstallTests(unittest.TestCase):
     def test_relocation_reuse_and_artist_changes(self):
         path,result = fluid_mixer.install(self.project,"Assets/Owner/Water")
         self.assertEqual(result,"installed")
-        self.assertEqual(len(list((path/"Presets").glob("*.asset"))),7)
+        expected = {"PlanarRipples", "FallingMass", "FreeJet", "RockImpact", "OpposedJets", "Waterfall",
+                    "Vortex", "WaterNeedle2D", "WaterCurtain2D", "ContinuousWaterfall"}
+        self.assertEqual({asset.stem for asset in (path / "Presets").glob("*.asset")}, expected)
+        self.assertEqual({asset.stem for asset in (path / "Variants").glob("*.prefab")}, expected)
         self.assertEqual(fluid_mixer.install(self.project,"Assets/Owner/Water")[1],"already installed")
         with self.assertRaisesRegex(ValueError,"GUID"):
             fluid_mixer.install(self.project,"Assets/Second")

@@ -6,7 +6,7 @@ namespace Qin.UnityEffects.Fluids
     [CreateAssetMenu(menuName = "Qin/Fluids/Recipe")]
     public sealed class SOFluidMixRecipe : ScriptableObject
     {
-        public enum Inlet { SurfaceImpulse, FallingMass, Jet, OpposedJets, Waterfall, Vortex }
+        public enum Inlet { SurfaceImpulse, FallingMass, Jet, OpposedJets, Waterfall, Vortex, Curtain, Needle }
 
         [Flags]
         public enum Response { None = 0, SurfaceWaves = 1, SolidObstacle = 2, Spray = 4 }
@@ -25,8 +25,12 @@ namespace Qin.UnityEffects.Fluids
         [SerializeField, Min(.3f)] private float _duration = 2.7f;
 
         [SerializeField] private bool _playOnEnable = true;
+        [SerializeField, Min(.34f)] private float _curtainHold = .50f;
+        [Tooltip("For the Waterfall inlet, replenish the falling sheet while the source is open.")]
+        [SerializeField] private bool _continuousFeed;
 
         public bool PlayOnEnable => _playOnEnable;
+        public bool ContinuousFeed => _feed == Inlet.Waterfall && _continuousFeed;
         public Inlet Feed => _feed;
         public bool SurfaceWaves => (_responses & Response.SurfaceWaves) != 0;
         public bool SolidObstacle => (_responses & Response.SolidObstacle) != 0;
@@ -40,6 +44,7 @@ namespace Qin.UnityEffects.Fluids
         public float Swirl => Mathf.Clamp(_swirl, 0f, 2f);
         public float Pressure => Mathf.Clamp(_pressure, 0f, 2f);
         public float FeedDuration => Mathf.Clamp(_feedDuration, .05f, Duration);
-        public float Duration => Mathf.Max(.3f, _duration);
+        public float CurtainHold => Mathf.Max(.34f, _curtainHold);
+        public float Duration => Mathf.Max(_feed == Inlet.Curtain ? CurtainHold + 1.40f : .3f, _duration);
     }
 }

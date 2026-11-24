@@ -27,8 +27,8 @@ namespace Qin.UnityEffects.Fluids
 
         private FluidMixSimulation _simulation;
         private MaterialPropertyBlock _block;
-        private float _seconds;
-        private float _stoppedAt;
+        private double _seconds;
+        private double _stoppedAt;
         private int _lastSampleFrame;
         private bool _sprayStarted;
 
@@ -46,7 +46,7 @@ namespace Qin.UnityEffects.Fluids
         private void LateUpdate()
         {
             if (CurrentStage != VisualStage.Recycled && _lastSampleFrame != Time.frameCount)
-                Sample(_seconds + Time.deltaTime);
+                Sample(_recipe.ContinuousFeed ? _seconds + Time.deltaTime : (float)_seconds + Time.deltaTime);
         }
 
         private void OnDisable()
@@ -56,22 +56,37 @@ namespace Qin.UnityEffects.Fluids
             _simulation = null;
         }
 
-        private void Sample(float seconds)
+        private void Sample(double seconds)
         {
-            _seconds = Mathf.Max(_seconds, seconds);
-            float end = _stoppedAt < 0f ? _recipe.Duration : Mathf.Min(_recipe.Duration, _stoppedAt + FadeSeconds);
+            _seconds = System.Math.Max(_seconds, seconds);
+            bool continuous = _recipe.ContinuousFeed;
+            double naturalEnd = continuous ? double.PositiveInfinity : _recipe.Duration;
+            double end = naturalEnd;
+            if (_stoppedAt >= 0)
+            {
+                double drainedAt = continuous ? _stoppedAt + FluidMixSimulation.ContinuousDrainSeconds
+                    : (float)_stoppedAt + FadeSeconds;
+                end = System.Math.Min(naturalEnd, drainedAt);
+            }
             if (_seconds >= end)
             {
                 Recycle();
                 return;
             }
 
-            float baseFade = 1f - Mathf.SmoothStep(0f, 1f, (_seconds - _recipe.Duration + FadeSeconds) / FadeSeconds);
-            float interruptFade = _stoppedAt < 0f ? 1f : 1f - Mathf.SmoothStep(0f, 1f, (_seconds - _stoppedAt) / FadeSeconds);
-            float weight = Mathf.SmoothStep(0f, 1f, _seconds / .12f) * Mathf.Min(baseFade, interruptFade);
+            float castTime = (float)_seconds;
+            float baseFade = continuous ? 1f : 1f - Mathf.SmoothStep(0f, 1f, (castTime - _recipe.Duration + FadeSeconds) / FadeSeconds);
+            float interruptFade = 1f;
+            if (_stoppedAt >= 0)
+            {
+                float fadeAge = continuous ? (float)(_seconds - end) + FadeSeconds : castTime - (float)_stoppedAt;
+                interruptFade = 1f - Mathf.SmoothStep(0f, 1f, fadeAge / FadeSeconds);
+            }
+            float weight = Mathf.SmoothStep(0f, 1f, castTime / .12f) * Mathf.Min(baseFade, interruptFade);
             Vector3 center = _obstacleAnchor ? transform.InverseTransformPoint(_obstacleAnchor.position) : _recipe.ObstacleCenter;
             Vector4 obstacle = new Vector4(center.x, center.y, center.z, _recipe.SolidObstacle ? _recipe.ObstacleRadius : 0f);
-            float admission = _stoppedAt < 0f ? _recipe.FeedDuration : Mathf.Min(_stoppedAt, _recipe.FeedDuration);
+            double feedEnd = continuous ? double.PositiveInfinity : _recipe.FeedDuration;
+            double admission = _stoppedAt < 0 ? feedEnd : System.Math.Min(_stoppedAt, feedEnd);
             _simulation.Advance(_seconds, admission, obstacle, _recipe.Pressure);
             if (_recipe.SurfaceWaves)
                 BindField(_surface, _simulation.Waves, 0f, weight);
@@ -79,7 +94,7 @@ namespace Qin.UnityEffects.Fluids
                 BindField(_volume, _simulation.Film, 1f, weight);
             if (_sprayStarted)
                 _spray.SetFloat(ReleaseWeight, weight);
-            CurrentStage = StageAt(end);
+            CurrentStage = StageAt((float)end);
         }
 
         private VisualStage StageAt(float end)
@@ -88,7 +103,7 @@ namespace Qin.UnityEffects.Fluids
             if (_seconds <= 0f) return VisualStage.Prepare;
             if (_seconds < .065f) return VisualStage.Preparing;
             if (_seconds < .12f) return VisualStage.Prepared;
-            return _seconds < _recipe.FeedDuration ? VisualStage.Releasing : VisualStage.Released;
+            return _recipe.ContinuousFeed || _seconds < _recipe.FeedDuration ? VisualStage.Releasing : VisualStage.Released;
         }
 
         private void BindField(MeshRenderer draw, RenderTexture texture, float side, float weight)
@@ -166,7 +181,7 @@ namespace Qin.UnityEffects.Fluids
 
         public void SetCastTime(float seconds)
         {
-            if (CurrentStage == VisualStage.Recycled) return;
+            if (CurrentStage == VisualStage.Recycled || !float.IsFinite(seconds)) return;
             _lastSampleFrame = Time.frameCount;
             Sample(seconds);
         }

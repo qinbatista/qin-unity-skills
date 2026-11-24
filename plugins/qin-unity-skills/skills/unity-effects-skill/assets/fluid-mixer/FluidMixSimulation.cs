@@ -9,6 +9,10 @@ namespace Qin.UnityEffects.Fluids
     {
         internal const int ParticleCount = 384;
         private const int StepsPerSecond = 90;
+        // Matches the parcel lifetime and timestamp modulus in FluidMix.compute.
+        private const int FeedLifeTicks = 162;
+        private const int FeedClockTicks = FeedLifeTicks * 4096;
+        internal const float ContinuousDrainSeconds = FeedLifeTicks / (float)StepsPerSecond + .24f;
         private const int ParticleGroups = ParticleCount / 64;
         private const int GridWords = 25 * 18 * (1 + ParticleCount / 32) + 3 * 96 * (ParticleCount / 32);
         private const int FilmWidth = 256;
@@ -31,6 +35,7 @@ namespace Qin.UnityEffects.Fluids
         private static readonly int SeedId = Shader.PropertyToID("_Seed");
         private static readonly int FeedId = Shader.PropertyToID("_Feed");
         private static readonly int DurationId = Shader.PropertyToID("_Duration");
+        private static readonly int CurtainHoldId = Shader.PropertyToID("_CurtainHold");
         private static readonly int FeedDurationId = Shader.PropertyToID("_FeedDuration");
         private static readonly int StrengthId = Shader.PropertyToID("_Strength");
         private static readonly int GravityId = Shader.PropertyToID("_Gravity");
@@ -41,6 +46,10 @@ namespace Qin.UnityEffects.Fluids
         private static readonly int PressureId = Shader.PropertyToID("_PressureScale");
         private static readonly int FreeFlightId = Shader.PropertyToID("_FreeFlight");
         private static readonly int BuildSupportMasksId = Shader.PropertyToID("_BuildSupportMasks");
+        private static readonly int ContinuousFeedId = Shader.PropertyToID("_ContinuousFeed");
+        private static readonly int FeedOpenId = Shader.PropertyToID("_FeedOpen");
+        private static readonly int FlowTimesId = Shader.PropertyToID("_FlowTimes");
+        private static readonly int FeedTickId = Shader.PropertyToID("_FeedTick");
         private static readonly int WavesEnabledId = Shader.PropertyToID("_WavesEnabled");
         private static readonly int SprayEnabledId = Shader.PropertyToID("_SprayEnabled");
 
@@ -66,6 +75,7 @@ namespace Qin.UnityEffects.Fluids
         private int _waveIndex;
         private int _lastStep;
         private int _ballisticThroughStep;
+        private bool _continuousFeed;
         private bool _hasLiquid;
         private bool _hasWaves;
         private bool _hasObstacle;
@@ -76,7 +86,7 @@ namespace Qin.UnityEffects.Fluids
         internal RenderTexture Waves => _waves[_waveIndex];
         internal RenderTexture Spray { get; }
         internal GraphicsBuffer Particles { get; }
-        internal int Step { get; private set; }
+        internal long Step { get; private set; }
 
         internal FluidMixSimulation(ComputeShader program)
         {
@@ -134,6 +144,7 @@ namespace Qin.UnityEffects.Fluids
             Step = 0;
             _waveIndex = 0;
             _lastStep = Mathf.CeilToInt(recipe.Duration * StepsPerSecond);
+            _continuousFeed = recipe.ContinuousFeed;
             _hasLiquid = (int)recipe.Feed != 0;
             _hasWaves = recipe.SurfaceWaves;
             _hasObstacle = recipe.SolidObstacle;
@@ -143,6 +154,7 @@ namespace Qin.UnityEffects.Fluids
             _commands.SetComputeIntParam(_program, SeedId, unchecked((int)seed));
             _commands.SetComputeIntParam(_program, FeedId, (int)recipe.Feed);
             _commands.SetComputeFloatParam(_program, DurationId, recipe.Duration);
+            _commands.SetComputeFloatParam(_program, CurtainHoldId, recipe.CurtainHold);
             _commands.SetComputeFloatParam(_program, FeedDurationId, recipe.FeedDuration);
             _commands.SetComputeFloatParam(_program, StrengthId, Mathf.Max(0f, recipe.Strength));
             _commands.SetComputeFloatParam(_program, GravityId, Mathf.Abs(recipe.Gravity));
@@ -152,6 +164,9 @@ namespace Qin.UnityEffects.Fluids
             _commands.SetComputeIntParam(_program, WavesEnabledId, _hasWaves ? 1 : 0);
             _commands.SetComputeIntParam(_program, SprayEnabledId, recipe.Spray ? 1 : 0);
             _commands.SetComputeFloatParam(_program, TimeId, 0f);
+            _commands.SetComputeIntParam(_program, ContinuousFeedId, _continuousFeed ? 1 : 0);
+            _commands.SetComputeIntParam(_program, FeedTickId, 0);
+            _commands.SetComputeVectorParam(_program, FlowTimesId, Vector4.zero);
             Bind(_resetLiquid, ParticlesId, Particles);
             Bind(_resetLiquid, DensityId, _density);
             _commands.SetComputeTextureParam(_program, _resetLiquid, SprayId, Spray);
@@ -167,19 +182,31 @@ namespace Qin.UnityEffects.Fluids
             Graphics.ExecuteCommandBuffer(_commands);
         }
 
-        internal bool Advance(float elapsed, float admissionUntil, Vector4 obstacle, float pressureScale = 1f)
+        internal bool Advance(double elapsed, double admissionUntil, Vector4 obstacle, float pressureScale = 1f)
         {
-            int target = Mathf.Min(_lastStep, Mathf.FloorToInt(elapsed * StepsPerSecond + .001f));
+            long target = _continuousFeed ? (long)Math.Floor(elapsed * StepsPerSecond + .001)
+                : Mathf.Min(_lastStep, Mathf.FloorToInt((float)elapsed * StepsPerSecond + .001f));
             if (target <= Step)
                 return false;
 
             _commands.Clear();
-            _commands.SetComputeFloatParam(_program, AdmissionId, admissionUntil);
+            _commands.SetComputeFloatParam(_program, AdmissionId, (float)admissionUntil);
             _commands.SetComputeFloatParam(_program, PressureId, Mathf.Clamp(pressureScale, 0f, 2f));
             _commands.SetComputeVectorParam(_program, ObstacleId, _hasObstacle ? obstacle : Vector4.zero);
             while (Step < target)
             {
-                _commands.SetComputeFloatParam(_program, TimeId, ++Step / (float)StepsPerSecond);
+                Step++;
+                if (_continuousFeed)
+                {
+                    int clock = (int)((Step - 1) % FeedClockTicks);
+                    _commands.SetComputeIntParam(_program, FeedTickId, clock);
+                    _commands.SetComputeIntParam(_program, FeedOpenId, Step / (double)StepsPerSecond <= admissionUntil ? 1 : 0);
+                    _commands.SetComputeFloatParam(_program, TimeId, clock / (float)StepsPerSecond);
+                }
+                else
+                {
+                    _commands.SetComputeFloatParam(_program, TimeId, Step / (float)StepsPerSecond);
+                }
                 if (_hasLiquid)
                     IntegrateLiquid();
                 if (_hasWaves)
@@ -187,6 +214,12 @@ namespace Qin.UnityEffects.Fluids
             }
             if (_hasLiquid)
             {
+                if (_continuousFeed)
+                {
+                    float sinceOpening = (float)Math.Min(2.0, elapsed);
+                    float sinceClosing = (float)Math.Clamp(elapsed - admissionUntil, 0.0, 2.0);
+                    _commands.SetComputeVectorParam(_program, FlowTimesId, new Vector4(sinceOpening, sinceClosing, 0f, 0f));
+                }
                 Index(_positions);
                 ReconstructFilm();
             }
@@ -211,6 +244,8 @@ namespace Qin.UnityEffects.Fluids
 
         private static int BallisticThroughStep(SOFluidMixRecipe recipe)
         {
+            if (recipe.Feed == SOFluidMixRecipe.Inlet.Needle)
+                return Mathf.CeilToInt(recipe.Duration * StepsPerSecond);
             if (recipe.Feed != SOFluidMixRecipe.Inlet.FallingMass || recipe.SolidObstacle)
                 return 0;
             // .35 is the release semi-height; .04 is the floor and .14 covers the maximum wave lift and a margin.

@@ -31,6 +31,10 @@ static const float CellSize = .25;
 static const float Radius = .182;
 static const float RestDensity = 4.6;
 static const float Floor = .040;
+// Keep the birth ticks and age local even during long-running scene effects.
+static const uint FeedLifeTicks = 162u;
+static const uint FeedClockTicks = FeedLifeTicks * 4096u;
+static const uint FoldPeriodTicks = FeedLifeTicks * 4u;
 static const float2 FieldOrigin = float2(-3.0, -.68);
 static const float2 FieldSize = float2(6.0, 4.18);
 
@@ -69,9 +73,13 @@ int _Feed;
 int _WavesEnabled;
 int _SprayEnabled;
 int _FreeFlight;
+int _ContinuousFeed;
+int _FeedOpen;
+uint _FeedTick;
 int _BuildSupportMasks;
 float _Duration;
 float _FeedDuration;
+float _CurtainHold;
 float _Strength;
 float _Gravity;
 float _Swirl;
@@ -79,6 +87,7 @@ float3 _Origin;
 float3 _Velocity;
 float4 _Obstacle;
 float _PressureScale;
+float2 _FlowTimes;
 
 float2 ProjectToFilm(float3 p)
 {
@@ -206,6 +215,18 @@ float3 DropOffset(uint id)
     return (radius + .008 * (Uniform(id, 2u) - .5)) * float3(ring * cos(angle), height, ring * sin(angle));
 }
 
+float CurtainAngle(uint id)
+{
+    return 6.2831853 * frac((float(id) + .5) * .61803399) + .049 * (Uniform(id, 17u) - .5);
+}
+
+float2 CurtainWall(float angle, float height, float closure)
+{
+    float roof = smoothstep(.96, 1.54, height);
+    float r = lerp(1.02 - .49 * roof, .10, closure);
+    return float2(r * cos(angle), (.45 - .13 * roof - .13 * closure) * sin(angle));
+}
+
 Particle Emit(uint id, float birth)
 {
     float angle = float(id) * 2.39996323 + .24 * (Uniform(id, 1u) - .5);
@@ -224,16 +245,17 @@ Particle Emit(uint id, float birth)
         velocity.y -= _Gravity * sinceOpening;
         velocity.xz += .075 * float2(site.z, -site.x);
     }
-    else if (_Feed == 2 || _Feed == 3)
+    else if (_Feed == 2 || _Feed == 3 || _Feed == 7)
     {
         // A round nozzle section is perpendicular to the actual launch vector.
         float3 axis = length(velocity) > .002 ? normalize(velocity) : float3(1, 0, 0);
         float3 hint = abs(axis.z) < .85 ? float3(0, 0, 1) : float3(0, 1, 0);
         float3 up = normalize(cross(hint, axis));
         float3 side = cross(axis, up);
-        float width = _Feed == 3 ? .116 : .139;
+        float width = _Feed == 7 ? .022 : _Feed == 3 ? .116 : .139;
         position += (up * disk.x + side * disk.y) * width + axis * (.045 * vertical);
-        velocity += up * (.12 * disk.x) + side * (.19 * disk.y);
+        float mixing = _Feed == 7 ? .20 : 1.0;
+        velocity += mixing * (up * (.12 * disk.x) + side * (.19 * disk.y));
         if (_Feed == 3 && (id & 1u) != 0u)
         {
             position.x = -position.x;
@@ -243,7 +265,7 @@ Particle Emit(uint id, float birth)
     else if (_Feed == 4)
     {
         float span = 2.0 * frac((float(id) + .5) * .61803399) - 1.0;
-        position.x += span * .70;
+        position.x += span * (_ContinuousFeed != 0 ? .53 : .70);
         position.y += .046 * disk.x;
         position.z += .109 * disk.y + .039 * sin(4.3 * span + 3.2 * birth);
         velocity.z += .18 * span + .11 * sin(5.4 * span + 2.2 * birth);
@@ -263,13 +285,50 @@ Particle Emit(uint id, float birth)
         velocity.xz += ((sideInlet ? 2.39 : 2.85) * _Swirl * tangent - .66 * radial) * sqrt(_Strength);
         velocity.y += .10 * disk.y;
     }
+    else if (_Feed == 6)
+    {
+        // Water rises from the perimeter. Different upward velocities fill the sheet over time.
+        float a = CurtainAngle(id);
+        position.xz += CurtainWall(a, 0.0, 0.0) + .049 * disk;
+        position.y += Floor + .024 + .032 * disk.y;
+        velocity.xz += .27 * float2(cos(a), sin(a));
+        velocity.y += lerp(1.20, 6.25, Uniform(id, 21u)) * sqrt(_Strength);
+    }
     Particle p;
     p.placement = float4(Contain(position), birth);
     p.motion = float4(velocity, 0.0);
     return p;
 }
 
-float3 Force(float3 position, float3 velocity)
+// Continuous feeds replace one aged-out parcel at a time. Neighbour, floor and wave state are retained.
+Particle Replenish(uint id, Particle p)
+{
+    uint offset = ((id * 73u) % PARTICLES) * FeedLifeTicks / PARTICLES;
+    uint ageTicks = (_FeedTick + FeedLifeTicks - offset) % FeedLifeTicks;
+    if (ageTicks == 0u)
+    {
+        if (_FeedOpen != 0)
+        {
+            uint birthKey = id + 419u * (_FeedTick / FeedLifeTicks);
+            p = Emit(birthKey, (_FeedTick % 630u) * StepSeconds);
+        }
+        else
+        {
+            p.placement.w = -2.0;
+            p.motion = 0.0;
+        }
+    }
+    if (p.placement.w >= 0.0)
+        p.placement.w = ageTicks * StepSeconds;
+    return p;
+}
+
+float ParticleAge(float stamp)
+{
+    return _ContinuousFeed != 0 ? stamp : _Seconds - stamp;
+}
+
+float3 Force(uint id, float3 position, float3 velocity)
 {
     float3 acceleration = float3(0., -_Gravity, 0.);
     if (_Feed == 5)
@@ -289,6 +348,27 @@ float3 Force(float3 position, float3 velocity)
         acceleration.xz += (radialForce * radial + 3.5 * (spin - azimuthalSpeed) * tangent) * imposedFlow;
         float basinHeight = _Origin.y + Floor + .40 * smoothstep(.075, 1.15, distance);
         acceleration.y += (_Gravity + 37.0 * (basinHeight - position.y) - 8.8 * velocity.y) * imposedFlow;
+    }
+    if (_Feed == 6)
+    {
+        // The opposing sheet supports lose pressure as they converge. Detached water keeps its momentum.
+        float a = CurtainAngle(id);
+        float y = max(0.0, position.y - _Origin.y);
+        float closeAge = _Seconds - _CurtainHold;
+        float closure = smoothstep(0.0, .29, closeAge);
+        float support = 1.0 - smoothstep(.29, .47, closeAge);
+        float2 wall = CurtainWall(a, y, closure);
+        wall *= 1.0 + .043 * sin(8.0 * y - 10.0 * _Seconds + 3.0 * a);
+        acceleration.xz += (53.0 * (_Origin.xz + wall - position.xz) - 8.1 * velocity.xz) * support;
+        float hold = 1.0 - smoothstep(.03, .28, closeAge);
+        float cap = 1.43 + .12 * sin(3.0 * a + 1.65 * _Seconds);
+        float drag = 2.45 + 11.0 * smoothstep(1.20, 1.58, y);
+        acceleration.y += (_Gravity - 29.0 * max(0.0, y - cap) - drag * velocity.y) * hold;
+        // A small fraction of the high shoulder is ejected by the pressure released on convergence.
+        float edge = smoothstep(.39, 1.17, y) * (1.0 - step(.31, Uniform(id, 23u)));
+        float pulse = smoothstep(.24, .33, closeAge) * (1.0 - smoothstep(.37, .51, closeAge)) * edge;
+        acceleration.xz += 16.5 * float2(cos(a), sin(a)) * pulse;
+        acceleration.y += lerp(4.5, 12.8, Uniform(id, 24u)) * pulse;
     }
     return acceleration;
 }
@@ -335,10 +415,21 @@ void ResetWave(uint2 pixel : SV_DispatchThreadID)
 void PredictPositions(uint id : SV_DispatchThreadID)
 {
     Particle p = _Particles[id];
-    if (p.placement.w < 0.0)
+    if (_ContinuousFeed != 0)
+    {
+        p = Replenish(id, p);
+        _Particles[id] = p;
+        if (p.placement.w < 0.0)
+        {
+            _Predictions[id] = p.placement;
+            return;
+        }
+    }
+    else if (p.placement.w < 0.0)
     {
         float birth = Birth(id);
-        if (_Strength <= .0001 || p.placement.w < -1.5 || birth > min(_Seconds, _AdmissionUntil))
+        if (_Strength <= .0001 || p.placement.w < -1.5 || birth > min(_Seconds, _AdmissionUntil)
+            || (_Feed == 7 && id % 6u != 0u))
         {
             _Predictions[id] = p.placement;
             return;
@@ -347,7 +438,7 @@ void PredictPositions(uint id : SV_DispatchThreadID)
         _Particles[id] = p;
     }
 
-    float3 velocity = (p.motion.xyz + Force(p.placement.xyz, p.motion.xyz) * StepSeconds) * (1.0 - .13 * StepSeconds);
+    float3 velocity = (p.motion.xyz + Force(id, p.placement.xyz, p.motion.xyz) * StepSeconds) * (1.0 - .13 * StepSeconds);
     float3 expected = p.placement.xyz + StepSeconds * velocity;
     if (_Feed == 5 && length(expected.xz - _Origin.xz) < .092)
     {
@@ -492,8 +583,10 @@ void ProjectPressure(uint id : SV_DispatchThreadID)
 
 float Envelope(Particle p)
 {
-    float age = smoothstep(0.0, .073, _Seconds - p.placement.w);
-    float release = 1.0 - smoothstep(_Duration - .39, _Duration, _Seconds);
+    float elapsed = ParticleAge(p.placement.w);
+    float age = smoothstep(0.0, .073, elapsed);
+    float release = _ContinuousFeed != 0 ? 1.0 - smoothstep(1.49, FeedLifeTicks * StepSeconds, elapsed)
+        : 1.0 - smoothstep(_Duration - .39, _Duration, _Seconds);
     // Material can leave through either open side without a square wall or a cropped bright streak.
     float perimeter = (1.0 - smoothstep(2.51, 2.83, abs(p.placement.x)))
                     * (1.0 - smoothstep(1.34, 1.66, abs(p.placement.z)));
@@ -537,7 +630,7 @@ void UpdateVelocities(uint id : SV_DispatchThreadID)
     }
     float freeSurface = _FreeFlight != 0 ? 0.0 : 1.0 - smoothstep(1.20, 2.42, _Density[id].y);
     float kinetic = smoothstep(1.8, 3.9, length(velocity)) * smoothstep(.085, .31, predicted.y);
-    float head = smoothstep(.15, .31, _Seconds - predicted.w);
+    float head = smoothstep(.15, .31, ParticleAge(predicted.w));
     float separation = _SprayEnabled != 0 ? freeSurface * kinetic * head : 0.;
     float spray = lerp(p.motion.w, separation, separation > p.motion.w ? .115 : .056);
     p.placement = predicted;
@@ -580,6 +673,8 @@ void StepWave(uint2 pixel : SV_DispatchThreadID)
         drive += secondaryStrength * SourcePulse(world, _Origin.xz + float2(1.18, .43), _Seconds, .52, secondaryDuration);
         drive *= 34.5 * _Strength;
     }
+    if (_Feed == 6)
+        drive = 12.0 * _Strength * SourcePulse(world, _Origin.xz, _Seconds, .026, .123);
     uint index = pixel.y * WAVE_WIDTH + pixel.x;
     float impact = min(3.1, (float)_Impulses[index] * (.17 / 1024.0));
     _Impulses[index] = 0u;
@@ -587,8 +682,89 @@ void StepWave(uint2 pixel : SV_DispatchThreadID)
     float2 margin = min(float2(pixel), float2(last - cell));
     float edge = 1.0 - smoothstep(0., 9., min(margin.x, margin.y));
     float damping = exp(-(1.03 + 9.0 * edge * edge) * StepSeconds);
-    float velocity = (water.y + StepSeconds * (3.7 * laplacian - drive) - impact) * damping;
+    // An open basin relaxes back to its resting level under a persistent feed.
+    float acceleration = 3.7 * laplacian - drive;
+    if (_ContinuousFeed != 0)
+        acceleration -= 3.6 * water.x;
+    float velocity = (water.y + StepSeconds * acceleration - impact) * damping;
     _WaveWrite[pixel] = float2(water.x + StepSeconds * velocity, velocity);
+}
+
+// A thin supported film bridges the gaps between nearby parcels during formation.
+// It enters from the floor and loses support from the top as detached parcels take over.
+float4 CurtainFilm(float2 position)
+{
+    float2 p = position - ProjectToFilm(_Origin);
+    float t = _Seconds;
+    float formation = smoothstep(.035, .42, t);
+    float closeAge = t - _CurtainHold;
+    float closure = smoothstep(0.0, .32, closeAge);
+    float spread = lerp(.88, 1.01, formation) * lerp(1.0, .35, closure);
+    float flow = .92 * min(t, .28) - .78 * max(t - .28, 0.0);
+    float vertical = p.y - flow;
+    float folds = sin(13.0 * p.x + .48 * sin(16.2 * vertical)) + .43 * sin(29.1 * p.x + 10.4 * vertical);
+    float r = abs(p.x + .028 * folds) / max(.12, spread);
+    float u = saturate(r);
+    float loss = max(closeAge - (.21 + .038 * sin(13.5 * p.x)), 0.0);
+    float height = 1.88 * formation * (1.0 - .18 * closure)
+        * (1.0 - .22 * u * u * u * u) - 5.1 * loss * loss;
+    height += .036 * formation * sin(17.0 * p.x + 19.0 * t);
+    float top = height - p.y;
+    float retire = 1.0 - smoothstep(.28, .64, closeAge + .085 * max(0.0, p.y));
+    float filaments = .5 + .5 * sin(20.1 * p.x + .64 * sin(20.6 * vertical) + .32 * sin(9.3 * vertical));
+    float film = .37 + .24 * filaments * filaments;
+    float lip = .36 * (1.0 - smoothstep(.021, .138, top)) + .34 * smoothstep(.70, .98, u);
+    float mass = (film + lip) * retire * formation * smoothstep(-.034, .049, p.y) *
+        smoothstep(-.014, .076, top) * (1.0 - smoothstep(.94, 1.025, r));
+    float depth = .39 * sqrt(max(0.0, 1.0 - u * u)) + .014 * folds;
+    float capillary = sin(30.0 * p.x + .75 * sin(19.0 * vertical) + .45 * sin(25.3 * vertical));
+    return float4(mass, depth, .35 + .33 * filaments, capillary);
+}
+
+// A coherent ribbon is the advective limit of the dense inlet. The parcel film
+// still carries separate drops, actual contact, downstream thickness and spray.
+float4 FallingRibbon(float2 p)
+{
+    float drop = _Origin.y + .32 * _Origin.z - p.y;
+    float g = max(0.025, _Gravity);
+    float speed = max(.05, -_Velocity.y * sqrt(_Strength));
+    float age = 2.0 * max(0.0, drop) / (speed + sqrt(speed * speed + 2.0 * g * max(0.0, drop)));
+    float span = .54 * rsqrt(1.0 + .60 * age);
+    float originX = _Origin.x + _Velocity.x * sqrt(_Strength) * age;
+    float spread = saturate(_Strength * 1.25);
+    // Integer harmonics keep the folds continuous across the bounded motion phase.
+    float t = float(_FeedTick % FoldPeriodTicks) - age / StepSeconds;
+    float moving = (6.2831853 / FoldPeriodTicks) * t;
+    float fold = sin(13.0 * p.y + 11.0 * moving + 6.3 * p.x)
+        + .39 * sin(27.3 * p.y + 14.0 * moving + 22.0 * p.x);
+    float wind = (.036 * sin(12.0 * moving + 6.1 * p.y) + .017 * fold) * smoothstep(.04, .44, age);
+    float x = p.x - originX - wind;
+    float width = span * (.87 + .105 * fold);
+    float distance = abs(x) / max(.06, width);
+    float shoulder = 1.0 - smoothstep(.76, 1.08, distance);
+    if (_Obstacle.w > 0.0)
+    {
+        // Trace two turn paths around the projected solid. Unbound strands remain in the solver.
+        float h = p.y - (_Obstacle.y + .32 * _Obstacle.z);
+        float r = _Obstacle.w;
+        float around = sqrt(saturate(1.0 - (h / (r + .045)) * (h / (r + .045))));
+        float turn = 1.0 - smoothstep(.08, r + .11, h);
+        float reach = r * (.28 + .68 * around);
+        float center = _Obstacle.x + min(.29, max(0.0, .20 * (r - h)));
+        float xoff = p.x - center - wind;
+        float outer = abs(abs(xoff) - reach - .075 * sin(15.0 * moving + 14.0 * p.y));
+        float branches = 1.0 - smoothstep(.094, .267, outer);
+        float solid = length(float2(p.x - _Obstacle.x, h / 1.05)) - r;
+        branches *= lerp(.16, 1.0, smoothstep(-.055, .110, solid));
+        shoulder = lerp(shoulder, branches, turn);
+    }
+    float hasArrived = smoothstep(-.014, .092, _FlowTimes.x - age);
+    float hasDrained = smoothstep(-.043, .085, _FlowTimes.y - age);
+    float ends = smoothstep(-.066, .071, drop + .022 * fold) * smoothstep(-.015, .13, p.y);
+    float filament = .5 + .5 * sin(49.0 * p.x + .65 * fold + 3.0 * moving);
+    float flow = shoulder * spread * ends * hasArrived * (1.0 - hasDrained);
+    float mass = flow * (.30 + .42 * filament * filament);
+    return float4(mass, .23 * shoulder + .026 * fold, .65, .60 * fold + .24 * filament);
 }
 
 [numthreads(8, 8, 1)]
@@ -612,8 +788,8 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
         float stretch = smoothstep(.28, 4.1, speed);
         float onGround = 1.0 - smoothstep(Floor + .018, Floor + .18, p.placement.y);
         // The footprint is a reconstruction radius, not a rendered particle radius.
-        float lengthwise = lerp(.183, .239, stretch);
-        float widthwise = lerp(.168, .122, stretch);
+        float lengthwise = _Feed == 7 ? .277 : lerp(.183, .239, stretch);
+        float widthwise = _Feed == 7 ? .046 : lerp(.168, .122, stretch);
         float u = dot(delta, axis) / lengthwise;
         float v = dot(delta, across) / widthwise;
         // A resting parcel lies in XZ. Its reconstructed patch projects as a shallow ellipse,
@@ -626,6 +802,15 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
         if (kernel <= 0.0)
             continue;
         float mass = kernel * kernel * kernel * Envelope(p) * (1.0 - .70 * p.motion.w);
+        if (_Feed == 6)
+        {
+            float attached = 1.0 - smoothstep(.25, .55, _Seconds - _CurtainHold);
+            mass *= lerp(.80, .18, attached * (1.0 - onGround));
+        }
+        if (_Feed == 7)
+            mass *= .25;
+        if (_ContinuousFeed != 0)
+            mass *= lerp(.41, .30, onGround);
         mass *= .026 / lerp(lengthwise * widthwise, groundLength * groundHeight, onGround);
         float reach = lerp(.075, .035, onGround) * sqrt(kernel);
         // Upper envelope in camera depth, softened so overlapping bodies form one optical surface.
@@ -634,11 +819,24 @@ void ReconstructFilm(uint2 pixel : SV_DispatchThreadID)
         thickness += mass;
         activity += mass * saturate(length(p.motion.xyz) / 5.0);
         // Material phases follow the parcels. Local coordinates align the fine folds with their current flow.
-        float age = _Seconds - p.placement.w;
+        float age = ParticleAge(p.placement.w);
         float phase = 5.2 * p.placement.w + 2.6 * (Uniform(other, 12u) - .5);
+        if (_ContinuousFeed != 0)
+        {
+            uint birth = (_FeedTick + FeedClockTicks - (uint)round(age / StepSeconds)) % FeedClockTicks;
+            phase = 6.2831853 * Uniform(other + 419u * (birth / FeedLifeTicks), 12u);
+        }
         float shear = .63 * sin(2.1 * age + p.placement.z * 3.2 + u);
         float acrossSurface = lerp(7.6 * v + 1.35 * u, 5.6 * ground.y + 1.35 * ground.x, onGround);
         capillary += mass * sin(acrossSurface + phase + shear);
+    }
+    if (_Feed == 6 || _ContinuousFeed != 0)
+    {
+        float4 sheet = _ContinuousFeed != 0 ? FallingRibbon(position) : CurtainFilm(position);
+        thickness += sheet.x;
+        depth += sheet.x * exp2(3.2 * sheet.y);
+        activity += sheet.x * sheet.z;
+        capillary += sheet.x * sheet.w;
     }
     if (thickness < .0001)
     {

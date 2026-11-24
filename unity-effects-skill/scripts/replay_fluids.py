@@ -1,4 +1,4 @@
-"""Recreate and replay all seven water forms in two new, independent Unity projects."""
+"""Recreate the water gallery and its 2D applications in two fresh Unity projects."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
@@ -11,6 +11,7 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 
+from fluid_application_checks import APPLICATIONS, review_application
 from fluid_mixer import MANIFEST, install
 from fluid_replay_checks import FORMS, review
 
@@ -49,7 +50,7 @@ def native_parent(work):
     return parent
 
 
-def lane(label, work, editor, seed):
+def lane(label, work, editor, seed, case):
     base = work / label
     project = base / "project"
     for folder in ("Assets", "Packages", "ProjectSettings"):
@@ -68,6 +69,8 @@ def lane(label, work, editor, seed):
                QIN_FLUID_SEED=str(seed), CFFIXED_USER_HOME=str(base / "home"),
                UPM_CACHE_ROOT=str(work / "upm"), DOTNET_PROCESSOR_COUNT="3")
     common = ["--editor-path",str(editor),"--timeout","1470","--non-interactive","--no-pager"]
+    filters = {"gallery": "QinFluidReplay.Replay", "all": "QinFluidReplay"}
+    selected = filters[case] if case in filters else "QinFluidReplay." + APPLICATIONS[case][0]
     with tempfile.TemporaryDirectory(prefix="temp-f-", dir=native_parent(work)) as scratch:
         env.update(TMPDIR=scratch,TEMP=scratch,TMP=scratch)
         run_command([sys.executable,"-B",str(CLI),"run",str(project),*common,"--log-file",str(base/"import.log"),
@@ -76,16 +79,17 @@ def lane(label, work, editor, seed):
         if "QIN_FLUID_RECEIVER_READY" not in (base/"import.log").read_text(errors="replace"):
             raise RuntimeError(f"Editor setup did not finish. See {base/'import.log'}")
         run_command([sys.executable,"-B",str(CLI),"test",str(project),*common,"--mode","EditMode",
-                     "--filter","QinFluidReplay.Replay","--output",str(base/"tests.xml"),"--",
+                     "--filter",selected,"--output",str(base/"tests.xml"),"--",
                      "-job-worker-count","3","-logFile",str(base/"play.log")],project,env,base/"play-cli.log")
     tests = list(ET.parse(base/"tests.xml").iter("test-case"))
-    if len(tests) != len(FORMS) or any(t.get("result") != "Passed" for t in tests):
+    expected_cases = {"gallery": len(FORMS), "all": len(FORMS) + len(APPLICATIONS)}
+    if len(tests) != expected_cases.get(case, 1) or any(t.get("result") != "Passed" for t in tests):
         raise RuntimeError(f"A native case failed. See {base/'tests.xml'}")
     actual = json.loads((project/"Packages/packages-lock.json").read_text())["dependencies"]
     if any(actual[key]["version"] != value for key,value in PACKAGES.items()):
         raise RuntimeError(f"Unexpected Unity package versions in receiver {label}")
     generated = {p.relative_to(installed).as_posix(): digest(p) for p in sorted(installed.rglob("*")) if p.is_file()}
-    print(f"{label}: seven native Play cases passed.",flush=True)
+    print(f"{label}: {len(tests)} native Play cases passed.", flush=True)
     return generated
 
 
@@ -94,6 +98,8 @@ def main():
     parser.add_argument("--editor",type=Path,required=True,help="Unity 6000.6.7f1 editor (.app on macOS)")
     parser.add_argument("--work",type=Path,required=True,help="New output directory inside the active task Cache")
     parser.add_argument("--seed",type=int,default=29411)
+    parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "all"), default="gallery",
+                        help="Select the seven-form gallery, an individual 2D application, or both")
     parser.add_argument("--preview",action="store_true",help="Also write FluidMixer.gif; requires Pillow")
     parser.add_argument("--video", action="store_true", help="Also write a full-rate H.264 reference. Requires Pillow and ffmpeg")
     args=parser.parse_args()
@@ -112,21 +118,36 @@ def main():
     work.mkdir(parents=True)
     native_parent(work)
     with ThreadPoolExecutor(max_workers=2) as workers:
-        futures = [workers.submit(lane,label,work,args.editor.resolve(),args.seed) for label in ("A","B")]
+        futures = [workers.submit(lane,label,work,args.editor.resolve(),args.seed,args.case) for label in ("A","B")]
         first,second = [f.result() for f in futures]
     expected = json.loads(MANIFEST.read_text(encoding="utf-8"))["files"]
     if first != second or first != expected:
         raise RuntimeError("The imported asset bytes differ from the release manifest or the second receiver.")
-    report = {"editor":EDITOR_VERSION,"packages":PACKAGES,"seed":args.seed,"files":first,
-              "receiverPaths":["Assets/QinFluidMixer","Assets/Effects/Liquid"],
-              "graphics":(work/"A/captures/FreeJet/device.txt").read_text().splitlines(),
-              "cases":review(work)}
-    if media:
-        if args.seed == 29411:
-            report["referenceSilhouetteIoU"] = fluid_preview.compare_silhouettes(work / "A/captures")
-        fluid_preview.export(work / "A/captures", work / "FluidMixer.gif", work / "FluidMixer.mp4" if args.video else None)
+    captures = work / "A/captures"
+    gallery = args.case in ("gallery", "all")
+    application_cases = {"gallery": (), "all": tuple(APPLICATIONS)}.get(args.case, (args.case,))
+    device_record = "FreeJet/device.txt" if gallery else "device.txt"
+    device = (captures / device_record).read_text().splitlines()
+    report = {"editor": EDITOR_VERSION, "packages": PACKAGES, "seed": args.seed, "files": first,
+              "receiverPaths": ["Assets/QinFluidMixer", "Assets/Effects/Liquid"], "graphics": device}
+    if gallery:
+        report["cases"] = review(work)
+        if media:
+            if args.seed == 29411:
+                report["referenceSilhouetteIoU"] = fluid_preview.compare_silhouettes(captures)
+            fluid_preview.export(captures, work / "FluidMixer.gif", work / "FluidMixer.mp4" if args.video else None)
+    if application_cases:
+        report["applications"] = {}
+        for case in application_cases:
+            app = review_application(work, case)
+            if media:
+                name = APPLICATIONS[case][1]
+                app["visual"] = fluid_preview.review_application_images(captures / name, case, app["physics"])
+                fluid_preview.export_application(captures / name, work / name, args.video)
+            report["applications"][case] = app
     (work / "FluidVerification.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-    print(f"Verified seven recreated fluids in A and B. Evidence: {work/'FluidVerification.json'}")
+    print(f"Verified {args.case} in both receivers. Evidence: {work / 'FluidVerification.json'}")
+
 
 
 if __name__ == "__main__":

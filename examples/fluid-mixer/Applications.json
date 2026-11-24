@@ -1,0 +1,108 @@
+{
+  "applications": {
+    "curtain": {
+      "equalFrames": 92,
+      "equalStateSamples": 14,
+      "media": {
+        "metadata": {
+          "format": {
+            "duration": "3.066667"
+          },
+          "programs": [],
+          "stream_groups": [],
+          "streams": [
+            {
+              "avg_frame_rate": "30/1",
+              "codec_name": "h264",
+              "height": 540,
+              "nb_read_frames": "92",
+              "width": 960
+            }
+          ]
+        },
+        "sha256": "7ba1d272a8352d93b09d4a4910030190b67eb10ff7bbe45b933f395a04c4e99b"
+      },
+      "physics": {
+        "anchorX": 0.92,
+        "closingMedianHalfWidthMetres": 0.25185005366802216,
+        "closureStartAfterImpactSeconds": 0.5,
+        "floorParcelFractionAt150sAfterHit": 0.9921875,
+        "impactFrame": 24,
+        "openMedianHalfWidthMetres": 0.750870406627655,
+        "opticsFrame": 38
+      },
+      "visual": {
+        "chromaReversalPixels": 5822,
+        "transmissionPixels": 10784,
+        "upperWaterPixelsAfterImpact": [
+          1230,
+          30837,
+          14966
+        ]
+      }
+    },
+    "waterfall": {
+      "equalFrames": 292,
+      "equalStateSamples": 39,
+      "media": {
+        "metadata": {
+          "format": {
+            "duration": "9.733333"
+          },
+          "programs": [],
+          "stream_groups": [],
+          "streams": [
+            {
+              "avg_frame_rate": "30/1",
+              "codec_name": "h264",
+              "height": 540,
+              "nb_read_frames": "292",
+              "width": 960
+            }
+          ]
+        },
+        "sha256": "a1030f3a794497f8e52104813030bf040ac26da45ccb3e74b6079764da2efb7f"
+      },
+      "physics": {
+        "feedOpenSeconds": 7.4,
+        "minimumDistanceFromRockCentreMetres": 0.5479998783067733,
+        "minimumFallingParcelsAtInlet": 56,
+        "minimumPoolHeightMagnitude": 48.9633912816098,
+        "opticsFrame": 162,
+        "parcelsAfterShutoff": [
+          317,
+          161,
+          0
+        ],
+        "settledFractionAt843s": 0.9875776397515528,
+        "steadySamples": 7
+      },
+      "visual": {
+        "chromaReversalPixels": 1403,
+        "steadyInletPixels": [
+          8851,
+          11205
+        ],
+        "steadyMinimumChangingPixels": 6286,
+        "transmissionPixels": 13918
+      }
+    }
+  },
+  "assetManifestSha256": "f3e3bf9341b88c96f3ca9431fe9944077715e4b5aaaf8469c803d39e3ed41c0f",
+  "caseCountPerReceiver": 9,
+  "controlScope": "Native screenshots and GPU readback on desktop Metal. A disabled collider leaves the original flight intact up to the hit window. Disabled surface response leaves no simulated pool wave.",
+  "galleryFramesMatched": 588,
+  "galleryReferenceMinIoU": 1.0,
+  "galleryStatesMatched": 189,
+  "graphics": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal"
+  ],
+  "receivers": [
+    "Assets/QinFluidMixer",
+    "Assets/Effects/Liquid"
+  ],
+  "replay": "scripts/replay_fluids.py --case all --preview --video",
+  "seed": 29411
+}
