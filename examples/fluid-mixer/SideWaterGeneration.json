@@ -86,6 +86,74 @@
       }
     }
   },
+  "completeInstalledReplay": {
+    "comparisonPlate": {
+      "file": "WaterMotionComparison.png",
+      "sha256": "03fd56afbda36b44677e25ba7a0c801d66fab2d28f56642825248414964cb3b7"
+    },
+    "crossReleaseBaselineReadbacks": {
+      "bin": {
+        "matched": 217,
+        "total": 244
+      },
+      "png": {
+        "matched": 1188,
+        "total": 1253
+      }
+    },
+    "freshReplayVideos": {
+      "fluid-curtain": {
+        "identicalEncoding": true,
+        "reencodedSha256": "f77e8a32a03066cf49d168cf1476a70ddfa4bfc268204c9e14ec47579acaab6e",
+        "shippedSha256": "f77e8a32a03066cf49d168cf1476a70ddfa4bfc268204c9e14ec47579acaab6e"
+      },
+      "fluid-motion": {
+        "identicalEncoding": true,
+        "reencodedSha256": "a843b2155d79eb70e635dc755dcecf52eeb0200e79db2f5c7ef8b4a44f9d553b",
+        "shippedSha256": "a843b2155d79eb70e635dc755dcecf52eeb0200e79db2f5c7ef8b4a44f9d553b"
+      },
+      "fluid-waterfall": {
+        "identicalEncoding": true,
+        "reencodedSha256": "7c8a787e949ee78face7c3e57af4ec0c85b0a06cd85354c5ca2b3566aaf979ea",
+        "shippedSha256": "7c8a787e949ee78face7c3e57af4ec0c85b0a06cd85354c5ca2b3566aaf979ea"
+      },
+      "side-channels": {
+        "identicalEncoding": true,
+        "reencodedSha256": "100f24fb3ad434e0fd996c86c0bc1b6b74314853ef12002682bc615f639d2922",
+        "shippedSha256": "100f24fb3ad434e0fd996c86c0bc1b6b74314853ef12002682bc615f639d2922"
+      },
+      "water-inlets": {
+        "identicalEncoding": true,
+        "reencodedSha256": "446f8e62e676b4b31582ecfec0238f69ad34d2bc33b85c3c3e48bb87e51b1043",
+        "shippedSha256": "446f8e62e676b4b31582ecfec0238f69ad34d2bc33b85c3c3e48bb87e51b1043"
+      }
+    },
+    "historicalGalleryComparison": {
+      "fallingMassWidthChangeAt080sMetres": 4.850327968597412e-06,
+      "minimumFrozenSilhouetteIoUByForm": {
+        "FallingMass": 0.97898,
+        "FreeJet": 1.0,
+        "OpposedJets": 1.0,
+        "PlanarRipples": 1.0,
+        "RockImpact": 1.0,
+        "Vortex": 1.0,
+        "Waterfall": 1.0
+      },
+      "source": "The earlier side-view gallery remains the independent historical silhouette reference. The shipped gallery film uses the current installed replay."
+    },
+    "matchedNormalFramesPerCaseFamily": {
+      "applications": 384,
+      "channels": 1024,
+      "gallery": 588,
+      "inlets": 342
+    },
+    "matchedNormalFramesTotal": 2338,
+    "nativeCasesPerReceiver": {
+      "A": 16,
+      "B": 16
+    },
+    "testedPackageRevision": "bcfb8d2b54f94c0c9e57ca651ca2f0e04677d879"
+  },
   "graphics": {
     "api": "Metal",
     "device": "Apple M3 Max",
@@ -95,6 +163,10 @@
   "inlets": {
     "LedgeDrip": {
       "airborneSpanMetres": 0.09600061178207397,
+      "ballisticControl": {
+        "comparedFlights": 20,
+        "maxVerticalErrorMetres": 7.999260640545458e-07
+      },
       "distinctBirths": 4,
       "firstMeasuredImpactSeconds": 1.0,
       "matchedFrames": 114,
@@ -103,6 +175,10 @@
     },
     "RainOnPool": {
       "airborneSpanMetres": 4.431546926498413,
+      "ballisticControl": {
+        "comparedFlights": 340,
+        "maxVerticalErrorMetres": 2.007704411610689e-06
+      },
       "distinctBirths": 70,
       "firstMeasuredImpactSeconds": 0.8,
       "matchedFrames": 114,
@@ -112,6 +188,10 @@
     "SpringFountain": {
       "airborneSpanMetres": 1.7392991185188293,
       "apexMetres": 2.144334316253662,
+      "ballisticControl": {
+        "comparedFlights": 819,
+        "maxVerticalErrorMetres": 4.131234804471973e-06
+      },
       "firstMeasuredImpactSeconds": 1.6,
       "matchedFrames": 114,
       "matchedNormalStates": 33,

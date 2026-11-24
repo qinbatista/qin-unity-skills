@@ -1,8 +1,25 @@
 """Check falling drops and a fountain from the generated recipes' parcel and surface histories."""
+import re
 from statistics import median
 from fluid_replay_checks import live, match_receivers, read_state, require
 
 INLETS = {"RainOnPool": "rain", "LedgeDrip": "drip", "SpringFountain": "fountain"}
+
+
+def ballistic_error(samples, gravity):
+    """Compare a tenth of a second of free flight with the fixed-step gravity and linear drag law."""
+    errors = []
+    for (before, _), (after, _) in zip(samples, samples[1:]):
+        for start, end in zip(before, after):
+            if start[3] < 0 or start[3] != end[3] or min(start[1], end[1]) < .19:
+                continue
+            height, speed = start[1], start[5]
+            for _ in range(9):
+                speed = (speed - gravity / 90) * (1 - .13 / 90)
+                height += speed / 90
+            errors.append(abs(height - end[1]))
+    require(len(errors) >= 10 and max(errors) < .003, "Airborne water diverged from its gravity and drag law")
+    return {"comparedFlights": len(errors), "maxVerticalErrorMetres": max(errors)}
 
 
 def review_inlets(work):
@@ -35,5 +52,8 @@ def review_inlets(work):
             if name == "RainOnPool": require(xspan > 3 and len(births) > 35, "Rain needs distributed arrivals")
             if name == "LedgeDrip": require(xspan < .32 and len(births) == 4, "The ledge must release four distinct drops")
             data["distinctBirths"] = len(births)
+        recipe = work / "A/project/Assets/GameWater" / name / (name + ".asset")
+        gravity = float(re.search(r"(?m)^  _gravity: (.+)$", recipe.read_text(encoding="utf-8"))[1])
+        data["ballisticControl"] = ballistic_error(rows, gravity)
         results[name] = data
     return results
