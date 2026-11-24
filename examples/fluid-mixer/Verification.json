@@ -1,0 +1,339 @@
+{
+  "scope": "Independent reproduction using the published global Effects Skill",
+  "executedRelease": "d964a39f6b5068516b01819c01d8180fb64aa98f",
+  "editor": "6000.6.7f1",
+  "graphics": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal"
+  ],
+  "packages": {
+    "com.unity.modules.audio": "1.0.0",
+    "com.unity.modules.imageconversion": "1.0.0",
+    "com.unity.modules.particlesystem": "1.0.0",
+    "com.unity.modules.physics2d": "1.0.0",
+    "com.unity.modules.video": "1.0.0",
+    "com.unity.render-pipelines.universal": "17.6.0",
+    "com.unity.shadergraph": "17.6.0",
+    "com.unity.test-framework": "1.8.0",
+    "com.unity.visualeffectgraph": "17.6.0"
+  },
+  "seed": 29411,
+  "receiverPaths": [
+    "Assets/QinFluidMixer",
+    "Assets/Effects/Liquid"
+  ],
+  "conditions": {
+    "nativeFramesPerRecipe": 84,
+    "framesPerSecond": 30,
+    "size": [
+      960,
+      540
+    ],
+    "repeatRule": "Corresponding lossless frames, sampled GPU states and optical controls must agree byte for byte across independent receivers.",
+    "reference": "Compare the visible water against the earlier controlled-background recording, using its fixed crop for the complete shot. For each camera, subtract its dry plate and threshold the luma-weighted absolute RGB change at 10/255. Report pixel intersection over union and mean RGB difference on the combined wet area. H.264 compression is present in the earlier recording.",
+    "referenceFrames": [
+      12,
+      24,
+      38,
+      47,
+      57
+    ],
+    "frozenReference": "The bundled silhouettes store downsampled coverage in the full native camera frame. These scores use soft intersection over union."
+  },
+  "installedAssetFiles": 56,
+  "nativeResults": {
+    "A": {
+      "passed": 7,
+      "failed": 0
+    },
+    "B": {
+      "passed": 7,
+      "failed": 0
+    }
+  },
+  "cases": {
+    "FallingMass": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "floorFractionAt080s": 0.9895833333333334,
+        "widthAt040s": 0.5210298657417297,
+        "widthAt057s": 0.5259067632257939,
+        "widthAt080s": 0.9934301435947417
+      },
+      "frozenReferenceIoU": {
+        "12": 1.0,
+        "24": 1.0,
+        "38": 1.0,
+        "47": 1.0,
+        "57": 1.0
+      },
+      "earlierFilm": {
+        "12": {
+          "iou": 0.9969,
+          "wetRgbMae": 1.252
+        },
+        "24": {
+          "iou": 0.9927,
+          "wetRgbMae": 1.593
+        },
+        "38": {
+          "iou": 0.9865,
+          "wetRgbMae": 1.832
+        },
+        "47": {
+          "iou": 0.9847,
+          "wetRgbMae": 2.163
+        },
+        "57": {
+          "iou": 0.9865,
+          "wetRgbMae": 2.051
+        }
+      }
+    },
+    "FreeJet": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "heightSumAt157s": 29.811313628895157
+      },
+      "frozenReferenceIoU": {
+        "12": 1.0,
+        "24": 1.0,
+        "38": 1.0,
+        "47": 1.0,
+        "57": 1.0
+      },
+      "earlierFilm": {
+        "12": {
+          "iou": 0.9919,
+          "wetRgbMae": 2.572
+        },
+        "24": {
+          "iou": 0.9897,
+          "wetRgbMae": 2.431
+        },
+        "38": {
+          "iou": 0.9862,
+          "wetRgbMae": 2.308
+        },
+        "47": {
+          "iou": 0.9789,
+          "wetRgbMae": 2.03
+        },
+        "57": {
+          "iou": 0.9641,
+          "wetRgbMae": 1.441
+        }
+      }
+    },
+    "OpposedJets": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "meanPressureDisplacementAt127s": 0.6016732170946854
+      },
+      "frozenReferenceIoU": {
+        "12": 1.0,
+        "24": 1.0,
+        "38": 1.0,
+        "47": 1.0,
+        "57": 1.0
+      },
+      "earlierFilm": {
+        "12": {
+          "iou": 0.9924,
+          "wetRgbMae": 2.216
+        },
+        "24": {
+          "iou": 0.9888,
+          "wetRgbMae": 2.507
+        },
+        "38": {
+          "iou": 0.9853,
+          "wetRgbMae": 2.469
+        },
+        "47": {
+          "iou": 0.977,
+          "wetRgbMae": 2.431
+        },
+        "57": {
+          "iou": 0.9757,
+          "wetRgbMae": 1.945
+        }
+      }
+    },
+    "PlanarRipples": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "distantHeightAt020s": 3.432570259289479e-07,
+        "distantHeightAt080s": 57.31104454309609
+      },
+      "frozenReferenceIoU": {
+        "12": 1.0,
+        "24": 1.0,
+        "38": 1.0,
+        "47": 1.0,
+        "57": 1.0
+      },
+      "earlierFilm": {
+        "12": {
+          "iou": 0.9878,
+          "wetRgbMae": 1.813
+        },
+        "24": {
+          "iou": 0.9921,
+          "wetRgbMae": 1.47
+        },
+        "38": {
+          "iou": 0.9703,
+          "wetRgbMae": 0.984
+        },
+        "47": {
+          "iou": 0.9538,
+          "wetRgbMae": 0.882
+        },
+        "57": {
+          "iou": 0.9395,
+          "wetRgbMae": 0.734
+        }
+      }
+    },
+    "RockImpact": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "freeControlInsideAt080s": 81,
+        "minimumCenterDistanceAt080s": 0.47799991689543764
+      },
+      "frozenReferenceIoU": {
+        "12": 1.0,
+        "24": 1.0,
+        "38": 1.0,
+        "47": 1.0,
+        "57": 1.0
+      },
+      "earlierFilm": {
+        "12": {
+          "iou": 0.9913,
+          "wetRgbMae": 2.55
+        },
+        "24": {
+          "iou": 0.978,
+          "wetRgbMae": 2.469
+        },
+        "38": {
+          "iou": 0.9731,
+          "wetRgbMae": 2.448
+        },
+        "47": {
+          "iou": 0.9553,
+          "wetRgbMae": 2.329
+        },
+        "57": {
+          "iou": 0.9606,
+          "wetRgbMae": 2.052
+        }
+      }
+    },
+    "Vortex": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "drainedAt157s": 11,
+        "medianAngularMomentumAt080s": 2.6698713685982387,
+        "medianRadiusAt040s": 1.0647428793950893,
+        "medianRadiusAt157s": 0.40886149187868615,
+        "torqueOffAngularMomentumAt080s": -0.034603067065728244
+      },
+      "frozenReferenceIoU": {
+        "12": 1.0,
+        "24": 1.0,
+        "38": 1.0,
+        "47": 1.0,
+        "57": 1.0
+      },
+      "earlierFilm": {
+        "12": {
+          "iou": 0.9923,
+          "wetRgbMae": 2.452
+        },
+        "24": {
+          "iou": 0.9942,
+          "wetRgbMae": 2.195
+        },
+        "38": {
+          "iou": 0.9961,
+          "wetRgbMae": 2.308
+        },
+        "47": {
+          "iou": 0.9929,
+          "wetRgbMae": 2.546
+        },
+        "57": {
+          "iou": 0.9843,
+          "wetRgbMae": 2.459
+        }
+      }
+    },
+    "Waterfall": {
+      "equalFrames": 84,
+      "equalStateSamples": 27,
+      "physics": {
+        "gravityHeightDifferenceAt080s": 0.4845275282859802,
+        "sheetWidthAt080s": 1.3691737055778503
+      },
+      "frozenReferenceIoU": {
+        "12": 1.0,
+        "24": 1.0,
+        "38": 1.0,
+        "47": 1.0,
+        "57": 1.0
+      },
+      "earlierFilm": {
+        "12": {
+          "iou": 0.9923,
+          "wetRgbMae": 1.638
+        },
+        "24": {
+          "iou": 0.9873,
+          "wetRgbMae": 1.954
+        },
+        "38": {
+          "iou": 0.985,
+          "wetRgbMae": 2.286
+        },
+        "47": {
+          "iou": 0.9785,
+          "wetRgbMae": 2.464
+        },
+        "57": {
+          "iou": 0.9706,
+          "wetRgbMae": 2.09
+        }
+      }
+    }
+  },
+  "media": {
+    "gif": {
+      "matchesDistributedBytes": true,
+      "sha256": "65687a2d104a1fd60696eeb0931760c0b6e57d926ee56ac7220bde190a2feeb9",
+      "seconds": 11.2,
+      "codec_name": "gif",
+      "width": 832,
+      "height": 468,
+      "nb_read_frames": "162"
+    },
+    "mp4": {
+      "matchesDistributedBytes": true,
+      "sha256": "8ac0ca498042f9e39d19b4bafdf311807be62adb1b9aad867f9f17c4e29c0483",
+      "seconds": 11.2,
+      "codec_name": "h264",
+      "width": 832,
+      "height": 468,
+      "nb_read_frames": "336"
+    }
+  }
+}
