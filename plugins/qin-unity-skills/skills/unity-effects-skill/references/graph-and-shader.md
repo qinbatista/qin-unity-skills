@@ -81,6 +81,14 @@ Use VFX Graph Update or a compute shader for the simulation. Connect both the vi
 
 Check the full gesture in the two native replays. Record a state sample appropriate to the model, such as a particle position, velocity, occupied height or contact time. Freeze state while keeping the render path live. Disable one causal term and compare its expected change in the measured state and the corresponding crop. Change the seed at the same trigger to test variation. Report the simulation domain and tested graphics backend when delivering the GIF and original-to-native comparison.
 
+#### Compose fluid from a source, moving body and responses
+
+Classify each local example by its inlet, state and dimensionality, applied force, boundary, and visible outputs. Count a parent effect and its material or timing variants once. Open the editable source for each transferred mechanism. List locally available bytes separately from catalog identifiers and downloadable archives.
+
+Keep the water recipe editable independently of its renderer. Carry an impact position and momentum into a receiving height field. Reconstruct falling or colliding volumes from the same moving state that feeds spray. Expose only the boundaries the solver handles. Distinguish the dimension of that state from its projection in the camera.
+
+In the timed GIF mark the last free-flight frame, first contact and the following response. Record the same inlet with and without the boundary. For a swirl, remove torque while retaining gravity and the same inlet. For a ripple, withhold the impulse and measure travel away from the source. Check that a falling mass stays together until contact, that the reference reads at gameplay size, and that the shader has no visible rectangular cutoff. Use a second native replay, a new seed, and a pooled interruption. Profile a single instance and the expected overlap on the actual backend. Keep project-specific materials, thresholds, videos and budgets with the receiving game.
+
 ## Compare two independent replays
 
 Inspect the serialized initial-event name before choosing a reset sequence. Reinitializing a Graph can submit its initial event, so a subsequent explicit Play can produce a second burst. Measure the first birth and the last live particle across disable, stop and reuse. A delayed echo is another distinct clock. Take its offset from the actual primary release, keeping any projectile travel time and contact event separate.
