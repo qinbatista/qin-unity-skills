@@ -1,0 +1,176 @@
+{
+  "shader": "SpriteLitTint.shadergraph",
+  "source_template_sha256": "6587e4dd2c9e88a279037a0f44f88a44eb3eac0fc0766154ebafecf10e7f6959",
+  "generator_sha256": "2c0eba92ed6f20f3a995f3f815df2e4f7a9f5524399b8df47c1474fa6c3daf9c",
+  "fixture_sha256": "4a81a21f57d5a2ed0a6d915d5a182799e6e94bf9254910ddc1a8f0b0fd120f41",
+  "validator_sha256": "e2d39892fe22df552f98d7b28c52fc757e09e003d42132ae6e768b16a56316c2",
+  "checked_in_graph_sha256": "13832881719071f88c65e34f1b5014a175085bb019093f792d511a82079ccc62",
+  "runner_sha256": "6721e394ba166ee49efed61925d4678372d9c51c296530758f4fedd5d627fb9b",
+  "metadata_policy": "The generator writes only Shader Graph bytes. Unity allocates each receiver's GUID.",
+  "frame_hash": "SHA-256 of every linear RGBAFloat pixel in native byte order, rows starting at the bottom",
+  "bytes_per_frame": 65536,
+  "native": {
+    "unity": "6000.6.7f1",
+    "urp": "17.6.0",
+    "shaderGraph": "17.6.0",
+    "graphics": "Metal",
+    "device": "Apple M3 Max",
+    "colorSpace": "Linear",
+    "pipeline": "ReceiverPipeline",
+    "readback": "RGBAFloat",
+    "target": "ARGBHalf",
+    "width": 64,
+    "height": 64,
+    "samples": 1,
+    "shaderErrors": 0,
+    "hdr": true,
+    "littleEndian": true
+  },
+  "layout": {
+    "target": "URP Sprite Lit",
+    "workingNodes": 5,
+    "textureSamples": 1,
+    "edges": 6,
+    "group": "Tint the sprite",
+    "note": "Keep the painted silhouette"
+  },
+  "metrics": {
+    "dim": {
+      "red": 0.25,
+      "green": 0.25,
+      "blue": 0.25,
+      "alpha": 1.0,
+      "clearRed": 0.0,
+      "clearAlpha": 0.0
+    },
+    "lit": {
+      "red": 1.0,
+      "green": 1.0,
+      "blue": 1.0,
+      "alpha": 1.0,
+      "clearRed": 0.0,
+      "clearAlpha": 0.0
+    },
+    "hdrTint": {
+      "red": 4.0,
+      "green": 1.0,
+      "blue": 1.0,
+      "alpha": 1.0,
+      "clearRed": 0.0,
+      "clearAlpha": 0.0
+    },
+    "rendererHalfAlpha": {
+      "red": 2.0078125,
+      "green": 0.501953125,
+      "blue": 0.501953125,
+      "alpha": 0.501953125,
+      "clearRed": 0.0,
+      "clearAlpha": 0.0
+    },
+    "materialAlpha": {
+      "red": 0.2998046875,
+      "green": 0.2998046875,
+      "blue": 0.2998046875,
+      "alpha": 0.2998046875,
+      "clearRed": 0.0,
+      "clearAlpha": 0.0
+    },
+    "coloredSprite": {
+      "red": 0.2509765625,
+      "green": 0.501953125,
+      "blue": 0.74853515625,
+      "alpha": 1.0,
+      "clearRed": 0.0,
+      "clearAlpha": 0.0
+    },
+    "rendererRgb": {
+      "red": 0.2509765625,
+      "green": 0.10821533203125,
+      "blue": 0.038177490234375,
+      "alpha": 1.0,
+      "clearRed": 0.0,
+      "clearAlpha": 0.0
+    },
+    "backgroundOnly": {
+      "red": 0.1004638671875,
+      "green": 0.318603515625,
+      "blue": 0.78759765625,
+      "alpha": 1.0,
+      "clearRed": 0.1004638671875,
+      "clearAlpha": 1.0
+    },
+    "transparentOnColor": {
+      "red": 0.2509765625,
+      "green": 0.10821533203125,
+      "blue": 0.038177490234375,
+      "alpha": 1.0,
+      "clearRed": 0.1004638671875,
+      "clearAlpha": 1.0
+    }
+  },
+  "runs": [
+    {
+      "run": "4a4e61a4-04d0-4cd3-b397-3bd348f3e70f",
+      "graph_sha256": "13832881719071f88c65e34f1b5014a175085bb019093f792d511a82079ccc62",
+      "unity_guid": "aa5580f448b11428892df454d0699ab1",
+      "full_frame_sha256": {
+        "dim": "5d471a4fe79df473c8a9b1e51c38c159cdc2b1b28223c1634218b6b939a95edc",
+        "lit": "cd998090c51166c45022f53ea3efdacb77abbb76fdcf1a9bc6885255a26d34a3",
+        "hdrTint": "45fba553d974503535b4f17f890c1abffb4ca19c3c0fa8018647dd72bf360a9b",
+        "rendererHalfAlpha": "9d076d78763e518cf251a8e123c9e455eb8d2084a627c964f87dedb2c7c3d4f7",
+        "materialAlpha": "b4b2bb01702e931309dcb286980c975dbd796c3b15df1d1f78b6cedd6581882f",
+        "coloredSprite": "03d687ac5cc389a6e803a6e3939c2c2c3954e608af0a67068bd5888cc5961c8a",
+        "rendererRgb": "9ac77d04d326ef6f64d3852667c211b834a52aaa2d26ce1bbaca0a78ab632a10",
+        "backgroundOnly": "24ef4b295c4b020313555f79b8ae8acca143f45da564c5dcdb7b40538eeb6560",
+        "transparentOnColor": "bf0bfba1292572941ed26e743f86c96ae2135d7e1dbf827549346afeb5954e23"
+      }
+    },
+    {
+      "run": "9f055efc-01b3-4058-b59d-a8f0f1e0a880",
+      "graph_sha256": "13832881719071f88c65e34f1b5014a175085bb019093f792d511a82079ccc62",
+      "unity_guid": "c686b55e3be3a46099591610b79749a8",
+      "full_frame_sha256": {
+        "dim": "5d471a4fe79df473c8a9b1e51c38c159cdc2b1b28223c1634218b6b939a95edc",
+        "lit": "cd998090c51166c45022f53ea3efdacb77abbb76fdcf1a9bc6885255a26d34a3",
+        "hdrTint": "45fba553d974503535b4f17f890c1abffb4ca19c3c0fa8018647dd72bf360a9b",
+        "rendererHalfAlpha": "9d076d78763e518cf251a8e123c9e455eb8d2084a627c964f87dedb2c7c3d4f7",
+        "materialAlpha": "b4b2bb01702e931309dcb286980c975dbd796c3b15df1d1f78b6cedd6581882f",
+        "coloredSprite": "03d687ac5cc389a6e803a6e3939c2c2c3954e608af0a67068bd5888cc5961c8a",
+        "rendererRgb": "9ac77d04d326ef6f64d3852667c211b834a52aaa2d26ce1bbaca0a78ab632a10",
+        "backgroundOnly": "24ef4b295c4b020313555f79b8ae8acca143f45da564c5dcdb7b40538eeb6560",
+        "transparentOnColor": "bf0bfba1292572941ed26e743f86c96ae2135d7e1dbf827549346afeb5954e23"
+      }
+    },
+    {
+      "run": "2cb41de8-6bb6-4cb1-beac-de32ffb7b931",
+      "graph_sha256": "13832881719071f88c65e34f1b5014a175085bb019093f792d511a82079ccc62",
+      "unity_guid": "dbf82feef4e034fc7b7ce4dc79f52a05",
+      "full_frame_sha256": {
+        "dim": "5d471a4fe79df473c8a9b1e51c38c159cdc2b1b28223c1634218b6b939a95edc",
+        "lit": "cd998090c51166c45022f53ea3efdacb77abbb76fdcf1a9bc6885255a26d34a3",
+        "hdrTint": "45fba553d974503535b4f17f890c1abffb4ca19c3c0fa8018647dd72bf360a9b",
+        "rendererHalfAlpha": "9d076d78763e518cf251a8e123c9e455eb8d2084a627c964f87dedb2c7c3d4f7",
+        "materialAlpha": "b4b2bb01702e931309dcb286980c975dbd796c3b15df1d1f78b6cedd6581882f",
+        "coloredSprite": "03d687ac5cc389a6e803a6e3939c2c2c3954e608af0a67068bd5888cc5961c8a",
+        "rendererRgb": "9ac77d04d326ef6f64d3852667c211b834a52aaa2d26ce1bbaca0a78ab632a10",
+        "backgroundOnly": "24ef4b295c4b020313555f79b8ae8acca143f45da564c5dcdb7b40538eeb6560",
+        "transparentOnColor": "bf0bfba1292572941ed26e743f86c96ae2135d7e1dbf827549346afeb5954e23"
+      }
+    }
+  ],
+  "reference": {
+    "commit": "8cd932a0391f37f59cf3e037c7baad6256dbef83",
+    "graph_sha256": "92bffa89afbc445c6b3d703db8b87133dcb0c1a58b93c9be32ae32daa7ba4c5f",
+    "full_frame_sha256": {
+      "dim": "5d471a4fe79df473c8a9b1e51c38c159cdc2b1b28223c1634218b6b939a95edc",
+      "lit": "cd998090c51166c45022f53ea3efdacb77abbb76fdcf1a9bc6885255a26d34a3",
+      "hdrTint": "45fba553d974503535b4f17f890c1abffb4ca19c3c0fa8018647dd72bf360a9b",
+      "rendererHalfAlpha": "9d076d78763e518cf251a8e123c9e455eb8d2084a627c964f87dedb2c7c3d4f7",
+      "materialAlpha": "b4b2bb01702e931309dcb286980c975dbd796c3b15df1d1f78b6cedd6581882f",
+      "coloredSprite": "03d687ac5cc389a6e803a6e3939c2c2c3954e608af0a67068bd5888cc5961c8a",
+      "rendererRgb": "9ac77d04d326ef6f64d3852667c211b834a52aaa2d26ce1bbaca0a78ab632a10",
+      "backgroundOnly": "24ef4b295c4b020313555f79b8ae8acca143f45da564c5dcdb7b40538eeb6560",
+      "transparentOnColor": "bf0bfba1292572941ed26e743f86c96ae2135d7e1dbf827549346afeb5954e23"
+    }
+  }
+}

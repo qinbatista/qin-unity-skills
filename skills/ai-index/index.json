@@ -123,7 +123,7 @@
       "id": "unity-effects",
       "summary": "Single-graph particle authoring and three-receiver comparison, Unity shaders, 34 water composer profiles, 37 native subjects, parameter limits and an offline comparison gallery, gameplay camera adapters, animated materials and native replay",
       "document": "skills/ai-index/modules/unity-effects.md",
-      "sources": ["unity-effects-skill", "examples/fluid-mixer", "examples/flow-sky-2d", "examples/particle-graphs"],
+      "sources": ["unity-effects-skill", "examples/fluid-mixer", "examples/flow-sky-2d", "examples/particle-graphs", "examples/sprite-lit-tint"],
       "dependencies": [{"module": "unity-code", "reason": "The fluid replay uses the installed Unity CLI launcher for both blank receivers."}],
       "code_targets": [
         {
@@ -139,6 +139,13 @@
           "symbol": "compare",
           "anchor": "def compare(roots):",
           "summary": "Verify the gesture, live input response, population, independent identities and shader bindings across all five recreated graphs."
+        },
+        {
+          "id": "generate-sprite-lit-tint",
+          "file": "unity-effects-skill/scripts/create_sprite_lit_tint.py",
+          "symbol": "build_graph",
+          "anchor": "def build_graph(package):",
+          "summary": "Author the minimal HDR tint shader with stable local IDs from the receiver’s native URP Sprite Lit template."
         },
         {
           "id": "advance-flow-sky-subject",
