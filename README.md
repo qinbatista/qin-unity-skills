@@ -8,6 +8,8 @@ For 2D water flow and water spells, [choose a water simulation](unity-effects-sk
 
 For phase-animated material studies, the [2D water, sky and spell catalog](unity-effects-skill/references/flow-sky-2d.md) pairs 24 editable surfaces with an XY prefab, an optional URP Shader Graph and a per-subject graphics replay. Watch the [chaptered film](unity-effects-skill/assets/flow-sky-2d.mp4) or use the [numbered frame index](examples/flow-sky-2d/Subjects.jpg) and [native results](examples/flow-sky-2d/Replay.json).
 
+For particle effects, [design one VFX Graph](unity-effects-skill/references/graph-and-shader.md#design-one-vfx-graph) from its particle budget, forces, contacts and output. [Import five editable examples or watch their three independent creations](examples/particle-graphs/README.md). The rain graph includes falling drops and contact-triggered spray in one component.
+
 ## Install the global Skill pack
 
 Paste this into an AI assistant with a local terminal.

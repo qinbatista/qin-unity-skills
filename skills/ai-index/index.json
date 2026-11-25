@@ -121,11 +121,25 @@
     },
     {
       "id": "unity-effects",
-      "summary": "Unity VFX and shaders, 34 water composer profiles, 37 native subjects, parameter limits and an offline comparison gallery, gameplay camera adapters, animated materials and native replay",
+      "summary": "Single-graph particle authoring and three-receiver comparison, Unity shaders, 34 water composer profiles, 37 native subjects, parameter limits and an offline comparison gallery, gameplay camera adapters, animated materials and native replay",
       "document": "skills/ai-index/modules/unity-effects.md",
-      "sources": ["unity-effects-skill", "examples/fluid-mixer", "examples/flow-sky-2d"],
+      "sources": ["unity-effects-skill", "examples/fluid-mixer", "examples/flow-sky-2d", "examples/particle-graphs"],
       "dependencies": [{"module": "unity-code", "reason": "The fluid replay uses the installed Unity CLI launcher for both blank receivers."}],
       "code_targets": [
+        {
+          "id": "author-particle-graph",
+          "file": "unity-effects-skill/scripts/particle-graph-trials/QinParticleGraphAuthor.cs",
+          "symbol": "QinParticleGraphAuthor.Create",
+          "anchor": "public static void Create(string subject, int trial = 2)",
+          "summary": "Create the selected editable graph, its grouped systems and particle mask in a configured Unity receiver."
+        },
+        {
+          "id": "compare-particle-graphs",
+          "file": "unity-effects-skill/scripts/particle_graph_checks.py",
+          "symbol": "compare",
+          "anchor": "def compare(roots):",
+          "summary": "Verify the gesture, live input response, population, independent identities and shader bindings across all five recreated graphs."
+        },
         {
           "id": "advance-flow-sky-subject",
           "file": "unity-effects-skill/assets/FlowSky2D/FlowSky2DPlayer.cs",

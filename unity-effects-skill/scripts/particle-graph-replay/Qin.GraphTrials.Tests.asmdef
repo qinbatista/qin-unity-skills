@@ -1,0 +1,10 @@
+{
+    "name": "Qin.GraphTrials.Tests",
+    "includePlatforms": ["Editor"],
+    "references": [
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.VisualEffectGraph.Runtime"
+    ],
+    "optionalUnityReferences": ["TestAssemblies"]
+}
