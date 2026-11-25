@@ -156,14 +156,16 @@ namespace Qin.UnityEffects.Fluids
             _obstacleAnchor = anchor;
         }
 
-        public void BeginCast(uint seed)
+        public void BeginCast(uint seed) => BeginChargedCast(seed, 1f);
+
+        public void BeginChargedCast(uint seed, float charge)
         {
             Recycle();
-            if (!_recipe || !_program || !_surface || !_volume || !_spray || !FluidMixSimulation.Supported())
+            if (!_recipe || !_program || !_surface || !_volume || !_spray || !float.IsFinite(charge) || !FluidMixSimulation.Supported())
                 return;
             _block ??= new MaterialPropertyBlock();
             _simulation ??= new FluidMixSimulation(_program);
-            _simulation.Reset(_recipe, seed);
+            _simulation.Reset(_recipe, seed, _recipe.Strength * Mathf.Clamp01(charge));
             _seconds = 0f;
             _stoppedAt = -1f;
             _lastSampleFrame = Time.frameCount;

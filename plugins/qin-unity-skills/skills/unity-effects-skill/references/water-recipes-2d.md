@@ -1,5 +1,7 @@
 # Build and replay a 2D water recipe
 
+For dam releases, reservoir exchange, top-down wakes, interactive casts and input extremes, use the [extended water matrix](water-scenario-matrix.md).
+
 ## Install and author a named effect
 
 Work from the installed `unity-effects-skill` directory. Use the receiving project's registered Unity launcher and the [solver and renderer prerequisites](fluid-mixer.md#install-into-a-receiving-game). The commands below use `python3` on macOS and Linux. Use `py -3` on Windows.
@@ -25,7 +27,7 @@ Each Watch link opens the verified full-frame native take from the installed pac
 
 | Capture | Profile | Setup and physical control |
 | --- | --- | --- |
-| PlanarRipples | `ripple` | Apply two localized surface impulses. Follow the first crest out of the source region. Switch off surface waves at the same clock. [Watch](../assets/fluid-subjects/PlanarRipples.mp4). |
+| PlanarRipples | `ripple` | Apply two localized surface impulses. Follow the first crest out of the source region. Set the impulse strength to zero at the same clock. [Watch](../assets/fluid-subjects/PlanarRipples.mp4). |
 | FallingMass | `mass` | Release a compact parcel body above the floor. Measure its width before and after landing, then disable gravity. [Watch](../assets/fluid-subjects/FallingMass.mp4). |
 | FreeJet | `jet` | Aim the nozzle above the pool. Follow the ballistic arc and first landing. Disable surface waves and compare the pool response. [Watch](../assets/fluid-subjects/FreeJet.mp4). |
 | RockImpact | `impact` | Set the obstacle anchor on the pictured rock and match its radius. Disable the solid while keeping the incoming jet identical. Compare clearance and downstream deflection. [Watch](../assets/fluid-subjects/RockImpact.mp4). |

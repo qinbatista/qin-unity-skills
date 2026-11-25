@@ -4,6 +4,13 @@
 
 // A six-metre XY section. Conservative state is depth, discharge and two transported dyes.
 #define CELLS 128
+#define GATE_FACE 51
+#define DRY_BREAK 3
+#define WET_BORE 4
+#define FILL 5
+#define DRAWDOWN 6
+#define TIDE 7
+#define DRIVEN_TANK 8
 static const float dx = 6.0 / CELLS;
 static const float dt = 1.0 / 150.0;
 static const float g = 9.81;
@@ -11,15 +18,19 @@ Texture2D<float4> _Read;
 RWTexture2D<float4> _Write;
 RWTexture2D<float4> _Presentation;
 int _Boundary;
-float _PoolDepth, _BankRise, _Drive, _Phase, _Clock, _StartWeight, _Kick;
+float _PoolDepth, _BankRise, _Drive, _Phase, _Clock, _StartWeight, _Kick, _GateOpening;
 
 float Bed(int i)
 {
     float s = (clamp(i, 0, CELLS - 1) + .5) / CELLS;
-    if (_Boundary == 1) return -_PoolDepth + _BankRise * s * s;
-    if (_Boundary == 2) return -_PoolDepth;
-    float bar = (s - .58) / .13;
-    return -_PoolDepth - .11 * s + _BankRise * exp(-bar * bar);
+    float bed = -_PoolDepth;
+    if (_Boundary == 0)
+    {
+        float bar = (s - .58) / .13;
+        bed = -_PoolDepth - .11 * s + _BankRise * exp(-bar * bar);
+    }
+    else if (_Boundary == 1) bed = -_PoolDepth + _BankRise * s * s;
+    return bed;
 }
 
 float2 Dyes(float x)
@@ -31,6 +42,9 @@ float2 Dyes(float x)
 void Initialize(uint i : SV_DispatchThreadID)
 {
     float h = max(0., -Bed(i));
+    if (_Boundary == DRY_BREAK || _Boundary == WET_BORE)
+        h = i < GATE_FACE ? _PoolDepth + min(.85, _BankRise) : (_Boundary == WET_BORE ? _PoolDepth * .48 : 0.);
+    if (_Boundary == FILL) h *= .34;
     float x = (i + .5) * dx - 3.;
     _Write[uint2(i, 0)] = float4(h, 0., h * Dyes(x));
 }
@@ -45,7 +59,7 @@ float4 LoadCell(int i)
     int inner = clamp(i, 0, CELLS - 1);
     float4 state = _Read.Load(int3(inner, 0, 0));
     if (i == inner) return state;
-    if (_Boundary == 2 || (_Boundary == 1 && i > inner))
+    if ((_Boundary >= 2 && _Boundary != TIDE) || (_Boundary == 1 && i > inner))
         return float4(state.x, -state.y, state.zw);
     if (i > inner) return state;
     float start = _Drive * _StartWeight;
@@ -53,6 +67,7 @@ float4 LoadCell(int i)
     // Impose one incoming characteristic at an open inlet. The outgoing wave leaves freely.
     float referenceHeight = baseDepth;
     float incomingSpeed = start;
+    if (_Boundary == TIDE) incomingSpeed = 1.6 * start * sin(_Clock);
     if (_Boundary == 1)
     {
         referenceHeight += start * (.28 * sin(_Clock) + .050 * sin(2. * _Clock));
@@ -82,6 +97,15 @@ float4 Flux(float4 a, float4 b, float ba, float bb, out float2 bedPressure)
     return float4(mass, momentum, mass * saturate(dye));
 }
 
+// Closed faces reflect momentum. Each side of the internal gate carries its own
+// hydrostatic pressure while both sides use the same transmitted mass and dye flux.
+float4 WallFlux(float4 state, bool rightFace)
+{
+    float4 mirror = float4(state.x, -state.y, state.zw);
+    float2 correction;
+    return rightFace ? Flux(state, mirror, 0., 0., correction) : Flux(mirror, state, 0., 0., correction);
+}
+
 [numthreads(32, 1, 1)]
 void Integrate(uint index : SV_DispatchThreadID)
 {
@@ -93,6 +117,24 @@ void Integrate(uint index : SV_DispatchThreadID)
     float4 next = Flux(state, LoadCell(i + 1), bed, Bed(i + 1), nextCorrection);
     previous.y += previousCorrection.y;
     next.y += nextCorrection.x;
+    if (_Boundary == DRY_BREAK || _Boundary == WET_BORE)
+    {
+        if (i == GATE_FACE) previous = lerp(WallFlux(state, false), previous, _GateOpening);
+        if (i == GATE_FACE - 1) next = lerp(WallFlux(state, true), next, _GateOpening);
+    }
+    if (_Boundary == FILL && i == 0)
+    {
+        // A pressure-fed port closes as the local water column reaches the supply head.
+        float inflow = .36 * _Drive * _StartWeight * saturate((_PoolDepth + .34 - state.x) / .32);
+        previous += float4(inflow, inflow * .8, inflow * Dyes(-3. + _Clock));
+    }
+    if (_Boundary == DRAWDOWN && i == CELLS - 1)
+    {
+        // A submerged outlet weakens with head; its removable water is bounded by this cell.
+        float outflow = min(.37 * _Drive * _StartWeight * sqrt(max(0., state.x)), .65 * state.x * dx / dt);
+        float2 dye = state.zw / max(.001, state.x);
+        next += float4(outflow, outflow * Velocity(state), outflow * dye);
+    }
     state += (dt / dx) * (previous - next);
     state.x = max(0., state.x);
     state.y = (state.y + dt * _Kick * state.x) / (1. + dt * .12 * abs(Velocity(state)));

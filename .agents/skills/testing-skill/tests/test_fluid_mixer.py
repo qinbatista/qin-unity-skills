@@ -107,6 +107,47 @@ class FluidInstallTests(unittest.TestCase):
                     self.assertEqual(status, "composed")
                     self.assertTrue(prefab.is_file())
 
+    def test_extended_suites_author_all_documented_subjects(self):
+        from replay_fluids import selected_suites
+        suites = selected_suites("all")
+        self.assertEqual(set(suites), {"channel-matrix", "topdown", "spells", "limits"})
+        base = "Assets/Relocated/Water"
+        fluid_mixer.install(self.project, base)
+        names = set()
+        for suite in suites.values():
+            result = suite.author(self.project, base)
+            self.assertEqual(set(result), set(suite.CASES))
+            self.assertTrue(names.isdisjoint(result))
+            names.update(result)
+            for name in result:
+                folder = self.project / "Assets/GameWater" / name
+                self.assertTrue((folder / (name + ".prefab")).is_file())
+        self.assertEqual(len(names), 21)
+
+    def test_author_timing_gravity_and_dam_boundaries(self):
+        base = "Assets/Water"
+        fluid_mixer.install(self.project, base)
+        for profile, options in (("curtain", {"duration": .7}), ("dam-wet", {"bank": .86})):
+            with self.assertRaises(ValueError):
+                compose(self.project, base, "Assets/GameWater", "Rejected", profile, options)
+            self.assertFalse((self.project / "Assets/GameWater/Rejected").exists())
+        for name, profile, options in (("Weightless", "mass", {"gravity": 0}),
+                                       ("Curtain", "curtain", {"duration": 1.9}),
+                                       ("Dam", "dam-dry", {"bank": .85})):
+            prefab, _ = compose(self.project, base, "Assets/GameWater", name, profile, options)
+            self.assertTrue(prefab.is_file())
+
+    def test_upgrade_rejects_modified_or_unmanaged_content(self):
+        base, _ = fluid_mixer.install(self.project)
+        original = base / "FluidMixSimulation.cs"
+        original.write_text(original.read_text() + "\n// Receiver modification.\n")
+        local = base / "Local.asset"
+        local.write_text("game-owned")
+        with self.assertRaisesRegex(ValueError, "preserved"):
+            fluid_mixer.install(self.project, upgrade=True)
+        self.assertEqual(local.read_text(), "game-owned")
+        self.assertTrue(original.read_text().endswith("// Receiver modification.\n"))
+
     def test_conflict_in_embedded_package_and_path_escape(self):
         packages=self.project/"Packages/some.other.package"
         packages.mkdir(parents=True)

@@ -308,6 +308,16 @@ Particle Emit(uint id, float birth)
         position.z += .09 * disk.y;
         velocity.xy += float2(.10 * disk.x, .17 * disk.y);
     }
+    else if (_Feed == 9)
+    {
+        // Each admission crosses a round aperture in XY. Once discharged the solver
+        // advances its position under gravity, pressure, solid contact and the floor.
+        float2 radial = float2(cos(angle), sin(angle));
+        float speed = length(_Velocity.xy) * sqrt(_Strength);
+        position.xy += radial * (.18 + .042 * disk.x);
+        position.z += .065 * disk.y;
+        velocity = float3(radial * speed * (.88 + .19 * Uniform(id, 37u)), .13 * disk.y);
+    }
     Particle p;
     p.placement = float4(Contain(position), birth);
     p.motion = float4(velocity, 0.0);

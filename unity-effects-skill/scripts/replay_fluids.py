@@ -2,6 +2,7 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
+from importlib import import_module
 import json
 import os
 from pathlib import Path
@@ -32,6 +33,19 @@ PACKAGES = {
     "com.unity.test-framework": "1.8.0",
     **{"com.unity.modules." + name: "1.0.0" for name in ("imageconversion", "video", "audio", "particlesystem", "physics2d")}
 }
+
+
+SUITES = {
+    "channel-matrix": ("channel_matrix", "ChannelMatrix"),
+    "topdown": ("topdown_matrix", "TopdownMatrix"),
+    "spells": ("spell_matrix", "SpellMatrix"),
+    "limits": ("water_limits", "ParameterLimits"),
+}
+
+
+def selected_suites(case):
+    return {group: import_module(module) for group, (module, _) in SUITES.items()
+            if case == "all" or case == group}
 
 
 def digest(path):
@@ -84,6 +98,9 @@ def lane(label, work, editor, seed, case, launcher, temp_parent):
         if result != "composed":
             raise RuntimeError("Expected independent authoring in this receiver")
         authored[name] = {p.name: digest(p) for p in sorted(path.parent.iterdir()) if p.is_file()}
+    suites = selected_suites(case)
+    for suite in suites.values():
+        authored.update(suite.author(project, relative))
     if authored:
         (base / "authored.json").write_text(json.dumps(authored, sort_keys=True))
     shutil.copytree(HERE / "fluid-replay", project / "Assets/Editor/FluidReplay")
@@ -96,6 +113,7 @@ def lane(label, work, editor, seed, case, launcher, temp_parent):
                UPM_CACHE_ROOT=str(work / "upm"), DOTNET_PROCESSOR_COUNT="3")
     common = ["--editor-path",str(editor),"--timeout","1470","--non-interactive","--no-pager"]
     filters = {"reuse": "QinFluidReplay.ReuseRockImpact", "gallery": "QinFluidReplay.Replay", "all": "QinFluidReplay", "channels": "QinFluidReplay.FlowChannel", "inlets": "QinFluidReplay.CastWaterVariant"}
+    filters.update({group: "QinFluidReplay." + method for group, (_, method) in SUITES.items()})
     selected = filters[case] if case in filters else "QinFluidReplay." + APPLICATIONS[case][0]
     with tempfile.TemporaryDirectory(prefix="temp-f-", dir=temp_parent) as scratch:
         env.update(TMPDIR=scratch,TEMP=scratch,TMP=scratch)
@@ -110,6 +128,8 @@ def lane(label, work, editor, seed, case, launcher, temp_parent):
     tests = list(ET.parse(base/"tests.xml").iter("test-case"))
     expected_cases = {"gallery": len(FORMS), "all": len(FORMS) + len(APPLICATIONS) + len(CHANNELS) + len(INLETS) + 1,
                       "channels": len(CHANNELS), "inlets": len(INLETS)}
+    expected_cases.update({group: len(suite.CASES) for group, suite in suites.items()})
+    expected_cases["all"] += sum(len(suite.CASES) for suite in suites.values())
     if len(tests) != expected_cases.get(case, 1) or any(t.get("result") != "Passed" for t in tests):
         raise RuntimeError(f"A native case failed. See {base/'tests.xml'}")
     if case in ("all", "reuse") and sum(t.get("fullname") == "QinFluidReplay.ReuseRockImpact" for t in tests) != 1:
@@ -128,8 +148,8 @@ def main():
     parser.add_argument("--launcher", type=Path, default=CLI, help="Receiving project's registered Unity CLI Python launcher")
     parser.add_argument("--work",type=Path,required=True,help="New output directory inside the active task Cache")
     parser.add_argument("--seed",type=int,default=29411)
-    parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "channels", "inlets", "reuse", "all"), default="gallery",
-                        help="Select a visual replay, the water reuse comparison, or the complete suite")
+    parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "channels", "inlets", *SUITES, "reuse", "all"), default="gallery",
+                        help="Select a water family, the reuse comparison, or the full physical scenario matrix")
     parser.add_argument("--preview",action="store_true",help="Also write FluidMixer.gif; requires Pillow")
     parser.add_argument("--video", action="store_true", help="Also write the gallery and individual native case movies at 30 fps. Requires Pillow and ffmpeg")
     args=parser.parse_args()
@@ -158,7 +178,7 @@ def main():
         raise RuntimeError("The imported asset bytes differ from the release manifest or the second receiver.")
     captures = work / "A/captures"
     gallery = args.case in ("gallery", "all")
-    application_cases = {"gallery": (), "channels": (), "inlets": (), "reuse": (), "all": tuple(APPLICATIONS)}.get(args.case, (args.case,))
+    application_cases = tuple(key for key in APPLICATIONS if args.case in ("all", key))
     device_record = "FreeJet/device.txt" if gallery else "device.txt"
     device = (captures / device_record).read_text().splitlines()
     report = {"editor": EDITOR_VERSION, "packages": PACKAGES, "seed": args.seed, "files": first,
@@ -189,10 +209,11 @@ def main():
                     fluid_preview.export_valve_comparison(captures / name, valve_movie)
                     app["valveVideo"] = valve_movie.name
             report["applications"][case] = app
-    if args.case in ("all", "channels", "inlets"):
+    suites = selected_suites(args.case)
+    if suites or args.case in ("channels", "inlets"):
         authored = [(work / label / "authored.json").read_bytes() for label in ("A", "B")]
         if authored[0] != authored[1]:
-            raise RuntimeError("The two authored cove prefabs have different identities or parameters")
+            raise RuntimeError("Independently authored prefabs have different identities or parameters")
         report["authoredVariants"] = json.loads(authored[0])
     if args.case in ("all", "channels"):
         report["channels"] = review_channels(work)
@@ -206,8 +227,23 @@ def main():
         if media:
             from channel_preview import export_inlets
             export_inlets(captures, work, args.video)
+    if suites:
+        completed = {}
+        report["families"] = {}
+        for group, suite in suites.items():
+            cases = suite.verify(work)
+            if set(cases) != set(suite.CASES) or completed.keys() & cases.keys():
+                raise RuntimeError(f"Unexpected or repeated native subjects in {group}.")
+            report["families"][group] = list(suite.CASES)
+            completed.update(cases)
+        report["scenarios"] = completed
     if args.video:
         report["subjectVideos"] = fluid_preview.export_subject_videos(work, report)
+        from water_gallery import write_gallery
+        report["gallery"] = write_gallery(work, report).name
+        if args.case == "all":
+            from water_reel import write_reel
+            report["matrixReel"] = write_reel(work, report["families"]).name
     (work / "FluidVerification.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(f"Verified {args.case} in both receivers. Evidence: {work / 'FluidVerification.json'}")
 

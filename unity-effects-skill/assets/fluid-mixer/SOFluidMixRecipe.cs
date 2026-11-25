@@ -6,7 +6,7 @@ namespace Qin.UnityEffects.Fluids
     [CreateAssetMenu(menuName = "Qin/Fluids/Recipe")]
     public sealed class SOFluidMixRecipe : ScriptableObject
     {
-        public enum Inlet { SurfaceImpulse, FallingMass, Jet, OpposedJets, Waterfall, Vortex, Curtain, Needle, FallingDrops }
+        public enum Inlet { SurfaceImpulse, FallingMass, Jet, OpposedJets, Waterfall, Vortex, Curtain, Needle, FallingDrops, RadialBurst }
 
         [Flags]
         public enum Response { None = 0, SurfaceWaves = 1, SolidObstacle = 2, Spray = 4 }

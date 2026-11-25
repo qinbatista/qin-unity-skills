@@ -9,7 +9,11 @@ namespace Qin.UnityEffects.Fluids
     [DisallowMultipleComponent]
     public sealed class ChannelWater2D : MonoBehaviour
     {
-        public enum Boundary { OpenRiver, SlopingShore, ClosedBasin }
+        public enum Boundary
+        {
+            OpenRiver, SlopingShore, ClosedBasin, DryDamBreak, WetBedBore,
+            ReservoirFill, ReservoirDrawdown, TidalReversal, DrivenTank
+        }
 
         private const int Cells = 128;
         private const int Hertz = 150;
@@ -20,6 +24,7 @@ namespace Qin.UnityEffects.Fluids
         private static readonly int Clock = Shader.PropertyToID("_Clock");
         private static readonly int StartWeight = Shader.PropertyToID("_StartWeight");
         private static readonly int Kick = Shader.PropertyToID("_Kick");
+        private static readonly int GateOpening = Shader.PropertyToID("_GateOpening");
         private static readonly int Field = Shader.PropertyToID("_LiquidFilm");
         private static readonly int Side = Shader.PropertyToID("_NearSide");
         private static readonly int Weight = Shader.PropertyToID("_FilmWeight");
@@ -47,10 +52,12 @@ namespace Qin.UnityEffects.Fluids
         private long _tick;
         private double _elapsed, _ending;
         private float _currentDrive, _targetDrive, _strength, _cycle;
+        private float? _tankAcceleration;
         private bool _running, _externallyTimed;
 
         public bool IsRunning => _running;
         public Boundary Profile => _boundary;
+        public float GateAperture { get; private set; }
 
         private void OnEnable()
         {
@@ -105,6 +112,8 @@ namespace Qin.UnityEffects.Fluids
             _ending = -1;
             _targetDrive = 1f;
             _currentDrive = 0f;
+            _tankAcceleration = null;
+            GateAperture = 0f;
             _running = true;
             _externallyTimed = false;
             _foam.Reinit();
@@ -122,6 +131,15 @@ namespace Qin.UnityEffects.Fluids
         public void SetDriver(float weight)
         {
             _targetDrive = Mathf.Clamp01(weight);
+        }
+
+        /// <summary>Override the DrivenTank body force in local X (metres per second squared).
+        /// Pass null to restore the periodic test driver. BeginFlow resets the override.</summary>
+        public void SetTankAcceleration(float? metresPerSecondSquared)
+        {
+            if (metresPerSecondSquared.HasValue && !float.IsFinite(metresPerSecondSquared.Value)) return;
+            _tankAcceleration = metresPerSecondSquared.HasValue
+                ? Mathf.Clamp(metresPerSecondSquared.Value, -4f, 4f) : null;
         }
 
         public void EndFlow()
@@ -199,8 +217,18 @@ namespace Qin.UnityEffects.Fluids
             _commands.SetComputeFloatParam(_solver, Clock, phase);
             // A basin receives one finite horizontal impulse. Reflected waves continue under their own momentum.
             float pulse = seconds < .60 ? Mathf.Sin(Mathf.PI * (float)seconds / .60f) : 0f;
-            _commands.SetComputeFloatParam(_solver, Kick, _boundary == Boundary.ClosedBasin ?
-                4.8f * _strength * _currentDrive * pulse * pulse : 0f);
+            float acceleration = 0f;
+            if (_boundary == Boundary.ClosedBasin)
+                acceleration = 4.8f * _strength * _currentDrive * pulse * pulse;
+            else if (_boundary == Boundary.DrivenTank)
+                acceleration = _currentDrive * (_tankAcceleration ?? (1.6f * _strength * Mathf.Sin(phase)));
+            _commands.SetComputeFloatParam(_solver, Kick, acceleration);
+            if (_boundary == Boundary.DryDamBreak || _boundary == Boundary.WetBedBore)
+            {
+                float release = Mathf.SmoothStep(0f, 1f, ((float)seconds - .60f) / .26f);
+                GateAperture = Mathf.Clamp01(_strength * _currentDrive) * release;
+                _commands.SetComputeFloatParam(_solver, GateOpening, GateAperture);
+            }
             int next = 1 - _current;
             _commands.SetComputeTextureParam(_solver, _integrate, Read, _state[_current]);
             _commands.SetComputeTextureParam(_solver, _integrate, Write, _state[next]);

@@ -1,0 +1,1026 @@
+{
+  "authoring": {
+    "levels": [
+      "inherited",
+      "minimum",
+      "maximum"
+    ],
+    "profiles": {
+      "basin": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "boat-wake": {
+        "authored": 27,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 16
+      },
+      "charged-surge": {
+        "authored": 63,
+        "incompatibleSchedules": 18,
+        "invalidInputs": 21
+      },
+      "curtain": {
+        "authored": 45,
+        "incompatibleSchedules": 36,
+        "invalidInputs": 21
+      },
+      "dam-dry": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "dam-wet": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "drain": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "drain-vortex": {
+        "authored": 27,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 16
+      },
+      "drip": {
+        "authored": 486,
+        "incompatibleSchedules": 243,
+        "invalidInputs": 32
+      },
+      "falls": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "fill": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "forked-channel": {
+        "authored": 27,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 16
+      },
+      "fountain": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "impact": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "island-current": {
+        "authored": 27,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 16
+      },
+      "jet": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "mass": {
+        "authored": 63,
+        "incompatibleSchedules": 18,
+        "invalidInputs": 21
+      },
+      "moving-ward-jet": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "needle": {
+        "authored": 63,
+        "incompatibleSchedules": 18,
+        "invalidInputs": 21
+      },
+      "opposed": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "radial-break": {
+        "authored": 63,
+        "incompatibleSchedules": 18,
+        "invalidInputs": 21
+      },
+      "rain": {
+        "authored": 486,
+        "incompatibleSchedules": 243,
+        "invalidInputs": 32
+      },
+      "rain-pond": {
+        "authored": 27,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 16
+      },
+      "recast-relay": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "ripple": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "river": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "shield-intercept": {
+        "authored": 63,
+        "incompatibleSchedules": 18,
+        "invalidInputs": 21
+      },
+      "shore": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "stream-confluence": {
+        "authored": 27,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 16
+      },
+      "tide": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "tilt": {
+        "authored": 81,
+        "incompatibleSchedules": 0,
+        "invalidInputs": 21
+      },
+      "upwell-geyser": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "vortex": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      },
+      "waterfall": {
+        "authored": 54,
+        "incompatibleSchedules": 27,
+        "invalidInputs": 21
+      }
+    },
+    "totals": {
+      "authored": 2817,
+      "incompatibleSchedules": 909,
+      "invalidInputs": 706
+    }
+  },
+  "comparisonFrames": {
+    "BasinSlosh": {
+      "control": "Driver disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 60
+    },
+    "BoatWake": {
+      "control": "Drive disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 179
+    },
+    "ChargedSurge": {
+      "control": "Reduced cast charge",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 18
+    },
+    "CoveWash": {
+      "control": "Driver disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 60
+    },
+    "Curtain": {
+      "control": "Target missed",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 39
+    },
+    "DrainVortex": {
+      "control": "Drive disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 179
+    },
+    "DrivenTank": {
+      "control": "Acceleration disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 66
+    },
+    "DryDamBreak": {
+      "control": "Gate held shut",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 120
+    },
+    "FallingMass": {
+      "control": "Gravity disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 17
+    },
+    "ForkedChannel": {
+      "control": "Drive disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 179
+    },
+    "FreeJet": {
+      "control": "Surface transfer disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 66
+    },
+    "IslandCurrent": {
+      "control": "Drive disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 179
+    },
+    "LedgeDrip": {
+      "control": "Surface transfer disabled",
+      "measurement": "GPU height in metres",
+      "symmetricHeightScaleMetres": 0.0013845463981851935,
+      "tick": 96
+    },
+    "MovingWardJet": {
+      "control": "Collision moved out of reach",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 48
+    },
+    "OpposedJets": {
+      "control": "Pressure disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 33
+    },
+    "PlanarRipples": {
+      "control": "Surface impulse strength set to zero",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 38
+    },
+    "RadialBreak": {
+      "control": "Reduced initial energy",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 24
+    },
+    "RainOnPool": {
+      "control": "Surface transfer disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 45
+    },
+    "RainPond": {
+      "control": "Drive disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 105
+    },
+    "RecastRelay": {
+      "control": "Second cast omitted",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 54
+    },
+    "ReservoirDrawdown": {
+      "control": "Drain closed",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 150
+    },
+    "ReservoirFill": {
+      "control": "Supply closed",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 150
+    },
+    "RiverCurrent": {
+      "control": "Driver disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 60
+    },
+    "RockImpact": {
+      "control": "Solid obstacle disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 47
+    },
+    "ShieldIntercept": {
+      "control": "Shield collision displaced",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 48
+    },
+    "ShoreWash": {
+      "control": "Driver disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 60
+    },
+    "SingleLedgeDrop": {
+      "control": "Surface transfer disabled",
+      "measurement": "GPU height in metres",
+      "symmetricHeightScaleMetres": 0.0007699636043980718,
+      "tick": 72
+    },
+    "SpringFountain": {
+      "control": "Surface transfer disabled",
+      "measurement": "GPU height in metres",
+      "symmetricHeightScaleMetres": 0.006932534743100405,
+      "tick": 96
+    },
+    "StreamConfluence": {
+      "control": "Drive disconnected",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 179
+    },
+    "TidalReversal": {
+      "control": "Tidal driver off",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 138
+    },
+    "UpwellGeyser": {
+      "control": "Collision moved out of reach",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 36
+    },
+    "Vortex": {
+      "control": "Swirl disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 47
+    },
+    "Waterfall": {
+      "control": "Gravity disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 47
+    },
+    "Waterfall2D": {
+      "control": "Surface transfer disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 66
+    },
+    "WeightlessMass": {
+      "control": "Gravity restored",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 24
+    },
+    "WetBedBore": {
+      "control": "Gate held shut",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 102
+    },
+    "WideCloudburst": {
+      "control": "Surface transfer disabled",
+      "measurement": "game camera",
+      "symmetricHeightScaleMetres": null,
+      "tick": 45
+    }
+  },
+  "editor": "6000.6.7f1",
+  "families": {
+    "channel-matrix": [
+      "DryDamBreak",
+      "WetBedBore",
+      "ReservoirFill",
+      "ReservoirDrawdown",
+      "TidalReversal",
+      "DrivenTank"
+    ],
+    "limits": [
+      "WeightlessMass",
+      "SingleLedgeDrop",
+      "WideCloudburst"
+    ],
+    "spells": [
+      "UpwellGeyser",
+      "ChargedSurge",
+      "MovingWardJet",
+      "ShieldIntercept",
+      "RecastRelay",
+      "RadialBreak"
+    ],
+    "topdown": [
+      "BoatWake",
+      "IslandCurrent",
+      "StreamConfluence",
+      "ForkedChannel",
+      "DrainVortex",
+      "RainPond"
+    ]
+  },
+  "graphics": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal"
+  ],
+  "legacyComparison": {
+    "byteIdenticalSubjects": 12,
+    "changedWetMaskPixelsAcrossAllNormalFrames": 1,
+    "comparedChannelGpuSnapshots": 372,
+    "comparedChannelNormalFrames": 1024,
+    "installedBaselineRevision": "ba924741205fe3dc1e93e4401f8ea0cd4d37b799",
+    "legacyChannelSubjects": [
+      "RiverCurrent",
+      "ShoreWash",
+      "BasinSlosh",
+      "CoveWash"
+    ],
+    "maximumCameraDifferenceRGB8": 1,
+    "maximumElevationDifferenceMetres": 0,
+    "maximumVelocityDifferenceMetresPerSecond": 0,
+    "minimumWetMaskIoU": 0.9999851281212355
+  },
+  "nativeDiagnostics": {
+    "Metal": "The compiler reports a potentially uninitialized LoadCell in the side-channel shader. Each supported boundary returns all four components in source. Physical branch contracts passed on this backend."
+  },
+  "nativeResults": {
+    "BoatWake": {
+      "matchedControlFrames": 6,
+      "matchedFieldSamples": 13,
+      "matchedFrames": 180,
+      "matchedPostCutoffFrames": 1,
+      "meanOffTrackWakeHeightMetres": 0.026608746911846698,
+      "postCutoffAbsoluteHeightSum": 60.62626850214798
+    },
+    "ChargedSurge": {
+      "fullChargeEnergy": 1,
+      "largestDifferenceFrame": 18,
+      "largestSampledPixelDifference": 151679,
+      "matchedControlFrames": 17,
+      "matchedFrames": 96,
+      "matchedGPUReadbacks": 32,
+      "medianForwardLeadAt060sMetres": 1.2360865995287895,
+      "tapEnergy": 0.2
+    },
+    "DrainVortex": {
+      "matchedControlFrames": 6,
+      "matchedFieldSamples": 13,
+      "matchedFrames": 180,
+      "matchedPostCutoffFrames": 1,
+      "meanCoreDisplacementMetres": -0.40858105350943175,
+      "meanTangentialSpeedMetresPerSecond": 1.2347425448891545,
+      "postCutoffAbsoluteHeightSum": 227.35830169445444
+    },
+    "DrivenTank": {
+      "changedControlFrames": 27,
+      "closedAreaMaxDriftM2": 3.520399332046509e-07,
+      "controlPeakSpeedMps": 0.0,
+      "downstreamRegionPixels": 55800,
+      "matchedControlFrames": 29,
+      "matchedFrames": 166,
+      "matchedStatesPerMode": 51,
+      "peakDownstreamChangedPixels": 14680,
+      "postForcePeakSpeedMps": 2.736041784286499,
+      "wallHeightDifferenceRangeM": [
+        -0.8848311193287373,
+        0.9339000210165977
+      ]
+    },
+    "DryDamBreak": {
+      "changedControlFrames": 24,
+      "closedAreaMaxDriftM2": 2.1513551473617554e-07,
+      "controlPeakSpeedMps": 1.2917494984776567e-07,
+      "downstreamArrivalS": 1.3,
+      "downstreamRegionPixels": 55800,
+      "matchedControlFrames": 29,
+      "matchedFrames": 166,
+      "matchedStatesPerMode": 51,
+      "peakDownstreamChangedPixels": 23451,
+      "wetFrontAdvanceM": 3.609375
+    },
+    "ForkedChannel": {
+      "lowerUpperLateralCurrentMetresPerSecond": [
+        -0.441265449712151,
+        0.41992479311792474
+      ],
+      "matchedControlFrames": 6,
+      "matchedFieldSamples": 13,
+      "matchedFrames": 180,
+      "matchedPostCutoffFrames": 1,
+      "postCutoffAbsoluteHeightSum": 166.40859914250177,
+      "trunkCurrentMetresPerSecond": 1.4482271283391923
+    },
+    "IslandCurrent": {
+      "islandInteriorState": 0.0,
+      "lowerUpperCurrentMetresPerSecond": [
+        1.295917373895645,
+        1.4340825915336608
+      ],
+      "matchedControlFrames": 6,
+      "matchedFieldSamples": 13,
+      "matchedFrames": 180,
+      "matchedPostCutoffFrames": 1,
+      "postCutoffAbsoluteHeightSum": 528.6620138890697
+    },
+    "MovingWardJet": {
+      "largestDifferenceFrame": 48,
+      "largestSampledPixelDifference": 59848,
+      "matchedControlFrames": 17,
+      "matchedFrames": 96,
+      "matchedGPUReadbacks": 32,
+      "maximumIncidentDisplacementMetres": 1.0385872087185437,
+      "maximumVelocityChangeMetresPerSecond": 6.464145046931609,
+      "nearestNormalDistanceMetres": 0.39799996338214094,
+      "normalInteriorParcelSamples": 0,
+      "solidRadiusMetres": 0.37,
+      "targetTravelXMetres": 0.960610347,
+      "targetTravelYMetres": 0.6959489699999999,
+      "unobstructedInteriorParcelSamples": 155
+    },
+    "RadialBreak": {
+      "largestDifferenceFrame": 18,
+      "largestSampledPixelDifference": 232216,
+      "leftRightUpDownParcelCountsAt020s": [
+        144,
+        146,
+        142,
+        159
+      ],
+      "lowImpulse90PercentWidthAt060sMetres": 2.4623146057128906,
+      "matchedControlFrames": 17,
+      "matchedFrames": 96,
+      "matchedGPUReadbacks": 32,
+      "normal90PercentWidthAt060sMetres": 3.6808727979660034
+    },
+    "RainPond": {
+      "disturbedCells": 1325,
+      "isolatedImpulseDistantMeanHeight": [
+        4.982222568100736e-21,
+        0.00045553311177782895
+      ],
+      "isolatedImpulseNormalizedEnergy": [
+        0.028412451588387084,
+        0.0014845450597367118
+      ],
+      "matchedControlFrames": 6,
+      "matchedFieldSamples": 19,
+      "matchedFrames": 180,
+      "matchedPostCutoffFrames": 1,
+      "maximumWaveDisplacementMetres": 0.008684167638421059,
+      "postCutoffAbsoluteHeightSum": 1.4500041674734874,
+      "simultaneousImpacts": {
+        "isolatedPeakMetres": [
+          0.0958981141448021,
+          0.07915381342172623
+        ],
+        "maximumSuperpositionError": 0.0,
+        "meanRingHeightAfter040s": [
+          0.0017307942161472675,
+          0.0013811544727193941
+        ]
+      }
+    },
+    "RecastRelay": {
+      "firstWetBoundsX": [
+        175,
+        279
+      ],
+      "interruptFrame": 14,
+      "largestDifferenceFrame": 54,
+      "largestSampledPixelDifference": 68389,
+      "matchedControlFrames": 17,
+      "matchedFrames": 96,
+      "matchedGPUReadbacks": 32,
+      "matchedLocalStateAtAgeFrames": 6,
+      "mirroredWetBoundsX": [
+        681,
+        785
+      ],
+      "secondCastFrame": 30,
+      "secondWorldMedianVelocityX": -4.00328254699707
+    },
+    "ReservoirDrawdown": {
+      "areaChangeM2": -1.620263697579503,
+      "changedControlFrames": 27,
+      "controlPeakSpeedMps": 0.0,
+      "downstreamRegionPixels": 55800,
+      "estimatedPortIntegralM2": -1.6185833381633417,
+      "finalGaugeDepthM": 0.5007193343979972,
+      "matchedControlFrames": 29,
+      "matchedFrames": 166,
+      "matchedStatesPerMode": 51,
+      "peakDownstreamChangedPixels": 13399
+    },
+    "ReservoirFill": {
+      "areaChangeM2": 1.9407365745864809,
+      "changedControlFrames": 27,
+      "controlPeakSpeedMps": 0.0,
+      "downstreamRegionPixels": 55800,
+      "estimatedPortIntegralM2": 1.9392485668464792,
+      "finalGaugeDepthM": 0.6194101061139788,
+      "matchedControlFrames": 29,
+      "matchedFrames": 166,
+      "matchedStatesPerMode": 51,
+      "peakDownstreamChangedPixels": 18834
+    },
+    "ShieldIntercept": {
+      "largestDifferenceFrame": 24,
+      "largestSampledPixelDifference": 5798,
+      "matchedControlFrames": 17,
+      "matchedFrames": 96,
+      "matchedGPUReadbacks": 32,
+      "maximumIncidentDisplacementMetres": 1.0042046017120698,
+      "maximumVelocityChangeMetresPerSecond": 7.277181347875594,
+      "nearestNormalDistanceMetres": 0.5279999363543949,
+      "normalInteriorParcelSamples": 0,
+      "solidRadiusMetres": 0.5,
+      "targetTravelXMetres": 0.0,
+      "targetTravelYMetres": 0.0,
+      "unobstructedInteriorParcelSamples": 24
+    },
+    "SingleLedgeDrop": {
+      "airborneSpanMetres": 0.08743709325790405,
+      "distinctBirths": 1,
+      "matchedFrames": 114,
+      "matchedStateSamples": 33,
+      "peakHeightSum": 1.0612290984827717
+    },
+    "StreamConfluence": {
+      "lowerUpperLateralCurrentMetresPerSecond": [
+        0.43825866729021073,
+        -0.3736254448953428
+      ],
+      "matchedControlFrames": 6,
+      "matchedFieldSamples": 13,
+      "matchedFrames": 180,
+      "matchedPostCutoffFrames": 1,
+      "postCutoffAbsoluteHeightSum": 308.27378936284913,
+      "trunkCurrentMetresPerSecond": 1.4375884722149561
+    },
+    "TidalReversal": {
+      "changedControlFrames": 27,
+      "controlPeakSpeedMps": 1.5650040552372957e-07,
+      "downstreamRegionPixels": 55800,
+      "gaugeDischargeRangeM2ps": [
+        -0.3732248562097375,
+        0.8980302719573394
+      ],
+      "matchedControlFrames": 29,
+      "matchedFrames": 166,
+      "matchedStatesPerMode": 51,
+      "peakDownstreamChangedPixels": 16382
+    },
+    "UpwellGeyser": {
+      "earlyUpwardSpeedMetresPerSecond": 8.539767265319824,
+      "largestDifferenceFrame": 36,
+      "largestSampledPixelDifference": 55608,
+      "matchedControlFrames": 17,
+      "matchedFrames": 96,
+      "matchedGPUReadbacks": 32,
+      "maximumIncidentDisplacementMetres": 3.440267629667278,
+      "maximumVelocityChangeMetresPerSecond": 5.64598333953197,
+      "nearestNormalDistanceMetres": 0.3980000033470936,
+      "normalInteriorParcelSamples": 0,
+      "solidRadiusMetres": 0.37,
+      "targetTravelXMetres": 0.0,
+      "targetTravelYMetres": 0.0,
+      "unobstructedInteriorParcelSamples": 119
+    },
+    "WeightlessMass": {
+      "heightDifferenceMetresAt080s": 1.6641169730573893,
+      "matchedFrames": 114,
+      "matchedStateSamples": 33
+    },
+    "WetBedBore": {
+      "boreGaugeRiseM": 0.3338148295879364,
+      "changedControlFrames": 24,
+      "closedAreaMaxDriftM2": 2.7101486921310425e-07,
+      "controlPeakSpeedMps": 4.4151587275109705e-08,
+      "downstreamRegionPixels": 55800,
+      "initialGaugeDepthM": 0.2880000174045563,
+      "matchedControlFrames": 29,
+      "matchedFrames": 166,
+      "matchedStatesPerMode": 51,
+      "peakDownstreamChangedPixels": 25536
+    },
+    "WideCloudburst": {
+      "airborneSpanMetres": 5.2628796100616455,
+      "distinctBirths": 160,
+      "matchedFrames": 114,
+      "matchedStateSamples": 33,
+      "peakHeightSum": 87.1741944020614
+    }
+  },
+  "nativeSubjects": {
+    "BasinSlosh": {
+      "frames": 256,
+      "fullRateMovieSha256": "d955cb96c21df96a7eb29b423763645d7821b068c79328addb8ff9033e737c9a",
+      "height": 540,
+      "nativeTreeSha256": "2e6dd86d79b8940d39910c77a55d63a6771c422854e84cff328ff360b8dfdf54",
+      "width": 960
+    },
+    "BoatWake": {
+      "frames": 180,
+      "fullRateMovieSha256": "79a2547c75b42b914bd884bd84955c3328d7471dabc445d6a59e601daa955688",
+      "height": 540,
+      "nativeTreeSha256": "bb866d56297c6aea51d3b7a4d5c687d33d00b61b2738fe1b38a9f8a6f0819c75",
+      "width": 960
+    },
+    "ChargedSurge": {
+      "frames": 96,
+      "fullRateMovieSha256": "d03ca49ad9892641ca7f5c8ce4fbe6a59abdb115026ad3657907fb26068dba43",
+      "height": 540,
+      "nativeTreeSha256": "12f4b8579b9abe737ca9ce07b91d0b7dfe52765e8e6993ec36c6b31a91d0c01a",
+      "width": 960
+    },
+    "CoveWash": {
+      "frames": 256,
+      "fullRateMovieSha256": "2ccb478362cd0a194c3be24b0a5876bda487ea9746a22cc9c8a24b973b3cb785",
+      "height": 540,
+      "nativeTreeSha256": "84474972c99a672675db37d3ebffd6df12bb9b865ae3056cb131f72a6d62f966",
+      "width": 960
+    },
+    "Curtain": {
+      "frames": 92,
+      "fullRateMovieSha256": "f77e8a32a03066cf49d168cf1476a70ddfa4bfc268204c9e14ec47579acaab6e",
+      "height": 540,
+      "nativeTreeSha256": "f1f0330a1544ed8c8ab4f83ed40d46c8ca9726c86d17bff4c2d282d81bac331e",
+      "width": 960
+    },
+    "DrainVortex": {
+      "frames": 180,
+      "fullRateMovieSha256": "88c45ac0d2376c923f3a174c2cf7f6040c6b64a3932c7b74519be9ab9cde9756",
+      "height": 540,
+      "nativeTreeSha256": "80819aa50ed8367d1cde25e6b6a5c3bc25496c070a3b697e48a30598a8a1ffa7",
+      "width": 960
+    },
+    "DrivenTank": {
+      "frames": 166,
+      "fullRateMovieSha256": "ba83eee31054a547dddd7d23f924e7881a771c7739f7fbfd5252e9b1220b8bb6",
+      "height": 540,
+      "nativeTreeSha256": "3763a90b8fba6dd4118975058ee02dd317296ff1cafb70448f8af0eba2cda3b6",
+      "width": 960
+    },
+    "DryDamBreak": {
+      "frames": 166,
+      "fullRateMovieSha256": "23db72506ee48631978682d2ca13acc803eb7036b79b416db06c1f763e36285f",
+      "height": 540,
+      "nativeTreeSha256": "1e43251aa8e16e69a305529663267992e0ff83c701d9a6144a7edd36e93d046d",
+      "width": 960
+    },
+    "FallingMass": {
+      "frames": 84,
+      "fullRateMovieSha256": "dbe8d8b17a5a1eb1a486e5991fc9f543b121fc401f6b568ec03a717e699ee376",
+      "height": 540,
+      "nativeTreeSha256": "334cabd39d4b5fffde65ddd130f144d2af8dad79268ff924f11b3f3291b1efb1",
+      "width": 960
+    },
+    "ForkedChannel": {
+      "frames": 180,
+      "fullRateMovieSha256": "ab4535f42f12d8695373b6864a0fad3e6059c6891ed6ccbddf572fa6aefde57c",
+      "height": 540,
+      "nativeTreeSha256": "044ec800b27932961e8371f1c634197151af4ff023d1ce6165eaf68b1cfb68c6",
+      "width": 960
+    },
+    "FreeJet": {
+      "frames": 84,
+      "fullRateMovieSha256": "c10d68979d9b31f9a1e9ff893d48ef41b8e665ad49de7a70572485ef43333c5f",
+      "height": 540,
+      "nativeTreeSha256": "070232f98b9a9b4dea6035735226bc51f8a166a347a3315a51d16763fd4890a1",
+      "width": 960
+    },
+    "IslandCurrent": {
+      "frames": 180,
+      "fullRateMovieSha256": "456c4be5df95183dd5015139f0017e209087b18bb2857ac90e3430a67c0d4922",
+      "height": 540,
+      "nativeTreeSha256": "e70ef5d1a29c658a7867cba6ffee76518e90284fa741a981e9e49629e7dbd761",
+      "width": 960
+    },
+    "LedgeDrip": {
+      "frames": 114,
+      "fullRateMovieSha256": "9bc7a413338f7605c2e5aec04f1e856fcfa3202be4176cd2de29e1bd585ab212",
+      "height": 540,
+      "nativeTreeSha256": "781e1a2d7ad6b5775a68f8d26c559c3e9f0f6c133e1338314056608846b6e891",
+      "width": 960
+    },
+    "MovingWardJet": {
+      "frames": 96,
+      "fullRateMovieSha256": "9369cc7a3d925eaee951de749ed85172efc8a036a40fb5ecb2cb6a93f96616ef",
+      "height": 540,
+      "nativeTreeSha256": "5d67129ac4c89a375db9d413ee0cfcc7f1e47dce5174fbcb5d8fd6d295595b9f",
+      "width": 960
+    },
+    "OpposedJets": {
+      "frames": 84,
+      "fullRateMovieSha256": "4b9efd7d6de41102e2675c05f3d5752051d05cefd6c19bbe1d147c9391e80d51",
+      "height": 540,
+      "nativeTreeSha256": "9cb2610760cc38f074a1eaa4fa202e4f247761c77483d4956661a60a411d8493",
+      "width": 960
+    },
+    "PlanarRipples": {
+      "frames": 84,
+      "fullRateMovieSha256": "0489c39ae88c41a84878b52ed5ae8581907f670512a6adbe41a68fd3a12fa0be",
+      "height": 540,
+      "nativeTreeSha256": "9cfd1fc1bcf88699308f51e258513d551444e3e13106b3a64fd6b655276e3934",
+      "width": 960
+    },
+    "RadialBreak": {
+      "frames": 96,
+      "fullRateMovieSha256": "5f9baa09cd036e49969f67950ecc5abed3afc09b8b6d0dc36c455d376cc4cf60",
+      "height": 540,
+      "nativeTreeSha256": "56077dace72d93fe4b8ca35f65c572b1dc55d41f6b7d75566d9065138f2a4795",
+      "width": 960
+    },
+    "RainOnPool": {
+      "frames": 114,
+      "fullRateMovieSha256": "b7173048a115570c8a99b1d4ab358395f47a5408621f762207a9ff6bd2a19866",
+      "height": 540,
+      "nativeTreeSha256": "02a849843b75675453952b448d758473417fbfd9604c2e29eeb3e436382cd49f",
+      "width": 960
+    },
+    "RainPond": {
+      "frames": 180,
+      "fullRateMovieSha256": "f8705c2fc2080f49671f34777aa20b60a4487110040aa8fd2099f573d86754ae",
+      "height": 540,
+      "nativeTreeSha256": "0943f0267000d265fd466ef092e43291e4ed934ca7a19fd4396e1230f896d1d4",
+      "width": 960
+    },
+    "RecastRelay": {
+      "frames": 96,
+      "fullRateMovieSha256": "655cc0b5fcf8fb64c867c6d57da0c012852845c081e3e9c261ce58858e789337",
+      "height": 540,
+      "nativeTreeSha256": "e45e0f374d0374d1169d58dbbc42ee2c056ef2b09283bf95ef6f63aa4cd59935",
+      "width": 960
+    },
+    "ReservoirDrawdown": {
+      "frames": 166,
+      "fullRateMovieSha256": "c1d85076f5e7a4db80e8570f48f7d38904f7215c1e4a694756e2ab1e953a98d9",
+      "height": 540,
+      "nativeTreeSha256": "888b22a9c803c53373dd06ea1a2aebcd1dde13f99f0b2a1b60e3cce263ed5602",
+      "width": 960
+    },
+    "ReservoirFill": {
+      "frames": 166,
+      "fullRateMovieSha256": "575af3524b8c45f2d199fc65f051b3b173f292e542fbec7b1e398c826f19f813",
+      "height": 540,
+      "nativeTreeSha256": "de93ef97b22b1dcf823f2d6cfaed9ecb88b2e2384304e495f683a80c1ba56b47",
+      "width": 960
+    },
+    "RiverCurrent": {
+      "frames": 256,
+      "fullRateMovieSha256": "df35d384316eb144ef2309852c27bd84d0f6ac262c0fa9806f34df6c485a6c06",
+      "height": 540,
+      "nativeTreeSha256": "2af9413bbc4d4d4ab91d32673e13567bef03c76d8585ad53e478d15ded6fd404",
+      "width": 960
+    },
+    "RockImpact": {
+      "frames": 84,
+      "fullRateMovieSha256": "6c546d6883b81c32451bdf55b6b8f04627f19645889999b155f7391ad8ec1186",
+      "height": 540,
+      "nativeTreeSha256": "797d4909acf9fcdaccff62a303325370f51187974ff598df19ab0a1d98124b04",
+      "width": 960
+    },
+    "ShieldIntercept": {
+      "frames": 96,
+      "fullRateMovieSha256": "9b211fc87389a6224846345a35e906cabbdcd5ed7b184fe9783e24fad40164bf",
+      "height": 540,
+      "nativeTreeSha256": "a37c2f2c00543abdbb45376d69ab5ef2b22d470d7cb1f83be29f61af6dedcbed",
+      "width": 960
+    },
+    "ShoreWash": {
+      "frames": 256,
+      "fullRateMovieSha256": "764c9bf440712cd6392436c934039ce1a3e0749b9200c11d5911cb5623234b0c",
+      "height": 540,
+      "nativeTreeSha256": "e8bd508fb5049f4637901f65d9a518836748d69a12bf79eefbc2aeb6b179feac",
+      "width": 960
+    },
+    "SingleLedgeDrop": {
+      "frames": 114,
+      "fullRateMovieSha256": "5e7d45fee196a7d188d929f839241bbf8c69d65d82b47d19906dd247fa70a140",
+      "height": 540,
+      "nativeTreeSha256": "42454db3d734864282084979b129e18025f55871497cbf9f3893fb0f5b7d6bd1",
+      "width": 960
+    },
+    "SpringFountain": {
+      "frames": 114,
+      "fullRateMovieSha256": "779b024238fe0bea5530113c2e01264f90e374dab76f890678b2cd75fc607ed4",
+      "height": 540,
+      "nativeTreeSha256": "0f1b2534b010a31c37e8abc06b0c697ba02bacdfbc822d50ada07a3869ec6aaf",
+      "width": 960
+    },
+    "StreamConfluence": {
+      "frames": 180,
+      "fullRateMovieSha256": "7b529a7f768a273a038f7f284ceaac2472ee8b139e36aa9b73793d0571d1a0ae",
+      "height": 540,
+      "nativeTreeSha256": "9d9dc43798307af2bdc1bf8c51b95d9830b17fbb815a765861924dbba8aa0cf7",
+      "width": 960
+    },
+    "TidalReversal": {
+      "frames": 166,
+      "fullRateMovieSha256": "d94b23576f42a9a3da563e98e4490b780199363a296620e7e119cd22c45da45d",
+      "height": 540,
+      "nativeTreeSha256": "4345b9715a52da0fdb2e6d3336bf5291f8e220f9d1242d1b44127647ac1aaabf",
+      "width": 960
+    },
+    "UpwellGeyser": {
+      "frames": 96,
+      "fullRateMovieSha256": "00e87d300ab7fd3deba8a69b9e0bbf7920de7586a416be6ed9cc628833074a68",
+      "height": 540,
+      "nativeTreeSha256": "b6cb35788605684908d9fc140fea28328e260da538d91d8a7f160cdb1b287417",
+      "width": 960
+    },
+    "Vortex": {
+      "frames": 84,
+      "fullRateMovieSha256": "ca59eed632c40e105f15f2acae20b02dffdeb7e254ef20202ac3c6f7295a14d6",
+      "height": 540,
+      "nativeTreeSha256": "9d79797212e8ee299b5f4d39eb7cf32d054f98e1ea0ef7d858f9fc280b430b9c",
+      "width": 960
+    },
+    "Waterfall": {
+      "frames": 84,
+      "fullRateMovieSha256": "97a43031a8034c808815842380b16bfb52e3ceb110c466f77c4c7fbc9e65e67d",
+      "height": 540,
+      "nativeTreeSha256": "870e10b854f52e78cfcd2765a2014a73202586eea7c223e355d852b214e52d53",
+      "width": 960
+    },
+    "Waterfall2D": {
+      "frames": 292,
+      "fullRateMovieSha256": "7c8a787e949ee78face7c3e57af4ec0c85b0a06cd85354c5ca2b3566aaf979ea",
+      "height": 540,
+      "nativeTreeSha256": "054858c5bb061b32a355d3d46da1bc0d8b83d3188236e96a21529baa75aca451",
+      "width": 960
+    },
+    "WeightlessMass": {
+      "frames": 114,
+      "fullRateMovieSha256": "bf6b6837d4c0852c9249d68a8e89fd91e878008a44404e56c27b9347301a97f5",
+      "height": 540,
+      "nativeTreeSha256": "0554c5e918e5e1aa24012f08acf6de1cd507e6eb391a01bd96c1eb8a3874c9c8",
+      "width": 960
+    },
+    "WetBedBore": {
+      "frames": 166,
+      "fullRateMovieSha256": "7601aa8af7e5de8971e03d1189db5aa97f255d57753e079e96312eaa4a521a0f",
+      "height": 540,
+      "nativeTreeSha256": "0c0dfa2fa6450a06088849eeef000a18a68625bfd84a002c5f513993d7713eec",
+      "width": 960
+    },
+    "WideCloudburst": {
+      "frames": 114,
+      "fullRateMovieSha256": "5f52ed569106bfbda09ddd669d6ea3afd8a3c759c2e57c3c8e862f8765748639",
+      "height": 540,
+      "nativeTreeSha256": "78f0645141371130d25652dc0855b024a3d2390e0b7946216a8f6534cc300b53",
+      "width": 960
+    }
+  },
+  "nativeTestsPerReceiver": 38,
+  "receiverPaths": [
+    "Assets/QinFluidMixer",
+    "Assets/Effects/Liquid"
+  ],
+  "reel": {
+    "file": "unity-effects-skill/assets/water-scenario-matrix.mp4",
+    "sha256": "620924caf0a08d0ce10a5af656ae6bd647cc76b908e7e3338aa5831c0f9a04d0"
+  },
+  "reuse": {
+    "cold": {
+      "casts": 4,
+      "filmTextures": 4,
+      "idleSolverSteps": 0,
+      "particleBuffers": 4,
+      "solverOwners": 4
+    },
+    "gpuStateSha256": "a59cbaf56a83ac812597985291b6d008aeaf1d2b392817b52001d65243ca8275",
+    "independentPeerRetirement": true,
+    "warm": {
+      "casts": 4,
+      "filmTextures": 1,
+      "idleSolverSteps": 0,
+      "particleBuffers": 1,
+      "solverOwners": 1
+    }
+  },
+  "scope": "Two independent native Unity receivers. Subject hashes include the same-clock control images and solver readbacks. The authoring sweep reads serialized settings separately from native playback.",
+  "seed": 29411,
+  "templatesManifestSha256": "c0f60e82b5b25b43321342bc157815725903ad015ba52b877fbc1a7a7fe1c228"
+}

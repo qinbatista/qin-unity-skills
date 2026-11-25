@@ -256,7 +256,7 @@ def export_subject_videos(work, report):
     with tempfile.TemporaryDirectory(prefix="temp-subjects-", dir=work) as temporary:
         staging = Path(temporary) / "Subjects"
         staging.mkdir()
-        for group in ("cases", "applications", "channels", "inlets"):
+        for group in ("cases", "applications", "channels", "inlets", "scenarios"):
             for case in report.get(group, {}):
                 if group == "applications":
                     name = APPLICATIONS[case][1]

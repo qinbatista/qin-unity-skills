@@ -1,4 +1,4 @@
-"""Author an editable side-view water prefab from a source, boundary and physical inputs."""
+"""Author an editable 2D water prefab from a source, boundary and physical inputs."""
 import argparse
 import math
 import os
@@ -9,7 +9,17 @@ import uuid
 
 from fluid_mixer import DEFAULT, TEMPLATE, digest, meta_guid, project_lock
 
-CHANNEL_BASES = {"river": "RiverCurrent", "shore": "ShoreWash", "basin": "BasinSlosh"}
+CHANNEL_BASES = {"river": "RiverCurrent", "shore": "ShoreWash", "basin": "BasinSlosh",
+                 "dam-dry": "DryDamBreak", "dam-wet": "WetBedBore", "fill": "ReservoirFill",
+                 "drain": "ReservoirDrawdown", "tide": "TidalReversal", "tilt": "DrivenTank"}
+TOPDOWN_BASES = {"boat-wake": "BoatWake", "island-current": "IslandCurrent",
+                 "stream-confluence": "StreamConfluence", "forked-channel": "ForkedChannel",
+                 "drain-vortex": "DrainVortex", "rain-pond": "RainPond"}
+SPELL_BASES = {"upwell-geyser": "UpwellGeyser", "charged-surge": "ChargedSurge",
+               "moving-ward-jet": "MovingWardJet", "shield-intercept": "ShieldIntercept",
+               "recast-relay": "RecastRelay", "radial-break": "RadialBreak"}
+TOPDOWN_RANGES = {"drive": ("_drive", 0, 1.4), "wave-speed": ("_waveSpeed", .8, 2),
+                  "drag": ("_drag", .1, 1.8)}
 RANGES = {"depth": ("_poolDepth", .25, .78), "bank": ("_bankRise", 0, 1.55),
           "drive": ("_drive", 0, 1.4), "period": ("_period", 2.2, 6)}
 
@@ -17,7 +27,7 @@ PARCEL_BASES = {"ripple": "PlanarRipples", "mass": "FallingMass", "jet": "FreeJe
                 "opposed": "OpposedJets", "waterfall": "Waterfall", "vortex": "Vortex", "needle": "WaterNeedle2D",
                 "curtain": "WaterCurtain2D", "falls": "ContinuousWaterfall", "rain": "FreeJet", "drip": "FreeJet",
                 "fountain": "WaterNeedle2D"}
-PARCEL_RANGES = {"gravity": ("_gravity", .1, 18), "strength": ("_strength", .05, 2),
+PARCEL_RANGES = {"gravity": ("_gravity", 0, 18), "strength": ("_strength", .05, 2),
                  "feed": ("_feedDuration", .18, 10), "duration": ("_duration", .4, 16),
                  "span": ("_dropSpan", 0, 5), "count": ("_dropCount", 1, 160)}
 DROP_DEFAULTS = {
@@ -28,6 +38,12 @@ DROP_DEFAULTS = {
     "fountain": {"_gravity": 8, "_responses": 5, "_playOnEnable": 1, "_origin": "{x: -0.94, y: 0.09, z: 0}", "_velocity": "{x: 1.32, y: 5.9, z: 0}",
                  "_feedDuration": 1.55, "_duration": 3.6}
 }
+
+
+def channel_ranges(profile):
+    if profile in ("dam-dry", "dam-wet"):
+        return RANGES | {"bank": ("_bankRise", 0, .85)}
+    return RANGES
 
 
 def in_assets(project, relative):
@@ -52,8 +68,10 @@ def compose(project, template, destination, name, profile, settings):
     if output.resolve() != output or base == output or base in output.parents or output in base.parents:
         raise ValueError("Keep the new variant in its own game-owned folder outside the template.")
     if profile in CHANNEL_BASES:
-        files = channel_files(base, name, profile, settings)
-    elif profile in PARCEL_BASES:
+        files = surface_files(base, name, CHANNEL_BASES[profile], settings, "Channels", "ChannelWater2D", channel_ranges(profile))
+    elif profile in TOPDOWN_BASES:
+        files = surface_files(base, name, TOPDOWN_BASES[profile], settings, "TopDown", "TopDownWater2D", TOPDOWN_RANGES)
+    elif profile in PARCEL_BASES or profile in SPELL_BASES:
         files = parcel_files(base, name, profile, settings)
     else:
         raise ValueError(f"Unknown water profile: {profile}")
@@ -81,15 +99,17 @@ def compose(project, template, destination, name, profile, settings):
     return output / (name + ".prefab"), "composed"
 
 
-def channel_files(base, name, profile, settings):
-    source = Path("Channels") / (CHANNEL_BASES[profile] + ".prefab")
-    for relative in (source, Path("Channels/ChannelWater2D.prefab"), Path("Channels/ChannelWater2D.prefab.meta")):
+def surface_files(base, name, donor, settings, directory, parent, ranges):
+    source = Path(directory) / (donor + ".prefab")
+    parent_asset = Path(directory) / (parent + ".prefab")
+    for relative in (source, parent_asset, Path(str(parent_asset) + ".meta")):
         if not (base / relative).is_file() or digest(base / relative) != digest(TEMPLATE / relative):
-            raise ValueError(f"Install this release of the channel template before composing: {relative}")
-    definition = (base / source).read_text(encoding="utf-8").replace("value: " + CHANNEL_BASES[profile], "value: " + name)
+            raise ValueError(f"Install this release of the water template before composing: {relative}")
+    definition = (base / source).read_text(encoding="utf-8").replace("value: " + donor, "value: " + name)
     for key, value in settings.items():
-        if key not in RANGES: raise ValueError(f"{key} applies to parcel water only.")
-        field, low, high = RANGES[key]
+        if key not in ranges:
+            raise ValueError(f"{key} is not an input for {donor}.")
+        field, low, high = ranges[key]
         if not math.isfinite(value) or not low <= value <= high:
             raise ValueError(f"{key} must be between {low} and {high}.")
         definition, changed = re.subn(r"(propertyPath: " + field + r"\n      value: )[^\n]+",
@@ -103,15 +123,21 @@ def channel_files(base, name, profile, settings):
     return files
 
 def parcel_files(base, name, profile, settings):
-    donor = PARCEL_BASES[profile]
-    preset = Path("Presets") / (donor + ".asset")
-    prefab = Path("Variants") / (donor + ".prefab")
-    for path in (preset, prefab, Path("WaterFluidMixer.prefab.meta")):
+    if profile in SPELL_BASES:
+        donor = SPELL_BASES[profile]
+        assets = Path("Spells") / donor
+        preset, prefab = assets / (donor + ".asset"), assets / (donor + ".prefab")
+    else:
+        donor = PARCEL_BASES[profile]
+        preset = Path("Presets") / (donor + ".asset")
+        prefab = Path("Variants") / (donor + ".prefab")
+    for path in (preset, prefab, Path(str(preset) + ".meta"), Path("WaterFluidMixer.prefab.meta")):
         if not (base / path).is_file() or digest(base / path) != digest(TEMPLATE / path):
             raise ValueError(f"Install this release of the fluid template before composing: {path}")
     new_fields = dict(DROP_DEFAULTS.get(profile, {}))
     for key, value in settings.items():
-        if key not in PARCEL_RANGES: raise ValueError(f"{key} applies to channel water only.")
+        if key not in PARCEL_RANGES:
+            raise ValueError(f"{key} is not an input for {profile}.")
         if key in ("span", "count") and profile not in ("drip", "rain"):
             raise ValueError(f"{key} applies to a falling drop inlet.")
         field, low, high = PARCEL_RANGES[key]
@@ -127,7 +153,13 @@ def parcel_files(base, name, profile, settings):
             recipe += "  " + key + ": " + str(value) + "\n"
     feed = float(re.search(r"(?m)^  _feedDuration: (.+)$", recipe)[1])
     duration = float(re.search(r"(?m)^  _duration: (.+)$", recipe)[1])
-    if feed > duration: raise ValueError("Feed duration must fit inside the cast duration.")
+    if feed > duration:
+        raise ValueError("Feed duration must fit inside the cast duration.")
+    if re.search(r"(?m)^  _feed: 6$", recipe):
+        hold = re.search(r"(?m)^  _curtainHold: (.+)$", recipe)
+        minimum = max(.34, float(hold[1]) if hold else .5) + 1.4
+        if duration < minimum - 1e-6:
+            raise ValueError(f"The curtain duration must allow its hold and runoff ({minimum:g} s).")
     recipe_guid = uuid.uuid5(uuid.NAMESPACE_URL, "qin-unity-skills/author-water-recipe/" + name).hex
     prefab_guid = uuid.uuid5(uuid.NAMESPACE_URL, "qin-unity-skills/author-channel/" + name).hex
     definition = (base / prefab).read_text(encoding="utf-8").replace("value: " + donor, "value: " + name)
@@ -145,11 +177,11 @@ def main():
     parser.add_argument("--template", default=DEFAULT)
     parser.add_argument("--destination", default="Assets/GameWater")
     parser.add_argument("--name", required=True)
-    parser.add_argument("--profile", choices=(*CHANNEL_BASES, *PARCEL_BASES), required=True)
-    for key, (_, low, high) in (RANGES | PARCEL_RANGES).items():
-        parser.add_argument("--" + key, type=float, help=f"Override the profile value ({low} to {high}).")
+    parser.add_argument("--profile", choices=(*CHANNEL_BASES, *PARCEL_BASES, *SPELL_BASES, *TOPDOWN_BASES), required=True)
+    for key, (_, low, high) in (RANGES | TOPDOWN_RANGES | PARCEL_RANGES).items():
+        parser.add_argument("--" + key, dest=key, type=float, help=f"Override the profile value ({low} to {high}).")
     args = parser.parse_args()
-    overrides = {key: getattr(args, key) for key in (RANGES | PARCEL_RANGES) if getattr(args, key) is not None}
+    overrides = {key: getattr(args, key) for key in (RANGES | TOPDOWN_RANGES | PARCEL_RANGES) if getattr(args, key) is not None}
     try:
         path, result = compose(args.project, args.template, args.destination, args.name, args.profile, overrides)
     except (ValueError, OSError) as error:

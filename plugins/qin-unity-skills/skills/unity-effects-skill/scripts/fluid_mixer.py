@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import tempfile
 
 ASSETS = Path(__file__).resolve().parents[1] / "assets"
@@ -55,7 +56,18 @@ def project_lock(version):
         yield
 
 
-def install(project, relative=DEFAULT):
+def matches_prior(target, prior):
+    if not target.is_dir():
+        return False
+    entries = set(target.rglob("*"))
+    expected = {target / name for name in prior}
+    folders = {parent for item in expected for parent in item.parents if target in parent.parents}
+    return (entries == expected | folders and all(not path.is_symlink() for path in entries)
+            and all((target / path).is_file() and digest(target / path) == signature
+                    for path, signature in prior.items()))
+
+
+def install(project, relative=DEFAULT, upgrade=False):
     project = Path(project).resolve(strict=True)
     assets = project / "Assets"
     version = project / "ProjectSettings/ProjectVersion.txt"
@@ -73,18 +85,37 @@ def install(project, relative=DEFAULT):
         raise ValueError("Missing or duplicate GUID in the installed template.")
 
     with project_lock(version):
-        if target.exists():
+        cache = project / "Cache"
+        prior = json.loads((ASSETS / "fluid-mixer-previous.json").read_text(encoding="utf-8"))["files"] if upgrade else {}
+        key = hashlib.sha256(relative.as_posix().encode()).hexdigest()[:16]
+        backup = cache / ("temp-fluid-upgrade-" + key) / "original"
+        if upgrade and backup.exists():
+            if not matches_prior(backup, prior):
+                raise ValueError(f"Preserved an unrecognized upgrade backup at {backup}.")
+            if not target.exists():
+                os.rename(backup, target)
+                backup.parent.rmdir()
+            elif all((target / p).is_file() and digest(target / p) == signature for p, signature in files.items()):
+                shutil.rmtree(backup)
+                backup.parent.rmdir()
+            else:
+                raise ValueError(f"Existing receiver and recoverable backup were preserved at {backup}.")
+        replacing = target.exists()
+        if replacing:
             if target.is_dir() and all((target/p).is_file() and digest(target/p) == signature for p,signature in files.items()):
                 return target, "already installed"
-            raise ValueError(f"Existing data at {target} was preserved. Use its mixer or choose an unused folder.")
+            if not upgrade or not matches_prior(target, prior):
+                raise ValueError(f"Existing data at {target} was preserved. Use --upgrade for the intact previous release. "
+                                 "Move custom assets with Unity before upgrading a modified template.")
         for root in (assets, project / "Packages"):
             if not root.is_dir():
                 continue
             for meta in root.rglob("*.meta"):
+                if replacing and target in meta.parents:
+                    continue
                 if meta.is_file() and meta_guid(meta) in guids:
                     raise ValueError(f"This fluid GUID already belongs to {meta}. Reuse that installation.")
         # Publish a complete tree by same-volume rename so the Editor can resolve every dependency at import.
-        cache = project / "Cache"
         cache.mkdir(exist_ok=True)
         target.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="temp-fluid-install-", dir=cache) as work:
@@ -95,17 +126,32 @@ def install(project, relative=DEFAULT):
                 out.write_bytes((TEMPLATE / path).read_bytes())
                 if digest(out) != signature:
                     raise OSError(f"Staging verification failed at {path}")
-            os.rename(staged, target)
-    return target, "installed"
+            if replacing:
+                backup.parent.mkdir(exist_ok=True)
+                if backup.parent.is_symlink() or any(backup.parent.iterdir()):
+                    raise ValueError(f"Choose an empty, locally owned upgrade staging directory at {backup.parent}.")
+                os.rename(target, backup)
+            try:
+                os.rename(staged, target)
+            except OSError:
+                if replacing:
+                    os.rename(backup, target)
+                    backup.parent.rmdir()
+                raise
+            if replacing:
+                shutil.rmtree(backup)
+                backup.parent.rmdir()
+    return target, "upgraded" if replacing else "installed"
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", required=True, type=Path)
     parser.add_argument("--destination", default=DEFAULT, help="Project-relative destination beneath Assets")
+    parser.add_argument("--upgrade", action="store_true", help="Upgrade an intact previous template in place, preserving its GUIDs.")
     args = parser.parse_args()
     try:
-        target, result = install(args.project, args.destination)
+        target, result = install(args.project, args.destination, args.upgrade)
     except (OSError, ValueError) as error:
         parser.exit(1, f"{error}\n")
     print(f"Fluid mixer {result}: {target / 'WaterFluidMixer.prefab'}")

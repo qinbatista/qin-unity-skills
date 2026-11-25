@@ -144,7 +144,7 @@ namespace Qin.UnityEffects.Fluids
                 && SystemInfo.IsFormatSupported(GraphicsFormat.R32G32_SFloat, GraphicsFormatUsage.LoadStore);
         }
 
-        internal void Reset(SOFluidMixRecipe recipe, uint seed)
+        internal void Reset(SOFluidMixRecipe recipe, uint seed, float strength)
         {
             if (recipe == null)
                 throw new ArgumentNullException(nameof(recipe));
@@ -157,7 +157,7 @@ namespace Qin.UnityEffects.Fluids
             _hasWaves = recipe.SurfaceWaves;
             _hasObstacle = recipe.SolidObstacle;
             _denseVolume = recipe.Feed == SOFluidMixRecipe.Inlet.FallingMass;
-            _ballisticThroughStep = BallisticThroughStep(recipe);
+            _ballisticThroughStep = BallisticThroughStep(recipe, strength);
             _commands.Clear();
             _commands.SetComputeIntParam(_program, SeedId, unchecked((int)seed));
             _commands.SetComputeIntParam(_program, FeedId, (int)recipe.Feed);
@@ -166,7 +166,7 @@ namespace Qin.UnityEffects.Fluids
             _commands.SetComputeFloatParam(_program, FeedDurationId, recipe.FeedDuration);
             _commands.SetComputeIntParam(_program, DropCountId, recipe.DropCount);
             _commands.SetComputeFloatParam(_program, DropSpanId, recipe.DropSpan);
-            _commands.SetComputeFloatParam(_program, StrengthId, Mathf.Max(0f, recipe.Strength));
+            _commands.SetComputeFloatParam(_program, StrengthId, strength);
             _commands.SetComputeFloatParam(_program, GravityId, Mathf.Abs(recipe.Gravity));
             _commands.SetComputeFloatParam(_program, SwirlId, Mathf.Clamp(recipe.Swirl, 0f, 2f));
             _commands.SetComputeVectorParam(_program, OriginId, recipe.Origin);
@@ -256,7 +256,7 @@ namespace Qin.UnityEffects.Fluids
             throw new InvalidOperationException("Unable to allocate " + label);
         }
 
-        private static int BallisticThroughStep(SOFluidMixRecipe recipe)
+        private static int BallisticThroughStep(SOFluidMixRecipe recipe, float strength)
         {
             if (recipe.Feed == SOFluidMixRecipe.Inlet.Needle || recipe.Feed == SOFluidMixRecipe.Inlet.FallingDrops)
                 return Mathf.CeilToInt(recipe.Duration * StepsPerSecond);
@@ -266,7 +266,7 @@ namespace Qin.UnityEffects.Fluids
             float clearance = recipe.Origin.y - .35f - .04f - .14f;
             if (clearance <= 0f)
                 return 0;
-            float downward = Mathf.Max(0f, -recipe.Velocity.y * Mathf.Sqrt(recipe.Strength));
+            float downward = Mathf.Max(0f, -recipe.Velocity.y * Mathf.Sqrt(strength));
             float closingSpeed = downward + Mathf.Sqrt(downward * downward + 2f * recipe.Gravity * clearance);
             float flight = closingSpeed > .0001f ? 2f * clearance / closingSpeed : recipe.Duration;
             float opening = Mathf.Min(.10f, .47f * recipe.FeedDuration);

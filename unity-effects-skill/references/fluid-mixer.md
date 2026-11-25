@@ -2,6 +2,8 @@
 
 Use the installed editable template for a travelling ripple, falling water mass, free jet, solid impact, opposed jets, waterfall or converging vortex. A single prefab combines an inlet, persistent GPU state, optional receiving surface, collision, and spray. The Skill contains the runtime, native graphs, materials, seven starting recipes, two 2D applications and their independent replays. Watch the seven subjects at their native playback speed in the [30 fps reference film](../assets/fluid-motion.mp4) or [looping GIF](../assets/fluid-motion.gif).
 
+The [2D water matrix](water-scenario-matrix.md) includes overhead XY currents, side-view gates and reservoirs, interactive casts and input limits, with one replay command and a matched physical control for each family.
+
 ## Choose the water simulation
 
 Use this entry for 2D water flow and water spells. Use the [profile, prefab and replay guide](water-recipes-2d.md#install-and-author-a-named-effect) for the executable steps and per-case controls. Choose what supplies water, where it can travel and what receives its momentum. For a combined water and star effect, give the fluid its physical driver and attach the stellar rendering to the requested scene or cast phase.
@@ -10,6 +12,9 @@ Use this entry for 2D water flow and water spells. Use the [profile, prefab and 
 | --- | --- | --- |
 | A ripple, falling mass, free jet, jet against a rock, opposing jets, finite waterfall or vortex | [Seven parcel and surface recipes](#choose-and-combine) | Remove the relevant impulse, gravity, solid or inlet. Follow crest position, falling mass, deflection or circulation at the same tick. |
 | Water needle opens a curtain on hit, holds, closes and drains | [Combat application](#2d-application-replays) | Disable the recipient collider. Compare the hit time, first wet frame and runoff with the same launch that misses. |
+| A dry or wet dam release, filling or draining pool, reversing tide, or repeatedly tilted container | [Side-view channel boundaries](channel-matrix.md) | Hold the gate or port closed, or disconnect the signed force. Compare the front, discharge, wall height and total water area. |
+| A boat wake, island, fork, confluence, drain or pond under overhead rain | [Top-down water](topdown-water.md) | Retain the boat or terrain and disable its water drive. Read the XY current, transported tracer, travelling height field and same-clock camera image. |
+| A charged, intercepted, redirected, recast or radial water spell | [Interactive casts](spell-water.md) | Move the solid aside, reduce charge or omit the recast and compare particle trajectories, visible reach and retirement. |
 | A continuous waterfall splits around a rock and feeds a pool | [Sustained inlet](#2d-application-replays) | Close the inlet during steady flow. Watch the upper sheet drain and measure the remaining water or waves downstream. |
 | Current in a river, shore advance and retreat, basin slosh or a custom cove | [Shallow-water channels](channel-water.md#reproduce-the-variants) | Remove the forcing with the bed and walls held fixed. Compare discharge, wet front or the difference between the wall heights. |
 | Rain reaching water, a ledge dripping or a fountain returning to a pool | [Inlet composer](#author-a-water-effect-from-parameters) | Track births, vertical velocity and landing. Read the pool response with contact transfer enabled and disabled. |

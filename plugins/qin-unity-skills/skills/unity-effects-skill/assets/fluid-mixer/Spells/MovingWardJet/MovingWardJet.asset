@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9744ba927cec53f5a337a8d1eec457b0, type: 3}
+  m_Name: MovingWardJet
+  m_EditorClassIdentifier:
+  _feed: 2
+  _responses: 7
+  _origin: {x: -2.25, y: 0.92, z: 0}
+  _velocity: {x: 4.55, y: 1.3, z: 0}
+  _obstacleCenter: {x: -0.13, y: 0.86, z: 0}
+  _obstacleRadius: 0.37
+  _gravity: 3.6
+  _strength: 1
+  _pressure: 0.74
+  _swirl: 1
+  _feedDuration: 1.72
+  _duration: 2.75
+  _playOnEnable: 0

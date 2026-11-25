@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9744ba927cec53f5a337a8d1eec457b0, type: 3}
+  m_Name: ChargedSurge
+  m_EditorClassIdentifier:
+  _feed: 2
+  _responses: 5
+  _origin: {x: -2.12, y: 0.42, z: 0}
+  _velocity: {x: 5.25, y: 2.75, z: 0}
+  _obstacleCenter: {x: 0, y: 0, z: 0}
+  _obstacleRadius: 0.44
+  _gravity: 7.5
+  _strength: 1
+  _pressure: 1.15
+  _swirl: 1
+  _feedDuration: 0.33
+  _duration: 2.45
+  _playOnEnable: 0
