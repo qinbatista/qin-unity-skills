@@ -130,7 +130,7 @@ def pose(args):
             print(json.dumps(result), flush=True)
 
 
-def launch_config(source, work, port, log):
+def launch_config(source, work, port, mjpeg_port, log):
     package = json.loads((source / "package.json").read_text(encoding="utf-8"))
     if package.get("name") != "appium-webdriveragent" or package.get("version") != "16.14.2":
         raise ValueError("This recipe is verified with appium-webdriveragent 16.14.2.")
@@ -147,20 +147,29 @@ def launch_config(source, work, port, log):
         raise RuntimeError(f"Expected one built WebDriverAgentRunner configuration, got {configs}")
     configuration = plistlib.loads(configs[0].read_bytes())
     target = configuration["WebDriverAgentRunner"]
-    # The HTTP service binds first. Reusing its port disables WDA's unused wildcard screenshot listener.
-    target.setdefault("EnvironmentVariables", {}).update(USE_IP="127.0.0.1", USE_PORT=str(port), MJPEG_SERVER_PORT=str(port))
+    target.setdefault("EnvironmentVariables", {}).update(USE_IP="127.0.0.1", USE_PORT=str(port),
+                                                        MJPEG_SERVER_PORT=str(mjpeg_port))
     local_config = product / "local-duo.xctestrun"
     local_config.write_bytes(plistlib.dumps(configuration))
     return local_config
 
 
 def serve(args):
+    # WDA's optional MJPEG service binds all interfaces. Reserve its port without
+    # listening so only the requested loopback HTTP service can accept connections.
+    with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as reserved:
+        reserved.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        reserved.bind(("::", 0))
+        run_server(args, reserved.getsockname()[1])
+
+
+def run_server(args, mjpeg_port):
     work = owned_work(args.work)
     name = device_name(args.udid)
     with socket.socket() as probe:
         probe.bind(("127.0.0.1", args.port))
     with (work / "wda-build.log").open("w", encoding="utf-8") as log:
-        config = launch_config(Path(args.wda).resolve(), work, args.port, log)
+        config = launch_config(Path(args.wda).resolve(), work, args.port, mjpeg_port, log)
     with (work / "wda-run.log").open("w", encoding="utf-8") as log:
         runner = subprocess.Popen(["xcodebuild", "test-without-building", "-xctestrun", str(config), "-destination",
                                    "platform=iOS Simulator,id=" + args.udid, "-parallel-testing-enabled", "NO",

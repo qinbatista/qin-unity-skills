@@ -1,0 +1,1822 @@
+{
+  "runtime": "Unity 6000.6.7f1, arm64 iOS Simulator, iOS 27.2",
+  "playerLocale": "de-DE",
+  "requestedOrientations": [
+    "Portrait",
+    "LandscapeLeft",
+    "LandscapeRight"
+  ],
+  "poseWindowOrientationColumns": [
+    "requested pose",
+    "Unity width px",
+    "Unity height px",
+    "UIKit orientation value",
+    "request realized"
+  ],
+  "primaryRuns": {
+    "final": {
+      "17e": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1170,
+            2532,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2532,
+            1170,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2532,
+            1170,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            31.67,
+            44.0
+          ],
+          "ControllerSurface": [
+            34.67,
+            48.0
+          ]
+        }
+      },
+      "17": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1206,
+            2622,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2622,
+            1206,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2622,
+            1206,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            33.0,
+            44.0
+          ],
+          "ControllerSurface": [
+            35.67,
+            48.0
+          ]
+        }
+      },
+      "Air": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1260,
+            2736,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2736,
+            1260,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2736,
+            1260,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            34.33,
+            44.0
+          ],
+          "ControllerSurface": [
+            37.33,
+            48.0
+          ]
+        }
+      },
+      "18-Pro": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1206,
+            2622,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2622,
+            1206,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2622,
+            1206,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            33.0,
+            44.0
+          ],
+          "ControllerSurface": [
+            35.67,
+            48.0
+          ]
+        }
+      },
+      "18-Pro-Max": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1320,
+            2868,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2868,
+            1320,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2868,
+            1320,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            35.67,
+            44.0
+          ],
+          "ControllerSurface": [
+            39.0,
+            48.0
+          ]
+        }
+      },
+      "Duo": {
+        "screenCases": 90,
+        "decodedPlayerFrames": 103,
+        "poseWindowOrientation": [
+          [
+            "outer-Portrait",
+            1398,
+            2034,
+            1,
+            true
+          ],
+          [
+            "outer-LandscapeLeft",
+            2034,
+            1398,
+            3,
+            true
+          ],
+          [
+            "outer-LandscapeRight",
+            2034,
+            1398,
+            4,
+            true
+          ],
+          [
+            "half-Portrait",
+            2853,
+            2007,
+            4,
+            false
+          ],
+          [
+            "half-LandscapeLeft",
+            2853,
+            2007,
+            4,
+            false
+          ],
+          [
+            "half-LandscapeRight",
+            2853,
+            2007,
+            4,
+            true
+          ],
+          [
+            "inner-Portrait",
+            2853,
+            2007,
+            4,
+            false
+          ],
+          [
+            "inner-LandscapeLeft",
+            2853,
+            2007,
+            4,
+            false
+          ],
+          [
+            "inner-LandscapeRight",
+            2853,
+            2007,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after",
+          "fold-before",
+          "half-ready",
+          "inner-ready",
+          "outer-return-ready",
+          "inner-again-ready"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            31.33,
+            44.0
+          ],
+          "ControllerSurface": [
+            34.0,
+            48.0
+          ]
+        },
+        "measuredHingeDegrees": {
+          "half-ready": 85.388,
+          "inner-ready": 180,
+          "outer-return-ready": 0,
+          "inner-again-ready": 180,
+          "initial": 0,
+          "half-matrix": 94.622,
+          "restored": 0
+        },
+        "retainedGeometry": {
+          "rotation-before": {
+            "framebuffer": [
+              1398,
+              2034
+            ],
+            "safe": [
+              0,
+              0,
+              1146,
+              1932
+            ],
+            "pane": [
+              0.0,
+              0.0,
+              1146.0,
+              1932.0
+            ],
+            "activeDivisions": []
+          },
+          "rotation-after": {
+            "framebuffer": [
+              2034,
+              1398
+            ],
+            "safe": [
+              252,
+              0,
+              1782,
+              1296
+            ],
+            "pane": [
+              252.0,
+              0.0,
+              1782.0,
+              1296.0
+            ],
+            "activeDivisions": []
+          },
+          "fold-before": {
+            "framebuffer": [
+              2034,
+              1398
+            ],
+            "safe": [
+              252,
+              0,
+              1782,
+              1296
+            ],
+            "pane": [
+              252.0,
+              0.0,
+              1782.0,
+              1296.0
+            ],
+            "activeDivisions": []
+          },
+          "half-ready": {
+            "framebuffer": [
+              2853,
+              2007
+            ],
+            "safe": [
+              0,
+              0,
+              2853,
+              1905
+            ],
+            "pane": [
+              0.0,
+              0.0,
+              1367.0,
+              1905.0
+            ],
+            "activeDivisions": [
+              [
+                1367,
+                0,
+                120,
+                2007
+              ]
+            ]
+          },
+          "inner-ready": {
+            "framebuffer": [
+              2853,
+              2007
+            ],
+            "safe": [
+              0,
+              0,
+              2853,
+              1905
+            ],
+            "pane": [
+              0.0,
+              0.0,
+              2853.0,
+              1905.0
+            ],
+            "activeDivisions": []
+          },
+          "outer-return-ready": {
+            "framebuffer": [
+              2034,
+              1398
+            ],
+            "safe": [
+              252,
+              0,
+              1782,
+              1296
+            ],
+            "pane": [
+              252.0,
+              0.0,
+              1782.0,
+              1296.0
+            ],
+            "activeDivisions": []
+          },
+          "inner-again-ready": {
+            "framebuffer": [
+              2853,
+              2007
+            ],
+            "safe": [
+              0,
+              0,
+              2853,
+              1905
+            ],
+            "pane": [
+              0.0,
+              0.0,
+              2853.0,
+              1905.0
+            ],
+            "activeDivisions": []
+          }
+        },
+        "automaticLayoutUpdates": {
+          "rotation-before": 0,
+          "rotation-after": 1,
+          "fold-before": 1,
+          "half-ready": 3,
+          "inner-ready": 4,
+          "outer-return-ready": 5,
+          "inner-again-ready": 6
+        }
+      }
+    },
+    "repeat": {
+      "17e": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1170,
+            2532,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2532,
+            1170,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2532,
+            1170,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            31.67,
+            44.0
+          ],
+          "ControllerSurface": [
+            34.67,
+            48.0
+          ]
+        }
+      },
+      "17": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1206,
+            2622,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2622,
+            1206,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2622,
+            1206,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            33.0,
+            44.0
+          ],
+          "ControllerSurface": [
+            35.67,
+            48.0
+          ]
+        }
+      },
+      "Air": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1260,
+            2736,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2736,
+            1260,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2736,
+            1260,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            34.33,
+            44.0
+          ],
+          "ControllerSurface": [
+            37.33,
+            48.0
+          ]
+        }
+      },
+      "18-Pro": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1206,
+            2622,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2622,
+            1206,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2622,
+            1206,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            33.0,
+            44.0
+          ],
+          "ControllerSurface": [
+            35.67,
+            48.0
+          ]
+        }
+      },
+      "18-Pro-Max": {
+        "screenCases": 30,
+        "decodedPlayerFrames": 34,
+        "poseWindowOrientation": [
+          [
+            "phone-Portrait",
+            1320,
+            2868,
+            1,
+            true
+          ],
+          [
+            "phone-LandscapeLeft",
+            2868,
+            1320,
+            3,
+            true
+          ],
+          [
+            "phone-LandscapeRight",
+            2868,
+            1320,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            35.67,
+            44.0
+          ],
+          "ControllerSurface": [
+            39.0,
+            48.0
+          ]
+        }
+      },
+      "Duo": {
+        "screenCases": 90,
+        "decodedPlayerFrames": 103,
+        "poseWindowOrientation": [
+          [
+            "outer-Portrait",
+            1398,
+            2034,
+            1,
+            true
+          ],
+          [
+            "outer-LandscapeLeft",
+            2034,
+            1398,
+            3,
+            true
+          ],
+          [
+            "outer-LandscapeRight",
+            2034,
+            1398,
+            4,
+            true
+          ],
+          [
+            "half-Portrait",
+            2853,
+            2007,
+            4,
+            false
+          ],
+          [
+            "half-LandscapeLeft",
+            2853,
+            2007,
+            4,
+            false
+          ],
+          [
+            "half-LandscapeRight",
+            2853,
+            2007,
+            4,
+            true
+          ],
+          [
+            "inner-Portrait",
+            2853,
+            2007,
+            4,
+            false
+          ],
+          [
+            "inner-LandscapeLeft",
+            2853,
+            2007,
+            4,
+            false
+          ],
+          [
+            "inner-LandscapeRight",
+            2853,
+            2007,
+            4,
+            true
+          ]
+        ],
+        "retainedPhases": [
+          "rotation-before",
+          "rotation-after",
+          "fold-before",
+          "half-ready",
+          "inner-ready",
+          "outer-return-ready",
+          "inner-again-ready"
+        ],
+        "uprightPrimaryHitShortAxisPointsBeforeAfter": {
+          "Expedition": [
+            31.33,
+            44.0
+          ],
+          "ControllerSurface": [
+            34.0,
+            48.0
+          ]
+        },
+        "measuredHingeDegrees": {
+          "half-ready": 85.401,
+          "inner-ready": 180,
+          "outer-return-ready": 0,
+          "inner-again-ready": 180,
+          "initial": 0,
+          "half-matrix": 94.62,
+          "restored": 0
+        },
+        "retainedGeometry": {
+          "rotation-before": {
+            "framebuffer": [
+              1398,
+              2034
+            ],
+            "safe": [
+              0,
+              0,
+              1146,
+              1932
+            ],
+            "pane": [
+              0.0,
+              0.0,
+              1146.0,
+              1932.0
+            ],
+            "activeDivisions": []
+          },
+          "rotation-after": {
+            "framebuffer": [
+              2034,
+              1398
+            ],
+            "safe": [
+              252,
+              0,
+              1782,
+              1296
+            ],
+            "pane": [
+              252.0,
+              0.0,
+              1782.0,
+              1296.0
+            ],
+            "activeDivisions": []
+          },
+          "fold-before": {
+            "framebuffer": [
+              2034,
+              1398
+            ],
+            "safe": [
+              252,
+              0,
+              1782,
+              1296
+            ],
+            "pane": [
+              252.0,
+              0.0,
+              1782.0,
+              1296.0
+            ],
+            "activeDivisions": []
+          },
+          "half-ready": {
+            "framebuffer": [
+              2853,
+              2007
+            ],
+            "safe": [
+              0,
+              0,
+              2853,
+              1905
+            ],
+            "pane": [
+              0.0,
+              0.0,
+              1367.0,
+              1905.0
+            ],
+            "activeDivisions": [
+              [
+                1367,
+                0,
+                120,
+                2007
+              ]
+            ]
+          },
+          "inner-ready": {
+            "framebuffer": [
+              2853,
+              2007
+            ],
+            "safe": [
+              0,
+              0,
+              2853,
+              1905
+            ],
+            "pane": [
+              0.0,
+              0.0,
+              2853.0,
+              1905.0
+            ],
+            "activeDivisions": []
+          },
+          "outer-return-ready": {
+            "framebuffer": [
+              2034,
+              1398
+            ],
+            "safe": [
+              252,
+              0,
+              1782,
+              1296
+            ],
+            "pane": [
+              252.0,
+              0.0,
+              1782.0,
+              1296.0
+            ],
+            "activeDivisions": []
+          },
+          "inner-again-ready": {
+            "framebuffer": [
+              2853,
+              2007
+            ],
+            "safe": [
+              0,
+              0,
+              2853,
+              1905
+            ],
+            "pane": [
+              0.0,
+              0.0,
+              2853.0,
+              1905.0
+            ],
+            "activeDivisions": []
+          }
+        },
+        "automaticLayoutUpdates": {
+          "rotation-before": 0,
+          "rotation-after": 1,
+          "fold-before": 1,
+          "half-ready": 3,
+          "inner-ready": 4,
+          "outer-return-ready": 5,
+          "inner-again-ready": 6
+        }
+      }
+    }
+  },
+  "additionalRuns": {
+    "SE3-final": {
+      "screenCases": 30,
+      "decodedPlayerFrames": 34,
+      "poseWindowOrientation": [
+        [
+          "phone-Portrait",
+          750,
+          1334,
+          1,
+          true
+        ],
+        [
+          "phone-LandscapeLeft",
+          1334,
+          750,
+          3,
+          true
+        ],
+        [
+          "phone-LandscapeRight",
+          1334,
+          750,
+          4,
+          true
+        ]
+      ],
+      "retainedPhases": [
+        "rotation-before",
+        "rotation-after"
+      ],
+      "stickBounds": {
+        "Portrait": {
+          "framebuffer": [
+            750,
+            1334
+          ],
+          "pane": [
+            0.0,
+            40.0,
+            750.0,
+            1294.0
+          ],
+          "renderedBounds": {
+            "stick": [
+              38,
+              1108,
+              226,
+              1296
+            ],
+            "thumb": [
+              94,
+              1164,
+              170,
+              1240
+            ]
+          }
+        },
+        "LandscapeLeft": {
+          "framebuffer": [
+            1334,
+            750
+          ],
+          "pane": [
+            40.0,
+            0.0,
+            1294.0,
+            750.0
+          ],
+          "renderedBounds": {
+            "stick": [
+              78,
+              524,
+              266,
+              712
+            ],
+            "thumb": [
+              134,
+              580,
+              210,
+              656
+            ]
+          }
+        },
+        "LandscapeRight": {
+          "framebuffer": [
+            1334,
+            750
+          ],
+          "pane": [
+            0.0,
+            0.0,
+            1294.0,
+            750.0
+          ],
+          "renderedBounds": {
+            "stick": [
+              38,
+              524,
+              226,
+              712
+            ],
+            "thumb": [
+              94,
+              580,
+              170,
+              656
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultDuoComparison": {
+    "screenCases": 90,
+    "retainedGeometry": {
+      "rotation-before": {
+        "framebuffer": [
+          1398,
+          2034
+        ],
+        "safe": [
+          0,
+          0,
+          1146,
+          1932
+        ],
+        "pane": [
+          0.0,
+          0.0,
+          1146.0,
+          1932.0
+        ],
+        "activeDivisions": []
+      },
+      "rotation-after": {
+        "framebuffer": [
+          2034,
+          1398
+        ],
+        "safe": [
+          252,
+          0,
+          1782,
+          1296
+        ],
+        "pane": [
+          252.0,
+          0.0,
+          1782.0,
+          1296.0
+        ],
+        "activeDivisions": []
+      },
+      "fold-before": {
+        "framebuffer": [
+          2034,
+          1398
+        ],
+        "safe": [
+          252,
+          0,
+          1782,
+          1296
+        ],
+        "pane": [
+          252.0,
+          0.0,
+          1782.0,
+          1296.0
+        ],
+        "activeDivisions": []
+      },
+      "half-ready": {
+        "framebuffer": [
+          2853,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          2853,
+          1905
+        ],
+        "pane": [
+          0.0,
+          0.0,
+          2853.0,
+          1905.0
+        ],
+        "activeDivisions": []
+      },
+      "inner-ready": {
+        "framebuffer": [
+          2853,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          2853,
+          1905
+        ],
+        "pane": [
+          0.0,
+          0.0,
+          2853.0,
+          1905.0
+        ],
+        "activeDivisions": []
+      },
+      "outer-return-ready": {
+        "framebuffer": [
+          2034,
+          1398
+        ],
+        "safe": [
+          252,
+          0,
+          1782,
+          1296
+        ],
+        "pane": [
+          252.0,
+          0.0,
+          1782.0,
+          1296.0
+        ],
+        "activeDivisions": []
+      },
+      "inner-again-ready": {
+        "framebuffer": [
+          2853,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          2853,
+          1905
+        ],
+        "pane": [
+          0.0,
+          0.0,
+          2853.0,
+          1905.0
+        ],
+        "activeDivisions": []
+      }
+    },
+    "observedLimitations": {
+      "automatic-reflow": [
+        "The mounted page did not observe the hinge-only change before capture"
+      ],
+      "separating-division": [
+        "Expected a divided half-open pane and a repeatable clear open pane"
+      ]
+    },
+    "windows": [
+      {
+        "pose": "outer-Portrait",
+        "framebuffer": [
+          1398,
+          2034
+        ],
+        "requested": "Portrait",
+        "unityOrientation": "Portrait",
+        "uiKitOrientation": 1,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          1398,
+          2034
+        ],
+        "safe": [
+          0,
+          0,
+          1146,
+          1932
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [],
+        "pane": [
+          0.0,
+          0.0,
+          1146.0,
+          1932.0
+        ],
+        "actionPoints": {
+          "x": 319.3332824707031,
+          "y": 43.999969482421875
+        }
+      },
+      {
+        "pose": "outer-LandscapeLeft",
+        "framebuffer": [
+          2034,
+          1398
+        ],
+        "requested": "LandscapeLeft",
+        "unityOrientation": "LandscapeLeft",
+        "uiKitOrientation": 3,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          2034,
+          1398
+        ],
+        "safe": [
+          252,
+          0,
+          1782,
+          1296
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [],
+        "pane": [
+          252.0,
+          0.0,
+          1782.0,
+          1296.0
+        ],
+        "actionPoints": {
+          "x": 516.6666259765625,
+          "y": 44.0
+        }
+      },
+      {
+        "pose": "outer-LandscapeRight",
+        "framebuffer": [
+          2034,
+          1398
+        ],
+        "requested": "LandscapeRight",
+        "unityOrientation": "LandscapeRight",
+        "uiKitOrientation": 4,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          2034,
+          1398
+        ],
+        "safe": [
+          0,
+          0,
+          1782,
+          1296
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [],
+        "pane": [
+          0.0,
+          0.0,
+          1782.0,
+          1296.0
+        ],
+        "actionPoints": {
+          "x": 516.6666259765625,
+          "y": 44.0
+        }
+      },
+      {
+        "pose": "half-Portrait",
+        "framebuffer": [
+          1407,
+          2007
+        ],
+        "requested": "Portrait",
+        "unityOrientation": "Portrait",
+        "uiKitOrientation": 1,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          1407,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          1407,
+          1905
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [],
+        "pane": [
+          0.0,
+          0.0,
+          1407.0,
+          1905.0
+        ],
+        "actionPoints": {
+          "x": 400.3333435058594,
+          "y": 44.0
+        }
+      },
+      {
+        "pose": "half-LandscapeLeft",
+        "framebuffer": [
+          2853,
+          2007
+        ],
+        "requested": "LandscapeLeft",
+        "unityOrientation": "LandscapeLeft",
+        "uiKitOrientation": 3,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          2853,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          2853,
+          1905
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [
+          [
+            1367,
+            0,
+            120,
+            2007
+          ]
+        ],
+        "pane": [
+          0.0,
+          0.0,
+          1367.0,
+          1905.0
+        ],
+        "actionPoints": {
+          "x": 387.6666564941406,
+          "y": 44.0
+        }
+      },
+      {
+        "pose": "half-LandscapeRight",
+        "framebuffer": [
+          2853,
+          2007
+        ],
+        "requested": "LandscapeRight",
+        "unityOrientation": "LandscapeRight",
+        "uiKitOrientation": 4,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          2853,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          2853,
+          1905
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [
+          [
+            1367,
+            0,
+            120,
+            2007
+          ]
+        ],
+        "pane": [
+          0.0,
+          0.0,
+          1367.0,
+          1905.0
+        ],
+        "actionPoints": {
+          "x": 387.6666564941406,
+          "y": 44.0
+        }
+      },
+      {
+        "pose": "inner-Portrait",
+        "framebuffer": [
+          1407,
+          2007
+        ],
+        "requested": "Portrait",
+        "unityOrientation": "Portrait",
+        "uiKitOrientation": 1,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          1407,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          1407,
+          1905
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [],
+        "pane": [
+          0.0,
+          0.0,
+          1407.0,
+          1905.0
+        ],
+        "actionPoints": {
+          "x": 400.3333435058594,
+          "y": 44.0
+        }
+      },
+      {
+        "pose": "inner-LandscapeLeft",
+        "framebuffer": [
+          2853,
+          2007
+        ],
+        "requested": "LandscapeLeft",
+        "unityOrientation": "LandscapeLeft",
+        "uiKitOrientation": 3,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          2853,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          2853,
+          1905
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [],
+        "pane": [
+          0.0,
+          0.0,
+          2853.0,
+          1905.0
+        ],
+        "actionPoints": {
+          "x": 374.6666564941406,
+          "y": 44.0
+        }
+      },
+      {
+        "pose": "inner-LandscapeRight",
+        "framebuffer": [
+          2853,
+          2007
+        ],
+        "requested": "LandscapeRight",
+        "unityOrientation": "LandscapeRight",
+        "uiKitOrientation": 4,
+        "rotationRealized": true,
+        "window": [
+          0,
+          0,
+          2853,
+          2007
+        ],
+        "safe": [
+          0,
+          0,
+          2853,
+          1905
+        ],
+        "activeOcclusions": [],
+        "activeDivisions": [],
+        "pane": [
+          0.0,
+          0.0,
+          2853.0,
+          1905.0
+        ],
+        "actionPoints": {
+          "x": 374.6666564941406,
+          "y": 44.0
+        }
+      }
+    ]
+  },
+  "primaryRunsConfiguration": {
+    "ordinaryPhones": "Unity default",
+    "Duo": "UIRequiresFullScreenIgnoredStartingWithVersion=27"
+  },
+  "finalWaypointPatch": {
+    "changedInputs": [
+      "DeviceScreenBinder.cs",
+      "IPhoneReplayPlayer.cs",
+      "WaypointCases.cs",
+      "WaypointMap.cs"
+    ],
+    "runs": {
+      "waypoint-Duo": {
+        "screenCases": 9,
+        "bothZoomActions": [
+          {
+            "pose": "half-LandscapeLeft",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "half-LandscapeRight",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "half-Portrait",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "inner-LandscapeLeft",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "inner-LandscapeRight",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "inner-Portrait",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "outer-LandscapeLeft",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "outer-LandscapeRight",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "outer-Portrait",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          }
+        ],
+        "decodedPlayerFrames": 16
+      },
+      "waypoint-SE3": {
+        "screenCases": 3,
+        "bothZoomActions": [
+          {
+            "pose": "phone-LandscapeLeft",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "phone-LandscapeRight",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          },
+          {
+            "pose": "phone-Portrait",
+            "zoomOutShortAxisPt": 48.0,
+            "fivePointPick": true
+          }
+        ],
+        "decodedPlayerFrames": 5
+      }
+    },
+    "binariesSHA256": {
+      "UnityFramework": "6b4049a23404308c0594f0785f04049206aa13f92bf69d50524956748a63ffa8",
+      "receiver": "83bed85e8cc14f0b2adb0034d2f74378fd85e7b15e95cc4adf51e5549088ea39"
+    },
+    "changedInputSHA256": {
+      "DeviceScreenBinder.cs": "8add657f02a0a20d8eb1857ea7661c50d4549b28a7951d605dfbebf0358ebee2",
+      "IPhoneReplayPlayer.cs": "bf4a96aa317ae0ec00ef2efb550f44db11815c40a0666119fb1be81c381f0975",
+      "WaypointCases.cs": "5318fc6eed831a59c703799e95c73c3fc40b1f65b5b0ebc6d643b80685413179",
+      "WaypointMap.cs": "921ea0c9eb0a4da1360ac61a4bb2d2e956ffa14e0301d2361d60fbda3c355236"
+    }
+  },
+  "build": {
+    "bundle": "com.DefaultCompany.receiver",
+    "sdk": "iphonesimulator27.2",
+    "binariesSHA256": {
+      "UnityFramework": "648762483b251f5ab021fe721e54fe33fa24e151eaba659e843d0224c7ab43da",
+      "receiver": "83bed85e8cc14f0b2adb0034d2f74378fd85e7b15e95cc4adf51e5549088ea39"
+    },
+    "inputSHA256": {
+      "Atlas.uss": "dd538659c55a29702058b90f2e875366338ec4d6e0b9c4bc6f59182723f0155a",
+      "Atlas.uxml": "a5646b02475122ec74367dadb6a7c639551db6ab4fed37eb2bd40e876048e747",
+      "AtlasCases.cs": "30e2607bff2aac10345fd73ab28b0999e0b4028ae1d51701b35a75f55ab58129",
+      "AtlasDirectory.cs": "7d12491a49344d572a7d913ae2ab91ac3d4cb27f15fd6ccc8b26266036edd14b",
+      "ControllerSurface.cs": "09ec309910eabeeda9f33c2a3435bdc0f30bd7b6393f79662dc05ad6a99e8efb",
+      "ControllerSurface.uss": "a4052eeb0b82d6b508d41285f36204428e88420028edd1b3417cfd7ab0606ae1",
+      "ControllerSurface.uxml": "d72ac4e69f80212320338e19c413666800e4e0f3b5a90f5ae6d915825f42f0a7",
+      "DeviceScreenBinder.cs": "1081bcb748ebd90e2e908098b1a900c349e4324547f0648264dbfc858c2d2bfc",
+      "Dialog.uxml": "8b3a02fd251f805832ea84b4890f10a7b1fde375ac9c5a1939bd3adcb0a1effc",
+      "Expedition.uxml": "aa2d33df3d65e7ba07c26891acaef5d7ea7b624da12213aea43ef6a8805ec044",
+      "Hud.uxml": "a21e9ab86c85186efc5bac3a6eefc571b7e245cb5daaf44dedd13d1f116cc03a",
+      "IPhoneReplayPlayer.cs": "7753ae8d3212b35c2d2220cb9ebe0123ec0c8b4509311ea19197e57a6c9dc980",
+      "Inventory.uxml": "23b5d00b1946826e6e7e29df7b7a749244f9738bd67f131bfc3f7afc0c02d851",
+      "InventoryReorder.cs": "3a668177baab266067c14224613063f06ab4ca0cc909939c505d4e8229772ad6",
+      "InventoryReorder.uss": "48a49780a22e0be093c986154ef46865d0ff99133c33260115947241c909f2b9",
+      "Item.uxml": "d18a976fa2a3e27a062c4f1f1b1ec0a350e08cdfddfa7e363b189b1de634f54c",
+      "LayoutFeedback.cs": "7784fa92875f61b7f684ac1877ee3d57e0a6c2a3b9747c248e7fa39cd7a2fa10",
+      "LayoutFeedback.uss": "a209e858c1d517309114c469d9eb6e93e267ab87eb6735199011acdae5bb8324",
+      "LayoutStrings.json": "ed9cdd9f2e0051d308c3095526f2ac57838cdfcf13cce31e40a0cd9bee25935d",
+      "LayoutText.cs": "111755f9548382b04a4959e54d23b6426cff3e976ec719fe87b6f860a033004c",
+      "Layouts.uss": "2b58d03a12f458e1e49763ace1af2f4c5e2b42aeebcd3c5f282e6ce01f857eef",
+      "Preferences.uxml": "04df5e5dcf4861c447311f22d965a9eb77432abd111e0e0907e8a271456b5e53",
+      "Quests.uxml": "108909804c7f8a0fc6504ae4faba030c382187c18c6f18f9e0b44b0f765a9744",
+      "ReplayBuilder.cs": "a3f92b7b7482d727f1c18bb4729e8447824c9ecc8ad9ff6056515260b24b143a",
+      "ReplayDisplay.mm": "4f095027368ff345a298e74416f89a53af8aa5fc7b974a4b949f64e30e1cc0b2",
+      "ScreenFamilies.uss": "73bf803944dd848e88af102f570a5c83cbb9f3157253f9a15a4a125cb67def77",
+      "ScreenFamilyViews.cs": "2a044db515b6b2b7bcf8301b7f110cbbc512f84d4f6520eb2b6a641cd1b0337f",
+      "SettingRow.uxml": "7ba016b6421a493c0d82e30c7d907a063fa737ae40b9c7c783b7208f96f51dc1",
+      "Settings.uxml": "c261808fa06f27fac6ee04984d2e34d6853dfca99c69db3f23df6bb0ad9c1f33",
+      "Waypoint.uss": "b51959f654d2f7e55bb4783f31fd13e05bafa4339d48969f77846729dc282dcc",
+      "Waypoint.uxml": "be0cf689a2309b42631c99108b66712cfd1702897963577867a9e7b3bf1e8176",
+      "WaypointCases.cs": "a6ca12a9c3270ac5f44d30296bd2573ee3ad6f6dcfa8228dd7eb62910d02525d",
+      "WaypointMap.cs": "adb2bcc9535f9a81022d4b5119d3c25b654dbefc05ee27d8e7ccc9c8b806f345"
+    }
+  },
+  "unityEditorRuns": {
+    "accepted-iphone": {
+      "profileSet": "iphone",
+      "profileCount": 61,
+      "locales": [
+        "en-US",
+        "de-DE"
+      ],
+      "primaryScreenCells": 1220,
+      "verifiedFrameCount": 2201,
+      "framesByScreen": {
+        "expedition": 244,
+        "controllersurface": 122,
+        "hud": 127,
+        "waypoint": 122,
+        "inventory": 122,
+        "atlas": 244,
+        "settings": 122,
+        "preferences": 610,
+        "dialog": 244,
+        "quests": 244
+      },
+      "waypointFixtureSHA256": "a6ca12a9c3270ac5f44d30296bd2573ee3ad6f6dcfa8228dd7eb62910d02525d"
+    },
+    "repeat-iphone": {
+      "profileSet": "iphone",
+      "profileCount": 61,
+      "locales": [
+        "en-US",
+        "de-DE"
+      ],
+      "primaryScreenCells": 1220,
+      "verifiedFrameCount": 2201,
+      "framesByScreen": {
+        "expedition": 244,
+        "controllersurface": 122,
+        "hud": 127,
+        "waypoint": 122,
+        "inventory": 122,
+        "atlas": 244,
+        "settings": 122,
+        "preferences": 610,
+        "dialog": 244,
+        "quests": 244
+      },
+      "waypointFixtureSHA256": "a6ca12a9c3270ac5f44d30296bd2573ee3ad6f6dcfa8228dd7eb62910d02525d"
+    },
+    "final-waypoint-iphone": {
+      "profileSet": "iphone",
+      "profileCount": 61,
+      "locales": [
+        "en-US",
+        "de-DE"
+      ],
+      "primaryScreenCells": 122,
+      "verifiedFrameCount": 122,
+      "framesByScreen": {
+        "waypoint": 122
+      },
+      "waypointFixtureSHA256": "5318fc6eed831a59c703799e95c73c3fc40b1f65b5b0ebc6d643b80685413179"
+    },
+    "final-waypoint-base": {
+      "profileSet": "base",
+      "profileCount": 25,
+      "locales": [
+        "en-US",
+        "de-DE"
+      ],
+      "primaryScreenCells": 50,
+      "verifiedFrameCount": 50,
+      "framesByScreen": {
+        "waypoint": 50
+      },
+      "waypointFixtureSHA256": "5318fc6eed831a59c703799e95c73c3fc40b1f65b5b0ebc6d643b80685413179"
+    },
+    "repeat-waypoint-iphone": {
+      "profileSet": "iphone",
+      "profileCount": 61,
+      "locales": [
+        "en-US",
+        "de-DE"
+      ],
+      "primaryScreenCells": 122,
+      "verifiedFrameCount": 122,
+      "framesByScreen": {
+        "waypoint": 122
+      },
+      "waypointFixtureSHA256": "5318fc6eed831a59c703799e95c73c3fc40b1f65b5b0ebc6d643b80685413179"
+    },
+    "final-base": {
+      "profileSet": "base",
+      "profileCount": 25,
+      "locales": [
+        "en-US",
+        "de-DE"
+      ],
+      "primaryScreenCells": 500,
+      "verifiedFrameCount": 914,
+      "framesByScreen": {
+        "expedition": 100,
+        "controllersurface": 56,
+        "hud": 55,
+        "waypoint": 50,
+        "inventory": 51,
+        "atlas": 102,
+        "settings": 50,
+        "preferences": 250,
+        "dialog": 100,
+        "quests": 100
+      },
+      "waypointFixtureSHA256": "5318fc6eed831a59c703799e95c73c3fc40b1f65b5b0ebc6d643b80685413179"
+    }
+  },
+  "unityEditorRepeatedImageComparison": {
+    "expedition": {
+      "total": 244,
+      "samePNG": 77,
+      "samePixels": 77
+    },
+    "controllersurface": {
+      "total": 122,
+      "samePNG": 122,
+      "samePixels": 122
+    },
+    "hud": {
+      "total": 127,
+      "samePNG": 41,
+      "samePixels": 41
+    },
+    "waypoint": {
+      "total": 122,
+      "samePNG": 122,
+      "samePixels": 122
+    },
+    "inventory": {
+      "total": 122,
+      "samePNG": 122,
+      "samePixels": 122
+    },
+    "atlas": {
+      "total": 244,
+      "samePNG": 244,
+      "samePixels": 244
+    },
+    "settings": {
+      "total": 122,
+      "samePNG": 122,
+      "samePixels": 122
+    },
+    "preferences": {
+      "total": 610,
+      "samePNG": 51,
+      "samePixels": 51
+    },
+    "dialog": {
+      "total": 244,
+      "samePNG": 244,
+      "samePixels": 244
+    },
+    "quests": {
+      "total": 244,
+      "samePNG": 244,
+      "samePixels": 244
+    }
+  }
+}
