@@ -22,7 +22,7 @@ For a new screen follow the [screen construction workflow](#build-a-screen), inc
 | Whole UI inventory across devices, states and input modes | [Inventory and test a whole UI](references/layout-and-input.md#inventory-and-test-a-whole-ui). |
 | Wrong button, duplicate input or broken return route | [Buttons and destination pages](references/layout-and-input.md#check-buttons-and-destination-pages). Replay the actual hit, destination and return. |
 | Text clipped or stale after a language change | [Verify each locale](references/layout-and-input.md#verify-each-locale) at the affected viewport. For missing keys, new copy or formatting use [text binding](references/layout-and-input.md#bind-player-facing-text-by-key). |
-| Incorrect size, inset, notch, orientation or fold | [Adapt an existing screen](#adapt-an-existing-screen). |
+| Incorrect size, inset, notch, orientation or fold | [Adapt an existing screen](#adapt-an-existing-screen). On iPhone, [measure the live window, point-sized controls and Duo pose changes](references/screen-adaptation.md#measure-iphone-fit-in-the-running-player). |
 | UXML grows a second tree, a reused row binds the wrong item, or USS differs from the design | [Import and inspect the mounted tree](references/layout-and-input.md#import-and-inspect-the-mounted-tree). |
 | Controls become tiny on the cover display or oversized when unfolded | [Set bounds for each group](references/screen-adaptation.md#set-bounds-for-each-group) and replay the pane change with the screen open. |
 | A press feels inert, changes its hit box or leaves a recycled row highlighted | [Give actions visible feedback](references/layout-and-input.md#give-actions-visible-feedback). |

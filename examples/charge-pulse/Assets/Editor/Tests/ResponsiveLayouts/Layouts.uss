@@ -95,6 +95,15 @@
     padding: 24px;
 }
 
+.shallow-pane .inventory-subtitle {
+    margin-bottom: 6px;
+}
+
+.shallow-pane .hud-objective {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
 .screen .hud-objective .title {
     font-size: 30px;
 }
@@ -326,11 +335,11 @@
     padding-right: 8px;
 }
 
-.narrow-body .wing {
+.narrow-body .wing, .compact-header .wing {
     width: 88px;
 }
 
-.narrow-body .hud-title {
+.narrow-body .hud-title, .compact-header .hud-title {
     font-size: 22px;
 }
 
@@ -343,7 +352,7 @@
     padding-right: 4px;
 }
 
-.narrow-body .journal-header .title {
+.narrow-body .journal-header .title, .compact-header .journal-header .title {
     font-size: 26px;
 }
 

@@ -93,8 +93,11 @@ namespace Qin.UnitySamples.Tests
                 AssertTextFits(title);
                 AssertInside(tab.tabHeader.worldBound, form.worldBound, label + " tab");
             }
+            ScrollView general = form.Q<ScrollView>("form-scroll");
             foreach (Label field in new[] { callSign.labelElement, alerts.labelElement, volume.labelElement })
             {
+                general.ScrollTo(field.parent);
+                yield return null;
                 AssertTextFits(field);
                 Assert.That(field.text, Is.EqualTo(text.Resolve("preferences." + field.parent.name)), label);
                 VisualElement input = field.parent.Q(className: BaseField<int>.inputUssClassName);
@@ -104,6 +107,8 @@ namespace Qin.UnitySamples.Tests
                 Assert.That(hit == field.parent || field.parent.Contains(hit), Is.True, label + " " + field.parent.name + " upper hit edge");
             }
 
+            general.scrollOffset = Vector2.zero;
+            yield return null;
             callSign.value = callSign.value == "Ridge" ? "Alder" : "Ridge";
             string typed = callSign.value;
             bool initialAlerts = alerts.value;

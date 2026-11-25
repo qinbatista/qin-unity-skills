@@ -15,7 +15,17 @@ namespace Qin.UnitySamples.Tests
             ControllerSurface surface = null;
             yield return Review("ControllerSurface", (screen, _) => surface = new ControllerSurface(screen),
                 (screen, profile, strings, target) => CheckControllerSurface(screen, surface, profile, strings, target),
-                profile => surface.SetExclusion(new Rect(profile.Cutout.position / profile.Scale, profile.Cutout.size / profile.Scale)));
+                profile => surface.SetExclusion(ControllerExclusion(profile)));
+        }
+
+        // The safe/selected pane already clears full edge strips and separating dividers.
+        // Give the local joystick owner only the part of the aperture still inside that foreground.
+        static Rect ControllerExclusion(LayoutProfile profile)
+        {
+            if (!profile.Safe.Overlaps(profile.Cutout)) return default;
+            Vector2 low = Vector2.Max(profile.Safe.min, profile.Cutout.min) / profile.Scale;
+            Vector2 high = Vector2.Min(profile.Safe.max, profile.Cutout.max) / profile.Scale;
+            return Rect.MinMaxRect(low.x, low.y, high.x, high.y);
         }
 
         static IEnumerator CheckControllerSurface(VisualElement screen, ControllerSurface surface, LayoutProfile profile,
@@ -28,14 +38,14 @@ namespace Qin.UnitySamples.Tests
             Button pause = screen.Q<Button>("pause");
             Button resume = screen.Q<Button>("resume");
             Rect pane = screen.Q("safe").worldBound;
-            Rect cutout = new Rect(profile.Cutout.position / profile.Scale, profile.Cutout.size / profile.Scale);
             string cell = profile.Name + "-" + strings.Locale;
             bool captureState = strings.Locale == "en-US" && (profile.Name == "compact-portrait" ||
                 profile.Name == "duo-outer-landscape-right" || profile.Name == "separating-left-pane");
             foreach (VisualElement element in new VisualElement[] { stick, pulse, pause, screen.Q("field") })
             {
                 AssertInside(element.worldBound, pane, cell + " " + element.name);
-                Assert.That(cutout.width > 0f && element.worldBound.Overlaps(cutout), Is.False, cell + " " + element.name);
+                foreach (Rect reservation in profile.PanelReservations)
+                    Assert.That(element.worldBound.Overlaps(reservation), Is.False, cell + " " + element.name + " overlaps " + reservation);
             }
             foreach (VisualElement control in new VisualElement[] { stick, pulse, pause })
             {

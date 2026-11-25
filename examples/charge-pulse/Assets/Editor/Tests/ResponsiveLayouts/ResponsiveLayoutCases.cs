@@ -15,7 +15,7 @@ namespace Qin.UnitySamples.Tests
         const float Tolerance = 1.1f;
 
         // All inputs are explicit top-left pixel fixtures. Display identity is independent of window size.
-        static readonly LayoutProfile[] Profiles =
+        static readonly LayoutProfile[] BaseProfiles =
         {
             new LayoutProfile("portrait-notch", 540, 1170, new Rect(0, 66, 540, 1072), new Rect(192, 12, 156, 36)),
             new LayoutProfile("landscape-left", 1170, 540, new Rect(74, 0, 1072, 518), new Rect(12, 192, 36, 156)),
@@ -24,7 +24,7 @@ namespace Qin.UnitySamples.Tests
             new LayoutProfile("duo-outer-portrait", 1398, 2034, new Rect(0, 0, 1398, 2034), new Rect(1200, 88, 110, 110), HeaderMode.Outer),
             new LayoutProfile("duo-inner-same-window", 1398, 2034, new Rect(0, 72, 1398, 1902), default, HeaderMode.Safe),
             new LayoutProfile("duo-outer-landscape-left", 2034, 1398, new Rect(0, 0, 2034, 1398), new Rect(88, 88, 110, 110), HeaderMode.Outer),
-            new LayoutProfile("duo-outer-landscape-right", 2034, 1398, new Rect(0, 0, 2034, 1398), new Rect(1836, 1200, 110, 110), HeaderMode.Outer),
+            new LayoutProfile("duo-outer-landscape-right", 2034, 1398, new Rect(0, 0, 2034, 1398), new Rect(1836, 1200, 110, 110), HeaderMode.Outer, true),
             new LayoutProfile("duo-inner-portrait", 1878, 2670, new Rect(0, 80, 1878, 2530), default, HeaderMode.Safe),
             new LayoutProfile("duo-inner-landscape", 2670, 1878, new Rect(40, 56, 2590, 1750), default, HeaderMode.Safe),
             // Host-selected primary pane with a separating vertical hinge. The full window stays landscape.
@@ -93,17 +93,19 @@ namespace Qin.UnitySamples.Tests
                     Assert.That(leftBounds.xMax, Is.LessThanOrEqualTo(centerBounds.xMin + Tolerance));
                     Assert.That(centerBounds.xMax, Is.LessThanOrEqualTo(rightBounds.xMin + Tolerance));
                 }
-                Assert.That(leftBounds.width * profile.Scale, Is.EqualTo((profile.NarrowBody ? 88f : 124f) * profile.Scale).Within(Tolerance));
+                Assert.That(leftBounds.width * profile.Scale, Is.EqualTo((profile.CompactHeader ? 88f : 124f) * profile.Scale).Within(Tolerance));
                 Assert.That(leftBounds.height * profile.Scale, Is.GreaterThanOrEqualTo(44f), "fixture minimum hit height");
                 Assert.That(leftBounds.height * profile.Scale, Is.EqualTo(48f * profile.Scale).Within(Tolerance));
+                if (profile.PixelsPerPoint > 0f && text.Locale == text.Locales[0])
+                {
+                    float pixelHeight = leftBounds.height * profile.Scale;
+                    Debug.Log($"iPhone HUD hit {profile.Name}: {pixelHeight:F2} framebuffer pixels / {profile.PixelsPerPoint:F2} = {pixelHeight / profile.PixelsPerPoint:F2} UIKit points");
+                }
                 foreach (VisualElement group in screen.Q("header").Children())
                 {
                     AssertInside(group.worldBound, screen.worldBound, group.name);
-                    if (profile.Cutout.width > 0f)
-                    {
-                        Rect obstruction = new Rect(profile.Cutout.position / profile.Scale, profile.Cutout.size / profile.Scale);
-                        Assert.That(group.worldBound.Overlaps(obstruction), Is.False, group.name);
-                    }
+                    foreach (Rect reservation in profile.PanelReservations)
+                        Assert.That(group.worldBound.Overlaps(reservation), Is.False, group.name + " overlaps " + reservation);
                 }
                 if (profile.Header == HeaderMode.Standard && profile.Portrait && profile.Cutout.width > 0f)
                     Assert.That(centerBounds.yMin * profile.Scale, Is.GreaterThanOrEqualTo(profile.Cutout.yMax - Tolerance), "title clears the portrait aperture");
@@ -120,8 +122,8 @@ namespace Qin.UnitySamples.Tests
                 AssertInside(objectiveTitle.worldBound, objective.worldBound, objectiveTitle.text);
                 Assert.That(objective.worldBound.yMax, Is.LessThan(tools.worldBound.yMin));
                 AssertInside(tools.worldBound, screen.Q("safe").worldBound, tools.name);
-                if (profile.Cutout.width > 0f)
-                    Assert.That(tools.worldBound.Overlaps(new Rect(profile.Cutout.position / profile.Scale, profile.Cutout.size / profile.Scale)), Is.False, tools.name);
+                foreach (Rect reservation in profile.PanelReservations)
+                    Assert.That(tools.worldBound.Overlaps(reservation), Is.False, tools.name);
                 bool lastCapture = profile.Name == Profiles[Profiles.Length - 1].Name && text.Locale == text.Locales[text.Locales.Count - 1];
                 return lastCapture ? CheckButtonFeedback(screen, left, target, $"hud-{profile.Name}-{text.Locale}") : null;
             });
@@ -399,6 +401,9 @@ namespace Qin.UnitySamples.Tests
                     onProfile?.Invoke(profile);
                     yield return null;
                     yield return null;
+                    Rect actualPane = screen.Q("safe").worldBound;
+                    Assert.That(Vector2.Distance(actualPane.min, profile.Safe.min / profile.Scale), Is.LessThanOrEqualTo(Tolerance), profile.Name + " pane start");
+                    Assert.That(Vector2.Distance(actualPane.max, profile.Safe.max / profile.Scale), Is.LessThanOrEqualTo(Tolerance), profile.Name + " pane end");
                     if (priorFocus != null)
                         Assert.That(screen.focusController.focusedElement, Is.SameAs(priorFocus), profile.Name);
                     if (journal != null && !firstView)
@@ -441,6 +446,7 @@ namespace Qin.UnitySamples.Tests
                         Assert.That(screen.worldBound.width * profile.Scale, Is.EqualTo(profile.Size.x).Within(Tolerance));
                         Assert.That(screen.worldBound.height * profile.Scale, Is.EqualTo(profile.Size.y).Within(Tolerance));
                         AssertVisibleTextFits(strings);
+                        if (profile.PanelReservations.Length > 0 || profile.PixelsPerPoint > 0f) AssertProfileActions(screen, profile);
                         if (idleButtons != null)
                         {
                             yield return new WaitUntil(idleButtons, TimeSpan.FromSeconds(3), () => Assert.Fail("Button feedback did not settle"));
@@ -455,7 +461,7 @@ namespace Qin.UnitySamples.Tests
                         if (checkFrames != null) yield return checkFrames;
                     }
                     // Exercise the opposite resize behavior when opening the taller inner display mid-list.
-                    inspectMiddleOnTransfer = journal != null && profile.Name == "duo-outer-landscape-right";
+                    inspectMiddleOnTransfer = journal != null && profile.CheckMiddleOnTransfer;
                     if (inspectMiddleOnTransfer)
                     {
                         journal.scrollOffset = new Vector2(0f, 60f);
@@ -480,7 +486,9 @@ namespace Qin.UnitySamples.Tests
             screen.EnableInClassList("wide-body", profile.WideBody);
             screen.EnableInClassList("narrow-body", profile.NarrowBody);
             screen.EnableInClassList("small-pane", profile.SmallPane);
+            screen.EnableInClassList("compact-header", profile.CompactHeader);
             screen.EnableInClassList("short-body", safePixels.height / scale < 700f);
+            screen.EnableInClassList("shallow-pane", safePixels.height / scale < 340f);
             VisualElement safe = screen.Q("safe");
             safe.style.left = safePixels.xMin / scale;
             safe.style.right = (profile.Size.x - safePixels.xMax) / scale;
@@ -495,8 +503,8 @@ namespace Qin.UnitySamples.Tests
                 if (profile.Header == HeaderMode.Safe) top += safePixels.yMin / scale;
                 if (profile.Header == HeaderMode.Outer && profile.Cutout.center.y < profile.Size.y / 2f)
                 {
-                    if (profile.Cutout.center.x > profile.Size.x / 2f) right = profile.Cutout.xMin;
-                    else left = profile.Cutout.xMax;
+                    if (profile.Cutout.center.x > profile.Size.x / 2f) right = Mathf.Min(right, profile.Cutout.xMin);
+                    else left = Mathf.Max(left, profile.Cutout.xMax);
                     top = profile.Cutout.center.y / scale - 24f;
                 }
                 header.style.left = left / scale + 18f;
@@ -511,7 +519,34 @@ namespace Qin.UnitySamples.Tests
             cutout.style.top = profile.Cutout.y / scale;
             cutout.style.width = profile.Cutout.width / scale;
             cutout.style.height = profile.Cutout.height / scale;
-            cutout.style.display = profile.Cutout.width > 0f ? DisplayStyle.Flex : DisplayStyle.None;
+            // Native reservation bounds can describe a full system strip, even when most of its pixels show scenery.
+            cutout.style.display = profile.PaintCutout && profile.Cutout.width > 0f ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        static void AssertProfileActions(VisualElement screen, LayoutProfile profile)
+        {
+            foreach (Button action in screen.Query<Button>().ToList())
+            {
+                Rect target = action.worldBound;
+                if (profile.PixelsPerPoint > 0f && action.enabledInHierarchy && action.GetFirstAncestorOfType<Scroller>() == null &&
+                    target.width > 0f && target.height > 0f && screen.panel.Pick(target.center) == action)
+                {
+                    float pointsPerUnit = profile.Scale / profile.PixelsPerPoint;
+                    float smallerAxisPoints = Mathf.Min(target.width, target.height) * pointsPerUnit;
+                    Assert.That(smallerAxisPoints, Is.GreaterThanOrEqualTo(44f - 1f / profile.PixelsPerPoint),
+                        profile.Name + " " + action.name + " primary hit size in UIKit points");
+                }
+                foreach (Rect obstruction in profile.PanelReservations)
+                {
+                    Rect bounds = action.worldBound;
+                    if (!bounds.Overlaps(obstruction)) continue;
+                    Vector2 hitPoint = (Vector2.Max(bounds.min, obstruction.min) + Vector2.Min(bounds.max, obstruction.max)) * 0.5f;
+                    VisualElement picked = screen.panel.Pick(hitPoint);
+                    // Picking at the overlap excludes buttons hidden by tabs, modal layers or scroll clipping.
+                    Assert.That(picked == action || (picked != null && action.Contains(picked)), Is.False,
+                        profile.Name + " " + action.name + " hit target under " + obstruction);
+                }
+            }
         }
 
         static void Submit(Button button)
@@ -574,26 +609,42 @@ namespace Qin.UnitySamples.Tests
             public readonly Rect Safe;
             public readonly Rect Cutout;
             public readonly HeaderMode Header;
+            public readonly bool CheckMiddleOnTransfer;
+            public readonly bool PaintCutout;
+            public readonly Rect[] PanelReservations;
+            public readonly float PixelsPerPoint;
             // Two 284-unit Settings cards with 7-unit margins on each side need 596 units.
             public bool WideBody => Safe.width / Scale >= 600f;
             public bool NarrowBody => Safe.width / Scale < 400f;
+            // Two 124-unit wings, 36 units of margins and the 157-unit title need 441 units before pixel rounding.
+            public bool CompactHeader => Safe.width / Scale < 442f;
             // Two 88-unit controls, 36 units of margins and a 133-unit translated title need 345 units.
             public bool SmallPane => Safe.width / Scale < 346f;
             public bool Portrait => Size.y > Size.x;
-            public float Scale => Mathf.Max(1f, ProportionalScale);
+            public float Scale => Mathf.Max(Mathf.Max(1f, ProportionalScale), PixelsPerPoint);
             public float ProportionalScale => Portrait ? Mathf.Min(Size.x / 540f, Size.y / 960f) : Mathf.Min(Size.x / 960f, Size.y / 540f);
 
             public LayoutProfile(string name, int width, int height) : this(name, width, height, new Rect(0, 0, width, height), default)
             {
             }
 
-            public LayoutProfile(string name, int width, int height, Rect safe, Rect cutout, HeaderMode header = HeaderMode.Standard)
+            public LayoutProfile(string name, int width, int height, Rect safe, Rect cutout, HeaderMode header = HeaderMode.Standard, bool checkMiddleOnTransfer = false, bool paintCutout = true, Rect[] reservations = null, float pixelsPerPoint = 0f)
             {
                 Name = name;
                 Size = new Vector2Int(width, height);
                 Safe = safe;
                 Cutout = cutout;
                 Header = header;
+                CheckMiddleOnTransfer = checkMiddleOnTransfer;
+                PaintCutout = paintCutout;
+                PixelsPerPoint = pixelsPerPoint;
+                Rect[] pixels = reservations ?? (cutout.width > 0f ? new[] { cutout } : Array.Empty<Rect>());
+                PanelReservations = new Rect[pixels.Length];
+                for (int index = 0; index < pixels.Length; index++)
+                {
+                    Rect pixelRegion = pixels[index];
+                    PanelReservations[index] = new Rect(pixelRegion.position / Scale, pixelRegion.size / Scale);
+                }
             }
         }
     }

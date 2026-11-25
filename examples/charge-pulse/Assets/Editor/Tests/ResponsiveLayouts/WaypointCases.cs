@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
@@ -21,10 +22,46 @@ namespace Qin.UnitySamples.Tests
             WaypointMap map = null;
             try
             {
-                yield return Review("Waypoint", (screen, text) => map = new WaypointMap(screen, camera),
-                    (screen, profile, text, target) => CheckWaypoint(map, screen));
+                IEnumerator Check(VisualElement screen, LayoutProfile profile, LayoutText text, RenderTexture target)
+                {
+                    Rect toolbar = screen.Q("map-toolbar").worldBound;
+                    Button zoomIn = screen.Q<Button>("zoom-in");
+                    Button zoomOut = screen.Q<Button>("zoom-out");
+                    foreach (Button button in new[] { zoomOut, zoomIn })
+                    {
+                        AssertInside(button.worldBound, toolbar, button.name);
+                        Assert.That(button.panel.Pick(button.worldBound.center), Is.SameAs(button), button.name);
+                        foreach (Rect obstruction in profile.PanelReservations)
+                            Assert.That(button.worldBound.Overlaps(obstruction), Is.False, button.name + " overlaps " + obstruction);
+                    }
+                    Rect natural = Rect.MinMaxRect(toolbar.xMax - (zoomIn.worldBound.xMax - zoomOut.worldBound.xMin),
+                        toolbar.yMin, toolbar.xMax, toolbar.yMax);
+                    if (!Array.Exists(profile.PanelReservations, area => area.Overlaps(natural)))
+                        Assert.That(zoomIn.worldBound.xMax, Is.EqualTo(toolbar.xMax).Within(Tolerance), "restored toolbar anchor");
+                    yield return CheckWaypoint(map, screen);
+                    if (profile.Name != Profiles[Profiles.Length - 1].Name || text.Locale != text.Locales[text.Locales.Count - 1])
+                        yield break;
+
+                    // A replaced document can still receive layout and paint callbacks for one frame.
+                    map.Dispose();
+                    Object.Destroy(rig);
+                    yield return null;
+                    float before = map.Surface.worldBound.width;
+                    map.Surface.style.width = before - 24f;
+                    map.Surface.MarkDirtyRepaint();
+                    Submit(screen.Q<Button>("zoom-in"));
+                    yield return null;
+                    yield return null;
+                    Assert.That(map.Surface.worldBound.width, Is.LessThan(before - 10f), "retired map relayout");
+                }
+                yield return Review("Waypoint", (screen, text) => map = new WaypointMap(screen, camera), Check,
+                    profile => map.SetExclusion(new Rect(profile.Cutout.position / profile.Scale, profile.Cutout.size / profile.Scale)));
             }
-            finally { Object.Destroy(rig); }
+            finally
+            {
+                map?.Dispose();
+                if (rig != null) Object.Destroy(rig);
+            }
         }
 
         static IEnumerator CheckWaypoint(WaypointMap map, VisualElement screen)
@@ -75,7 +112,7 @@ namespace Qin.UnitySamples.Tests
             yield return null;
         }
 
-        sealed class WaypointMap
+        sealed class WaypointMap : IDisposable
         {
             static readonly Vector3[] Trail =
             {
@@ -83,6 +120,10 @@ namespace Qin.UnitySamples.Tests
                 new Vector3(-1, -.4f), new Vector3(-.9f, .6f), new Vector3(1.25f, .8f)
             };
             readonly Camera _camera;
+            readonly VisualElement _toolbar;
+            readonly Button _zoomIn, _zoomOut;
+            Rect _exclusion;
+            int _pointer = -1;
             Vector3 _worldPoint = new Vector3(1.25f, .8f, 0);
             public VisualElement Surface { get; }
             public VisualElement Pin { get; }
@@ -92,35 +133,97 @@ namespace Qin.UnitySamples.Tests
                 _camera = camera;
                 Surface = screen.Q("map");
                 Pin = screen.Q("pin");
-                Surface.RegisterCallback<GeometryChangedEvent>(_ =>
-                {
-                    Rect area = Surface.contentRect;
-                    if (area.height <= 0 || area.width <= 0) return;
-                    _camera.aspect = area.width / area.height;
-                    UpdatePin();
-                });
+                _toolbar = screen.Q("map-toolbar");
+                _zoomIn = screen.Q<Button>("zoom-in");
+                _zoomOut = screen.Q<Button>("zoom-out");
+                _toolbar.RegisterCallback<GeometryChangedEvent>(ToolbarLayout);
+                Surface.RegisterCallback<GeometryChangedEvent>(OnLayout);
                 Surface.generateVisualContent += DrawMap;
-                screen.Q<Button>("zoom-in").clicked += () => Zoom(.8f);
-                screen.Q<Button>("zoom-out").clicked += () => Zoom(1.25f);
-                Pin.RegisterCallback<PointerDownEvent>(evt =>
-                {
-                    if (evt.button != 0) return;
-                    Pin.Focus();
-                    Pin.CapturePointer(evt.pointerId);
-                    Pin.AddToClassList("dragging");
-                    evt.StopPropagation();
-                });
-                Pin.RegisterCallback<PointerMoveEvent>(evt =>
-                {
-                    if (!Pin.HasPointerCapture(evt.pointerId)) return;
-                    Vector2 local = Surface.WorldToLocal(evt.position);
-                    Rect area = Surface.contentRect;
-                    SetWaypoint(_camera.ViewportToWorldPoint(new Vector3(Mathf.Clamp01(local.x / area.width),
-                        1f - Mathf.Clamp01(local.y / area.height), -_camera.transform.position.z)));
-                });
-                Pin.RegisterCallback<PointerUpEvent>(evt => Pin.ReleasePointer(evt.pointerId));
-                Pin.RegisterCallback<PointerCancelEvent>(evt => Pin.ReleasePointer(evt.pointerId));
-                Pin.RegisterCallback<PointerCaptureOutEvent>(_ => Pin.RemoveFromClassList("dragging"));
+                _zoomIn.clicked += ZoomIn;
+                _zoomOut.clicked += ZoomOut;
+                Pin.RegisterCallback<PointerDownEvent>(BeginDrag);
+                Pin.RegisterCallback<PointerMoveEvent>(Drag);
+                Pin.RegisterCallback<PointerUpEvent>(Release);
+                Pin.RegisterCallback<PointerCancelEvent>(Cancel);
+                Pin.RegisterCallback<PointerCaptureOutEvent>(CaptureEnded);
+            }
+
+            public void Dispose()
+            {
+                _toolbar.UnregisterCallback<GeometryChangedEvent>(ToolbarLayout);
+                EndDrag(_pointer);
+                Surface.UnregisterCallback<GeometryChangedEvent>(OnLayout);
+                Surface.generateVisualContent -= DrawMap;
+                _zoomIn.clicked -= ZoomIn;
+                _zoomOut.clicked -= ZoomOut;
+                Pin.UnregisterCallback<PointerDownEvent>(BeginDrag);
+                Pin.UnregisterCallback<PointerMoveEvent>(Drag);
+                Pin.UnregisterCallback<PointerUpEvent>(Release);
+                Pin.UnregisterCallback<PointerCancelEvent>(Cancel);
+                Pin.UnregisterCallback<PointerCaptureOutEvent>(CaptureEnded);
+            }
+
+            public void SetExclusion(Rect panelExclusion)
+            {
+                _exclusion = panelExclusion;
+                PlaceToolbar();
+            }
+
+            void ToolbarLayout(GeometryChangedEvent evt) => PlaceToolbar();
+
+            void PlaceToolbar()
+            {
+                Rect row = _toolbar.worldBound;
+                if (row.width <= 0f || row.height <= 0f) return;
+                // The two zoom buttons share a trailing anchor. Measure their unshifted span so
+                // adding clearance cannot toggle it off on the next layout pass.
+                float span = _zoomOut.resolvedStyle.width + _zoomIn.resolvedStyle.marginLeft + _zoomIn.resolvedStyle.width;
+                Rect actions = new Rect(row.xMax - span, row.yMin, span, row.height);
+                float clearance = actions.Overlaps(_exclusion) ? row.xMax - _exclusion.xMin + 4f : 0f;
+                if (!Mathf.Approximately(_toolbar.resolvedStyle.paddingRight, clearance))
+                    _toolbar.style.paddingRight = clearance;
+            }
+
+            void OnLayout(GeometryChangedEvent evt)
+            {
+                Rect area = Surface.contentRect;
+                if (area.height <= 0 || area.width <= 0) return;
+                _camera.aspect = area.width / area.height;
+                UpdatePin();
+            }
+
+            void ZoomIn() => Zoom(.8f);
+            void ZoomOut() => Zoom(1.25f);
+
+            void BeginDrag(PointerDownEvent evt)
+            {
+                if (evt.button != 0 || _pointer >= 0) return;
+                _pointer = evt.pointerId;
+                Pin.Focus();
+                Pin.CapturePointer(_pointer);
+                Pin.AddToClassList("dragging");
+                evt.StopPropagation();
+            }
+
+            void Drag(PointerMoveEvent evt)
+            {
+                if (evt.pointerId != _pointer) return;
+                Vector2 local = Surface.WorldToLocal(evt.position);
+                Rect area = Surface.contentRect;
+                SetWaypoint(_camera.ViewportToWorldPoint(new Vector3(Mathf.Clamp01(local.x / area.width),
+                    1f - Mathf.Clamp01(local.y / area.height), -_camera.transform.position.z)));
+            }
+
+            void Release(PointerUpEvent evt) => EndDrag(evt.pointerId);
+            void Cancel(PointerCancelEvent evt) => EndDrag(evt.pointerId);
+            void CaptureEnded(PointerCaptureOutEvent evt) => EndDrag(evt.pointerId);
+
+            void EndDrag(int pointer)
+            {
+                if (pointer < 0 || _pointer != pointer) return;
+                _pointer = -1;
+                if (Pin.HasPointerCapture(pointer)) Pin.ReleasePointer(pointer);
+                Pin.RemoveFromClassList("dragging");
             }
 
             void Zoom(float factor)

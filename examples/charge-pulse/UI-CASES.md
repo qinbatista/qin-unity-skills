@@ -2,7 +2,7 @@
 
 The Charge Pulse sample mounts ten UI Toolkit screens, switches between English and German on the same tree, and replays 25 viewport configurations. Each screen has 50 primary viewport and language combinations. Additional checks cover daily use and edge cases. For example, the HUD runs its held, disabled and reduced-motion sequence in the 4K German landscape case, and the form checks notification expiry in compact English. The device profiles supply coordinates to a real Unity panel rendered in Play Mode.
 
-[Compare all ten screens on a small phone and tablet](ui-device-gallery.jpg)
+[Compare all ten screens on a small phone and tablet](ui-device-gallery.jpg) · [Compare the iPhone models and Duo poses](iphone-adaptation/README.md)
 
 ## Verified results
 
@@ -73,7 +73,7 @@ A focused arm64 Unity 6000.6.7f1 Player mounted the German controller and expedi
 | iPhone Duo, outer display | 1398 × 2034 | 0, 102, 1146, 1932 | [Controller](ui-device-captures/duo-outer-controller.png) · [Full-screen menu](ui-device-captures/duo-outer-expedition.png) |
 | iPad Pro 13-inch (M5) | 2064 × 2752 | 0, 40, 2064, 2712 | [Controller](ui-device-captures/ipad-controller.png) · [Full-screen menu](ui-device-captures/ipad-expedition.png) |
 
-The controller action measured 111.86 × 48.14 panel units on the Duo and 111.98 × 47.79 on the iPad. The menu stacked in the narrower Duo safe area and displayed its map beside the route on iPad. Switching the inner display power on and the outer power off left the same running Player at 1398 × 2034. Its Pause action still worked, and the inner display returned an all-black 2007 × 2853 frame. Inner-display layout and transfer evidence comes from the Editor matrix. The two-finger gestures and directional navigation were exercised there with scripted input. The Android gesture-inset profile also ran in the Editor. This environment had no connected Android device or configured emulator image.
+The controller action measured 111.86 × 48.14 panel units on the Duo and 111.98 × 47.79 on the iPad. The menu stacked in the narrower Duo safe area and displayed its map beside the route on iPad. In the initial display-power test, switching the inner display power on and the outer power off left the same running Player at 1398 × 2034. Its Pause action still worked, and the inner display returned an all-black 2007 × 2853 frame. The [subsequent iPhone replay](iphone-adaptation/README.md) drives the simulated hinge directly and records the foreground window on both displays. The two-finger gestures and directional navigation were exercised there with scripted input. The Android gesture-inset profile also ran in the Editor. This environment had no connected Android device or configured emulator image.
 
 ## Reproduce the native matrix
 
