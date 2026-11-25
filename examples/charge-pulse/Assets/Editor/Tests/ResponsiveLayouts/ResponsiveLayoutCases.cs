@@ -32,6 +32,15 @@ namespace Qin.UnitySamples.Tests
             new LayoutProfile("compact-portrait", 360, 780),
             new LayoutProfile("before-wide-body", 599, 960),
             new LayoutProfile("at-wide-body", 600, 960),
+            new LayoutProfile("small-phone", 320, 568),
+            new LayoutProfile("separating-right-pane", 1000, 720, new Rect(510, 0, 490, 720), new Rect(490, 0, 20, 720), HeaderMode.Safe),
+            new LayoutProfile("horizontal-fold-upper-pane", 1000, 800, new Rect(0, 0, 1000, 390), new Rect(0, 390, 1000, 20), HeaderMode.Safe),
+            new LayoutProfile("handheld-landscape", 800, 480),
+            new LayoutProfile("tablet-portrait", 1536, 2048),
+            new LayoutProfile("tablet-landscape", 2048, 1536),
+            new LayoutProfile("desktop-16x10", 1440, 900),
+            new LayoutProfile("desktop-ultrawide", 2560, 1080),
+            new LayoutProfile("android-gesture-portrait", 1080, 2400, new Rect(0, 96, 1080, 2214), new Rect(496, 18, 88, 56)),
             new LayoutProfile("portrait-reference", 2160, 3840, new Rect(0, 0, 2160, 3840), default),
             new LayoutProfile("landscape-reference", 3840, 2160, new Rect(0, 0, 3840, 2160), default)
         };
@@ -75,9 +84,15 @@ namespace Qin.UnitySamples.Tests
                 Assert.That(rightBounds.yMin, Is.EqualTo(leftBounds.yMin).Within(Tolerance));
                 Assert.That(centerBounds.center.x, Is.EqualTo((leftBounds.center.x + rightBounds.center.x) / 2f).Within(Tolerance));
                 float titleDrop = profile.Header == HeaderMode.Standard ? profile.Safe.yMin / profile.Scale : 0f;
+                if (profile.SmallPane) titleDrop = Mathf.Max(54f, titleDrop);
                 Assert.That(centerBounds.yMin, Is.EqualTo(leftBounds.yMin + titleDrop).Within(Tolerance));
-                Assert.That(leftBounds.xMax, Is.LessThanOrEqualTo(centerBounds.xMin + Tolerance));
-                Assert.That(centerBounds.xMax, Is.LessThanOrEqualTo(rightBounds.xMin + Tolerance));
+                if (profile.SmallPane)
+                    Assert.That(centerBounds.yMin, Is.GreaterThanOrEqualTo(leftBounds.yMax + 5f));
+                else
+                {
+                    Assert.That(leftBounds.xMax, Is.LessThanOrEqualTo(centerBounds.xMin + Tolerance));
+                    Assert.That(centerBounds.xMax, Is.LessThanOrEqualTo(rightBounds.xMin + Tolerance));
+                }
                 Assert.That(leftBounds.width * profile.Scale, Is.EqualTo((profile.NarrowBody ? 88f : 124f) * profile.Scale).Within(Tolerance));
                 Assert.That(leftBounds.height * profile.Scale, Is.GreaterThanOrEqualTo(44f), "fixture minimum hit height");
                 Assert.That(leftBounds.height * profile.Scale, Is.EqualTo(48f * profile.Scale).Within(Tolerance));
@@ -91,7 +106,7 @@ namespace Qin.UnitySamples.Tests
                     }
                 }
                 if (profile.Header == HeaderMode.Standard && profile.Portrait && profile.Cutout.width > 0f)
-                    Assert.That(leftBounds.yMax * profile.Scale, Is.LessThan(profile.Safe.yMin));
+                    Assert.That(centerBounds.yMin * profile.Scale, Is.GreaterThanOrEqualTo(profile.Cutout.yMax - Tolerance), "title clears the portrait aperture");
 
                 Submit(left);
                 Submit(right);
@@ -115,6 +130,7 @@ namespace Qin.UnitySamples.Tests
         [UnityTest]
         public IEnumerator InventoryReflowsOneSetOfInstances()
         {
+            InventoryReorder reorder = null;
             VisualElement[] cards = new VisualElement[6];
             string[] itemIds = { "rope", "map", "compass", "lantern", "salve", "rations" };
             int[] counts = { 2, 1, 1, 1, 3, 4 };
@@ -128,10 +144,12 @@ namespace Qin.UnitySamples.Tests
                     item.CloneTree(grid);
                     VisualElement tile = grid.ElementAt(index);
                     cards[index] = tile;
+                    tile.userData = itemIds[index];
                     text.Bind(tile.Q<Label>("item-icon"), $"items.{itemIds[index]}.icon");
                     text.Bind(tile.Q<Label>("item-name"), $"items.{itemIds[index]}.name");
                     text.Bind(tile.Q<Label>("item-count"), "inventory.quantity", counts[index]);
                 }
+                reorder = new InventoryReorder(screen);
             }, (screen, profile, text, target) =>
             {
                 VisualElement grid = screen.Q("tiles");
@@ -161,7 +179,7 @@ namespace Qin.UnitySamples.Tests
                     Assert.That(icon.worldBound.xMax, Is.LessThan(name.worldBound.xMin));
                     Assert.That((icon.worldBound.xMin + name.worldBound.xMax) / 2f, Is.EqualTo(identity.center.x).Within(Tolerance));
                 }
-                return null;
+                return CheckInventoryReorder(screen, reorder, cards, profile, text, target);
             });
         }
 
@@ -322,7 +340,8 @@ namespace Qin.UnitySamples.Tests
             using (NativeReadback image = new NativeReadback(target)) image.SaveIfRequested($"quests-{profile.Name}-{text.Locale}-last.png");
         }
 
-        static IEnumerator Review(string name, Action<VisualElement, LayoutText> bind, Func<VisualElement, LayoutProfile, LayoutText, RenderTexture, IEnumerator> check)
+        static IEnumerator Review(string name, Action<VisualElement, LayoutText> bind, Func<VisualElement, LayoutProfile, LayoutText, RenderTexture, IEnumerator> check,
+            Action<LayoutProfile> onProfile = null)
         {
             Assert.That(Application.isPlaying, Is.True, "The layout fixtures require Unity Play Mode.");
             GameObject host = new GameObject(name + " layout fixture");
@@ -377,6 +396,7 @@ namespace Qin.UnitySamples.Tests
                     // This receiver declares a 1:1 minimum for its compact, low-density test window.
                     settings.scale = 4f * profile.Scale / profile.ProportionalScale;
                     ApplyGeometry(screen, cutout, profile);
+                    onProfile?.Invoke(profile);
                     yield return null;
                     yield return null;
                     if (priorFocus != null)
@@ -420,7 +440,7 @@ namespace Qin.UnitySamples.Tests
                         Assert.That(document.rootVisualElement.Q("screen"), Is.SameAs(screen));
                         Assert.That(screen.worldBound.width * profile.Scale, Is.EqualTo(profile.Size.x).Within(Tolerance));
                         Assert.That(screen.worldBound.height * profile.Scale, Is.EqualTo(profile.Size.y).Within(Tolerance));
-                        foreach (TextElement element in strings.BoundElements) AssertTextFits(element);
+                        AssertVisibleTextFits(strings);
                         if (idleButtons != null)
                         {
                             yield return new WaitUntil(idleButtons, TimeSpan.FromSeconds(3), () => Assert.Fail("Button feedback did not settle"));
@@ -459,6 +479,7 @@ namespace Qin.UnitySamples.Tests
             Rect safePixels = profile.Safe;
             screen.EnableInClassList("wide-body", profile.WideBody);
             screen.EnableInClassList("narrow-body", profile.NarrowBody);
+            screen.EnableInClassList("small-pane", profile.SmallPane);
             screen.EnableInClassList("short-body", safePixels.height / scale < 700f);
             VisualElement safe = screen.Q("safe");
             safe.style.left = safePixels.xMin / scale;
@@ -481,7 +502,8 @@ namespace Qin.UnitySamples.Tests
                 header.style.left = left / scale + 18f;
                 header.style.right = (profile.Size.x - right) / scale + 18f;
                 header.style.top = top;
-                header.Q("center-title").style.top = profile.Header == HeaderMode.Standard ? safePixels.yMin / scale : 0f;
+                float titleOffset = profile.Header == HeaderMode.Standard ? safePixels.yMin / scale : 0f;
+                header.Q("center-title").style.top = profile.SmallPane ? Mathf.Max(54f, titleOffset) : titleOffset;
             }
             cutout.style.borderTopLeftRadius = cutout.style.borderTopRightRadius =
                 cutout.style.borderBottomLeftRadius = cutout.style.borderBottomRightRadius = profile.Header == HeaderMode.Outer ? profile.Cutout.width / (2f * scale) : 18f;
@@ -511,9 +533,21 @@ namespace Qin.UnitySamples.Tests
             Assert.That(child.yMax, Is.LessThanOrEqualTo(parent.yMax + Tolerance), name);
         }
 
+        static void AssertVisibleTextFits(LayoutText strings)
+        {
+            foreach (TextElement element in strings.BoundElements)
+            {
+                VisualElement ancestor = element;
+                while (ancestor != null && ancestor.resolvedStyle.display != DisplayStyle.None) ancestor = ancestor.parent;
+                if (ancestor == null) AssertTextFits(element);
+            }
+        }
+
         static void AssertTextFits(TextElement text)
         {
             Vector2 ink = text.MeasureTextSize(text.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined);
+            if (ink.x > text.contentRect.width + Tolerance && text.resolvedStyle.whiteSpace == WhiteSpace.Normal)
+                ink = text.MeasureTextSize(text.text, text.contentRect.width, VisualElement.MeasureMode.AtMost, 0, VisualElement.MeasureMode.Undefined);
             Assert.That(ink.x, Is.Positive, text.text);
             Assert.That(ink.x, Is.LessThanOrEqualTo(text.contentRect.width + Tolerance), text.text);
             Assert.That(ink.y, Is.LessThanOrEqualTo(text.contentRect.height + Tolerance), text.text);
@@ -543,6 +577,8 @@ namespace Qin.UnitySamples.Tests
             // Two 284-unit Settings cards with 7-unit margins on each side need 596 units.
             public bool WideBody => Safe.width / Scale >= 600f;
             public bool NarrowBody => Safe.width / Scale < 400f;
+            // Two 88-unit controls, 36 units of margins and a 133-unit translated title need 345 units.
+            public bool SmallPane => Safe.width / Scale < 346f;
             public bool Portrait => Size.y > Size.x;
             public float Scale => Mathf.Max(1f, ProportionalScale);
             public float ProportionalScale => Portrait ? Mathf.Min(Size.x / 540f, Size.y / 960f) : Mathf.Min(Size.x / 960f, Size.y / 540f);

@@ -16,7 +16,9 @@ The [case-by-case code review](CASEBOOK.md) links the runnable Skill cases, nega
 
 ## Responsive UI cases
 
-Five fixtures mount their own UXML screens and apply the same geometry policy to the live tree as the viewport changes. All use a 4K design baseline with quarter-resolution USS units. The Canvas dialog uses the same content and an independent native layout for comparison.
+The [UI case inventory](UI-CASES.md) lists the ten rendered UI families, interaction states, device profiles, and reproduction steps. [Compare the native phone and tablet views](ui-device-gallery.jpg).
+
+The five original fixtures mount their own UXML screens and apply the same geometry policy to the live tree as the viewport changes. All use a 4K design baseline with quarter-resolution USS units. The Canvas dialog uses the same content and an independent native layout for comparison.
 
 The [fixture string table](Assets/Editor/Tests/ResponsiveLayouts/LayoutStrings.json) contains the player-facing copy in English (`en-US`) and German (`de-DE`). [LayoutText](Assets/Editor/Tests/ResponsiveLayouts/LayoutText.cs) updates existing UI Toolkit elements from locale keys and typed arguments. The Canvas dialog reads the same resources and returns stable action IDs. The sample table is Editor test data. Production screens use their game's localization service.
 
@@ -44,7 +46,7 @@ python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<task-project>" --n
 
 At 360 × 780, UI Toolkit measured the German Pack label, “Gepäck”, at 78 panel units wide. The original button had 76 units available for text. Widening the button from 80 to 88 units left 84 units inside its two-unit borders. Both languages fit with the full 48-unit hit height.
 
-Unity 6000.6.7f1 passed all five screen tests across 16 viewport profiles and two locales. The run produced 229 native frames, including 160 screen views, 32 Canvas dialog comparisons, 32 scrolled journal views and five interaction states. [Native layout comparison](ui-layout-preview.jpg)
+The initial Unity 6000.6.7f1 replay passed all five original screen tests across 16 viewport profiles and two locales. That run produced 229 native frames, including 160 screen views, 32 Canvas dialog comparisons, 32 scrolled journal views and five interaction states. [Native layout comparison](ui-layout-preview.jpg)
 
 The [iPhone Duo outer-display capture](duo-outer-dialog.png) shows the German confirmation running in an iOS Simulator Player at 1398 × 2034. The safe area started at x = 0 and was 1146 pixels wide. The dialog’s painted edges ran from x = 149 to x = 997 (exclusive), centering it at x = 573 in a window whose midpoint was x = 699. Unity measured the confirm button at 151.98 × 48.14 panel units and picked “Verlassen” at its center. The inner connector stayed black during the attempted simulated transfer. Inner layouts and same-size transfers were verified in the Editor fixtures.
 

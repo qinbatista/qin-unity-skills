@@ -15,6 +15,7 @@ namespace Qin.UnitySamples.Tests
 
         public IReadOnlyList<string> Locales { get; }
         public string Locale => Locales[_activeLocale];
+        public event Action Changed;
         public IEnumerable<TextElement> BoundElements => _bindings.Keys;
 
         public LayoutText(TextAsset resource)
@@ -52,6 +53,7 @@ namespace Qin.UnitySamples.Tests
             _activeLocale = localeIndex;
             foreach (KeyValuePair<TextElement, (string Key, object[] Arguments)> binding in _bindings)
                 binding.Key.text = Resolve(binding.Value.Key, binding.Value.Arguments);
+            Changed?.Invoke();
         }
 
         [Serializable]

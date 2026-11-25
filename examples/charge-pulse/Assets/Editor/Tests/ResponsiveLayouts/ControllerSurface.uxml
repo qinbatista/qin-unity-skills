@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Layouts.uss" />
+    <Style src="LayoutFeedback.uss" />
+    <Style src="ControllerSurface.uss" />
+    <ui:VisualElement name="screen" class="screen controller-surface">
+        <ui:VisualElement name="safe" class="safe controller-safe" picking-mode="Ignore">
+            <ui:VisualElement name="field" class="beacon-field" picking-mode="Ignore">
+                <ui:Label name="beacon" class="localized" picking-mode="Ignore" />
+                <ui:VisualElement name="range" class="beacon-range" picking-mode="Ignore">
+                    <ui:VisualElement name="marker" class="beacon-marker" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="rail" class="controller-rail" picking-mode="Ignore">
+                <ui:VisualElement name="stick-group" class="controller-stick-group" picking-mode="Ignore">
+                    <ui:Label name="move" class="localized" picking-mode="Ignore" />
+                    <ui:VisualElement name="stick" class="controller-stick">
+                        <ui:VisualElement name="thumb" class="controller-thumb" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="actions" class="controller-actions" picking-mode="Ignore">
+                    <ui:Button name="pause" class="localized" />
+                    <ui:Button name="pulse" class="localized" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="pause-sheet" class="controller-pause">
+                <ui:Label name="paused" class="localized" />
+                <ui:Button name="resume" class="localized" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

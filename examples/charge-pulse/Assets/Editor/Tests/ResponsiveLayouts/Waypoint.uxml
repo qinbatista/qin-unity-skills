@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Layouts.uss" />
+    <Style src="LayoutFeedback.uss" />
+    <Style src="Waypoint.uss" />
+    <ui:VisualElement name="screen" class="screen">
+        <ui:VisualElement name="safe" class="safe waypoint-page">
+            <ui:Label name="heading" class="title localized" />
+            <ui:VisualElement name="map" class="route-map">
+                <ui:VisualElement name="pin" class="route-pin" focusable="true">
+                    <ui:Label name="pin-symbol" text="A" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="map-toolbar" class="map-toolbar">
+                <ui:Label name="destination" class="detail localized" />
+                <ui:Button name="zoom-out" text="−" class="map-button" />
+                <ui:Button name="zoom-in" text="+" class="map-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

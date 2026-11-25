@@ -1,0 +1,136 @@
+.controller-surface {
+    background-color: #14242c;
+}
+
+.controller-safe, .beacon-field, .beacon-range, .controller-stick, .controller-pause {
+    align-items: center;
+    justify-content: center;
+}
+
+.beacon-field {
+    width: 184px;
+    height: 184px;
+    border-width: 2px;
+    border-color: #4e6b71;
+    border-radius: 92px;
+    background-color: #1e363d;
+}
+
+.beacon-range {
+    width: 92px;
+    height: 92px;
+    border-width: 2px;
+    border-color: #69958f;
+    border-radius: 46px;
+}
+
+.controller-surface #beacon {
+    margin-bottom: 10px;
+    color: #c5e3dc;
+    font-size: 18px;
+}
+
+.beacon-marker {
+    width: 20px;
+    height: 20px;
+    border-width: 4px;
+    border-color: #fff0b8;
+    border-radius: 10px;
+    background-color: #eeb85e;
+}
+
+.controller-rail {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.controller-stick-group {
+    align-items: center;
+}
+
+.controller-surface #move {
+    margin-bottom: 4px;
+    color: #c5e3dc;
+    font-size: 16px;
+}
+
+.controller-stick {
+    width: 100px;
+    height: 100px;
+    border-width: 3px;
+    border-radius: 50px;
+    border-color: #718c91;
+    background-color: #20373e;
+}
+
+.controller-thumb {
+    width: 42px;
+    height: 42px;
+    border-width: 2px;
+    border-radius: 21px;
+    border-color: #a8c7c8;
+    background-color: #4a686e;
+}
+
+.controller-stick.held .controller-thumb, .beacon-field.pulsed .beacon-marker {
+    border-color: #fff0b8;
+    background-color: #ce9952;
+}
+
+.controller-surface Button {
+    width: 112px;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    border-width: 2px;
+    border-color: #608287;
+    border-radius: 12px;
+    background-color: #28464c;
+    color: #edf4e8;
+    font-size: 18px;
+    -unity-font-style: bold;
+    transition-property: background-color;
+    transition-duration: 90ms;
+}
+
+.controller-surface #pulse {
+    margin-top: 8px;
+    background-color: #e8ba70;
+    border-color: #efc98e;
+    color: #1d2b2d;
+}
+
+.controller-surface Button:focus, .controller-surface #pulse:focus {
+    border-color: white;
+    border-width: 3px;
+}
+
+.controller-surface Button:active {
+    background-color: #356462;
+    border-bottom-width: 4px;
+    color: #fff3d9;
+}
+
+.controller-surface #pulse:active {
+    background-color: #92c9b9;
+    color: #152727;
+}
+
+.controller-pause {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(14, 29, 35, 0.97);
+}
+
+.controller-surface.paused .controller-pause { display: flex; }
+.controller-surface .controller-pause Label { font-size: 30px; margin-bottom: 16px; }
+.controller-surface.reduced-motion Button { transition-duration: 0s; }

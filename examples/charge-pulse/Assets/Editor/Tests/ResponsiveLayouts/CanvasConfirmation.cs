@@ -71,6 +71,16 @@ namespace Qin.UnitySamples.Tests
             camera.orthographicSize = size.y / (2f * scale);
             float width = Mathf.Min(400f, safe.width / scale * .96f);
             dialog.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            float actionWidth = Mathf.Min(336f, width);
+            float buttonWidth = actionWidth / 2f - 16f;
+            groups["actions"].SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actionWidth);
+            foreach (string name in new[] { "stay", "leave" })
+            {
+                RectTransform button = groups[name];
+                button.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, buttonWidth);
+                button.anchoredPosition = new Vector2((name == "stay" ? -1 : 1) * actionWidth / 4f, 0f);
+                groups[name + "-caption"].SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, buttonWidth);
+            }
             float captionWidth = Mathf.Min(352f, width * .95f);
             groups["heading"].SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, captionWidth);
             groups["message"].SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, captionWidth);

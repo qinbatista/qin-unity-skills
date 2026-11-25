@@ -1,0 +1,10 @@
+.waypoint-page { padding: 14px; }
+.waypoint-page > .title { margin-bottom: 8px; }
+.route-map { flex-grow: 1; min-height: 0; overflow: hidden; background-color: #25453c; border-radius: 8px; }
+.route-pin { position: absolute; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 24px; border-width: 3px; border-color: #ecd3a3; background-color: #764c28; }
+.route-pin:focus, .route-pin.dragging { border-color: white; background-color: #925e23; }
+.route-pin > Label { color: #fff7dc; -unity-font-style: bold; font-size: 22px; }
+.map-toolbar { margin-top: 8px; flex-direction: row; align-items: center; }
+.map-toolbar > .detail { flex-grow: 1; flex-shrink: 1; }
+.map-toolbar .map-button { width: 48px; height: 48px; margin: 0 0 0 8px; padding: 0; border-width: 2px; border-color: transparent; font-size: 25px; background-color: #38574a; color: #fcf1d9; }
+.map-toolbar .map-button:focus { border-color: #e8c47e; }

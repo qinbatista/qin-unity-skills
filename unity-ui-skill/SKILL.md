@@ -19,6 +19,7 @@ For a new screen follow the [screen construction workflow](#build-a-screen), inc
 
 | Problem | Read and verify |
 | --- | --- |
+| Whole UI inventory across devices, states and input modes | [Inventory and test a whole UI](references/layout-and-input.md#inventory-and-test-a-whole-ui). |
 | Wrong button, duplicate input or broken return route | [Buttons and destination pages](references/layout-and-input.md#check-buttons-and-destination-pages). Replay the actual hit, destination and return. |
 | Text clipped or stale after a language change | [Verify each locale](references/layout-and-input.md#verify-each-locale) at the affected viewport. For missing keys, new copy or formatting use [text binding](references/layout-and-input.md#bind-player-facing-text-by-key). |
 | Incorrect size, inset, notch, orientation or fold | [Adapt an existing screen](#adapt-an-existing-screen). |

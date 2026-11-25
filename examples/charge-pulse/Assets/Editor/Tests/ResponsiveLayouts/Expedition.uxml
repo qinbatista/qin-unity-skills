@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Layouts.uss" />
+    <Style src="LayoutFeedback.uss" />
+    <Style src="ScreenFamilies.uss" />
+    <ui:VisualElement name="screen" class="screen family-screen">
+        <ui:VisualElement name="safe" class="safe family-safe">
+            <ui:VisualElement name="home" class="family-shell menu-shell">
+                <ui:Label name="menu-title" class="family-heading localized" />
+                <ui:VisualElement name="route-card" class="route-card">
+                    <ui:VisualElement name="route-plot" class="route-plot" picking-mode="Ignore" />
+                    <ui:VisualElement name="route-summary" class="route-summary">
+                        <ui:Label name="route-kind" class="family-caption localized" />
+                        <ui:Label name="route-title" class="family-subheading localized" />
+                        <ui:Label name="route-distance" class="family-info localized" />
+                        <ui:Button name="open-route" class="family-button family-primary localized" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="briefing" class="family-shell family-paper family-hidden">
+                <ui:Label name="brief-title" class="family-heading localized" />
+                <ui:Label name="starting-point" class="brief-stop localized" />
+                <ui:Label name="shelter" class="brief-stop localized" />
+                <ui:Label name="summit" class="brief-stop localized" />
+                <ui:Button name="back" class="family-button family-primary localized" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,54 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Layouts.uss" />
+    <Style src="LayoutFeedback.uss" />
+    <Style src="ScreenFamilies.uss" />
+    <ui:VisualElement name="screen" class="screen family-screen">
+        <ui:VisualElement name="safe" class="safe family-safe">
+            <ui:VisualElement name="form" class="family-shell prefs-shell">
+                <ui:VisualElement class="family-toolbar">
+                    <ui:Label name="heading" class="family-heading localized" />
+                    <ui:Button name="help" class="family-button family-quiet localized" />
+                </ui:VisualElement>
+                <ui:TabView name="pages" class="prefs-tabs">
+                    <ui:Tab name="general-tab" label="…">
+                        <ui:ScrollView name="form-scroll" class="field-scroll" vertical-scroller-visibility="Auto">
+                            <ui:TextField name="call-sign" label="…" value="Ridge" max-length="18" class="prefs-field" />
+                            <ui:Toggle name="alerts" label="…" class="prefs-field" />
+                            <ui:SliderInt name="volume" label="…" low-value="0" high-value="10" value="6" class="prefs-field" />
+                        </ui:ScrollView>
+                    </ui:Tab>
+                    <ui:Tab name="display-tab" label="…">
+                        <ui:ScrollView name="display-scroll" class="field-scroll" vertical-scroller-visibility="AlwaysVisible">
+                            <ui:Label name="map-heading" class="family-caption localized" />
+                            <ui:Toggle name="contours" label="…" value="true" class="prefs-field" />
+                            <ui:Toggle name="rivers" label="…" value="true" class="prefs-field" />
+                            <ui:Toggle name="paths" label="…" value="true" class="prefs-field" />
+                            <ui:Toggle name="shelters" label="…" class="prefs-field" />
+                            <ui:Toggle name="markers" label="…" class="prefs-field" />
+                            <ui:Toggle name="summits" label="…" class="prefs-field" />
+                        </ui:ScrollView>
+                    </ui:Tab>
+                </ui:TabView>
+                <ui:VisualElement class="family-footer">
+                    <ui:Label name="saved" class="family-notice localized" picking-mode="Ignore" />
+                    <ui:Button name="apply" class="family-button family-primary localized" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="help-popover" class="help-popover family-hidden">
+                <ui:Label name="help-title" class="popover-heading localized" />
+                <ui:Label name="help-body" class="family-info localized" />
+                <ui:Button name="close-help" class="family-button family-quiet localized" />
+            </ui:VisualElement>
+            <ui:VisualElement name="modal-shade" class="family-shade family-hidden">
+                <ui:VisualElement name="modal" class="family-paper">
+                    <ui:Label name="confirm-title" class="popover-heading localized" />
+                    <ui:Label name="confirm-body" class="family-info localized" />
+                    <ui:VisualElement class="family-dialog-actions">
+                        <ui:Button name="cancel" class="family-button family-quiet localized" />
+                        <ui:Button name="save" class="family-button family-primary localized" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

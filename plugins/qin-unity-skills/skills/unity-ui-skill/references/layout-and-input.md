@@ -1,5 +1,21 @@
 # Responsive layout and input
 
+## Inventory and test a whole UI
+
+Start with the receiving game's actual routes and mounted documents. List each player-facing screen, overlay, embedded control group and return path. A visual pattern can have multiple entry paths. Record which caller owns input, focus and data in each path. Include these families where the game uses them.
+
+| UI family | Native fit and behavior check |
+| --- | --- |
+| Full-screen menu, pause and navigation | Fill the window with the background, constrain the actionable page to its pane, and open a destination. Cancel or return to the originating control. |
+| HUD and gameplay controls | Measure header, counters, banners, slots, action buttons and overlays together. Press, drag, release and cancel the virtual stick while pressing a second control. Open pause and verify input returns once. |
+| Inventory, collection and detail | Reflow real items across columns or panes. Scroll to the last item, filter the collection and reopen a recycled row. Verify the current item, rendered text, focused item and return path. For reordering, drop on a valid target, release outside, cancel, and repeat using click or submit. A move retains item identity and focus. A cancelled move preserves the order. |
+| Settings and forms | Operate tabs, toggles, sliders and text fields. Scroll focused content into view. Verify long labels, saved and cancelled values, keyboard navigation and the platform keyboard when supported. |
+| Dialog, sheet, popover and status | Verify placement against its trigger or pane, modal input shielding, and a reachable close action. Exercise loading, empty, error, retry and confirmation states through their owner. |
+| Maps and world-tracked HUD | Project an actual world point, zoom or change the camera and measure its rendered position. Exercise edge clamping, a target behind the camera and pointer capture during drag. |
+| Other game-owned surfaces | Include any extra store, chat, cinematic, split-screen player or accessibility flows found in the route inventory. A platform purchase, real controller or operating-system keyboard needs its own applicable runtime evidence. |
+
+Cross each affected family with its reachable states, supported locales, input modes and device geometries. Include small phones, tablets, short handhelds, desktop and ultrawide windows, opposite side insets, both hinge panes and supported fold poses. Test a whole mounted session through size or locale changes. Keep input generation explicit in the results. Match a passing native test with the expected screen, profile, locale and nonblank capture. Record unresolved failures and unexercised integration paths. [Runnable screen inventory and device matrix](https://github.com/qinbatista/qin-unity-skills/blob/master/examples/charge-pulse/UI-CASES.md)
+
 ## Hierarchy and reuse
 
 - Use one named parent per functional group, for example Header, Inventory Grid, or Dialog Actions. Within the group, give related text, icons and values bounded slots. An icon and its label belong to the same control. A list or grid owns its repeated items. Set the parent layout, padding, gaps, alignment and size constraints before adjusting individual children. Add a visible boundary only where it communicates a grouping.

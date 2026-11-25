@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Layouts.uss" />
+    <Style src="LayoutFeedback.uss" />
+    <Style src="Atlas.uss" />
+    <ui:VisualElement name="screen" class="screen">
+        <ui:VisualElement name="safe" class="safe atlas-safe">
+            <ui:VisualElement name="atlas" class="atlas">
+                <ui:VisualElement class="atlas-header">
+                    <ui:Label name="heading" class="title localized" />
+                    <ui:Button name="sort" class="atlas-button localized" />
+                </ui:VisualElement>
+                <ui:VisualElement name="body" class="atlas-body">
+                    <ui:VisualElement name="directory" class="atlas-directory">
+                        <ui:Label name="search-label" class="detail localized" />
+                        <ui:TextField name="query" class="atlas-query" />
+                        <ui:ListView name="routes" class="atlas-list" />
+                        <ui:VisualElement name="status" class="atlas-status">
+                            <ui:Label name="status-label" />
+                            <ui:Button name="retry" class="atlas-button" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="detail-card" class="atlas-detail">
+                        <ui:Label name="route-type" class="detail localized" />
+                        <ui:Label name="route-name" class="atlas-name" />
+                        <ui:Label name="route-altitude" class="atlas-altitude" />
+                        <ui:Button name="return-list" class="atlas-button" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="sort-shade" class="sort-shade">
+                <ui:VisualElement name="sort-sheet" class="sort-sheet">
+                    <ui:Label name="sort-title" class="atlas-name localized" />
+                    <ui:Button name="by-number" class="atlas-button localized" />
+                    <ui:Button name="by-height" class="atlas-button localized" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,10 +1,12 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Layouts.uss" />
     <Style src="LayoutFeedback.uss" />
+    <Style src="InventoryReorder.uss" />
     <ui:VisualElement name="screen" class="screen">
         <ui:VisualElement name="safe" class="safe page">
             <ui:Label name="heading" class="title page-title localized" />
             <ui:Label name="capacity" class="detail page-subtitle" />
+            <ui:Label name="destination" class="detail page-subtitle localized" />
             <ui:VisualElement name="tiles" class="tiles" />
         </ui:VisualElement>
     </ui:VisualElement>

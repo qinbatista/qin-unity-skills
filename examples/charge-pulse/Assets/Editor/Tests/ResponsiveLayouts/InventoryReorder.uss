@@ -1,0 +1,18 @@
+.screen #destination, .screen.inventory-moving #capacity { display: none; }
+.screen.inventory-moving #destination { display: flex; color: #f5d39a; }
+
+.tile-frame {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 14px;
+    border-width: 2px;
+    border-color: transparent;
+}
+
+.tile:focus > .tile-frame { border-color: #e7f0f5; }
+.tile.move-source > .tile-frame { border-color: #f5c56f; border-left-width: 6px; }
+.tile.drop-target { background-color: #335b60; }
+.tile.drop-target > .tile-frame { border-color: #b6e5d6; border-bottom-width: 6px; }

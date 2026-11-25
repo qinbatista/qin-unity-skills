@@ -134,6 +134,7 @@
 .tiles {
     /* Leave room for rounded item widths and margins at fractional panel scales. */
     width: 352px;
+    max-width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
@@ -238,13 +239,19 @@
 }
 
 .dialog-actions {
+    width: 100%;
+    max-width: 336px;
     height: 48px;
     margin-top: 28px;
     justify-content: center;
 }
 
 .dialog-button {
-    width: 152px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    max-width: 152px;
+    min-width: 0;
     height: 48px;
     margin: 0 8px;
     padding: 0;
@@ -307,6 +314,18 @@
 }
 
 /* Preserve readable text and the 48-unit hit height inside a compact pane. */
+.narrow-body .hud-objective {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.narrow-body .tile {
+    width: 46%;
+    max-width: 162px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
 .narrow-body .wing {
     width: 88px;
 }
@@ -319,6 +338,27 @@
     width: 152px;
 }
 
+.narrow-body .quest-scroll {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
 .narrow-body .journal-header .title {
     font-size: 26px;
+}
+
+.small-pane .hud-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: auto;
+}
+
+.small-pane .status {
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.small-pane .journal-header .title {
+    font-size: 23px;
 }
