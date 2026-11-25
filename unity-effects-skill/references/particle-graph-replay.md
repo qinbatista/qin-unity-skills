@@ -18,12 +18,12 @@ Each creation starts in a blank URP project. The [author](../scripts/particle-gr
 | Windblown leaves | 13–15/s for 1.60–2.55 s | 44 | Leaves travel downwind, descend and turn as they age. The short emission replay makes the drift of one group visible. |
 | Attracted motes | 42–46/s for 1.25–2.05 s | 104 | A cloud contracts around a target. Moving the target during emission pulls particles toward its new position. |
 
-Use the installed Unity 6000.6.7f1 Editor, Unity CLI and a graphics device with compute support. The fixture selects URP, Shader Graph and VFX Graph 17.6.0 before it authors the assets. Its [launcher](../scripts/replay_particle_graphs.py) requires a fresh child directory for each receiver. Run these commands from the installed `unity-effects-skill/scripts` directory using `python3` on macOS or Linux, or `py -3` on Windows. Replace `<editor>` with the Editor path (the `Unity.app` bundle on macOS) and `<run>` with the project's allocated task Cache directory.
+Use the installed Unity 6000.6.7f1 Editor, Unity CLI and a graphics device with compute support. The fixture selects URP, Shader Graph and VFX Graph 17.6.0 before it authors the assets. Its [launcher](../scripts/replay_particle_graphs.py) requires a fresh child directory for each receiver. Run these commands from the installed `unity-effects-skill/scripts` directory using `python3` on macOS or Linux, or `py -3` on Windows. Replace `<run>` with the project's allocated task Cache directory. Unity CLI selects the pinned Editor version by default. To select a specific installation, pass `--editor` with its path (the `Unity.app` bundle on macOS).
 
 ```text
-python3 -B replay_particle_graphs.py --work "<run>/one" --editor "<editor>" --trial 1
-python3 -B replay_particle_graphs.py --work "<run>/two" --editor "<editor>" --trial 2
-python3 -B replay_particle_graphs.py --work "<run>/three" --editor "<editor>" --trial 3
+python3 -B replay_particle_graphs.py --work "<run>/one" --trial 1
+python3 -B replay_particle_graphs.py --work "<run>/two" --trial 2
+python3 -B replay_particle_graphs.py --work "<run>/three" --trial 3
 python3 -B particle_graph_checks.py "<run>/one" "<run>/two" "<run>/three" --output "<run>/comparison.json"
 ```
 
