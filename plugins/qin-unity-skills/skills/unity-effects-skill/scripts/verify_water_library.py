@@ -124,7 +124,7 @@ def caption_reel(source, destination, gold, font_path, scratch):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--work", required=True, type=Path, help="Completed replay_fluids --case all --edition original --video")
+    parser.add_argument("--work", required=True, type=Path, help="Completed replay_fluids --case all --edition original --library-only")
     parser.add_argument("--output", required=True, type=Path, help="New evidence directory inside your task cache")
     parser.add_argument("--cloudburst", type=Path, help="Also check all three focused replay_cloudburst camera takes")
     parser.add_argument("--caption-font", type=Path, help="Rebuild both approved reels with the original Hiragino Sans GB TTC")

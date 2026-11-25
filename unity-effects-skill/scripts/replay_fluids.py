@@ -187,8 +187,14 @@ def main():
                         help="Select the original filmed rain or its later exposed streaks and contact response")
     parser.add_argument("--preview",action="store_true",help="Also write FluidMixer.gif; requires Pillow")
     parser.add_argument("--video", action="store_true", help="Also write the gallery and individual native case movies at 30 fps. Requires Pillow and ffmpeg")
+    parser.add_argument("--library-only", action="store_true",
+                        help="For --case all, export the full-rate subject movies, selector and reel with all physical and visual checks. Skip supplementary family previews.")
     parser.add_argument("--asset-prefix", help="Replay independently authored game-named variants, including every actor of the hit sequence.")
     args=parser.parse_args()
+    if args.library_only:
+        if args.case != "all":
+            parser.error("--library-only requires --case all.")
+        args.video = True
     if args.edition == "original" and args.case != "reuse" and not args.asset_prefix:
         args.asset_prefix = "Recorded"
     if args.asset_prefix is not None:
@@ -225,6 +231,7 @@ def main():
 def verify_and_export(args, work, installed_files):
     """Check the recorded GPU state and camera captures, then write the selected media."""
     media = args.preview or args.video
+    family_previews = media and not args.library_only
     if media:
         import fluid_preview
     captures = work / "A/captures"
@@ -251,6 +258,7 @@ def verify_and_export(args, work, installed_files):
             report["sideWaterline"] = fluid_preview.verify_side_waterline(captures)
             if args.seed == 29411:
                 report["referenceSilhouetteIoU"] = fluid_preview.compare_silhouettes(captures)
+        if family_previews:
             fluid_preview.export(captures, work / "FluidMixer.gif", work / "FluidMixer.mp4" if args.video else None)
     if application_cases:
         report["applications"] = {}
@@ -259,6 +267,7 @@ def verify_and_export(args, work, installed_files):
             if media:
                 name = APPLICATIONS[case][1]
                 app["visual"] = fluid_preview.review_application_images(captures / name, case, app["physics"])
+            if family_previews:
                 fluid_preview.export_application(captures / name, work / name, args.video)
                 if case == "waterfall" and args.video:
                     valve_movie = work / "WaterfallValveControl.mp4"
@@ -277,10 +286,11 @@ def verify_and_export(args, work, installed_files):
             from channel_preview import export_channels, visible
             for name in CHANNELS:
                 report["channels"][name]["visual"] = visible(captures, name)
+        if family_previews:
             export_channels(captures, work, args.video)
     if args.case in ("all", "inlets"):
         report["inlets"] = review_inlets(work)
-        if media:
+        if family_previews:
             from channel_preview import export_inlets
             export_inlets(captures, work, args.video)
     if suites:

@@ -36,7 +36,7 @@ Choose the case by its stable ID in the [named template library](water-template-
 From the installed Effects Skill, run these commands in fresh directories under your task cache. The first command runs both Unity receivers. The second checks the native frames, controls, sampled solver states and exported movies against the [frozen original signatures](../assets/water-library-baseline.json). Its optional caption step recreates both complete films. Supply the original Hiragino Sans GB TTC font for the Chinese captions. The original envelope is Unity 6000.6.7f1, Apple M3 Max, Metal and seed 29411. Byte-identical movie acceptance uses FFmpeg 9.0.2, Pillow 13.0.0, Arial for the original English board and Hiragino Sans GB for its Chinese overlay. The baseline includes both font signatures.
 
 ```sh
-python3 -B scripts/replay_fluids.py --case all --edition original --video --seed 29411 --editor "<Unity editor>" --launcher "<registered Unity CLI Python script>" --work "<task-cache>/original"
+python3 -B scripts/replay_fluids.py --case all --edition original --library-only --seed 29411 --editor "<Unity editor>" --launcher "<registered Unity CLI Python script>" --work "<task-cache>/original"
 python3 -B scripts/verify_water_library.py --work "<task-cache>/original" --output "<task-cache>/checked" --caption-font "/System/Library/Fonts/Hiragino Sans GB.ttc"
 ```
 

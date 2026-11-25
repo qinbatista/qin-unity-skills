@@ -258,13 +258,14 @@ def export_subject_videos(work, report):
         staging.mkdir()
         for group in ("cases", "applications", "channels", "inlets", "scenarios"):
             for case in report.get(group, {}):
-                if group == "applications":
-                    name = APPLICATIONS[case][1]
-                    shutil.copyfile(work / (name + ".mp4"), staging / (name + ".mp4"))
+                name = APPLICATIONS[case][1] if group == "applications" else case
+                movie = staging / (name + ".mp4")
+                prior = work / (name + ".mp4")
+                if group == "applications" and prior.is_file():
+                    shutil.copyfile(prior, movie)
                 else:
-                    name = case
                     sequence = "frames" if group == "cases" else "normal"
-                    encode_native_frames(captures / name / sequence, staging / (name + ".mp4"))
+                    encode_native_frames(captures / name / sequence, movie)
                 videos[name] = (Path("Subjects") / (name + ".mp4")).as_posix()
         staging.rename(destination)
     return videos
