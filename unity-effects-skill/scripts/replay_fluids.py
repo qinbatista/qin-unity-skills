@@ -52,10 +52,10 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def run_command(command, project, env, log):
+def run_command(command, project, env, log, *, timeout=1530):
     with log.open("w", encoding="utf-8") as stream:
         completed = subprocess.run(command, cwd=project, env=env, stdin=subprocess.DEVNULL,
-                                   stdout=stream, stderr=subprocess.STDOUT, timeout=1530, **hidden_process_options())
+                                   stdout=stream, stderr=subprocess.STDOUT, timeout=timeout, **hidden_process_options())
     if completed.returncode:
         raise RuntimeError(f"Unity exited with {completed.returncode}. See {log} and its adjacent Unity log.")
 

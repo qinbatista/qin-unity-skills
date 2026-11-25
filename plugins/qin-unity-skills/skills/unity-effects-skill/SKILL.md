@@ -1,6 +1,6 @@
 ---
 name: unity-effects-skill
-description: Create Unity gameplay effects with VFX Graph and Shader Graph. Simulate 2D water flow and water spells with persistent GPU parcels, surface waves and shallow-water channels. Replay individual water bodies, collisions, inlets and hits through an XY gameplay camera. Author animated sky and spell materials, adapt Particle System references, animate each visible part, and compare native playback with the original.
+description: Create Unity gameplay effects with VFX Graph and Shader Graph. Budget particles and group emission, forces, contact events and live inputs in one editable graph. Simulate 2D water flow and water spells with persistent GPU parcels, surface waves and shallow-water channels. Replay individual water bodies, collisions, inlets and hits through an XY gameplay camera. Author animated sky and spell materials, adapt Particle System references, animate each visible part, and compare native playback with the original.
 ---
 
 # Unity Effects

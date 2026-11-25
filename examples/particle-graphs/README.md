@@ -1,6 +1,6 @@
 # Five editable VFX Graphs
 
-Import [ParticleGraphs.unitypackage](ParticleGraphs.unitypackage) into a URP project with VFX Graph and Shader Graph 17.6.0. In `Assets/GraphTrials`, assign one of the five `.vfx` files to a `VisualEffect` component. These are the middle recipe variations shown in the comparison. The four small textures supply droplet, ember, leaf and mote silhouettes. The particle outputs reference the VFX Graph package's default Shader Graph.
+Extract [ParticleGraphs.zip](ParticleGraphs.zip) into the root of a URP project with VFX Graph and Shader Graph 17.6.0. In `Assets/GraphTrials`, assign one of the five `.vfx` files to a `VisualEffect` component. These are the middle recipe variations shown in the comparison. The four small textures supply droplet, ember, leaf and mote silhouettes. The particle outputs reference the VFX Graph package's default Shader Graph.
 
 Set the component's `Driver` vector in effect-local metres. It moves the emitter for rain, embers, the fountain and leaves. For motes, it moves the attractor while the particles are in flight. Rain also exposes `GroundHeight`, initially −1.65 m. Each drop's first contact kills the drop and emits three short-lived splash particles inside the same graph.
 

@@ -77,7 +77,8 @@ public partial class GraphTrialReplay
         frame = new Texture2D(Width, Height, TextureFormat.RGBA32, false);
     }
 
-    [UnityTest]
+    // First-use compilation runs synchronously on graphics-capable batch Editors.
+    [UnityTest, Timeout(900000)]
     public IEnumerator ShowTrials([ValueSource(nameof(Cases))] string name)
     {
         string output = Path.Combine(Environment.GetEnvironmentVariable("QIN_VFX_OUTPUT"), name);
