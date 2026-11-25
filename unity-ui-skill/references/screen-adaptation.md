@@ -12,6 +12,12 @@ After choosing the composition for the active orientation, default to one unifor
 
 For a screen-space Toolkit panel, use Scale With Screen Size and Expand when the entire design must fit. A screen-space Canvas can use Scale With Screen Size and Expand with the equivalent reference resolution. Read back the effective scale and geometry for the active host, including target textures and nested canvases. [Unity PanelScreenMatchMode](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/UIElements.PanelScreenMatchMode.html)
 
+## Center a group within its declared bounds
+
+Work in one pane coordinate space. Let `L` and `R` be the clear horizontal limits at the group’s height after required gutters and exclusions. Let `h` be half the measured width of the group, including its painted and interactive bounds. For a **safe-area-centered** group, use `(L + R) / 2`. For a **pane-centered** group, start at the pane midpoint and use `clamp(pane.center.x, L + h, R - h)`. This preserves the pane anchor until an edge would cross a limit. If `2 * h > R - L`, use the group’s approved compact arrangement, reflow or scrolling, remeasure, and check its text and target minima. A separating hinge gives each pane its own limits.
+
+Replay both landscape turns with the asymmetric inset on opposite sides. In each native frame measure the group center and both outer edges against its declared anchor and limits. Check that a safe-area-centered group follows the usable midpoint and that a pane-centered group returns to its pane midpoint wherever its full width fits.
+
 ## Set bounds for each group
 
 Record the smallest supported usable pane, the approved body type size and touch target floor, and the largest useful content width for each screen. Use the receiver's text-size settings and actual density. Convert panel bounds through the active surface into platform points or dp when checking a mobile hit target. Typical touch guidance is 44 × 44 pt on iOS and 48 × 48 dp on Android. A compact icon can sit inside a larger hit target if neighboring targets stay distinct. [Apple button sizing](https://developer.apple.com/design/human-interface-guidelines/buttons) · [Android touch targets](https://developer.android.com/guide/topics/ui/accessibility/apps)

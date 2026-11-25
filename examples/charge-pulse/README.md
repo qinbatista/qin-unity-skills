@@ -46,7 +46,7 @@ At 360 × 780, UI Toolkit measured the German Pack label, “Gepäck”, at 78 p
 
 Unity 6000.6.7f1 passed all five screen tests across 16 viewport profiles and two locales. The run produced 229 native frames, including 160 screen views, 32 Canvas dialog comparisons, 32 scrolled journal views and five interaction states. [Native layout comparison](ui-layout-preview.jpg)
 
-The [iPhone Duo outer-display capture](duo-outer-dialog.png) shows the German confirmation running in an iOS Simulator Player at 1398 × 2034. Unity measured the confirm button at 151.98 × 48.14 panel units and picked “Verlassen” at its center. The inner connector stayed black during the attempted simulated transfer. Inner layouts and same-size transfers were verified in the Editor fixtures.
+The [iPhone Duo outer-display capture](duo-outer-dialog.png) shows the German confirmation running in an iOS Simulator Player at 1398 × 2034. The safe area started at x = 0 and was 1146 pixels wide. The dialog’s painted edges ran from x = 149 to x = 997 (exclusive), centering it at x = 573 in a window whose midpoint was x = 699. Unity measured the confirm button at 151.98 × 48.14 panel units and picked “Verlassen” at its center. The inner connector stayed black during the attempted simulated transfer. Inner layouts and same-size transfers were verified in the Editor fixtures.
 
 ## Run the focused tests
 
