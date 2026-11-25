@@ -4,6 +4,8 @@ The [Effects entry](../../../unity-effects-skill/SKILL.md) selects reuse or crea
 
 For 2D world sprites, use the [Sprite Lit authoring and native lighting checks](../../../unity-effects-skill/references/sprite-lit-graphs.md). For 3D surfaces use the [mesh material route](../../../unity-effects-skill/references/graph-and-shader.md#author-a-3d-mesh-material).
 
+[Design one VFX Graph](../../../unity-effects-skill/references/graph-and-shader.md#design-one-vfx-graph) covers per-system particle budgets, grouped nodes, contact-born particles, local and world inputs, and the final cost comparison. Use the [reconstruction procedure](../../../unity-effects-skill/references/graph-and-shader.md#rebuild-from-declared-inputs) to compare the motion of fresh creations against the same brief.
+
 For a straight cut or occluder outline on a free material surface, use [edge diagnosis and native comparison](../../../unity-effects-skill/references/rendering-and-verification.md#trace-an-unexplained-straight-edge) and [surface reconstruction](../../../unity-effects-skill/references/staged-effects.md#continue-a-free-surface-through-occlusion).
 
 For a reproduction claim, follow [the declared input and output boundary](../../../unity-effects-skill/references/graph-and-shader.md#rebuild-from-declared-inputs). Record the available authoring, fresh import, native motion and transfer evidence for each requested example.
