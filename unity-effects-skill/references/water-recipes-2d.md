@@ -59,6 +59,8 @@ The executable templates are the [seven physical forms](../scripts/fluid-replay/
 
 ## Bind a moving container to a closed basin
 
+Use the side section when the camera shows the wall height or a cutaway. When the player sees the open top of a pan, fit the projected wet footprint to the bowl's visible inner rim, retain the scene detail underneath it and compare the full camera with the dry bowl. The [moving-container procedure](channel-matrix.md) covers the signed acceleration and the receiving camera.
+
 1. Instantiate two `BasinSlosh` prefabs with identical beds, orientation, seed and clock. Keep the section facing the camera and align the bed to the container. A side section of a circular pan can span 1.70 times its outer radius with the waterline 0.22 radii below the center. For this fit the uniform scale is the desired width divided by the solver's six-metre span. Follow the actual artwork center when it moves.
 2. On both [channel controllers](../assets/fluid-mixer/Channels/ChannelWater2D.cs), call `BeginFlow(seed)`, `SetDriver(0)` and `SetTime(0)` before the first automatic update. A short turn supplies the initial basin impulse. Read the container angle accepted by gameplay after the input frame. Keep the same moving container in both runs.
 3. This template samples at 30 Hz. Initialize `previousAngle` from the resting container. Its unsigned weight scales a single positive push in the solver's first 0.60 s. Repeated or signed stirring requires an explicitly driven acceleration term in the solver.

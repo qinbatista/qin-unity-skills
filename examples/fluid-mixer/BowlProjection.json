@@ -1,0 +1,74 @@
+{
+  "device": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal"
+  ],
+  "nativeCase": "QinFluidReplay.BowlProjectionProbe",
+  "launch": "Unity Test Framework batchmode after registered CLI signature timeout; executable identity and code signature independently verified",
+  "seed": 29411,
+  "fixtureSha256": "a8adb77c8108c13f6d5ee9a9ff2e52381e750c2b7c99568059fd4137a92cbf2d",
+  "compiledFixtureSha256": "04d2ecbf0cda14c3a91e67dde1a1453388ff8ea818dad9beac88ae0162d351e0",
+  "optionalSourceSha256": {
+    "BowlProjection.mat": "66d2c396327df89b8caba626f8caf6066998f923547047946b4bc4a071648079",
+    "BowlProjection.mat.meta": "6b93177b9d2ed877dca438776a6dc4bd0743f931ba5863a967f39430b11fe25d",
+    "BowlProjection.prefab": "53554c508f6a4a53ef855022b8b435378dd5ef7929b0f04e15be484cabe964a0",
+    "BowlProjection.prefab.meta": "fd10daa6dea02e9bcce41aee7891a756fc11263b3a4c14f77acc305a9ed2168c",
+    "BowlProjection.shader": "fef286e80db4d6208871435b6c4c993c99137249ba07471dd0efd167e6b213b6",
+    "BowlProjection.shader.meta": "f6fa0b7c3c82b837776b1e4cfe99b7397d76a2cca0a828a175b66c3f60536af2",
+    "BowlProjection2D.cs": "cbb8f67eed1b73e59e38bb237294d929b54196af030788ba03107155ca21f04d",
+    "BowlProjection2D.cs.meta": "d031c41dad7045ff66905ac9cd8bc2eade2c601107f91f5761194320c4ef9c83",
+    "Qin.UnityEffects.BowlProjection.asmdef": "4a2f1321149bc8b016842290e081c853673f0156893f38332f9ea384234392bc",
+    "Qin.UnityEffects.BowlProjection.asmdef.meta": "cf704154c1bc79ad9bce92628203f1f96ea4c6676dcc1cd5b863befec5dd0a00"
+  },
+  "measurement": {
+    "nativeFrames": 75,
+    "exteriorFramesChecked": 175,
+    "ellipse": [
+      0.56,
+      0.48,
+      0.253,
+      0.265
+    ],
+    "outsideEllipseChangedPixelSamples": 15,
+    "maximumChangedDistanceOutsideAnalyticEllipsePx": 0.0014190411229850898,
+    "beyondOnePixelChangedSamples": 0,
+    "largestWetNormalizedRadius": 1.0000058706361197,
+    "comparisonFrame": 45,
+    "clearedModesMatchDry": 3,
+    "exteriorBackdropChallengeChangedPixelsAtFrame30": 0,
+    "gpuFileRightMinusLeftHeightAtFrame30": {
+      "driven": 0.5973650217056274,
+      "opposite": -0.5973649024963379,
+      "zero": 0.0
+    },
+    "rightMinusLeftHeight": {
+      "driven": 1.143244803,
+      "opposite": -1.1432448,
+      "zero": 0.0
+    },
+    "signedWetEdgeDifferenceInRadii": 0.7781620553359684,
+    "interiorPixelsChangedFromZero": 32258,
+    "stillWaterChangedPixelsFromDry": 67437,
+    "sortingLayerChangedPixels": 76579,
+    "landmarkColorSeparationDryDrivenSortingLayer": {
+      "gold": [
+        155.0,
+        122.0,
+        122.0
+      ],
+      "turquoise": [
+        95.0,
+        101.0,
+        100.0
+      ]
+    }
+  },
+  "film": {
+    "filename": "BowlProjection.mp4",
+    "frames": 75,
+    "fps": 30,
+    "bytes": 67944,
+    "sha256": "a0d64590210a6b90eb0765c46e275045d4eeec923616d6b445a131d304e8f47f"
+  }
+}

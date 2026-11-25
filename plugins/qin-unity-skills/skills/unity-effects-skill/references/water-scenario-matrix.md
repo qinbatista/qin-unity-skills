@@ -44,7 +44,7 @@ Keep inlet duration within cast duration. A curtain needs its authored hold plus
 | Waterfall or sluice stopped by a valve | Continuous sheet plus receiving pool. Compare two valve times and follow the tail after cutoff. |
 | Sudden flood on a dry floor, a surge entering existing water or a reservoir draining | Select the initial downstream depth, the released gate or the open port. Follow the front and account for water crossing the boundary. |
 | Rock in a river, river fork, two channels merging or an eddy near an inlet | Use the overhead field when flow can pass on either side. Compare downstream transport and obstacle exclusion with the same camera. |
-| Pan, basin or vessel moving under player input | Apply its signed acceleration to the side-view water. Check both wall heights, their reversal and the closed volume. |
+| Pan, basin or vessel moving under player input | Apply signed acceleration to the water. Check both wall heights, their reversal and the closed volume. If the camera sees into a round pan, [project its free surface inside the visible rim](bowl-projection.md). |
 | Skill whose water charges, hits, splits, bursts or changes direction | Reuse the matching spell or compose a trigger sequence. Preserve the physical flight through impact, cancellation, recast and retirement. |
 
 Each template has a declared geometry. Pressurized pipe networks, overturning ocean breakers, trapped air and interactions between immiscible fluids require additional solver models and their own native cases.

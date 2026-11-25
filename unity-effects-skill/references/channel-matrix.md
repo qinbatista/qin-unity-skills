@@ -63,6 +63,10 @@ Keep the master driver enabled for both tanks. A zero value passed to `SetDriver
 
 For a game-camera test, attach two independent bodies initialized with the same seed to the same live vessel transform. Preserve camera bounds, sorting and geometry, then toggle their renderers within a single game tick. Capture the native camera twice, record that tick and read all 128 columns from both bodies. At each timestamp compare maximum speed, wall-to-wall surface difference and integrated section area (sum of depth times 6/128 m). Check both signs of force and reflected wall head, bounded area drift and a stationary zero-force control. Compare the two camera images within the vessel. If the game is also repeating its original gesture, log the freshly observed angle beside the stored angle and report their maximum discrepancy. Label the force input as a recorded trace even when the game scene, pointer replay and camera capture are fresh. A recording used as a backdrop is a separate compositing test and should be identified explicitly.
 
+## Present a curved vessel in a top-down camera
+
+For a round pan seen from above, use the [bowl projection workflow](bowl-projection.md) to bind the solved surface to the visible inner rim, preserve the scene underneath and verify the dry exterior on the gameplay camera. Keep the side section available for measuring wall height and conservation.
+
 ## Regenerate the six comparisons
 
 Run `python scripts/replay_fluids.py --editor EDITOR --work NEW_TASK_CACHE --case channel-matrix --video` from the Skill directory, adding `--launcher REGISTERED_UNITY_LAUNCHER` for a receiving project with its own CLI. The command composes six new variants independently under two different template installation paths, plays both in URP Renderer2D, samples native GPU fields and verifies exact equality of corresponding capture bytes.
