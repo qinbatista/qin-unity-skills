@@ -75,14 +75,23 @@
     },
     {
       "id": "unity-assets",
-      "summary": "Unity asset placement, GUID-preserving moves, and texture intake",
+      "summary": "Asset placement, GUID-preserving moves, world scale, import caps, tiled ground and adjustable trunks",
       "document": "skills/ai-index/modules/unity-assets.md",
       "sources": ["unity-assets-skill"],
-      "dependencies": []
+      "dependencies": [],
+      "code_targets": [
+        {
+          "id": "configure-repeat-sprite-import",
+          "file": "unity-assets-skill/assets/Editor/WorldRepeatSprite.cs",
+          "symbol": "WorldRepeatSprite.ConfigureForDisplay",
+          "anchor": "public static bool ConfigureForDisplay(",
+          "summary": "Derive a cap from the full canvas and its largest projected extent, then configure a rendering-only Single Sprite in an isolated import trial."
+        }
+      ]
     },
     {
       "id": "unity-ui",
-      "summary": "UI Toolkit, localization, screen profiles, full-window backgrounds, iPhone Duo outer portrait and landscape, safe inner headers, fold panes and Canvas parity",
+      "summary": "UI Toolkit, sliced or tiled controls, localization, screen profiles, full-window backgrounds, iPhone Duo outer portrait and landscape, safe inner headers, fold panes and Canvas parity",
       "document": "skills/ai-index/modules/unity-ui.md",
       "sources": ["unity-ui-skill"],
       "dependencies": []

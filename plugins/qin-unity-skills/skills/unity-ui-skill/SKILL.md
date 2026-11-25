@@ -24,6 +24,7 @@ For a new screen follow the [screen construction workflow](#build-a-screen), inc
 | Incorrect size, inset, notch, orientation or fold | [Adapt an existing screen](#adapt-an-existing-screen). |
 | Whole-game UI for a portrait-designed game on phones, tablets and foldables | [Portrait game UI matrix](references/screen-profiles.md#portrait-game-ui-matrix) and [wide-window review](references/screen-profiles.md#verify-the-wide-window-of-a-portrait-game). |
 | Wrong, sliced or split artwork | [Source and component identity](references/artwork-intake.md#source-component-and-instance-identity) or [YoFaAssets split handoff](references/artwork-intake.md#yofaassets-split-to-unity). Audit each touched image through Assets. |
+| A panel or button needs several sizes or ships a large bitmap per size | [Resize buttons and panels](references/artwork-intake.md#resize-buttons-and-panels) with a shared backing, fixed corners and a stretched or tiled center. |
 | Artwork stretched after resizing or captions squeezed into a navigation row | [UI Toolkit artwork and navigation](references/screen-adaptation.md#ui-toolkit-artwork-and-navigation). Verify original proportions, caption ink and actual button hits. |
 
 ## Adapt an existing screen

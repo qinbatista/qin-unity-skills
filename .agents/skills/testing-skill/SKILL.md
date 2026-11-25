@@ -9,6 +9,7 @@ Use the smallest maintained case that can establish the change. Run from the rep
 
 | Purpose | Level | Runner and owner |
 | --- | --- | --- |
+| Sprite density and atlas membership, loaded texture size, repeated ground and capped trunks, and sliced and tiled Toolkit buttons | 2 graphics-enabled EditMode with a Play transition | [Image sizing replay](#run-the-image-sizing-fixture) runs both [sprite sizing](tests/Editor/SpriteSizingCases.cs) and [atlas packing](tests/Editor/SpriteSizingCasesAtlas.cs). |
 | Sprite Lit Tint responds to Light 2D, preserves HDR and transparent sprite coverage, and applies renderer alpha once | 2 graphics-enabled EditMode | In an isolated URP 17.6 Renderer 2D fixture, copy [SpriteLitTint.shadergraph](../../../unity-effects-skill/assets/SpriteLitTint.shadergraph) to `Assets/SpriteLitTint.shadergraph` and [SpriteLitTintCases.cs](tests/Editor/SpriteLitTintCases.cs) to the Editor test assembly referencing URP runtime, URP 2D runtime and Core runtime. Run Unity CLI EditMode with filter `SpriteLitTintCases`. |
 | Overhead XY currents, dam release and reservoir budgets, spell collision and recasting, extreme gravity and drop counts | 2 | [Two-receiver physical case matrix](../../../unity-effects-skill/references/water-scenario-matrix.md) with `--case all --preview --video`. Use the bounded authoring sweep from the same guide to exercise the serialized parameter grid. |
 | Every documented physical water recipe authors a saved prefab and corresponds to a real native capture | 2 | [Recipe guide authoring](tests/test_fluid_mixer.py), Python unittest, and [native replay](../../../unity-effects-skill/references/water-recipes-2d.md#install-and-author-a-named-effect) with both receivers. |
@@ -55,3 +56,13 @@ From the repository root, use the [fixture preparer](tests/prepare_foundation_te
 python3 -B .agents/skills/testing-skill/tests/prepare_foundation_tests.py "<task-cache>"
 python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<task-cache>/foundations" --non-interactive --no-pager --mode EditMode --filter UnityFoundationTests --output "<task-cache>/foundations.xml" -- -nographics -logFile "<task-cache>/foundations.log"
 ```
+
+## Run the image sizing fixture
+
+Use a fresh task-owned Unity 6000.6.7f1 project with the [Charge Pulse package manifest](../../../examples/charge-pulse/Packages/manifest.json) and an Editor test assembly with `optionalUnityReferences: ["TestAssemblies"]`. Run on the Standalone build target with graphics enabled. Copy both case files from the table above and the packaged [world Sprite importer](../../../unity-assets-skill/assets/Editor/WorldRepeatSprite.cs) into that assembly. Copy the packaged [slicing stylesheet](../../../unity-ui-skill/assets/ResizableBacking.uss) to `Assets/ResizableBacking.uss` and the [fixture theme](../../../examples/charge-pulse/Assets/Prefabs/ChargePulse/PulseTheme.tss) to `Assets/PulseTheme.tss`. Set `SPRITE_SIZING_FRAMES` to an existing task Cache directory for optional PNG readbacks.
+
+```text
+python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<project>" --non-interactive --no-pager --mode EditMode --filter SpriteSizingCases --output "<task-cache>/sizing.xml" -- -logFile "<task-cache>/sizing.log"
+```
+
+Verify that all four cases pass in the NUnit XML. The importer case checks the projected height can determine the size cap, checks an exact power-of-two boundary, and reports before/after texture object bytes in the Editor. The graphics cases sample the rendered ground, tree caps, sliced button borders and the 16-pixel tiled motif through a partial final repeat. They pick the expanded button in both modes. The atlas case checks two co-used entries share one page and excludes the unrelated backdrop.

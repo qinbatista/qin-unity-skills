@@ -51,8 +51,8 @@ For a reusable gameplay foundation, the [Singleton Manager](unity-code-skill/ref
 | Skill | What to inspect |
 | --- | --- |
 | [Unity Code](unity-code-skill/SKILL.md) | [C# style and runtime ownership](examples/charge-pulse/CASEBOOK.md#unity-code) · [Charge controller](examples/charge-pulse/Assets/Scripts/ChargePulse/ChargePulseController.cs) |
-| [Unity Assets](unity-assets-skill/SKILL.md) | [Prefab placement, asset moves and imports](examples/charge-pulse/CASEBOOK.md#unity-assets) |
-| [Unity UI](unity-ui-skill/SKILL.md) | [Screen layout configuration](unity-ui-skill/assets/screen-layouts.json) · [Five responsive layouts](examples/charge-pulse/README.md#responsive-ui-cases) · [Toolkit and Canvas input and localization](examples/charge-pulse/CASEBOOK.md#unity-ui) |
+| [Unity Assets](unity-assets-skill/SKILL.md) | [Prefab placement, asset moves and imports](examples/charge-pulse/CASEBOOK.md#unity-assets) · [1,000 PPU, tiled ground and adjustable trees](unity-assets-skill/references/texture-intake.md#build-resizable-world-sprites) |
+| [Unity UI](unity-ui-skill/SKILL.md) | [Resizable buttons and panels](unity-ui-skill/references/artwork-intake.md#resize-buttons-and-panels) · [Screen layout configuration](unity-ui-skill/assets/screen-layouts.json) · [Five responsive layouts](examples/charge-pulse/README.md#responsive-ui-cases) · [Toolkit and Canvas input and localization](examples/charge-pulse/CASEBOOK.md#unity-ui) |
 | [Unity Animation](unity-animation-skill/SKILL.md) | [Clips, transitions, Blend Trees and rigs](examples/charge-pulse/CASEBOOK.md#unity-animation) |
 | [Unity Effects](unity-effects-skill/SKILL.md) | [Particles, shaders, Graph bindings and replay](examples/charge-pulse/CASEBOOK.md#unity-effects) |
 | [Unity Performance](unity-performance-skill/SKILL.md) | [C# hot paths, pooling and asset lifetimes](unity-performance-skill/references/runtime-code.md) · [Simulation, physics and visual effects in 2D](unity-performance-skill/references/simulation-and-effects.md) · [Before-and-after measurement](unity-performance-skill/references/measure-and-verify.md) |

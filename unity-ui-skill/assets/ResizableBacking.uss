@@ -1,0 +1,11 @@
+.resizable-backing {
+    -unity-slice-left: 8;
+    -unity-slice-right: 8;
+    -unity-slice-top: 8;
+    -unity-slice-bottom: 8;
+    background-size: 100% 100%;
+}
+
+.resizable-backing--tiled {
+    -unity-slice-type: tiled;
+}

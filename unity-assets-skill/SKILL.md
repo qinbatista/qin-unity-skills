@@ -1,6 +1,6 @@
 ---
 name: unity-assets-skill
-description: Route Unity asset placement, GUID-preserving moves and image intake. Use whenever Unity work touches an image, including Sprite sizing, platform texture formats, Crunch and native import optimization with or without YoFaAssets.
+description: Route Unity asset placement, GUID-preserving moves and image intake. Use whenever Unity work touches an image, including 1000 PPU world scale, tiled ground, modular trees, Sprite Atlases, platform texture formats and native import optimization with or without YoFaAssets.
 ---
 
 # Unity Assets
@@ -22,6 +22,7 @@ For every image read, received, generated, edited or reused for Unity, audit its
 | Place a Prefab, scene or tool | [Place by owner](#place-by-owner). |
 | Move, rename or remove an asset | [Move with identity](#move-with-identity). |
 | Decide world Sprite PPU or change existing geometry | [Size new world art](references/texture-intake.md#size-new-world-art) or [migrate an existing Sprite](references/texture-intake.md#migrate-an-existing-sprite). For new world art without a project convention, 1000 pixels = 1 Unity unit = 1 meter at effective scale 1. For a change [verify imported world size](references/texture-intake.md#verify-imported-world-size). |
+| Resize ground, trees or other repeatable art without baking a larger Sprite | [Build resizable world Sprites](references/texture-intake.md#build-resizable-world-sprites) and [select atlas membership](references/texture-intake.md#pack-sprites-that-load-together). |
 | Identify a source, atlas, material or consumer | [Bind source and receiver](references/texture-intake.md#bind-source-and-receiver). |
 | Choose settings for pixel art, UI, normal maps or other texture styles | [Settings by texture role](references/texture-intake.md#settings-by-texture-role). For a size cap or streamed mips use [resolution and mip streaming](references/texture-intake.md#resolution-and-mip-streaming). |
 | Compare platform compression, ASTC, ETC, BC or Crunch | [Target formats and Crunch](references/texture-intake.md#target-formats-and-crunch). |
