@@ -20,7 +20,7 @@ public sealed partial class QinFluidReplay
     {
         string root = ApplicationCapture(form);
         string path = $"Assets/GameWater/{form}/{form}.prefab";
-        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SubjectAsset(form, path));
         Assert.That(prefab, Is.Not.Null, path);
         Assert.That(PrefabUtility.GetPrefabAssetType(prefab), Is.EqualTo(PrefabAssetType.Variant));
         var instance = Object.Instantiate(prefab, stage.transform);

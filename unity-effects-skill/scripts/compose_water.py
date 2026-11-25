@@ -66,7 +66,24 @@ def in_assets(project, relative):
     return target
 
 
+def asset_files(base, name, profile, settings, *, original_surface=False):
+    if profile in CHANNEL_BASES:
+        return surface_files(base, name, CHANNEL_BASES[profile], settings, "Channels", "ChannelWater2D", channel_ranges(profile))
+    elif profile in TOPDOWN_BASES:
+        return surface_files(base, name, TOPDOWN_BASES[profile], settings, "TopDown", "TopDownWater2D", TOPDOWN_RANGES)
+    elif profile in PARCEL_BASES or profile in SPELL_BASES:
+        return parcel_files(base, name, profile, settings, original_surface=original_surface)
+    else:
+        raise ValueError(f"Unknown water profile: {profile}")
+
+
 def compose(project, template, destination, name, profile, settings):
+    prefabs, status = compose_bundle(project, template, destination, name, [("", profile, settings)])
+    return prefabs[0], status
+
+
+def compose_bundle(project, template, destination, name, actors, *, original_surface=False):
+    """Stage every actor and publish the complete named recipe with one directory rename."""
     project = Path(project).resolve(strict=True)
     version = project / "ProjectSettings/ProjectVersion.txt"
     if not version.is_file() or not (project / "Assets").is_dir():
@@ -77,21 +94,26 @@ def compose(project, template, destination, name, profile, settings):
     output = in_assets(project, destination) / name
     if output.resolve() != output or base == output or base in output.parents or output in base.parents:
         raise ValueError("Keep the new variant in its own game-owned folder outside the template.")
-    if profile in CHANNEL_BASES:
-        files = surface_files(base, name, CHANNEL_BASES[profile], settings, "Channels", "ChannelWater2D", channel_ranges(profile))
-    elif profile in TOPDOWN_BASES:
-        files = surface_files(base, name, TOPDOWN_BASES[profile], settings, "TopDown", "TopDownWater2D", TOPDOWN_RANGES)
-    elif profile in PARCEL_BASES or profile in SPELL_BASES:
-        files = parcel_files(base, name, profile, settings)
-    else:
-        raise ValueError(f"Unknown water profile: {profile}")
+    files = {}
+    prefabs = []
+    for suffix, profile, settings in actors:
+        if not re.fullmatch(r"[A-Za-z0-9_]*", suffix):
+            raise ValueError("Use identifier characters for the prefab role suffix.")
+        actor = name + suffix
+        prefab = output / (actor + ".prefab")
+        if prefab in prefabs:
+            raise ValueError(f"Duplicate actor name: {actor}")
+        prefabs.append(prefab)
+        files.update(asset_files(base, actor, profile, settings, original_surface=original_surface))
+    if not prefabs:
+        raise ValueError("The water template requires at least one actor.")
     owned_guids = {re.search(rb"(?m)^guid: ([0-9a-f]+)$", data)[1]
                    for filename, data in files.items() if filename.endswith(".meta")}
     with project_lock(version):
         if output.exists():
             if output.is_dir() and all((output / file).is_file() and (output / file).read_bytes() == data
                                        for file, data in files.items()):
-                return output / (name + ".prefab"), "already composed"
+                return prefabs, "already composed"
             raise ValueError(f"Existing artist changes or a different recipe were preserved at {output}.")
         for root in (project / "Assets", project / "Packages"):
             for path in root.rglob("*.meta"):
@@ -106,7 +128,7 @@ def compose(project, template, destination, name, profile, settings):
             for file, data in files.items():
                 (staged / file).write_bytes(data)
             os.rename(staged, output)
-    return output / (name + ".prefab"), "composed"
+    return prefabs, "composed"
 
 
 def surface_files(base, name, donor, settings, directory, parent, ranges):
@@ -132,7 +154,7 @@ def surface_files(base, name, donor, settings, directory, parent, ranges):
              re.sub(r"(?m)^guid: [0-9a-f]+$", "guid: " + guid, meta).encode()}
     return files
 
-def parcel_files(base, name, profile, settings):
+def parcel_files(base, name, profile, settings, *, original_surface=False):
     if profile in SPELL_BASES:
         donor = SPELL_BASES[profile]
         assets = Path("Spells") / donor
@@ -142,6 +164,9 @@ def parcel_files(base, name, profile, settings):
         preset = Path("Presets") / (donor + ".asset")
         prefab = Path("Variants") / (donor + ".prefab")
     required = [preset, prefab, Path(str(preset) + ".meta"), Path("WaterFluidMixer.prefab.meta")]
+    if original_surface:
+        required.extend("OriginalFluidSurface." + ext for ext in
+                        ("mat", "mat.meta", "shadergraph", "shadergraph.meta", "hlsl", "hlsl.meta"))
     if profile == "rain" and settings.get("rain-exposure", 0) > 0:
         required.extend(("WaterFluidMixer.prefab", "FluidMix.compute", "FluidMixController.cs",
                          "FluidMixSimulation.cs", "SOFluidMixRecipe.cs", "FluidSurface.hlsl", "WaterStudyOptics.hlsl",
@@ -178,6 +203,16 @@ def parcel_files(base, name, profile, settings):
     recipe_guid = uuid.uuid5(uuid.NAMESPACE_URL, "qin-unity-skills/author-water-recipe/" + name).hex
     prefab_guid = uuid.uuid5(uuid.NAMESPACE_URL, "qin-unity-skills/author-channel/" + name).hex
     definition = (base / prefab).read_text(encoding="utf-8").replace("value: " + donor, "value: " + name)
+    if original_surface:
+        root_guid = meta_guid(base / "WaterFluidMixer.prefab.meta").decode()
+        material_guid = meta_guid(base / "OriginalFluidSurface.mat.meta").decode()
+        overrides = "".join(
+            f"    - target: {{fileID: {renderer}, guid: {root_guid}, type: 3}}\n"
+            "      propertyPath: m_Materials.Array.data[0]\n"
+            "      value: \n"
+            f"      objectReference: {{fileID: 2100000, guid: {material_guid}, type: 2}}\n"
+            for renderer in (110203, 110303))
+        definition = definition.replace("    m_RemovedComponents:", overrides + "    m_RemovedComponents:", 1)
     donor_guid = meta_guid(TEMPLATE / (str(preset) + ".meta")).decode()
     files = {name + ".asset": recipe.encode(), name + ".prefab": definition.replace(donor_guid, recipe_guid).encode()}
     for path, guid in ((preset, recipe_guid), (prefab, prefab_guid)):

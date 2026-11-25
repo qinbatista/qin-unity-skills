@@ -91,6 +91,10 @@ def title(case):
 
 
 def write_gallery(work, report):
+    from water_templates import describe
+
+    recipes = work / "Recipes"
+    recipes.mkdir(exist_ok=True)
     groups = {case: GROUPS[group] for group, cases in report.get("families", {}).items() for case in cases}
     output = work / "Comparisons"
     output.mkdir(exist_ok=True)
@@ -107,7 +111,11 @@ def write_gallery(work, report):
         with Image.open(frames[len(frames) // 3]) as shot:
             shot.convert("RGB").save(poster, quality=90)
         result = compare(folder, output / (case + ".jpg"))
-        row = dict(name=case, label=label, group=group, video=path, poster="Comparisons/" + poster.name)
+        edition = report.get("edition", "refined") if case == "WideCloudburst" else "original"
+        recipe_path = recipes / (case + ".json")
+        recipe_path.write_text(json.dumps(describe(case, edition), indent=2) + "\n", encoding="utf-8")
+        row = dict(name=case, label=label, group=group, video=path, poster="Comparisons/" + poster.name,
+                   recipe=recipe_path.relative_to(work).as_posix())
         if result:
             row.update(pair="Comparisons/" + case + ".jpg", control=result[0], tick=result[1], fieldRange=result[2])
         rows.append(row)
@@ -140,11 +148,11 @@ figure{margin:0}a{color:#83dbeb}button:focus-visible,select:focus-visible,a:focu
 </style><main><header><h1>2D water replay</h1><span>%%COUNT%% scenes · 30 fps</span></header>
 <nav aria-label="Select a replay"><label for="scene">Scene</label><select id="scene">%%OPTIONS%%</select>
 <button id="prev" aria-label="Previous scene">←</button><button id="next" aria-label="Next scene">→</button></nav>
-<video id="film" controls playsinline loop preload="metadata"></video><p><a id="file">Open full-size film</a></p>
+<video id="film" controls playsinline loop preload="metadata"></video><p><a id="file">Open full-size film</a> · <a id="recipe">View template and scene inputs</a></p>
 <section id="comparison"><h2 id="moment"></h2><p id="scale" hidden></p><figure><img id="pair" alt="Native camera frames at the same simulation tick"><figcaption><span>Normal input</span><span id="condition"></span></figcaption></figure></section>
 </main><script>const cases=%%DATA%%;const sel=document.getElementById('scene'),film=document.getElementById('film');
 const ordered=Array.from(sel.options).map(o=>Number(o.value));
-function show(i){const c=cases[i];sel.value=i;film.poster=c.poster;film.src=c.video;document.getElementById('file').href=c.video;
+function show(i){const c=cases[i];sel.value=i;film.poster=c.poster;film.src=c.video;document.getElementById('file').href=c.video;document.getElementById('recipe').href=c.recipe;
 const section=document.getElementById('comparison');section.hidden=!c.pair;
 if(c.pair){document.getElementById('pair').src=c.pair;document.getElementById('moment').textContent=(c.fieldRange?'GPU surface height · ':'Same-camera comparison · ')+(c.tick/30).toFixed(2)+' s';
 const scale=document.getElementById('scale');scale.hidden=!c.fieldRange;if(c.fieldRange){scale.textContent='Identical colour scale in both fields, ±'+c.fieldRange.toPrecision(3)+' m. Blue indicates a trough and gold a crest.';}

@@ -29,6 +29,19 @@ python3 -B scripts/replay_fluids.py --editor "/path/to/Unity" --launcher "/path/
 python3 -B scripts/sweep_water.py --work "/path/to/task/Cache/temp-run/authoring"
 ```
 
+## Check the original recordings
+
+Choose the case by its stable ID in the [named template library](water-template-library.md). The selector contains 37 public subjects. The original 30 fps montage shows 21 of those subjects in four chapters. Its final row contains WeightlessMass, SingleLedgeDrop and the original WideCloudburst. The refined cloudburst has its own three-take probe.
+
+From the installed Effects Skill, run these commands in fresh directories under your task cache. The first command runs both Unity receivers. The second checks the native frames, controls, sampled solver states and exported movies against the [frozen original signatures](../assets/water-library-baseline.json). Its optional caption step recreates both complete films. Supply the original Hiragino Sans GB TTC font for the Chinese captions. The original envelope is Unity 6000.6.7f1, Apple M3 Max, Metal and seed 29411. Byte-identical movie acceptance uses FFmpeg 9.0.2, Pillow 13.0.0, Arial for the original English board and Hiragino Sans GB for its Chinese overlay. The baseline includes both font signatures.
+
+```sh
+python3 -B scripts/replay_fluids.py --case all --edition original --video --seed 29411 --editor "<Unity editor>" --launcher "<registered Unity CLI Python script>" --work "<task-cache>/original"
+python3 -B scripts/verify_water_library.py --work "<task-cache>/original" --output "<task-cache>/checked" --caption-font "/System/Library/Fonts/Hiragino Sans GB.ttc"
+```
+
+For both storm editions and their zero-wave control, run [the cloudburst probe](wide-cloudburst.md#author-and-replay) and add `--cloudburst "<probe-work>"` to the verification command. A mismatch identifies the receiver, case and failed signature. Each subject hash covers the sorted relative filenames and file contents under its native capture directory. The movie has a separate digest. Keep the accepted signatures when changing a recipe and record a separate version for a newly approved look. For private game shots, retain the receiving scene, input sequence, project revision, adapter and movie hashes with the game.
+
 ## Interpret the checks
 
 The [authoring sweep](../scripts/sweep_water.py) enumerates the Cartesian product of inherited, minimum and maximum values exposed for each profile. It invokes the composer, reopens each valid prefab and checks its fields and recipe binding. It also exercises incompatible durations, out-of-range inputs, nonfinite numbers, unsupported settings and fractional drop counts. A matrix cell in the authoring receipt represents serialized assets. The 37 filmed subjects have separate simulation, image and clock evidence. The full run also executes the [repeated-cast resource comparison](fluid-mixer.md#verify-resource-reuse-across-casts) once per receiver.

@@ -1,0 +1,377 @@
+{
+  "version": 1,
+  "seed": 29411,
+  "graphics": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal"
+  ],
+  "fps": 30,
+  "receiverPaths": [
+    "Assets/QinFluidMixer",
+    "Assets/Effects/Liquid"
+  ],
+  "testsPerReceiver": 38,
+  "chapters": [
+    {
+      "id": "channel-matrix",
+      "label": "侧视河道与容器",
+      "cases": [
+        "DryDamBreak",
+        "WetBedBore",
+        "ReservoirFill",
+        "ReservoirDrawdown",
+        "TidalReversal",
+        "DrivenTank"
+      ]
+    },
+    {
+      "id": "topdown",
+      "label": "俯视水流",
+      "cases": [
+        "BoatWake",
+        "IslandCurrent",
+        "StreamConfluence",
+        "ForkedChannel",
+        "DrainVortex",
+        "RainPond"
+      ]
+    },
+    {
+      "id": "spells",
+      "label": "水系技能",
+      "cases": [
+        "UpwellGeyser",
+        "ChargedSurge",
+        "MovingWardJet",
+        "ShieldIntercept",
+        "RecastRelay",
+        "RadialBreak"
+      ]
+    },
+    {
+      "id": "limits",
+      "label": "极限输入",
+      "cases": [
+        "WeightlessMass",
+        "SingleLedgeDrop",
+        "WideCloudburst"
+      ]
+    }
+  ],
+  "reel": {
+    "englishSha256": "620924caf0a08d0ce10a5af656ae6bd647cc76b908e7e3338aa5831c0f9a04d0",
+    "chineseSha256": "48522d306b9df06be270baf16d907398f77dce0e97baf0d32e895ff32cf9e9a3",
+    "encoder": {
+      "ffmpeg": "9.0.2",
+      "Pillow": "13.0.0",
+      "fontFiles": {
+        "Arial.ttf": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+        "Hiragino Sans GB.ttc": "ca1e9bf621f13ddc4800bfb74d0124571dfc25a1678a28d6e7dbcf39fad2504a"
+      }
+    }
+  },
+  "subjects": {
+    "BasinSlosh": {
+      "label": "封闭水池晃荡",
+      "frames": 256,
+      "fullRateMovieSha256": "d955cb96c21df96a7eb29b423763645d7821b068c79328addb8ff9033e737c9a",
+      "height": 540,
+      "nativeTreeSha256": "2e6dd86d79b8940d39910c77a55d63a6771c422854e84cff328ff360b8dfdf54",
+      "width": 960
+    },
+    "BoatWake": {
+      "label": "行船尾流",
+      "frames": 180,
+      "fullRateMovieSha256": "79a2547c75b42b914bd884bd84955c3328d7471dabc445d6a59e601daa955688",
+      "height": 540,
+      "nativeTreeSha256": "bb866d56297c6aea51d3b7a4d5c687d33d00b61b2738fe1b38a9f8a6f0819c75",
+      "width": 960
+    },
+    "ChargedSurge": {
+      "label": "蓄力浪涌",
+      "frames": 96,
+      "fullRateMovieSha256": "d03ca49ad9892641ca7f5c8ce4fbe6a59abdb115026ad3657907fb26068dba43",
+      "height": 540,
+      "nativeTreeSha256": "12f4b8579b9abe737ca9ce07b91d0b7dfe52765e8e6993ec36c6b31a91d0c01a",
+      "width": 960
+    },
+    "CoveWash": {
+      "label": "定制岸坡的海湾",
+      "frames": 256,
+      "fullRateMovieSha256": "2ccb478362cd0a194c3be24b0a5876bda487ea9746a22cc9c8a24b973b3cb785",
+      "height": 540,
+      "nativeTreeSha256": "84474972c99a672675db37d3ebffd6df12bb9b865ae3056cb131f72a6d62f966",
+      "width": 960
+    },
+    "Curtain": {
+      "label": "水针命中展开水帘",
+      "frames": 92,
+      "fullRateMovieSha256": "f77e8a32a03066cf49d168cf1476a70ddfa4bfc268204c9e14ec47579acaab6e",
+      "height": 540,
+      "nativeTreeSha256": "f1f0330a1544ed8c8ab4f83ed40d46c8ca9726c86d17bff4c2d282d81bac331e",
+      "width": 960
+    },
+    "DrainVortex": {
+      "label": "俯视排水漩涡",
+      "frames": 180,
+      "fullRateMovieSha256": "88c45ac0d2376c923f3a174c2cf7f6040c6b64a3932c7b74519be9ab9cde9756",
+      "height": 540,
+      "nativeTreeSha256": "80819aa50ed8367d1cde25e6b6a5c3bc25496c070a3b697e48a30598a8a1ffa7",
+      "width": 960
+    },
+    "DrivenTank": {
+      "label": "摇动容器",
+      "frames": 166,
+      "fullRateMovieSha256": "ba83eee31054a547dddd7d23f924e7881a771c7739f7fbfd5252e9b1220b8bb6",
+      "height": 540,
+      "nativeTreeSha256": "3763a90b8fba6dd4118975058ee02dd317296ff1cafb70448f8af0eba2cda3b6",
+      "width": 960
+    },
+    "DryDamBreak": {
+      "label": "干河床开闸",
+      "frames": 166,
+      "fullRateMovieSha256": "23db72506ee48631978682d2ca13acc803eb7036b79b416db06c1f763e36285f",
+      "height": 540,
+      "nativeTreeSha256": "1e43251aa8e16e69a305529663267992e0ff83c701d9a6144a7edd36e93d046d",
+      "width": 960
+    },
+    "FallingMass": {
+      "label": "水团落地",
+      "frames": 84,
+      "fullRateMovieSha256": "dbe8d8b17a5a1eb1a486e5991fc9f543b121fc401f6b568ec03a717e699ee376",
+      "height": 540,
+      "nativeTreeSha256": "334cabd39d4b5fffde65ddd130f144d2af8dad79268ff924f11b3f3291b1efb1",
+      "width": 960
+    },
+    "ForkedChannel": {
+      "label": "河道分叉",
+      "frames": 180,
+      "fullRateMovieSha256": "ab4535f42f12d8695373b6864a0fad3e6059c6891ed6ccbddf572fa6aefde57c",
+      "height": 540,
+      "nativeTreeSha256": "044ec800b27932961e8371f1c634197151af4ff023d1ce6165eaf68b1cfb68c6",
+      "width": 960
+    },
+    "FreeJet": {
+      "label": "抛物水柱",
+      "frames": 84,
+      "fullRateMovieSha256": "c10d68979d9b31f9a1e9ff893d48ef41b8e665ad49de7a70572485ef43333c5f",
+      "height": 540,
+      "nativeTreeSha256": "070232f98b9a9b4dea6035735226bc51f8a166a347a3315a51d16763fd4890a1",
+      "width": 960
+    },
+    "IslandCurrent": {
+      "label": "水流绕岛",
+      "frames": 180,
+      "fullRateMovieSha256": "456c4be5df95183dd5015139f0017e209087b18bb2857ac90e3430a67c0d4922",
+      "height": 540,
+      "nativeTreeSha256": "e70ef5d1a29c658a7867cba6ffee76518e90284fa741a981e9e49629e7dbd761",
+      "width": 960
+    },
+    "LedgeDrip": {
+      "label": "岩沿滴水",
+      "frames": 114,
+      "fullRateMovieSha256": "9bc7a413338f7605c2e5aec04f1e856fcfa3202be4176cd2de29e1bd585ab212",
+      "height": 540,
+      "nativeTreeSha256": "781e1a2d7ad6b5775a68f8d26c559c3e9f0f6c133e1338314056608846b6e891",
+      "width": 960
+    },
+    "MovingWardJet": {
+      "label": "水柱撞移动护盾",
+      "frames": 96,
+      "fullRateMovieSha256": "9369cc7a3d925eaee951de749ed85172efc8a036a40fb5ecb2cb6a93f96616ef",
+      "height": 540,
+      "nativeTreeSha256": "5d67129ac4c89a375db9d413ee0cfcc7f1e47dce5174fbcb5d8fd6d295595b9f",
+      "width": 960
+    },
+    "OpposedJets": {
+      "label": "两股射流对撞",
+      "frames": 84,
+      "fullRateMovieSha256": "4b9efd7d6de41102e2675c05f3d5752051d05cefd6c19bbe1d147c9391e80d51",
+      "height": 540,
+      "nativeTreeSha256": "9cb2610760cc38f074a1eaa4fa202e4f247761c77483d4956661a60a411d8493",
+      "width": 960
+    },
+    "PlanarRipples": {
+      "label": "传播的涟漪",
+      "frames": 84,
+      "fullRateMovieSha256": "0489c39ae88c41a84878b52ed5ae8581907f670512a6adbe41a68fd3a12fa0be",
+      "height": 540,
+      "nativeTreeSha256": "9cfd1fc1bcf88699308f51e258513d551444e3e13106b3a64fd6b655276e3934",
+      "width": 960
+    },
+    "RadialBreak": {
+      "label": "环形水爆",
+      "frames": 96,
+      "fullRateMovieSha256": "5f9baa09cd036e49969f67950ecc5abed3afc09b8b6d0dc36c455d376cc4cf60",
+      "height": 540,
+      "nativeTreeSha256": "56077dace72d93fe4b8ca35f65c572b1dc55d41f6b7d75566d9065138f2a4795",
+      "width": 960
+    },
+    "RainOnPool": {
+      "label": "降雨入池",
+      "frames": 114,
+      "fullRateMovieSha256": "b7173048a115570c8a99b1d4ab358395f47a5408621f762207a9ff6bd2a19866",
+      "height": 540,
+      "nativeTreeSha256": "02a849843b75675453952b448d758473417fbfd9604c2e29eeb3e436382cd49f",
+      "width": 960
+    },
+    "RainPond": {
+      "label": "雨滴落入池塘",
+      "frames": 180,
+      "fullRateMovieSha256": "f8705c2fc2080f49671f34777aa20b60a4487110040aa8fd2099f573d86754ae",
+      "height": 540,
+      "nativeTreeSha256": "0943f0267000d265fd466ef092e43291e4ed934ca7a19fd4396e1230f896d1d4",
+      "width": 960
+    },
+    "RecastRelay": {
+      "label": "中断后反向再施放",
+      "frames": 96,
+      "fullRateMovieSha256": "655cc0b5fcf8fb64c867c6d57da0c012852845c081e3e9c261ce58858e789337",
+      "height": 540,
+      "nativeTreeSha256": "e45e0f374d0374d1169d58dbbc42ee2c056ef2b09283bf95ef6f63aa4cd59935",
+      "width": 960
+    },
+    "ReservoirDrawdown": {
+      "label": "蓄水池泄流",
+      "frames": 166,
+      "fullRateMovieSha256": "c1d85076f5e7a4db80e8570f48f7d38904f7215c1e4a694756e2ab1e953a98d9",
+      "height": 540,
+      "nativeTreeSha256": "888b22a9c803c53373dd06ea1a2aebcd1dde13f99f0b2a1b60e3cce263ed5602",
+      "width": 960
+    },
+    "ReservoirFill": {
+      "label": "蓄水池进水",
+      "frames": 166,
+      "fullRateMovieSha256": "575af3524b8c45f2d199fc65f051b3b173f292e542fbec7b1e398c826f19f813",
+      "height": 540,
+      "nativeTreeSha256": "de93ef97b22b1dcf823f2d6cfaed9ecb88b2e2384304e495f683a80c1ba56b47",
+      "width": 960
+    },
+    "RiverCurrent": {
+      "label": "河道水流",
+      "frames": 256,
+      "fullRateMovieSha256": "df35d384316eb144ef2309852c27bd84d0f6ac262c0fa9806f34df6c485a6c06",
+      "height": 540,
+      "nativeTreeSha256": "2af9413bbc4d4d4ab91d32673e13567bef03c76d8585ad53e478d15ded6fd404",
+      "width": 960
+    },
+    "RockImpact": {
+      "label": "射流撞石",
+      "frames": 84,
+      "fullRateMovieSha256": "6c546d6883b81c32451bdf55b6b8f04627f19645889999b155f7391ad8ec1186",
+      "height": 540,
+      "nativeTreeSha256": "797d4909acf9fcdaccff62a303325370f51187974ff598df19ab0a1d98124b04",
+      "width": 960
+    },
+    "ShieldIntercept": {
+      "label": "护盾截断水枪",
+      "frames": 96,
+      "fullRateMovieSha256": "9b211fc87389a6224846345a35e906cabbdcd5ed7b184fe9783e24fad40164bf",
+      "height": 540,
+      "nativeTreeSha256": "a37c2f2c00543abdbb45376d69ab5ef2b22d470d7cb1f83be29f61af6dedcbed",
+      "width": 960
+    },
+    "ShoreWash": {
+      "label": "水浪上岸回退",
+      "frames": 256,
+      "fullRateMovieSha256": "764c9bf440712cd6392436c934039ce1a3e0749b9200c11d5911cb5623234b0c",
+      "height": 540,
+      "nativeTreeSha256": "e8bd508fb5049f4637901f65d9a518836748d69a12bf79eefbc2aeb6b179feac",
+      "width": 960
+    },
+    "SingleLedgeDrop": {
+      "label": "零宽水源的单滴",
+      "frames": 114,
+      "fullRateMovieSha256": "5e7d45fee196a7d188d929f839241bbf8c69d65d82b47d19906dd247fa70a140",
+      "height": 540,
+      "nativeTreeSha256": "42454db3d734864282084979b129e18025f55871497cbf9f3893fb0f5b7d6bd1",
+      "width": 960
+    },
+    "SpringFountain": {
+      "label": "泉眼喷流",
+      "frames": 114,
+      "fullRateMovieSha256": "779b024238fe0bea5530113c2e01264f90e374dab76f890678b2cd75fc607ed4",
+      "height": 540,
+      "nativeTreeSha256": "0f1b2534b010a31c37e8abc06b0c697ba02bacdfbc822d50ada07a3869ec6aaf",
+      "width": 960
+    },
+    "StreamConfluence": {
+      "label": "两股水汇流",
+      "frames": 180,
+      "fullRateMovieSha256": "7b529a7f768a273a038f7f284ceaac2472ee8b139e36aa9b73793d0571d1a0ae",
+      "height": 540,
+      "nativeTreeSha256": "9d9dc43798307af2bdc1bf8c51b95d9830b17fbb815a765861924dbba8aa0cf7",
+      "width": 960
+    },
+    "TidalReversal": {
+      "label": "潮汐换向",
+      "frames": 166,
+      "fullRateMovieSha256": "d94b23576f42a9a3da563e98e4490b780199363a296620e7e119cd22c45da45d",
+      "height": 540,
+      "nativeTreeSha256": "4345b9715a52da0fdb2e6d3336bf5291f8e220f9d1242d1b44127647ac1aaabf",
+      "width": 960
+    },
+    "UpwellGeyser": {
+      "label": "涌泉撞击",
+      "frames": 96,
+      "fullRateMovieSha256": "00e87d300ab7fd3deba8a69b9e0bbf7920de7586a416be6ed9cc628833074a68",
+      "height": 540,
+      "nativeTreeSha256": "b6cb35788605684908d9fc140fea28328e260da538d91d8a7f160cdb1b287417",
+      "width": 960
+    },
+    "Vortex": {
+      "label": "旋流汇入排口",
+      "frames": 84,
+      "fullRateMovieSha256": "ca59eed632c40e105f15f2acae20b02dffdeb7e254ef20202ac3c6f7295a14d6",
+      "height": 540,
+      "nativeTreeSha256": "9d79797212e8ee299b5f4d39eb7cf32d054f98e1ea0ef7d858f9fc280b430b9c",
+      "width": 960
+    },
+    "Waterfall": {
+      "label": "有限供水的瀑布",
+      "frames": 84,
+      "fullRateMovieSha256": "97a43031a8034c808815842380b16bfb52e3ceb110c466f77c4c7fbc9e65e67d",
+      "height": 540,
+      "nativeTreeSha256": "870e10b854f52e78cfcd2765a2014a73202586eea7c223e355d852b214e52d53",
+      "width": 960
+    },
+    "Waterfall2D": {
+      "label": "持续瀑布与关阀",
+      "frames": 292,
+      "fullRateMovieSha256": "7c8a787e949ee78face7c3e57af4ec0c85b0a06cd85354c5ca2b3566aaf979ea",
+      "height": 540,
+      "nativeTreeSha256": "054858c5bb061b32a355d3d46da1bc0d8b83d3188236e96a21529baa75aca451",
+      "width": 960
+    },
+    "WeightlessMass": {
+      "label": "零重力水团",
+      "frames": 114,
+      "fullRateMovieSha256": "bf6b6837d4c0852c9249d68a8e89fd91e878008a44404e56c27b9347301a97f5",
+      "height": 540,
+      "nativeTreeSha256": "0554c5e918e5e1aa24012f08acf6de1cd507e6eb391a01bd96c1eb8a3874c9c8",
+      "width": 960
+    },
+    "WetBedBore": {
+      "label": "有底水的溃坝涌波",
+      "frames": 166,
+      "fullRateMovieSha256": "7601aa8af7e5de8971e03d1189db5aa97f255d57753e079e96312eaa4a521a0f",
+      "height": 540,
+      "nativeTreeSha256": "0c0dfa2fa6450a06088849eeef000a18a68625bfd84a002c5f513993d7713eec",
+      "width": 960
+    },
+    "WideCloudburst": {
+      "label": "五米宽的暴雨",
+      "frames": 114,
+      "fullRateMovieSha256": "5f52ed569106bfbda09ddd669d6ea3afd8a3c759c2e57c3c8e862f8765748639",
+      "height": 540,
+      "nativeTreeSha256": "78f0645141371130d25652dc0855b024a3d2390e0b7946216a8f6534cc300b53",
+      "width": 960
+    }
+  },
+  "cloudburstModes": {
+    "normal": "e0fcf163f9db3bf19cb461d5b8a760547890b720b28f4340bb98815cf804d27e",
+    "no-waves": "db6670ebbb1171723da3260477fba1f659275e9e78a832b1d7c789cc9989c211",
+    "legacy": "d3b74ab0acd08c8f16e0356547e11f1e5b4fe6766dee2eb990756d8616f9801f"
+  }
+}

@@ -13,9 +13,17 @@ BRIEFS = {
 CASES = tuple(BRIEFS)
 
 
-def author(project, template):
+def brief(name, edition):
+    profile, settings = BRIEFS[name]
+    if name == "WideCloudburst" and edition == "original":
+        return profile, {**settings, "rain-exposure": 0}
+    return profile, settings
+
+
+def author(project, template, edition="refined"):
     assets = {}
-    for name, (profile, settings) in BRIEFS.items():
+    for name in CASES:
+        profile, settings = brief(name, edition)
         prefab, _ = compose(project, template, "Assets/GameWater", name, profile, settings)
         assets[name] = {file.name: sha256(file.read_bytes()).hexdigest()
                         for file in sorted(prefab.parent.iterdir()) if file.is_file()}

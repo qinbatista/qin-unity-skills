@@ -120,13 +120,25 @@ public sealed partial class QinFluidReplay
         backdropTexture = MakeFluidBackdrop(out backdropSprite);
     }
 
+    // Only the disposable named-template receiver writes this marker. The canonical
+    // subject still selects its scene, controls, capture name and event sequence.
+    private static string SubjectAsset(string subject, string originalPath, string role = "")
+    {
+        string marker = Path.Combine(Application.dataPath, "..", ".qin-fluid-template-prefix");
+        if (!File.Exists(marker)) return originalPath;
+        string name = File.ReadAllText(marker).Trim() + subject;
+        string asset = $"Assets/GameWater/{name}/{name}{role}{Path.GetExtension(originalPath)}";
+        Debug.Log("QIN_WATER_TEMPLATE_ASSET " + asset);
+        return asset;
+    }
+
     [UnityTest]
     public IEnumerator Replay([ValueSource(nameof(Forms))] string form)
     {
         string folder = Path.Combine(Environment.GetEnvironmentVariable("QIN_FLUID_OUTPUT"),form);
         foreach (string sub in new[] { "frames","normal","control" }) Directory.CreateDirectory(Path.Combine(folder,sub));
-        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Imported + "/Variants/" + form + ".prefab");
-        var recipe = AssetDatabase.LoadAssetAtPath<SOFluidMixRecipe>(Imported + "/Presets/" + form + ".asset");
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SubjectAsset(form, Imported + "/Variants/" + form + ".prefab"));
+        var recipe = AssetDatabase.LoadAssetAtPath<SOFluidMixRecipe>(SubjectAsset(form, Imported + "/Presets/" + form + ".asset"));
         Assert.That(prefab && recipe, Is.True);
         Assert.That(PrefabUtility.GetPrefabAssetType(prefab), Is.EqualTo(PrefabAssetType.Variant));
         Assert.That(prefab.GetComponent<FluidMixController>().Recipe, Is.EqualTo(recipe), "The saved drag-and-play variant must bind its own recipe");

@@ -5,6 +5,7 @@ import hashlib
 from importlib import import_module
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import socket
@@ -77,7 +78,26 @@ def native_parent(work):
     return short
 
 
-def lane(label, work, editor, seed, case, launcher, temp_parent):
+def named_receiver(project, relative, case, edition, prefix):
+    from water_templates import CASES, compose_bundle, recipe
+
+    authored = {}
+    paths = []
+    for subject, (suite, _) in CASES.items():
+        if case not in ("all", suite):
+            continue
+        subject_edition = edition if subject == "WideCloudburst" else "original"
+        _, actors = recipe(subject, subject_edition)
+        name = prefix + subject
+        prefabs, _ = compose_bundle(project, relative, "Assets/GameWater", name, actors,
+                                    original_surface=subject_edition == "original")
+        authored[subject] = {p.name: digest(p) for p in sorted(prefabs[0].parent.iterdir()) if p.is_file()}
+        paths.extend(p.relative_to(project).as_posix() for p in prefabs)
+    (project / ".qin-fluid-template-prefix").write_text(prefix, encoding="utf-8")
+    return authored, paths
+
+
+def lane(label, work, editor, seed, case, launcher, temp_parent, edition="refined", asset_prefix=None):
     base = work / label
     project = base / "project"
     for folder in ("Assets", "Packages", "ProjectSettings"):
@@ -87,20 +107,25 @@ def lane(label, work, editor, seed, case, launcher, temp_parent):
     (project / "Packages/manifest.json").write_text(json.dumps({"dependencies": PACKAGES},indent=2))
     relative = "Assets/QinFluidMixer" if label == "A" else "Assets/Effects/Liquid"
     installed, _ = install(project, relative)
-    authored = {}
-    briefs = {}
-    if case in ("all", "channels"):
-        briefs["CoveWash"] = ("shore", COVE)
-    if case in ("all", "inlets"):
-        briefs.update({name: (profile, {}) for name, profile in INLETS.items()})
-    for name, (profile, overrides) in briefs.items():
-        path, result = compose(project, relative, "Assets/GameWater", name, profile, overrides)
-        if result != "composed":
-            raise RuntimeError("Expected independent authoring in this receiver")
-        authored[name] = {p.name: digest(p) for p in sorted(path.parent.iterdir()) if p.is_file()}
     suites = selected_suites(case)
-    for suite in suites.values():
-        authored.update(suite.author(project, relative))
+    named_paths = []
+    if asset_prefix:
+        authored, named_paths = named_receiver(project, relative, case, edition, asset_prefix)
+    else:
+        authored = {}
+        briefs = {}
+        if case in ("all", "channels"):
+            briefs["CoveWash"] = ("shore", COVE)
+        if case in ("all", "inlets"):
+            briefs.update({name: (profile, {}) for name, profile in INLETS.items()})
+        for name, (profile, overrides) in briefs.items():
+            path, result = compose(project, relative, "Assets/GameWater", name, profile, overrides)
+            if result != "composed":
+                raise RuntimeError("Expected independent authoring in this receiver")
+            authored[name] = {p.name: digest(p) for p in sorted(path.parent.iterdir()) if p.is_file()}
+        for group, suite in suites.items():
+            options = {"edition": edition} if group == "limits" else {}
+            authored.update(suite.author(project, relative, **options))
     if authored:
         (base / "authored.json").write_text(json.dumps(authored, sort_keys=True))
     shutil.copytree(HERE / "fluid-replay", project / "Assets/Editor/FluidReplay")
@@ -134,6 +159,14 @@ def lane(label, work, editor, seed, case, launcher, temp_parent):
         raise RuntimeError(f"A native case failed. See {base/'tests.xml'}")
     if case in ("all", "reuse") and sum(t.get("fullname") == "QinFluidReplay.ReuseRockImpact" for t in tests) != 1:
         raise RuntimeError(f"The native water reuse test was missing or duplicated in receiver {label}")
+    if named_paths:
+        lines = (base / "play.log").read_text(errors="replace").splitlines()
+        loaded = {line.removeprefix("QIN_WATER_TEMPLATE_ASSET ") for line in lines
+                  if line.startswith("QIN_WATER_TEMPLATE_ASSET ")}
+        missing = set(named_paths) - loaded
+        if missing:
+            raise RuntimeError(f"Native fixture did not load authored prefabs: {sorted(missing)}")
+        (base / "named-prefabs.json").write_text(json.dumps(sorted(named_paths), indent=2), encoding="utf-8")
     actual = json.loads((project/"Packages/packages-lock.json").read_text())["dependencies"]
     if any(actual[key]["version"] != value for key,value in PACKAGES.items()):
         raise RuntimeError(f"Unexpected Unity package versions in receiver {label}")
@@ -150,9 +183,21 @@ def main():
     parser.add_argument("--seed",type=int,default=29411)
     parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "channels", "inlets", *SUITES, "reuse", "all"), default="gallery",
                         help="Select a water family, the reuse comparison, or the full physical scenario matrix")
+    parser.add_argument("--edition", choices=("original", "refined"), default="refined",
+                        help="Select the original filmed rain or its later exposed streaks and contact response")
     parser.add_argument("--preview",action="store_true",help="Also write FluidMixer.gif; requires Pillow")
     parser.add_argument("--video", action="store_true", help="Also write the gallery and individual native case movies at 30 fps. Requires Pillow and ffmpeg")
+    parser.add_argument("--asset-prefix", help="Replay independently authored game-named variants, including every actor of the hit sequence.")
     args=parser.parse_args()
+    if args.edition == "original" and args.case != "reuse" and not args.asset_prefix:
+        args.asset_prefix = "Recorded"
+    if args.asset_prefix is not None:
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", args.asset_prefix) or args.case == "reuse":
+            parser.error("Choose an identifier prefix and one or more recorded visual cases.")
+        from water_templates import CASES
+        if any(len(args.asset_prefix + subject) > 60 for subject, (suite, _) in CASES.items()
+               if args.case in ("all", suite)):
+            parser.error("Prefix plus each selected case identifier must fit within 60 characters.")
     if args.video and not shutil.which("ffmpeg"):
         parser.error("Install ffmpeg on PATH to export the optional MP4.")
     media = args.preview or args.video
@@ -166,23 +211,34 @@ def main():
         parser.error(f"Choose a new work directory. Existing data at {work} is preserved.")
     if args.case == "reuse" and media:
         parser.error("The reuse case records GPU state and resource counts. Select a visual case for previews or videos.")
-    if media:
-        import fluid_preview
     work.mkdir(parents=True)
     temp_parent = native_parent(work)
     with ThreadPoolExecutor(max_workers=2) as workers:
-        futures = [workers.submit(lane,label,work,args.editor.resolve(),args.seed,args.case,launcher,temp_parent) for label in ("A","B")]
+        futures = [workers.submit(lane,label,work,args.editor.resolve(),args.seed,args.case,launcher,temp_parent,args.edition,args.asset_prefix) for label in ("A","B")]
         first,second = [f.result() for f in futures]
     expected = json.loads(MANIFEST.read_text(encoding="utf-8"))["files"]
     if first != second or first != expected:
         raise RuntimeError("The imported asset bytes differ from the release manifest or the second receiver.")
+    verify_and_export(args, work, first)
+
+
+def verify_and_export(args, work, installed_files):
+    """Check the recorded GPU state and camera captures, then write the selected media."""
+    media = args.preview or args.video
+    if media:
+        import fluid_preview
     captures = work / "A/captures"
     gallery = args.case in ("gallery", "all")
     application_cases = tuple(key for key in APPLICATIONS if args.case in ("all", key))
     device_record = "FreeJet/device.txt" if gallery else "device.txt"
     device = (captures / device_record).read_text().splitlines()
-    report = {"editor": EDITOR_VERSION, "packages": PACKAGES, "seed": args.seed, "files": first,
+    report = {"editor": EDITOR_VERSION, "packages": PACKAGES, "seed": args.seed, "edition": args.edition, "files": installed_files,
               "receiverPaths": ["Assets/QinFluidMixer", "Assets/Effects/Liquid"], "graphics": device}
+    if args.asset_prefix:
+        named = [json.loads((work / label / "named-prefabs.json").read_text()) for label in ("A", "B")]
+        if named[0] != named[1]:
+            raise RuntimeError("The native receivers did not load the same game-named actors.")
+        report.update(namedAssetPrefix=args.asset_prefix, loadedNamedPrefabsPerReceiver=named[0])
     if args.case in ("all", "reuse"):
         costs = [json.loads((work / lane / "captures/RockImpactReuse/costs.json").read_text())
                  for lane in ("A", "B")]

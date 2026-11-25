@@ -52,7 +52,10 @@ def review_inlets(work):
             if name == "RainOnPool": require(xspan > 3 and len(births) > 35, "Rain needs distributed arrivals")
             if name == "LedgeDrip": require(xspan < .32 and len(births) == 4, "The ledge must release four distinct drops")
             data["distinctBirths"] = len(births)
-        recipe = work / "A/project/Assets/GameWater" / name / (name + ".asset")
+        project = work / "A/project"
+        marker = project / ".qin-fluid-template-prefix"
+        actor = (marker.read_text(encoding="utf-8").strip() if marker.is_file() else "") + name
+        recipe = project / "Assets/GameWater" / actor / (actor + ".asset")
         gravity = float(re.search(r"(?m)^  _gravity: (.+)$", recipe.read_text(encoding="utf-8"))[1])
         data["ballisticControl"] = ballistic_error(rows, gravity)
         results[name] = data

@@ -50,12 +50,12 @@ public sealed partial class QinFluidReplay
         collider.radius = .32f;
         Physics2D.SyncTransforms();
 
-        var gather = OpenVariant("Vortex", new Vector3(-2.69f, ApplicationFloor + .948f, 0f));
+        var gather = OpenVariant("Vortex", new Vector3(-2.69f, ApplicationFloor + .948f, 0f), subject: "Curtain", role: "Gather");
         gather.transform.localScale = Vector3.one * .245f;
         gather.transform.rotation = Quaternion.Euler(0f, 0f, 22f);
         gather.SetRecipe(gather.Recipe);
-        var needle = OpenVariant("WaterNeedle2D", new Vector3(0, ApplicationFloor, 0));
-        var curtain = OpenVariant("WaterCurtain2D", new Vector3(0, ApplicationFloor, 0));
+        var needle = OpenVariant("WaterNeedle2D", new Vector3(0, ApplicationFloor, 0), subject: "Curtain", role: "Needle");
+        var curtain = OpenVariant("WaterCurtain2D", new Vector3(0, ApplicationFloor, 0), subject: "Curtain", role: "Curtain");
         needle.SetObstacleAnchor(anchor);
         curtain.SetObstacleAnchor(anchor);
         // Clear colour history before the first capture.
@@ -153,7 +153,7 @@ public sealed partial class QinFluidReplay
     {
         string root = ApplicationCapture("Waterfall2D");
         SetApplicationCamera();
-        var fall = OpenVariant("ContinuousWaterfall", new Vector3(0, ApplicationFloor, 0));
+        var fall = OpenVariant("ContinuousWaterfall", new Vector3(0, ApplicationFloor, 0), subject: "Waterfall2D");
         SOFluidMixRecipe original = fall.Recipe;
         Assert.That(original.ContinuousFeed && original.PlayOnEnable, Is.True);
         for (int frame = 0; frame < 12; frame++) yield return null;
@@ -226,15 +226,18 @@ public sealed partial class QinFluidReplay
         camera.transform.position = new Vector3(0f, ApplicationFloor + 1.24f, -10f);
     }
 
-    private FluidMixController OpenVariant(string name, Vector3 position, string path = null)
+    private FluidMixController OpenVariant(string name, Vector3 position, string path = null,
+        string subject = null, string role = "")
     {
-        var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path ?? $"{Imported}/Variants/{name}.prefab");
+        string originalPath = path ?? $"{Imported}/Variants/{name}.prefab";
+        string selectedPath = SubjectAsset(subject ?? name, originalPath, role);
+        var asset = AssetDatabase.LoadAssetAtPath<GameObject>(selectedPath);
         Assert.That(asset, Is.Not.Null, name);
         Assert.That(PrefabUtility.GetPrefabAssetType(asset), Is.EqualTo(PrefabAssetType.Variant));
         var instance = Object.Instantiate(asset, stage.transform, false);
         instance.transform.position = position;
         var controller = instance.GetComponent<FluidMixController>();
-        Assert.That(controller.Recipe.name, Is.EqualTo(name));
+        Assert.That(controller.Recipe.name, Is.EqualTo(selectedPath == originalPath ? name : Path.GetFileNameWithoutExtension(selectedPath)));
         Assert.That(instance.GetComponentsInChildren<ParticleSystem>(true), Is.Empty);
         controller.SetWaterSortingLayer(WaterLayer);
         BindReceiverWater(controller);

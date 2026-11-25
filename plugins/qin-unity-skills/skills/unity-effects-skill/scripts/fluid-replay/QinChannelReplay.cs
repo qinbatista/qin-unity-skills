@@ -18,7 +18,7 @@ public sealed partial class QinFluidReplay
     {
         string root = ApplicationCapture(form);
         string path = form == "CoveWash" ? "Assets/GameWater/CoveWash/CoveWash.prefab" : Imported + "/Channels/" + form + ".prefab";
-        GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(SubjectAsset(form, path));
         Assert.That(asset, Is.Not.Null, path);
         GameObject instance = Object.Instantiate(asset, stage.transform);
         var water = instance.GetComponent<ChannelWater2D>();

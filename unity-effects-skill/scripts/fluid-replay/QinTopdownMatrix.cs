@@ -19,7 +19,7 @@ public sealed partial class QinFluidReplay
     public IEnumerator TopdownMatrix([ValueSource(nameof(TopdownSubjects))] string subject)
     {
         string root = ApplicationCapture(subject);
-        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/GameWater/{subject}/{subject}.prefab");
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SubjectAsset(subject, $"Assets/GameWater/{subject}/{subject}.prefab"));
         Assert.That(prefab && PrefabUtility.GetPrefabAssetType(prefab) == PrefabAssetType.Variant, Is.True);
         var instance = Object.Instantiate(prefab, stage.transform, false);
         var grid = instance.GetComponent<TopDownWater2D>();
