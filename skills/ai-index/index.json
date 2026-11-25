@@ -139,6 +139,13 @@
           "summary": "Encode each accepted water capture at native framing and frame rate, and return its receipt path."
         },
         {
+          "id": "verify-water-cast-reuse",
+          "file": "unity-effects-skill/scripts/fluid-replay/QinWaterReuseReplay.cs",
+          "symbol": "ReuseRockImpact",
+          "anchor": "public IEnumerator ReuseRockImpact()",
+          "summary": "Compare solver resource lifetimes and GPU state on repeated and overlapping RockImpact casts."
+        },
+        {
           "id": "compare-fluid-receivers",
           "file": "unity-effects-skill/scripts/fluid_replay_checks.py",
           "symbol": "review",

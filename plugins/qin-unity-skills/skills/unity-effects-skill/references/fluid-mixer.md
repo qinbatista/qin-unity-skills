@@ -96,6 +96,18 @@ For a scene, duplicate `ContinuousWaterfall` and keep **Continuous Feed** enable
 
 Use a detailed receiving backdrop to check refraction and local colour reversal independently. A smooth, wet silhouette and a quiet, dry test frame are part of both receiver checks. Avoid looping the finite waterfall asset for a persistent emitter.
 
+## Verify resource reuse across casts
+
+Use the installed `RockImpact` prefab when checking repeated water hits. The enabled controller keeps its solver between casts. When a cast reaches `Recycled`, it can start another one. Disabling the owner releases the solver resources. Give overlapping effects independent state while both are active.
+
+Run the [water replay](../scripts/replay_fluids.py) from the installed Effects Skill with the same Editor and task Cache used for the other water cases.
+
+```text
+python3 -B scripts/replay_fluids.py --editor "<Unity 6000.6.7f1 Editor>" --case reuse --work "<task-run>/water-reuse"
+```
+
+Read `reuse` in `FluidVerification.json`. Four seeded casts run on an enabled controller. A control disables and re-enables its GameObject between casts. The replay counts distinct solver instances, particle buffers and film textures, compares the parcel and wave data at the same instant, and checks idle solver steps and final release. A separate overlapping cast tests whether retiring a peer disturbs the survivor. A device frame-time claim needs a Player capture under the game's actual cast frequency and peak overlap.
+
 ## Reproduce twice from the installed Skill
 
 Run the [replay command](../scripts/replay_fluids.py) from this Skill with a new output directory under the current task Cache. It only sets up its own two blank receivers. It invokes the registered Python launcher selected with `--launcher` (Unity Code by default) in graphics-enabled batch mode and installs the same template at two different Assets paths. Both receivers use procedural lighting and their own 2D colour capture. Use `--case all` for the gallery, both applications, four channel variants and three airborne inlets, or select `--case curtain` or `--case waterfall` to replay one application. Python's standard library suffices for the tests. Add Pillow for the optional GIF and install ffmpeg on PATH for the 30 fps MP4.

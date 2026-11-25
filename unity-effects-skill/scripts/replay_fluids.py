@@ -95,7 +95,7 @@ def lane(label, work, editor, seed, case, launcher, temp_parent):
                QIN_FLUID_SEED=str(seed), CFFIXED_USER_HOME=str(base / "home"),
                UPM_CACHE_ROOT=str(work / "upm"), DOTNET_PROCESSOR_COUNT="3")
     common = ["--editor-path",str(editor),"--timeout","1470","--non-interactive","--no-pager"]
-    filters = {"gallery": "QinFluidReplay.Replay", "all": "QinFluidReplay", "channels": "QinFluidReplay.FlowChannel", "inlets": "QinFluidReplay.CastWaterVariant"}
+    filters = {"reuse": "QinFluidReplay.ReuseRockImpact", "gallery": "QinFluidReplay.Replay", "all": "QinFluidReplay", "channels": "QinFluidReplay.FlowChannel", "inlets": "QinFluidReplay.CastWaterVariant"}
     selected = filters[case] if case in filters else "QinFluidReplay." + APPLICATIONS[case][0]
     with tempfile.TemporaryDirectory(prefix="temp-f-", dir=temp_parent) as scratch:
         env.update(TMPDIR=scratch,TEMP=scratch,TMP=scratch)
@@ -106,12 +106,14 @@ def lane(label, work, editor, seed, case, launcher, temp_parent):
             raise RuntimeError(f"Editor setup did not finish. See {base/'import.log'}")
         run_command([sys.executable,"-B",str(launcher),"test",str(project),*common,"--mode","EditMode",
                      "--filter",selected,"--output",str(base/"tests.xml"),"--",
-                     "-job-worker-count","3","-logFile",str(base/"play.log")],project,env,base/"play-cli.log")
+                     "-job-worker-count","3","-perfTestResults",str(base/"performance.json"),"-logFile",str(base/"play.log")],project,env,base/"play-cli.log")
     tests = list(ET.parse(base/"tests.xml").iter("test-case"))
-    expected_cases = {"gallery": len(FORMS), "all": len(FORMS) + len(APPLICATIONS) + len(CHANNELS) + len(INLETS),
+    expected_cases = {"gallery": len(FORMS), "all": len(FORMS) + len(APPLICATIONS) + len(CHANNELS) + len(INLETS) + 1,
                       "channels": len(CHANNELS), "inlets": len(INLETS)}
     if len(tests) != expected_cases.get(case, 1) or any(t.get("result") != "Passed" for t in tests):
         raise RuntimeError(f"A native case failed. See {base/'tests.xml'}")
+    if case in ("all", "reuse") and sum(t.get("fullname") == "QinFluidReplay.ReuseRockImpact" for t in tests) != 1:
+        raise RuntimeError(f"The native water reuse test was missing or duplicated in receiver {label}")
     actual = json.loads((project/"Packages/packages-lock.json").read_text())["dependencies"]
     if any(actual[key]["version"] != value for key,value in PACKAGES.items()):
         raise RuntimeError(f"Unexpected Unity package versions in receiver {label}")
@@ -126,8 +128,8 @@ def main():
     parser.add_argument("--launcher", type=Path, default=CLI, help="Receiving project's registered Unity CLI Python launcher")
     parser.add_argument("--work",type=Path,required=True,help="New output directory inside the active task Cache")
     parser.add_argument("--seed",type=int,default=29411)
-    parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "channels", "inlets", "all"), default="gallery",
-                        help="Select gallery, attack, waterfall, channel generation or the complete suite")
+    parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "channels", "inlets", "reuse", "all"), default="gallery",
+                        help="Select a visual replay, the water reuse comparison, or the complete suite")
     parser.add_argument("--preview",action="store_true",help="Also write FluidMixer.gif; requires Pillow")
     parser.add_argument("--video", action="store_true", help="Also write the gallery and individual native case movies at 30 fps. Requires Pillow and ffmpeg")
     args=parser.parse_args()
@@ -142,6 +144,8 @@ def main():
     work = args.work.resolve()
     if work.exists():
         parser.error(f"Choose a new work directory. Existing data at {work} is preserved.")
+    if args.case == "reuse" and media:
+        parser.error("The reuse case records GPU state and resource counts. Select a visual case for previews or videos.")
     if media:
         import fluid_preview
     work.mkdir(parents=True)
@@ -154,11 +158,17 @@ def main():
         raise RuntimeError("The imported asset bytes differ from the release manifest or the second receiver.")
     captures = work / "A/captures"
     gallery = args.case in ("gallery", "all")
-    application_cases = {"gallery": (), "channels": (), "inlets": (), "all": tuple(APPLICATIONS)}.get(args.case, (args.case,))
+    application_cases = {"gallery": (), "channels": (), "inlets": (), "reuse": (), "all": tuple(APPLICATIONS)}.get(args.case, (args.case,))
     device_record = "FreeJet/device.txt" if gallery else "device.txt"
     device = (captures / device_record).read_text().splitlines()
     report = {"editor": EDITOR_VERSION, "packages": PACKAGES, "seed": args.seed, "files": first,
               "receiverPaths": ["Assets/QinFluidMixer", "Assets/Effects/Liquid"], "graphics": device}
+    if args.case in ("all", "reuse"):
+        costs = [json.loads((work / lane / "captures/RockImpactReuse/costs.json").read_text())
+                 for lane in ("A", "B")]
+        if costs[0] != costs[1]:
+            raise RuntimeError("Water reuse costs or matched GPU state differ between receivers")
+        report["reuse"] = costs[0]
     if gallery:
         report["cases"] = review(work)
         if media:

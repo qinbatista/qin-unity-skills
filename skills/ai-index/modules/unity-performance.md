@@ -9,3 +9,5 @@
 The [casebook](../../../unity-performance-skill/references/performance-cases.md) maps paths to the [portable replay CLI](../../../unity-performance-skill/scripts/replay_cases.py). The Skill packages its case inventory, Editor tests and graphics inputs beside the CLI. The [verified replay](../../../examples/performance-cases/Verification.json) binds the results to the fixture hash and Unity package versions. The receiving game owns regressions for any additional costs discovered along its actual entry.
 
 Verify the installed routes with the [repository testing Skill](../../../.agents/skills/testing-skill/SKILL.md). The Charge Pulse code cases and Job State Batches scenes exercise the runtime behaviors used as examples.
+
+For a feature-level example, trace repeat water hits from the [performance casebook](../../../unity-performance-skill/references/performance-cases.md#select-cases-from-the-change) to the [RockImpact resource case](../../../unity-effects-skill/references/fluid-mixer.md#verify-resource-reuse-across-casts). The [two-receiver results](../../../examples/performance-cases/WaterReuse.json) record the observed cost and solver behavior.

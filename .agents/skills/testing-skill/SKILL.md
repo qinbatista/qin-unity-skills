@@ -10,6 +10,7 @@ Use the smallest maintained case that can establish the change. Run from the rep
 | Purpose | Level | Runner and owner |
 | --- | --- | --- |
 | Every documented physical water recipe authors a saved prefab and corresponds to a real native capture | 2 | [Recipe guide authoring](tests/test_fluid_mixer.py), Python unittest, and [native replay](../../../unity-effects-skill/references/water-recipes-2d.md#install-and-author-a-named-effect) with both receivers. |
+| Repeated RockImpact casts retain their solver resources while the controller is enabled, preserve the simulated result, and release the resources on disable | 2 | [Water reuse replay](../../../unity-effects-skill/references/fluid-mixer.md#verify-resource-reuse-across-casts), `--case reuse` in both receiving projects. |
 | Fluid template installs atomically, handles an identical reinstall, protects custom data and GUID bindings | 1 | [Installer cases](tests/test_fluid_mixer.py), Python unittest. |
 | The optional URP graph and prefab material both draw the selected subject on the same mesh in Renderer2D | 2 | [URP graphics parity](../../../unity-effects-skill/references/flow-sky-2d.md#replay-individual-subjects), Edit Mode filter `FlowSkyUrpReplay.CompareMaterials`. |
 | All 24 water, sky and spell surfaces draw, move, repeat or retire and can cancel and replay on the same prefab | 2 | [Built-in graphics Play replay](../../../unity-effects-skill/references/flow-sky-2d.md#replay-individual-subjects), Edit Mode filter `FlowSkyNativeReplay.PlayEachSubject`. |

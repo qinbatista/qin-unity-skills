@@ -1,0 +1,52 @@
+{
+  "case": "QinFluidReplay.ReuseRockImpact",
+  "result": "Passed",
+  "scope": "Unity Editor Play Mode",
+  "graphics": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal"
+  ],
+  "seed": 29411,
+  "packages": {
+    "com.unity.modules.audio": "1.0.0",
+    "com.unity.modules.imageconversion": "1.0.0",
+    "com.unity.modules.particlesystem": "1.0.0",
+    "com.unity.modules.physics2d": "1.0.0",
+    "com.unity.modules.video": "1.0.0",
+    "com.unity.render-pipelines.universal": "17.6.0",
+    "com.unity.shadergraph": "17.6.0",
+    "com.unity.test-framework": "1.8.0",
+    "com.unity.visualeffectgraph": "17.6.0"
+  },
+  "receiverPaths": [
+    "Assets/QinFluidMixer",
+    "Assets/Effects/Liquid"
+  ],
+  "passedReceivers": 2,
+  "solverManifestSha256": "e00016f2ba43f4a7537df1e61d2e047dd217ba761ca938397a51abc21cadd0ad",
+  "fixtureSha256": {
+    "unity-effects-skill/scripts/fluid-replay/QinWaterReuseReplay.cs": "fa35222724dcb15c12052a58dca1e845b6a607ab8b2039bd76ed53c498ba025a",
+    "unity-effects-skill/scripts/fluid-replay/QinFluidReplay.cs": "b0da53bd7cd590cd3a5e957d8b2f10a6263b3994a3ba07c8fa3338d18b6e7b34",
+    "unity-effects-skill/scripts/fluid-replay/QinFluidApplicationReplay.cs": "7464a13a7c5fe3b300376ee5a57028b01280fa7cebbe9f00fb5082f1acfa6f58",
+    "unity-effects-skill/scripts/replay_fluids.py": "24efc84c98f74d99e32198a46379e8dd66ab357c5eb11bf31c7a3f321207c0ee"
+  },
+  "costs": {
+    "cold": {
+      "casts": 4,
+      "filmTextures": 4,
+      "idleSolverSteps": 0,
+      "particleBuffers": 4,
+      "solverOwners": 4
+    },
+    "gpuStateSha256": "a59cbaf56a83ac812597985291b6d008aeaf1d2b392817b52001d65243ca8275",
+    "independentPeerRetirement": true,
+    "warm": {
+      "casts": 4,
+      "filmTextures": 1,
+      "idleSolverSteps": 0,
+      "particleBuffers": 1,
+      "solverOwners": 1
+    }
+  }
+}

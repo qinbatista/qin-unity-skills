@@ -66,6 +66,15 @@ class InstalledRoutingTests(unittest.TestCase):
         material = next(row for row in effect_menu.splitlines() if "explicitly requested animated material study" in row)
         self.assertIn("flow-sky-2d.md#pick-a-subject", material)
 
+        review_link = re.search(r"\]\(([^)]+#review-every-unity-task)\)", effect_menu).group(1)
+        review = read_topic("effects", review_link)
+        casebook_link = re.search(r"\]\(([^)]+#select-cases-from-the-change)\)", review).group(1)
+        casebook = read_topic("performance", casebook_link)
+        water_proof = re.search(r"\]\(([^)]+#verify-resource-reuse-across-casts)\)", casebook).group(1)
+        section = read_topic("performance", str(Path(casebook_link).parent / water_proof))
+        self.assertIn("--case reuse", section)
+        self.assertIn("FluidVerification.json", section)
+
     def test_pack_changes_route_to_the_contribution_workflow(self):
         code_menu = read_topic("code", "#choose-an-operation")
         pack_menu = run_reader()
