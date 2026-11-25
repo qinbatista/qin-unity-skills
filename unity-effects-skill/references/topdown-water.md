@@ -25,6 +25,8 @@ python unity-effects-skill/scripts/compose_water.py --project GAME --template As
 
 ## Apply gameplay input
 
+For a rain sequence with visible airborne drops, use the [rain-on-water study](rain-on-water.md). It links each landing to a single input on this field and compares the same falling drops with surface transfer switched off.
+
 `TopDownWater2D.SetBoat(position, velocity)` uses XY basin coordinates in metres and metres per second. Supply the boat's current state before advancing water. The hull displaces water in its direction of travel. `UseDemoBoat()` restores the authored traversal. `Impulse(position, height, radius)` adds a local surface displacement immediately. Calls at the same simulation time accumulate in the current field without a CPU queue. Each call costs one GPU dispatch. Per-cell displacement is bounded between −0.42 and +0.50 metres.
 
 Set `InputEnabled` false to cut the profile's forcing while existing water and dye continue to evolve. `ResetWater()` clears both simulation textures and restarts the clock. With `Automatic` true the owner advances in Update. A replay or an external game clock can set it false and call `Advance(seconds)`. Each call admits up to 0.20 seconds of catch-up and advances in fixed 1/120-second steps.

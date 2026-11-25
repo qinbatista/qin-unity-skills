@@ -1,0 +1,111 @@
+{
+  "editorDevice": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal",
+    "Gamma",
+    "960x540"
+  ],
+  "dimensions": [
+    960,
+    540
+  ],
+  "fps": 30,
+  "framesPerTake": 270,
+  "solverHz": 120,
+  "seed": 29411,
+  "nativeInputSha256": {
+    "Assets/Pond/TopDownWater2D.cs": "261b0a2846fd75c8e1ec19d334e2d0ee67b4694b6681404ba0e3cca46607e51e",
+    "Assets/Pond/TopDownWater.compute": "548a758855dff5d885d7abf4fe3323d0b4dd0401eebd7242c6ba86ab0bbb83c7",
+    "Assets/Pond/WaterDomain.hlsl": "3cec46df75d06b68b7ae58f7fb3888b213e95359374f14d9bd2759670622757e",
+    "Assets/RainLook/RainStudy.shader": "8aedbc16fbfe67dd486a963fde1075a9ec58ef04d5b7fcbd1b50f53b972ee55c",
+    "Assets/RainLook/RainStudy.shader.meta": "6edc8474a7c39f4a111142daf377e887a7f8d8274f74a69d9d6b001996fc0906",
+    "Assets/RainLook/StillPool.jpg": "299fbc6dcbc43605ebb82cb1358c2b71b9e444d51c380bbeb1d9021b04659b36",
+    "Assets/RainLook/StillPool.jpg.meta": "ed584eccbf9960003db937a324b560daaf7dfcd46953416f7b656e366dba44a1",
+    "Assets/RainLook/ShoreMask.png": "aeb034fc7722b9ce3dabea90b690e3497438dd7b14dd74052c587062bf9146ee",
+    "Assets/RainLook/ShoreMask.png.meta": "0883c9266412ad20c5243dba1e123be3f298cba30b2db7e533d81629aa5f889e",
+    "Assets/Editor/RainDropTimeline.cs": "70bfdb40f54e3d9436ad75a3390c1470fa8d35aa63c8270ccd81f8b31ae8eb41",
+    "Assets/Editor/NativeRainStudy.cs": "833b04b6bd2aff973128d6a537ffc5c443cd5578865cf7a6fa53c948e53e2c59"
+  },
+  "contacts": 159,
+  "firstImpactTick": 108,
+  "sourceCutoffSeconds": 6.15,
+  "lastImpactTick": 801,
+  "firstCavityDepthM": -0.0118603092,
+  "firstHeightEnergyRadiusM": {
+    "0": 0.0836702,
+    "3": 0.23202987,
+    "8": 0.4081307,
+    "14": 0.7489279
+  },
+  "peakAirborne": 27,
+  "peakRetainedContacts": 58,
+  "tailFirstFrame": 201,
+  "tailSumHeightSquaredM2": 0.000420799275,
+  "finalSumHeightSquaredM2": 3.43560686e-07,
+  "controlMaxM": 0,
+  "nativeTableSha256": {
+    "contacts.csv": "1d4a2946a4b78279564b58e5fa78d4e358d5898065ef700b7b89c83576314530",
+    "field.csv": "4d56f25edfaae6323bd7dcd87904199544b1aac243d065880930002a1c9add04"
+  },
+  "opticalReadback": {
+    "preImpactIdenticalFrames": 27,
+    "checkedShorePixelsPerFrame": 62758,
+    "shoreDifferences": 0,
+    "firstPacketGroupSpeedMps": 0.17873949009218443,
+    "firstPacket": [
+      {
+        "frame": 36,
+        "ageS": 0.3,
+        "contrastRadiusM": 0.0870215373465609,
+        "predictedEnvelopeRadiusM": 0.07562184702765533,
+        "pixelsAtLeast8of255": 564
+      },
+      {
+        "frame": 38,
+        "ageS": 0.36666666666666664,
+        "contrastRadiusM": 0.09821156340099538,
+        "predictedEnvelopeRadiusM": 0.08753781303380095,
+        "pixelsAtLeast8of255": 686
+      },
+      {
+        "frame": 42,
+        "ageS": 0.5,
+        "contrastRadiusM": 0.12013014340033315,
+        "predictedEnvelopeRadiusM": 0.1113697450460922,
+        "pixelsAtLeast8of255": 818
+      },
+      {
+        "frame": 45,
+        "ageS": 0.6,
+        "contrastRadiusM": 0.13837286176330185,
+        "predictedEnvelopeRadiusM": 0.12924369405531067,
+        "pixelsAtLeast8of255": 891
+      },
+      {
+        "frame": 49,
+        "ageS": 0.7333333333333333,
+        "contrastRadiusM": 0.16234441218274787,
+        "predictedEnvelopeRadiusM": 0.1530756260676019,
+        "pixelsAtLeast8of255": 973
+      }
+    ],
+    "finalPacketDifferencePixels": 0
+  },
+  "nativeCase": "NativeRainStudy.Render",
+  "preview": {
+    "asset": "unity-effects-skill/assets/rain-study-preview.mp4",
+    "sha256": "f2c3d521b6dd599f25e928ad81ff6956af5e7c6405e806fb755fa0d6676e6cac",
+    "dimensions": [
+      480,
+      270
+    ],
+    "frames": 270,
+    "fps": 30
+  },
+  "normalAndControlDecodedRgbSequenceSha256": {
+    "normal": "e3a5609b513b0b376f5292f30a31b2bf715d767d9104dcefa981617e9713dda8",
+    "control": "f67674f38f1c0f12cebeb264bd116f6213d100155a0c8f8a1189303f69a57f63"
+  },
+  "presentation": "Built-in graphics batch Editor with the RainPond compute solver, original generated artwork and contact-triggered analytic short waves."
+}
