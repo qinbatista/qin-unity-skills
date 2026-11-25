@@ -1,30 +1,20 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Template name="setting-row" src="SettingRow.uxml" />
     <Style src="Layouts.uss" />
+    <Style src="LayoutFeedback.uss" />
     <ui:VisualElement name="screen" class="screen">
         <ui:VisualElement name="safe" class="safe page">
             <ui:Label name="heading" class="title page-title localized" />
             <ui:VisualElement name="settings-groups" class="settings-groups">
                 <ui:VisualElement name="display" class="card settings-card">
                     <ui:Label name="display-heading" class="card-title localized" />
-                    <ui:VisualElement name="display-row" class="setting-row">
-                        <ui:Label name="display-label" class="detail localized" />
-                        <ui:Label name="display-value" class="value" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="setting-row">
-                        <ui:Label name="frame-rate-label" class="detail localized" />
-                        <ui:Label name="frame-rate-value" class="value" />
-                    </ui:VisualElement>
+                    <ui:Instance template="setting-row" name="display-row" class="setting-row" />
+                    <ui:Instance template="setting-row" name="frame-rate-row" class="setting-row" />
                 </ui:VisualElement>
                 <ui:VisualElement name="audio" class="card settings-card">
                     <ui:Label name="audio-heading" class="card-title localized" />
-                    <ui:VisualElement class="setting-row">
-                        <ui:Label name="environment-label" class="detail localized" />
-                        <ui:Label name="environment-value" class="value" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="setting-row">
-                        <ui:Label name="music-label" class="detail localized" />
-                        <ui:Label name="music-value" class="value" />
-                    </ui:VisualElement>
+                    <ui:Instance template="setting-row" name="environment-row" class="setting-row" />
+                    <ui:Instance template="setting-row" name="music-row" class="setting-row" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

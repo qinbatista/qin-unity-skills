@@ -20,19 +20,19 @@ Five fixtures mount their own UXML screens and apply the same geometry policy to
 
 The [fixture string table](Assets/Editor/Tests/ResponsiveLayouts/LayoutStrings.json) contains the player-facing copy in English (`en-US`) and German (`de-DE`). [LayoutText](Assets/Editor/Tests/ResponsiveLayouts/LayoutText.cs) updates existing UI Toolkit elements from locale keys and typed arguments. The Canvas dialog reads the same resources and returns stable action IDs. The sample table is Editor test data. Production screens use their game's localization service.
 
-[View the Unity-rendered English portrait and German landscape comparison](ui-layout-preview.jpg).
+[View the native layout comparison](ui-layout-preview.jpg).
 
-| Layout | Portrait | Landscape | Native check |
+| Layout | Compact pane | Wide pane | Native check |
 | --- | --- | --- | --- |
 | [Expedition HUD](Assets/Editor/Tests/ResponsiveLayouts/Hud.uxml) | Map and Pack remain at the top while the title clears the center cutout. | The header follows the clear side margins in each rotation. | Obstruction clearance, equal top offsets, projected size and one response per scripted action. |
-| [Inventory](Assets/Editor/Tests/ResponsiveLayouts/Inventory.uxml) | Two columns, three rows. | Three columns, two rows. | A single [item template](Assets/Editor/Tests/ResponsiveLayouts/Item.uxml) creates six instances that survive resize. Icon and label slots stay aligned and bounded. |
-| [Settings](Assets/Editor/Tests/ResponsiveLayouts/Settings.uxml) | Display above Audio. | Display and Audio side by side. | Peer frame alignment, caption and value containment, and enough room for the longest supplied label. |
+| [Inventory](Assets/Editor/Tests/ResponsiveLayouts/Inventory.uxml) | Two columns, three rows. | Three columns, two rows. | A single [item template](Assets/Editor/Tests/ResponsiveLayouts/Item.uxml) creates six instances that survive resize. The group uses the width available within its pane. |
+| [Settings](Assets/Editor/Tests/ResponsiveLayouts/Settings.uxml) | Display above Audio. | Display and Audio side by side. | Both cards reuse one [setting row](Assets/Editor/Tests/ResponsiveLayouts/SettingRow.uxml). Long labels and values stay inside their own row. |
 | [Confirmation](Assets/Editor/Tests/ResponsiveLayouts/Dialog.uxml) | Centered dialog with both actions on one line. | Same dialog and actions centered in the usable region. | [Canvas](Assets/Editor/Tests/ResponsiveLayouts/CanvasConfirmation.cs) and Toolkit compare projected bounds and return the same choice through native handlers. |
 | [Trail journal](Assets/Editor/Tests/ResponsiveLayouts/Quests.uxml) | Tall list between header and footer. | Wider, shorter scrolling region. | The final item scrolls into the content viewport and the header and footer stay fixed. |
 
-[ResponsiveLayoutCases.cs](Assets/Editor/Tests/ResponsiveLayouts/ResponsiveLayoutCases.cs) runs each layout at the 2160 × 3840 and 3840 × 2160 reference sizes, at 540 × 1170 and 1080 × 2340 with synthetic center cutouts, and at 1170 × 540 with synthetic left and right obstructions. The iPhone Duo outer display (1398 × 2034) and inner display (1878 × 2670) each replay in portrait and landscape using their rectangular resolutions. Device insets, physical folding and touch need their own device run. Input here uses scripted events in Unity Play Mode. [Apple iPhone Duo display specifications](https://www.apple.com/iphone-duo/specs/)
+[ResponsiveLayoutCases.cs](Assets/Editor/Tests/ResponsiveLayouts/ResponsiveLayoutCases.cs) replays both 4K references, phone cutouts, a compact 360 × 780 window, a narrow pane in a landscape window and widths on either side of the inventory and settings breakpoint. Its iPhone Duo cases cover the outer upright camera, both landscape turns, the inner safe area in portrait and landscape, and a transfer from outer to inner at the same window size. Insets, hinge and display changes are fixture inputs. Scripted input runs in Unity Play Mode. [Apple iPhone Duo display specifications](https://www.apple.com/iphone-duo/specs/)
 
-Each viewport runs all locales in the table on the same mounted tree. The tests check text fit, the journal's scroll position during language changes, native focus, and Canvas dialog parity. Capture file names include the locale.
+Each viewport runs both locales on the same mounted tree. The tests check text fit, scroll position, native focus, item identity and Canvas dialog parity. [Interaction feedback](Assets/Editor/Tests/ResponsiveLayouts/ResponsiveFeedbackCases.cs) exercises the pressed, cancelled, released, disabled and reduced-motion states on the HUD. Capture file names identify the profile and locale or interaction state.
 
 Run the class from a task-owned snapshot, with a graphics device and an optional `CHARGE_PULSE_EVIDENCE` directory for rendered frames.
 

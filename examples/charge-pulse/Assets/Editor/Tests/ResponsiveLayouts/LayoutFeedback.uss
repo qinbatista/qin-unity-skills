@@ -1,0 +1,41 @@
+.screen > .safe, .screen > .header {
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+}
+
+.screen.view-entering > .safe, .screen.view-entering > .header {
+    opacity: 0.65;
+}
+
+/* The painted frame changes inside the existing hit area. */
+.screen .wing, .screen .dialog-button {
+    border-width: 2px;
+    border-color: transparent;
+    transition-property: background-color;
+    transition-duration: 90ms;
+    transition-timing-function: ease-out;
+}
+
+.screen .wing:focus, .screen .dialog-button:focus {
+    border-color: white;
+}
+
+.screen .wing:active, .screen .dialog-button:active {
+    border-bottom-width: 4px;
+    border-bottom-color: white;
+    background-color: #336d73;
+    color: white;
+}
+
+.screen .wing:disabled, .screen .dialog-button:disabled {
+    background-color: #38424b;
+    color: #bfc5c9;
+    border-color: transparent;
+}
+
+.screen.reduced-motion > .safe, .screen.reduced-motion > .header,
+.screen.reduced-motion .wing, .screen.reduced-motion .dialog-button {
+    transition-duration: 0s;
+}

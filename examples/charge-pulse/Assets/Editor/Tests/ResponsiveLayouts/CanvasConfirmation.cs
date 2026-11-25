@@ -69,6 +69,11 @@ namespace Qin.UnitySamples.Tests
             Object.Destroy(target);
             target = next;
             camera.orthographicSize = size.y / (2f * scale);
+            float width = Mathf.Min(400f, safe.width / scale * .96f);
+            dialog.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            float captionWidth = Mathf.Min(352f, width * .95f);
+            groups["heading"].SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, captionWidth);
+            groups["message"].SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, captionWidth);
             dialog.anchoredPosition = new Vector2(safe.center.x - size.x / 2f, size.y / 2f - safe.center.y) / scale;
             Canvas.ForceUpdateCanvases();
             foreach (Text caption in captions.Values)

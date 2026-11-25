@@ -55,14 +55,14 @@
 }
 
 .header {
-    left: 0;
-    right: 0;
     height: 120px;
-    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
 .screen .wing, .screen .hud-title {
-    position: absolute;
+    flex-shrink: 0;
     width: 124px;
     height: 48px;
     margin: 0;
@@ -78,6 +78,7 @@
 
 .screen .hud-title {
     width: 196px;
+    flex-shrink: 1;
     background-color: transparent;
     font-size: 26px;
 }
@@ -90,6 +91,7 @@
 .hud-objective {
     align-items: flex-start;
     width: 352px;
+    max-width: 96%;
     padding: 24px;
 }
 
@@ -137,7 +139,7 @@
     justify-content: center;
 }
 
-.landscape .tiles {
+.wide-body .tiles {
     width: 526px;
 }
 
@@ -178,7 +180,7 @@
     margin-top: 18px;
 }
 
-.landscape .settings-groups {
+.wide-body .settings-groups {
     flex-direction: row;
 }
 
@@ -212,6 +214,7 @@
 
 .dialog {
     width: 400px;
+    max-width: 96%;
     height: 204px;
     background-color: #25384a;
     align-items: center;
@@ -219,6 +222,7 @@
 
 .screen .dialog-heading, .screen .dialog-message {
     width: 352px;
+    max-width: 95%;
     height: 44px;
     -unity-text-align: middle-center;
 }
@@ -263,10 +267,12 @@
 
 .journal {
     width: 416px;
+    max-width: 94%;
     height: 640px;
+    max-height: 96%;
 }
 
-.landscape .journal {
+.short-body .journal {
     width: 496px;
     height: 386px;
 }
@@ -298,4 +304,21 @@
 .screen .journal-footer {
     height: 44px;
     -unity-text-align: middle-center;
+}
+
+/* Preserve readable text and the 48-unit hit height inside a compact pane. */
+.narrow-body .wing {
+    width: 88px;
+}
+
+.narrow-body .hud-title {
+    font-size: 22px;
+}
+
+.narrow-body .status {
+    width: 152px;
+}
+
+.narrow-body .journal-header .title {
+    font-size: 26px;
 }

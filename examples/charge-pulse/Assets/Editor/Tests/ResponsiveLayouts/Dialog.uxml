@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Layouts.uss" />
+    <Style src="LayoutFeedback.uss" />
     <ui:VisualElement name="screen" class="screen dialog-screen">
         <ui:VisualElement name="safe" class="safe page">
             <ui:VisualElement name="dialog" class="dialog">

@@ -91,7 +91,7 @@
     },
     {
       "id": "unity-ui",
-      "summary": "UI Toolkit, sliced or tiled controls, localization, screen profiles, full-window backgrounds, iPhone Duo outer portrait and landscape, safe inner headers, fold panes and Canvas parity",
+      "summary": "UI Toolkit template reuse, press feedback, sliced or tiled controls, localization, bounded responsive layouts, Duo outer and inner displays, fold panes and Canvas parity",
       "document": "skills/ai-index/modules/unity-ui.md",
       "sources": ["unity-ui-skill"],
       "dependencies": []

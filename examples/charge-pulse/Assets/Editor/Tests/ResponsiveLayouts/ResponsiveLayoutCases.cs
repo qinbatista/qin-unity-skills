@@ -9,22 +9,29 @@ using Object = UnityEngine.Object;
 
 namespace Qin.UnitySamples.Tests
 {
-    public sealed class ResponsiveLayoutCases
+    public sealed partial class ResponsiveLayoutCases
     {
         const string Assets = "Assets/Editor/Tests/ResponsiveLayouts/";
         const float Tolerance = 1.1f;
 
-        // All rectangles use top-left viewport pixels. Duo profiles replay display size alone.
+        // All inputs are explicit top-left pixel fixtures. Display identity is independent of window size.
         static readonly LayoutProfile[] Profiles =
         {
             new LayoutProfile("portrait-notch", 540, 1170, new Rect(0, 66, 540, 1072), new Rect(192, 12, 156, 36)),
             new LayoutProfile("landscape-left", 1170, 540, new Rect(74, 0, 1072, 518), new Rect(12, 192, 36, 156)),
             new LayoutProfile("landscape-right", 1170, 540, new Rect(24, 0, 1072, 518), new Rect(1122, 192, 36, 156)),
             new LayoutProfile("portrait-notch-2x", 1080, 2340, new Rect(0, 132, 1080, 2144), new Rect(384, 24, 312, 72)),
-            new LayoutProfile("duo-outer-portrait", 1398, 2034),
-            new LayoutProfile("duo-outer-landscape", 2034, 1398),
-            new LayoutProfile("duo-inner-portrait", 1878, 2670),
-            new LayoutProfile("duo-inner-landscape", 2670, 1878),
+            new LayoutProfile("duo-outer-portrait", 1398, 2034, new Rect(0, 0, 1398, 2034), new Rect(1200, 88, 110, 110), HeaderMode.Outer),
+            new LayoutProfile("duo-inner-same-window", 1398, 2034, new Rect(0, 72, 1398, 1902), default, HeaderMode.Safe),
+            new LayoutProfile("duo-outer-landscape-left", 2034, 1398, new Rect(0, 0, 2034, 1398), new Rect(88, 88, 110, 110), HeaderMode.Outer),
+            new LayoutProfile("duo-outer-landscape-right", 2034, 1398, new Rect(0, 0, 2034, 1398), new Rect(1836, 1200, 110, 110), HeaderMode.Outer),
+            new LayoutProfile("duo-inner-portrait", 1878, 2670, new Rect(0, 80, 1878, 2530), default, HeaderMode.Safe),
+            new LayoutProfile("duo-inner-landscape", 2670, 1878, new Rect(40, 56, 2590, 1750), default, HeaderMode.Safe),
+            // Host-selected primary pane with a separating vertical hinge. The full window stays landscape.
+            new LayoutProfile("separating-left-pane", 1000, 720, new Rect(0, 0, 490, 720), new Rect(490, 0, 20, 720), HeaderMode.Safe),
+            new LayoutProfile("compact-portrait", 360, 780),
+            new LayoutProfile("before-wide-body", 599, 960),
+            new LayoutProfile("at-wide-body", 600, 960),
             new LayoutProfile("portrait-reference", 2160, 3840, new Rect(0, 0, 2160, 3840), default),
             new LayoutProfile("landscape-reference", 3840, 2160, new Rect(0, 0, 3840, 2160), default)
         };
@@ -49,13 +56,30 @@ namespace Qin.UnitySamples.Tests
                 Rect leftBounds = left.worldBound;
                 Rect rightBounds = right.worldBound;
                 Rect centerBounds = center.worldBound;
-                Assert.That(leftBounds.yMin, Is.EqualTo(14f).Within(Tolerance));
+                bool besideLens = profile.Header == HeaderMode.Outer && profile.Cutout.center.y < profile.Size.y / 2f;
+                float anchorTop = profile.Header == HeaderMode.Safe ? profile.Safe.yMin / profile.Scale : 0f;
+                if (besideLens)
+                {
+                    Assert.That(leftBounds.center.y * profile.Scale, Is.EqualTo(profile.Cutout.center.y).Within(Tolerance));
+                    if (profile.Cutout.center.x > profile.Size.x / 2f)
+                        Assert.That(rightBounds.xMax * profile.Scale, Is.LessThan(profile.Cutout.xMin));
+                    else
+                        Assert.That(leftBounds.xMin * profile.Scale, Is.GreaterThan(profile.Cutout.xMax));
+                }
+                else
+                {
+                    Assert.That(leftBounds.yMin, Is.EqualTo(anchorTop + 14f).Within(Tolerance));
+                    Assert.That(leftBounds.xMin * profile.Scale, Is.EqualTo(profile.Safe.xMin + 18f * profile.Scale).Within(Tolerance));
+                    Assert.That(rightBounds.xMax * profile.Scale, Is.EqualTo(profile.Safe.xMax - 18f * profile.Scale).Within(Tolerance));
+                }
                 Assert.That(rightBounds.yMin, Is.EqualTo(leftBounds.yMin).Within(Tolerance));
-                Assert.That(leftBounds.xMin * profile.Scale, Is.EqualTo(profile.Safe.xMin + 18f * profile.Scale).Within(Tolerance));
-                Assert.That(rightBounds.xMax * profile.Scale, Is.EqualTo(profile.Safe.xMax - 18f * profile.Scale).Within(Tolerance));
-                Assert.That(centerBounds.center.x, Is.EqualTo(screen.worldBound.center.x).Within(Tolerance));
-                Assert.That(centerBounds.yMin, Is.EqualTo(profile.Safe.yMin / profile.Scale + 14f).Within(Tolerance));
-                Assert.That(leftBounds.width * profile.Scale, Is.EqualTo(124f * profile.Scale).Within(Tolerance));
+                Assert.That(centerBounds.center.x, Is.EqualTo((leftBounds.center.x + rightBounds.center.x) / 2f).Within(Tolerance));
+                float titleDrop = profile.Header == HeaderMode.Standard ? profile.Safe.yMin / profile.Scale : 0f;
+                Assert.That(centerBounds.yMin, Is.EqualTo(leftBounds.yMin + titleDrop).Within(Tolerance));
+                Assert.That(leftBounds.xMax, Is.LessThanOrEqualTo(centerBounds.xMin + Tolerance));
+                Assert.That(centerBounds.xMax, Is.LessThanOrEqualTo(rightBounds.xMin + Tolerance));
+                Assert.That(leftBounds.width * profile.Scale, Is.EqualTo((profile.NarrowBody ? 88f : 124f) * profile.Scale).Within(Tolerance));
+                Assert.That(leftBounds.height * profile.Scale, Is.GreaterThanOrEqualTo(44f), "fixture minimum hit height");
                 Assert.That(leftBounds.height * profile.Scale, Is.EqualTo(48f * profile.Scale).Within(Tolerance));
                 foreach (VisualElement group in screen.Q("header").Children())
                 {
@@ -66,7 +90,7 @@ namespace Qin.UnitySamples.Tests
                         Assert.That(group.worldBound.Overlaps(obstruction), Is.False, group.name);
                     }
                 }
-                if (profile.Portrait && profile.Cutout.width > 0f)
+                if (profile.Header == HeaderMode.Standard && profile.Portrait && profile.Cutout.width > 0f)
                     Assert.That(leftBounds.yMax * profile.Scale, Is.LessThan(profile.Safe.yMin));
 
                 Submit(left);
@@ -80,7 +104,11 @@ namespace Qin.UnitySamples.Tests
                 Label objectiveTitle = objective.Q<Label>(className: "title");
                 AssertInside(objectiveTitle.worldBound, objective.worldBound, objectiveTitle.text);
                 Assert.That(objective.worldBound.yMax, Is.LessThan(tools.worldBound.yMin));
-                return null;
+                AssertInside(tools.worldBound, screen.Q("safe").worldBound, tools.name);
+                if (profile.Cutout.width > 0f)
+                    Assert.That(tools.worldBound.Overlaps(new Rect(profile.Cutout.position / profile.Scale, profile.Cutout.size / profile.Scale)), Is.False, tools.name);
+                bool lastCapture = profile.Name == Profiles[Profiles.Length - 1].Name && text.Locale == text.Locales[text.Locales.Count - 1];
+                return lastCapture ? CheckButtonFeedback(screen, left, target, $"hud-{profile.Name}-{text.Locale}") : null;
             });
         }
 
@@ -109,15 +137,21 @@ namespace Qin.UnitySamples.Tests
                 VisualElement grid = screen.Q("tiles");
                 Assert.That(grid.childCount, Is.EqualTo(cards.Length));
                 Assert.That(grid.worldBound.center.x, Is.EqualTo(screen.Q("safe").worldBound.center.x).Within(Tolerance));
-                int columns = profile.Portrait ? 2 : 3;
+                AssertInside(grid.worldBound, screen.Q("safe").worldBound, "inventory grid");
+                int columns = profile.WideBody ? 3 : 2;
                 for (int index = 0; index < cards.Length; index++)
                 {
                     VisualElement tile = grid.ElementAt(index);
                     Assert.That(tile, Is.SameAs(cards[index]));
                     Rect bounds = tile.worldBound;
-                    Rect first = cards[0].worldBound;
-                    Assert.That(bounds.xMin, Is.EqualTo(first.xMin + index % columns * 174f).Within(Tolerance), $"{profile.Name} {text.Locale} {itemIds[index]} column");
-                    Assert.That(bounds.yMin, Is.EqualTo(first.yMin + index / columns * 116f).Within(Tolerance), $"{profile.Name} {text.Locale} {itemIds[index]} row");
+                    int column = index % columns;
+                    Assert.That(bounds.xMin, Is.EqualTo(cards[column].worldBound.xMin).Within(Tolerance), itemIds[index] + " column alignment");
+                    Assert.That(bounds.yMin, Is.EqualTo(cards[index - column].worldBound.yMin).Within(Tolerance), itemIds[index] + " row alignment");
+                    // Measure adjacent edges. Native pixel snapping rounds each gap independently.
+                    if (column > 0)
+                        Assert.That(bounds.xMin - cards[index - 1].worldBound.xMax, Is.EqualTo(12f).Within(Tolerance), itemIds[index] + " horizontal gap");
+                    if (index >= columns)
+                        Assert.That(bounds.yMin - cards[index - columns].worldBound.yMax, Is.EqualTo(12f).Within(Tolerance), itemIds[index] + " vertical gap");
                     AssertInside(bounds, grid.worldBound, itemIds[index]);
                     Rect identity = tile.Q("item-identity").worldBound;
                     Label icon = tile.Q<Label>("item-icon");
@@ -136,10 +170,10 @@ namespace Qin.UnitySamples.Tests
         {
             yield return Review("Settings", (screen, text) =>
             {
-                text.Bind(screen.Q<Label>("display-value"), "settings.display-value", 0.8d);
-                text.Bind(screen.Q<Label>("frame-rate-value"), "settings.frame-rate-value", 60);
-                text.Bind(screen.Q<Label>("environment-value"), "settings.environment-value", 0.65d);
-                text.Bind(screen.Q<Label>("music-value"), "settings.music-value", 0.5d);
+                BindSetting(screen, text, "display", 0.8d);
+                BindSetting(screen, text, "frame-rate", 60);
+                BindSetting(screen, text, "environment", 0.65d);
+                BindSetting(screen, text, "music", 0.5d);
             }, (screen, profile, text, target) =>
             {
                 Rect group = screen.Q("settings-groups").worldBound;
@@ -150,7 +184,7 @@ namespace Qin.UnitySamples.Tests
                 AssertInside(audio, group, "audio card");
                 Assert.That(display.width * profile.Scale, Is.EqualTo(audio.width * profile.Scale).Within(Tolerance), profile.Name);
                 Assert.That(display.height * profile.Scale, Is.EqualTo(audio.height * profile.Scale).Within(Tolerance), profile.Name);
-                if (profile.Portrait)
+                if (!profile.WideBody)
                 {
                     Assert.That(display.center.x, Is.EqualTo(audio.center.x).Within(Tolerance));
                     Assert.That(audio.yMin - display.yMax, Is.EqualTo(14f).Within(Tolerance));
@@ -171,6 +205,15 @@ namespace Qin.UnitySamples.Tests
                 }
                 return null;
             });
+        }
+
+        static void BindSetting(VisualElement screen, LayoutText text, string key, object value)
+        {
+            TemplateContainer row = screen.Q<TemplateContainer>(key + "-row");
+            Assert.That(row, Is.Not.Null, key);
+            Assert.That(row.childCount, Is.EqualTo(2), key);
+            text.Bind(row.Q<Label>("caption"), $"settings.{key}-label");
+            text.Bind(row.Q<Label>("value"), $"settings.{key}-value", value);
         }
 
         [UnityTest]
@@ -258,7 +301,10 @@ namespace Qin.UnitySamples.Tests
             VisualElement footer = screen.Q("journal-footer");
             ScrollView list = screen.Q<ScrollView>("quest-scroll");
             VisualElement last = list.contentContainer.ElementAt(list.contentContainer.childCount - 1);
-            AssertInside(journal.worldBound, screen.Q("safe").worldBound, "trail journal");
+            Rect pane = screen.Q("safe").worldBound;
+            AssertInside(journal.worldBound, pane, "trail journal");
+            Assert.That(journal.worldBound.xMin - pane.xMin, Is.GreaterThan(6f), "journal left gutter");
+            Assert.That(pane.xMax - journal.worldBound.xMax, Is.GreaterThan(6f), "journal right gutter");
             Rect heading = header.Q("heading").worldBound;
             Rect entryCount = header.Q("entry-count").worldBound;
             Assert.That((entryCount.xMin - heading.xMax) * profile.Scale, Is.GreaterThanOrEqualTo(12f * profile.Scale - Tolerance), text.Locale);
@@ -293,6 +339,7 @@ namespace Qin.UnitySamples.Tests
             try
             {
                 VisualElement screen = document.rootVisualElement.Q("screen");
+                LayoutFeedback.Enter(screen, false);
                 VisualElement cutout = new VisualElement { pickingMode = PickingMode.Ignore };
                 cutout.AddToClassList("cutout");
                 screen.Add(cutout);
@@ -302,17 +349,49 @@ namespace Qin.UnitySamples.Tests
                     strings.Bind(element, $"{scope}.{element.name}");
                 bind(screen, strings);
                 ScrollView journal = screen.Q<ScrollView>("quest-scroll");
+                using JournalScrollAnchor journalAnchor = journal == null ? null : new JournalScrollAnchor(journal);
+                bool firstView = true;
+                Func<bool> idleButtons = null;
+                bool inspectMiddleOnTransfer = false;
                 foreach (LayoutProfile profile in Profiles)
                 {
+                    Focusable priorFocus = screen.focusController.focusedElement;
+                    VisualElement lastVisibleEntry = null;
+                    if (journal != null && current != null)
+                    {
+                        VisualElement last = journal.contentContainer.ElementAt(journal.contentContainer.childCount - 1);
+                        if (!inspectMiddleOnTransfer)
+                        {
+                            AssertInside(last.worldBound, journal.contentViewport.worldBound, "outgoing final entry");
+                            lastVisibleEntry = last;
+                        }
+                    }
+                    float priorScroll = journal?.scrollOffset.y ?? 0f;
+                    journalAnchor?.BeforeViewportChange();
                     RenderTexture next = new RenderTexture(profile.Size.x, profile.Size.y, 24);
                     settings.targetTexture = next;
                     Object.Destroy(current);
                     current = next;
                     settings.referenceResolution = profile.Portrait ? new Vector2Int(2160, 3840) : new Vector2Int(3840, 2160);
                     // USS uses quarter-resolution design units. PanelSettings projects them directly.
-                    settings.scale = 4f;
+                    // This receiver declares a 1:1 minimum for its compact, low-density test window.
+                    settings.scale = 4f * profile.Scale / profile.ProportionalScale;
                     ApplyGeometry(screen, cutout, profile);
-                    if (journal != null) journal.scrollOffset = Vector2.zero;
+                    yield return null;
+                    yield return null;
+                    if (priorFocus != null)
+                        Assert.That(screen.focusController.focusedElement, Is.SameAs(priorFocus), profile.Name);
+                    if (journal != null && !firstView)
+                    {
+                        if (inspectMiddleOnTransfer)
+                        {
+                            Assert.That(priorScroll, Is.GreaterThan(0f), "outgoing mid-list position");
+                            Assert.That(journal.scrollOffset.y, Is.EqualTo(priorScroll).Within(Tolerance), profile.Name + " retained offset");
+                        }
+                        else
+                            AssertInside(lastVisibleEntry.worldBound, journal.contentViewport.worldBound, profile.Name + " retained quest");
+                        journal.scrollOffset = Vector2.zero; // Start the standard capture after observing the transferred state.
+                    }
                     for (int locale = 0; locale < strings.Locales.Count; locale++)
                     {
                         Focusable focus = screen.focusController.focusedElement;
@@ -331,10 +410,22 @@ namespace Qin.UnitySamples.Tests
                             }
                         }
 
+                        if (firstView)
+                        {
+                            yield return new WaitUntil(() => !screen.ClassListContains("view-entering") && screen.Q("safe").resolvedStyle.opacity >= 0.999f,
+                                TimeSpan.FromSeconds(3), () => Assert.Fail("Screen entrance did not settle"));
+                            idleButtons = CaptureIdleButtonStyles(screen);
+                            firstView = false;
+                        }
                         Assert.That(document.rootVisualElement.Q("screen"), Is.SameAs(screen));
                         Assert.That(screen.worldBound.width * profile.Scale, Is.EqualTo(profile.Size.x).Within(Tolerance));
                         Assert.That(screen.worldBound.height * profile.Scale, Is.EqualTo(profile.Size.y).Within(Tolerance));
                         foreach (TextElement element in strings.BoundElements) AssertTextFits(element);
+                        if (idleButtons != null)
+                        {
+                            yield return new WaitUntil(idleButtons, TimeSpan.FromSeconds(3), () => Assert.Fail("Button feedback did not settle"));
+                            yield return null;
+                        }
                         using (NativeReadback image = new NativeReadback(current))
                         {
                             Assert.That(image.BrightPixels, Is.GreaterThan(100), $"{name} {profile.Name} {strings.Locale} has no bright foreground");
@@ -342,6 +433,13 @@ namespace Qin.UnitySamples.Tests
                         }
                         IEnumerator checkFrames = check(screen, profile, strings, current);
                         if (checkFrames != null) yield return checkFrames;
+                    }
+                    // Exercise the opposite resize behavior when opening the taller inner display mid-list.
+                    inspectMiddleOnTransfer = journal != null && profile.Name == "duo-outer-landscape-right";
+                    if (inspectMiddleOnTransfer)
+                    {
+                        journal.scrollOffset = new Vector2(0f, 60f);
+                        yield return null;
                     }
                 }
             }
@@ -359,7 +457,9 @@ namespace Qin.UnitySamples.Tests
         {
             float scale = profile.Scale;
             Rect safePixels = profile.Safe;
-            screen.EnableInClassList("landscape", !profile.Portrait);
+            screen.EnableInClassList("wide-body", profile.WideBody);
+            screen.EnableInClassList("narrow-body", profile.NarrowBody);
+            screen.EnableInClassList("short-body", safePixels.height / scale < 700f);
             VisualElement safe = screen.Q("safe");
             safe.style.left = safePixels.xMin / scale;
             safe.style.right = (profile.Size.x - safePixels.xMax) / scale;
@@ -368,14 +468,23 @@ namespace Qin.UnitySamples.Tests
             VisualElement header = screen.Q("header");
             if (header != null)
             {
-                VisualElement left = header.Q("left-wing");
-                left.style.left = 18f + safePixels.xMin / scale;
-                left.style.top = 14f;
-                VisualElement right = header.Q("right-wing");
-                right.style.right = 18f + (profile.Size.x - safePixels.xMax) / scale;
-                right.style.top = 14f;
-                header.Q("center-title").style.top = 14f + safePixels.yMin / scale;
+                float left = safePixels.xMin;
+                float right = safePixels.xMax;
+                float top = 14f;
+                if (profile.Header == HeaderMode.Safe) top += safePixels.yMin / scale;
+                if (profile.Header == HeaderMode.Outer && profile.Cutout.center.y < profile.Size.y / 2f)
+                {
+                    if (profile.Cutout.center.x > profile.Size.x / 2f) right = profile.Cutout.xMin;
+                    else left = profile.Cutout.xMax;
+                    top = profile.Cutout.center.y / scale - 24f;
+                }
+                header.style.left = left / scale + 18f;
+                header.style.right = (profile.Size.x - right) / scale + 18f;
+                header.style.top = top;
+                header.Q("center-title").style.top = profile.Header == HeaderMode.Standard ? safePixels.yMin / scale : 0f;
             }
+            cutout.style.borderTopLeftRadius = cutout.style.borderTopRightRadius =
+                cutout.style.borderBottomLeftRadius = cutout.style.borderBottomRightRadius = profile.Header == HeaderMode.Outer ? profile.Cutout.width / (2f * scale) : 18f;
             cutout.style.left = profile.Cutout.x / scale;
             cutout.style.top = profile.Cutout.y / scale;
             cutout.style.width = profile.Cutout.width / scale;
@@ -422,25 +531,33 @@ namespace Qin.UnitySamples.Tests
             if (Application.isPlaying) yield return new ExitPlayMode();
         }
 
+        enum HeaderMode { Standard, Outer, Safe }
+
         readonly struct LayoutProfile
         {
             public readonly string Name;
             public readonly Vector2Int Size;
             public readonly Rect Safe;
             public readonly Rect Cutout;
+            public readonly HeaderMode Header;
+            // Two 284-unit Settings cards with 7-unit margins on each side need 596 units.
+            public bool WideBody => Safe.width / Scale >= 600f;
+            public bool NarrowBody => Safe.width / Scale < 400f;
             public bool Portrait => Size.y > Size.x;
-            public float Scale => Portrait ? Mathf.Min(Size.x / 540f, Size.y / 960f) : Mathf.Min(Size.x / 960f, Size.y / 540f);
+            public float Scale => Mathf.Max(1f, ProportionalScale);
+            public float ProportionalScale => Portrait ? Mathf.Min(Size.x / 540f, Size.y / 960f) : Mathf.Min(Size.x / 960f, Size.y / 540f);
 
             public LayoutProfile(string name, int width, int height) : this(name, width, height, new Rect(0, 0, width, height), default)
             {
             }
 
-            public LayoutProfile(string name, int width, int height, Rect safe, Rect cutout)
+            public LayoutProfile(string name, int width, int height, Rect safe, Rect cutout, HeaderMode header = HeaderMode.Standard)
             {
                 Name = name;
                 Size = new Vector2Int(width, height);
                 Safe = safe;
                 Cutout = cutout;
+                Header = header;
             }
         }
     }

@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Label name="caption" class="detail" />
+    <ui:Label name="value" class="value" />
+</ui:UXML>

@@ -12,6 +12,20 @@ After choosing the composition for the active orientation, default to one unifor
 
 For a screen-space Toolkit panel, use Scale With Screen Size and Expand when the entire design must fit. A screen-space Canvas can use Scale With Screen Size and Expand with the equivalent reference resolution. Read back the effective scale and geometry for the active host, including target textures and nested canvases. [Unity PanelScreenMatchMode](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/UIElements.PanelScreenMatchMode.html)
 
+## Set bounds for each group
+
+Record the smallest supported usable pane, the approved body type size and touch target floor, and the largest useful content width for each screen. Use the receiver's text-size settings and actual density. Convert panel bounds through the active surface into platform points or dp when checking a mobile hit target. Typical touch guidance is 44 × 44 pt on iOS and 48 × 48 dp on Android. A compact icon can sit inside a larger hit target if neighboring targets stay distinct. [Apple button sizing](https://developer.apple.com/design/human-interface-guidelines/buttons) · [Android touch targets](https://developer.android.com/guide/topics/ui/accessibility/apps)
+
+| Group | At the narrow or short limit | In a wide or unfolded window |
+| --- | --- | --- |
+| Header and persistent actions | Reserve the corner targets and measure the remaining row using the longest supported labels. Apply the local obstruction rule. | Keep the authored anchors and limit the length of the central row. |
+| Inventory and settings | Choose columns from the usable **group width** after padding, gutters and the minimum readable item width. Stack settings groups when two readable cards cannot fit. | Add a column only when the full row fits. Cap the content width so cards and text retain their intended scale. |
+| Journal and dialog | Keep the heading and actions reachable. Give the variable body the remaining height and let that region scroll when necessary. | Bound the dialog or reading column. Let surrounding space carry the backdrop. |
+
+Drive these choices from the measured pane in panel units. A hinge can leave a narrow pane inside a landscape window. When a geometry or platform reservation changes, update only the affected classes, anchors and sizes on the mounted tree. A class change must settle to the same result on the next layout pass. Use an independent pane or host measurement so a child's own reflow cannot toggle its breakpoint repeatedly. Keep artwork and its visual proportions under one scale owner.
+
+In a native replay, visit the smallest and largest supported panes and both sides of each changed breakpoint. Record effective type, target size, content width and clearance in the relevant units. Check a long label and the last reachable control. Repeat the resize with a modal open or a list scrolled, then restore the original pane. Compare the visible item, current action, focus and settled geometry. A raster-only replay can verify composition and picking. Physical target size needs the receiving surface's verified density.
+
 ## UI Toolkit artwork and navigation
 
 Locate the accepted PNG or Sprite and verify its source dimensions, trim, visible bounds and import settings. In UXML, give the hit target, backdrop, button faces, icons and caption separate elements. Apply USS `background-size: contain` to complete artwork and fit a single multiplier to its painted bounds. An artwork asset can retain transparent padding outside its visible bounds. Use proportional cover for full-screen scene backgrounds.

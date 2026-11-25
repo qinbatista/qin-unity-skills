@@ -13,6 +13,21 @@
 - Use [screen adaptation](screen-adaptation.md) for scaling, safe areas and painted bounds. In Toolkit, use parent-relative layout, flex and native anchors.
 - Read the current state on mount and invoke the owning action directly. Use the owning change callbacks for geometry, values and text.
 
+## Import and inspect the mounted tree
+
+1. Sketch the functional hierarchy first. For a journal, a fixed heading, one scrolling list and a fixed footer express the layout. A wrapper earns its place by owning alignment, a clip, a template boundary, a hit target or an effect. Remove empty wrappers, duplicate frames and alternate copies of the same screen for different devices. Use short USS class selectors for shared roles and stable element names for binding.
+2. Import the UXML, USS and template dependencies in the receiving Unity version. Check importer diagnostics, the `UnityEngine.UIElements` namespace, case-sensitive asset references and the element types available in that runtime. Use its supported USS properties, selectors and units. Express a responsive variant with a class on the mounted owner. Browser CSS features such as media queries and grid need a native layout equivalent. [Unity UXML](https://docs.unity3d.com/6000.0/Documentation/Manual/UIE-WritingUXMLTemplate.html)
+3. Mount through the actual `UIDocument` or screen entry. Check that each required binding resolves once **within its instance** and has the expected type. Inspect the live hierarchy. `Instantiate()` adds a `TemplateContainer` whose sizing participates in flex layout. Use `CloneTree(parent)` when that parent already owns the slot. Check the resolved size, style and native pick of a real instance after layout settles. [Unity template instantiation](https://docs.unity3d.com/6000.0/Documentation/Manual/UIE-LoadingUXMLcsharp.html)
+4. Keep template references and callbacks with the mounted component. For a recycled list row, bind its current item and clear item-specific state and subscriptions on unbind. Scroll away and back, then activate the row. Confirm the intended item receives one action. Resize, change locale and return to the initial pane. Count mounted items and compare identities, selection, focus and the visible scroll item. Reopening a deliberately destroyed page should create exactly its expected tree.
+
+## Give actions visible feedback
+
+Give each screen a cue tied to its purpose. A journal or inventory can reveal its foreground briefly when opened. Play that entrance once per opening so resizing, folding and language changes preserve the reading position. For a button, acknowledge the press immediately with a brief tint or a small scale change on the visual face inside the stable hit target. For a settings change, show the new value. For a long-running action, expose its actual progress or pending state. Keep reading text and idle screens steady.
+
+Share a USS state rule across controls with the same role. Name the properties to transition, such as `scale` or `background-color`. Keep the focus indicator and a non-color cue legible through the transition. Restore the authored style when a press is released, cancelled, disabled, detached or recycled. With reduced motion enabled, give immediate static feedback. Let the control's normal activation path dispatch the action independently of animation completion. [Unity USS transitions](https://docs.unity3d.com/6000.0/Documentation/Manual/UIE-Transitions.html)
+
+Exercise a held press, release, cancellation and keyboard submission. During the effect, pick at an edge of the original target and check a neighboring control's bounds. Inspect the rendered pressed and released states, confirm the action count and repeat with reduced motion. For non-interactive content, exercise the meaningful change the screen presents, such as the current list position or updated value.
+
 ## Check buttons and destination pages
 
 1. Identify the source page and the expected action, destination, exits and effect on data and selection. Enter through the actual scene or formal route and let layout settle. Re-read the currently mounted hit bounds after remount, resize, inset or language changes. Convert through the current panel or device and use real press/release, touch, gamepad or keyboard input as appropriate. Read the actual focused target when testing navigation submission.
