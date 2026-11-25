@@ -60,6 +60,8 @@ python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<task-cache>/founda
 
 ## Run the image sizing fixture
 
+The [illustrated optimization replay](../../../examples/image-optimization/README.md) adds a Level 2 graphics case using recognizable artwork for repeatable terrain, tree components, Toolkit and Canvas controls, import sizing and atlas packing. Its [Python runner](../../../examples/image-optimization/replay.py) executes the native cases from the example’s Editor directory and checks the capture inventory.
+
 Use a fresh task-owned Unity 6000.6.7f1 project with the [Charge Pulse package manifest](../../../examples/charge-pulse/Packages/manifest.json) and an Editor test assembly with `optionalUnityReferences: ["TestAssemblies"]`. Run on the Standalone build target with graphics enabled. Copy both case files from the table above and the packaged [world Sprite importer](../../../unity-assets-skill/assets/Editor/WorldRepeatSprite.cs) into that assembly. Copy the packaged [slicing stylesheet](../../../unity-ui-skill/assets/ResizableBacking.uss) to `Assets/ResizableBacking.uss` and the [fixture theme](../../../examples/charge-pulse/Assets/Prefabs/ChargePulse/PulseTheme.tss) to `Assets/PulseTheme.tss`. Set `SPRITE_SIZING_FRAMES` to an existing task Cache directory for optional PNG readbacks.
 
 ```text

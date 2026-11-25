@@ -1,0 +1,63 @@
+{
+    "editorVersion": "6000.6.7f1",
+    "activeTarget": "StandaloneOSX",
+    "source": "World/TreeCrown.png",
+    "sourceWidth": 768,
+    "sourceHeight": 576,
+    "projectedWidth": 192,
+    "projectedHeight": 144,
+    "before": {
+        "width": 768,
+        "height": 576,
+        "platformCap": 2048,
+        "configuredPpu": 100.0,
+        "effectivePpu": 100.0,
+        "rendererScale": 0.10000000149011612,
+        "worldWidth": 0.7680000066757202,
+        "worldHeight": 0.5760000348091125,
+        "textureObjectBytes": 3539952,
+        "graphicsFormat": "R8G8B8A8_UNorm"
+    },
+    "after": {
+        "width": 256,
+        "height": 192,
+        "platformCap": 256,
+        "configuredPpu": 1000.0,
+        "effectivePpu": 333.3333435058594,
+        "rendererScale": 1.0,
+        "worldWidth": 0.7679999470710754,
+        "worldHeight": 0.5759999752044678,
+        "textureObjectBytes": 394224,
+        "graphicsFormat": "R8G8B8A8_UNorm"
+    },
+    "visibleAlphaOverlap": 0.9996493458747864,
+    "meanVisibleRgbError": 0.0049125500954687595,
+    "atlasWidth": 1024,
+    "atlasHeight": 1024,
+    "atlasTextureObjectBytes": 2098201,
+    "atlasFormat": "RGBA_DXT5_UNorm",
+    "excluded": "Ground",
+    "pieces": [
+        {
+            "name": "TreeBase",
+            "x": 0,
+            "y": 580,
+            "width": 320,
+            "height": 120
+        },
+        {
+            "name": "TreeTrunk",
+            "x": 324,
+            "y": 580,
+            "width": 144,
+            "height": 144
+        },
+        {
+            "name": "TreeCrown",
+            "x": 0,
+            "y": 0,
+            "width": 768,
+            "height": 576
+        }
+    ]
+}

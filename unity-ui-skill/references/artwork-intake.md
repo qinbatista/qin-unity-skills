@@ -25,6 +25,8 @@ Verify the assigned Sprite or texture, exact accepted bytes, native import and a
 
 ## Resize buttons and panels
 
+The [woodland control example](https://github.com/qinbatista/qin-unity-skills/tree/master/examples/image-optimization) shows the small frame texture, its stretched and tiled instances, and native captures from UI Toolkit and Canvas.
+
 Keep one compact backing for each distinct appearance. Measure the four cuts in source pixels from the outer edges to where the center can extend. Leave a positive center on each extensible axis. Stretch a flat middle, tile a seamless pattern, and keep unique ornaments, icons and localized text in separate slots. Preserve intact illustrated panels when a cut would cross important detail. The layout owns the final width, height, content padding and hit region.
 
 **UI Toolkit.** Bind the backing to the button or panel's `background-image`. For a Sprite shared across controls, set its four borders in the native importer. For a Texture2D or a control-specific override, attach the [resizable backing stylesheet](../assets/ResizableBacking.uss) and apply `resizable-backing`. Its four 8-pixel cuts suit a 32 × 32 sample with a 16 × 16 center. A 96 × 40 button and a 224 × 64 panel can use the same texture. Replace all four values when adapting the class to different art. For a Sprite binding, tune `-unity-slice-scale` against the panel's reference Sprite PPU and verify the painted border at the active panel scale. Screen-space dimensions come from layout and the target display. [Unity USS slicing](https://docs.unity3d.com/6000.0/Documentation/Manual/UIE-USS-SupportedProperties.html)

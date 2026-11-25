@@ -77,7 +77,7 @@
       "id": "unity-assets",
       "summary": "Asset placement, GUID-preserving moves, world scale, import caps, tiled ground and adjustable trunks",
       "document": "skills/ai-index/modules/unity-assets.md",
-      "sources": ["unity-assets-skill"],
+      "sources": ["unity-assets-skill", "examples/image-optimization"],
       "dependencies": [],
       "code_targets": [
         {
