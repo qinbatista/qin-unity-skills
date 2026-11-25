@@ -7,6 +7,13 @@ float4 _CameraSortingLayerTexture_TexelSize;
 #endif
 float _QinFluidOpticsMode;
 
+// The rain contact and the section silhouette must share the same projected height.
+float RainSectionHeight(float u, float displacement)
+{
+    float shore = 1. - smoothstep(.79, .995, abs(2.*u - 1.));
+    return .040 + clamp(4.25*displacement, -.13, .165)*shore;
+}
+
 void ApplyWaterStudyOptics(float2 screenUv, float2 slope, float crest, float4 settings,
     inout float3 color, inout float alpha)
 {

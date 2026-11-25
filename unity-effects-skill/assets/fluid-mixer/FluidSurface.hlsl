@@ -9,7 +9,7 @@ float4 FluidField(UnityTexture2D field, float2 uv)
     return SAMPLE_TEXTURE2D(field.tex, field.samplerstate, saturate(uv));
 }
 
-void SideWaterline(float2 uv, UnityTexture2D film, out float pigment, out float rim,
+void SideWaterline(float2 uv, UnityTexture2D film, bool rain, out float pigment, out float rim,
     out float opacity, out float2 bend, out float crest)
 {
     float dx = max(film.texelSize.x, .0001);
@@ -23,7 +23,7 @@ void SideWaterline(float2 uv, UnityTexture2D film, out float pigment, out float 
     float end = 1. - smoothstep(.79, .995, abs(2. * uv.x - 1.));
     // This sprite is a side section. Its top is the displaced physical waterline.
     float localY = (uv.y - .5) * 1.024;
-    float top = .040 + clamp(value.x * 2.35, -.13, .165) * end;
+    float top = rain ? RainSectionHeight(uv.x, value.x) : .040 + clamp(value.x * 2.35, -.13, .165) * end;
     float below = top - localY;
     float body = smoothstep(-.014, .022, below) * (1. - smoothstep(.040, .190, below));
     float stroke = smoothstep(-.015, .009, below) * (1. - smoothstep(.010, .050, below));
@@ -31,6 +31,16 @@ void SideWaterline(float2 uv, UnityTexture2D film, out float pigment, out float 
     pigment = saturate(.23 + 2.0 * below);
     rim = stroke * (.50 + .31 * crest);
     opacity = end * wet * (body * .28 + rim * .62);
+    if (rain)
+    {
+        // Narrow glints follow the signed slope and velocity of the solved waterline.
+        float active = smoothstep(.0005, .013, energy);
+        float lip = 1. - smoothstep(.006, .022, abs(below));
+        float lit = saturate(.54 + 4. * slope + .22 * value.y);
+        crest = active * lit;
+        rim = active * lip * (.44 + .53 * lit);
+        opacity = end * active * (.32 * body + .64 * lip);
+    }
     bend = float2(-slope * 1.25, value.y * .14) * body;
 }
 
@@ -45,7 +55,7 @@ void FluidInterface_float(float4 UV, UnityTexture2D Film, float NearSide, out fl
     }
     if (NearSide < .5)
     {
-        SideWaterline(uv, Film, Depth, Reflectance, WetAlpha, Slope, Crest);
+        SideWaterline(uv, Film, NearSide < -.5, Depth, Reflectance, WetAlpha, Slope, Crest);
         return;
     }
 

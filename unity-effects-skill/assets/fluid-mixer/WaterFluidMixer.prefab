@@ -54,6 +54,7 @@ MonoBehaviour:
   _recipe: {fileID: 11400000, guid: e56a759e60475436a5d922d93578b8c7, type: 2}
   _obstacleAnchor: {fileID: 0}
   _waterSortingLayer:
+  _rainMaterial: {fileID: 2100000, guid: 1910459a2e814391ae11a24be94f0d45, type: 2}
 --- !u!1 &110401
 GameObject:
   m_ObjectHideFlags: 0

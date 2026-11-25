@@ -84,6 +84,7 @@ float _Duration;
 float _FeedDuration;
 int _DropCount;
 float _DropSpan;
+float _RainExposure;
 float _CurtainHold;
 float _Strength;
 float _Gravity;
@@ -417,6 +418,15 @@ void DepositImpact(float2 position, float momentum)
     }
 }
 
+// Contact, wave forcing and the optical splash share one first-hit record per drop.
+void StrikeRain(uint id, float3 previous, float3 next, float surface, float downwardSpeed)
+{
+    if (_Spray[uint2(id, 1)].w > 0.0) return;
+    float hit = saturate((previous.y - surface) / max(.0001, previous.y - next.y));
+    DepositImpact(next.xz, downwardSpeed * lerp(2.4, 1.4, saturate(_DropSpan)));
+    _Spray[uint2(id, 1)] = float4(next.x, surface, _Seconds - (1.0 - hit) * StepSeconds, downwardSpeed);
+}
+
 [numthreads(64, 1, 1)]
 void ResetLiquid(uint id : SV_DispatchThreadID)
 {
@@ -478,8 +488,18 @@ void PredictPositions(uint id : SV_DispatchThreadID)
     {
         float2 water = _WaveRead.Load(int3(WavePixel(expected.xz), 0));
         float surface = Floor + clamp(water.x, 0.0, .10);
-        if (velocity.y < -.59 && p.placement.y >= surface && expected.y < surface)
-            DepositImpact(expected.xz, -velocity.y * (_Feed == 8 ? lerp(2.4, 1.4, saturate(_DropSpan)) : 1.));
+        if (velocity.y < -.59)
+        {
+            if (_RainExposure > 0.0)
+            {
+                // The floor constraint stops a parcel within 2 mm. Use that same contact
+                // interval before its downward velocity disappears on the next step.
+                if (expected.y <= surface + .002)
+                    StrikeRain(id, p.placement.xyz, expected, surface, -velocity.y);
+            }
+            else if (p.placement.y >= surface && expected.y < surface)
+                DepositImpact(expected.xz, -velocity.y * (_Feed == 8 ? lerp(2.4, 1.4, saturate(_DropSpan)) : 1.));
+        }
         // The height/vertical velocity of the receiving film lifts already settled water.
         if (expected.y < surface && velocity.y > -.59)
             expected.y += min(.018, (surface - expected.y) * .24 + max(0.0, water.y) * .001);
@@ -650,6 +670,9 @@ void UpdateVelocities(uint id : SV_DispatchThreadID)
     velocity *= min(1.0, 9.0 * rsqrt(max(.0001, dot(velocity, velocity))));
     if (predicted.y <= Floor + .002)
     {
+        // Pressure constraints can complete a landing after ballistic prediction.
+        if (_RainExposure > 0.0 && _WavesEnabled != 0 && p.motion.y < -.59)
+            StrikeRain(id, p.placement.xyz, predicted.xyz, Floor, -p.motion.y);
         if (_Feed == 1 && p.motion.y < -.85)
         {
             float sinceOpening = max(0., _Seconds - min(Start, .47 * _FeedDuration));
@@ -671,6 +694,7 @@ void UpdateVelocities(uint id : SV_DispatchThreadID)
     p.motion = float4(velocity, spray);
     _Particles[id] = p;
 
+    if (_RainExposure > 0.0) return;
     float weight = (1.0 - step(.64, Uniform(id, 8u))) * spray * Envelope(p);
     _Spray[uint2(id, 0)] = float4(predicted.xyz, weight * SolidAir2D(predicted.xy));
     _Spray[uint2(id, 1)] = float4(velocity.xy, Uniform(id, 9u), Uniform(id, 10u));

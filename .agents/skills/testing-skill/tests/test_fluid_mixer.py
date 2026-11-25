@@ -83,6 +83,23 @@ class FluidInstallTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duration"): rain({"duration": .5})
         self.assertEqual(donor.read_bytes(), original)
 
+    def test_wide_cloudburst_opts_into_camera_exposure(self):
+        from water_limits import BRIEFS
+
+        folder = "Assets/Installed/Water"
+        installed, _ = fluid_mixer.install(self.project, folder)
+        profile, settings = BRIEFS["WideCloudburst"]
+        cloudburst, _ = compose(self.project, folder, "Assets/Weather", "WideCloudburst", profile, settings)
+        rain, _ = compose(self.project, folder, "Assets/Weather", "OrdinaryRain", "rain", {})
+        self.assertIn("_rainExposure: 0.035", cloudburst.with_suffix(".asset").read_text())
+        self.assertNotIn("_rainExposure: 0.035", rain.with_suffix(".asset").read_text())
+        self.assertNotIn("_rainExposure: 0.035", (installed / "Presets/FreeJet.asset").read_text())
+        with self.assertRaises(ValueError):
+            compose(self.project, folder, "Assets/Weather", "LedgeDrop", "drip", {"rain-exposure": .035})
+        (installed / "SideRain.mat").unlink()
+        with self.assertRaisesRegex(ValueError, "SideRain.mat"):
+            compose(self.project, folder, "Assets/Weather", "CloudburstCopy", profile, settings)
+
     def test_recipe_guide_authors_each_native_capture(self):
         template = "Assets/Effects/Water"
         fluid_mixer.install(self.project, template)

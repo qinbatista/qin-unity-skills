@@ -32,6 +32,9 @@ namespace Qin.UnityEffects.Fluids
         [SerializeField, Range(1, 160)] private int _dropCount = 48;
         [SerializeField, Range(0f, 5f)] private float _dropSpan = 3.8f;
 
+        [SerializeField, Range(0f, .05f), Tooltip("Side-view rain shutter in seconds. Zero uses the standard parcel surface.")]
+        private float _rainExposure;
+        public float RainExposure => _feed == Inlet.FallingDrops ? Mathf.Clamp(_rainExposure, 0f, .05f) : 0f;
         public int DropCount => Mathf.Clamp(_dropCount, 1, 160);
         public float DropSpan => Mathf.Clamp(_dropSpan, 0f, 5f);
         public bool PlayOnEnable => _playOnEnable;

@@ -29,7 +29,8 @@ PARCEL_BASES = {"ripple": "PlanarRipples", "mass": "FallingMass", "jet": "FreeJe
                 "fountain": "WaterNeedle2D"}
 PARCEL_RANGES = {"gravity": ("_gravity", 0, 18), "strength": ("_strength", .05, 2),
                  "feed": ("_feedDuration", .18, 10), "duration": ("_duration", .4, 16),
-                 "span": ("_dropSpan", 0, 5), "count": ("_dropCount", 1, 160)}
+                 "span": ("_dropSpan", 0, 5), "count": ("_dropCount", 1, 160),
+                 "rain-exposure": ("_rainExposure", 0, .05)}
 DROP_DEFAULTS = {
     "rain": {"_feed": 8, "_origin": "{x: -0.21, y: 2.25, z: 0}", "_velocity": "{x: 0.63, y: -1.25, z: 0}",
              "_dropSpan": 4.2, "_dropCount": 70, "_feedDuration": 2.35, "_duration": 3.6},
@@ -44,6 +45,15 @@ def channel_ranges(profile):
     if profile in ("dam-dry", "dam-wet"):
         return RANGES | {"bank": ("_bankRise", 0, .85)}
     return RANGES
+
+
+def parcel_ranges(profile):
+    ranges = dict(PARCEL_RANGES)
+    if profile not in ("rain", "drip"):
+        del ranges["count"], ranges["span"]
+    if profile != "rain":
+        del ranges["rain-exposure"]
+    return ranges
 
 
 def in_assets(project, relative):
@@ -131,16 +141,21 @@ def parcel_files(base, name, profile, settings):
         donor = PARCEL_BASES[profile]
         preset = Path("Presets") / (donor + ".asset")
         prefab = Path("Variants") / (donor + ".prefab")
-    for path in (preset, prefab, Path(str(preset) + ".meta"), Path("WaterFluidMixer.prefab.meta")):
+    required = [preset, prefab, Path(str(preset) + ".meta"), Path("WaterFluidMixer.prefab.meta")]
+    if profile == "rain" and settings.get("rain-exposure", 0) > 0:
+        required.extend(("WaterFluidMixer.prefab", "FluidMix.compute", "FluidMixController.cs",
+                         "FluidMixSimulation.cs", "SOFluidMixRecipe.cs", "FluidSurface.hlsl", "WaterStudyOptics.hlsl",
+                         "SideRainRenderer.cs", "SideRain.mat", "SideRain.mat.meta",
+                         "SideRain.shader", "SideRain.shader.meta"))
+    for path in required:
         if not (base / path).is_file() or digest(base / path) != digest(TEMPLATE / path):
             raise ValueError(f"Install this release of the fluid template before composing: {path}")
+    ranges = parcel_ranges(profile)
     new_fields = dict(DROP_DEFAULTS.get(profile, {}))
     for key, value in settings.items():
-        if key not in PARCEL_RANGES:
+        if key not in ranges:
             raise ValueError(f"{key} is not an input for {profile}.")
-        if key in ("span", "count") and profile not in ("drip", "rain"):
-            raise ValueError(f"{key} applies to a falling drop inlet.")
-        field, low, high = PARCEL_RANGES[key]
+        field, low, high = ranges[key]
         if not math.isfinite(value) or not low <= value <= high or (key == "count" and value != int(value)):
             raise ValueError(f"Invalid {key}. Expected a value from {low} through {high}.")
         new_fields[field] = int(value) if key == "count" else format(value, ".7g")
@@ -178,10 +193,11 @@ def main():
     parser.add_argument("--destination", default="Assets/GameWater")
     parser.add_argument("--name", required=True)
     parser.add_argument("--profile", choices=(*CHANNEL_BASES, *PARCEL_BASES, *SPELL_BASES, *TOPDOWN_BASES), required=True)
-    for key, (_, low, high) in (RANGES | TOPDOWN_RANGES | PARCEL_RANGES).items():
+    options = RANGES | TOPDOWN_RANGES | PARCEL_RANGES
+    for key, (_, low, high) in options.items():
         parser.add_argument("--" + key, dest=key, type=float, help=f"Override the profile value ({low} to {high}).")
     args = parser.parse_args()
-    overrides = {key: getattr(args, key) for key in (RANGES | TOPDOWN_RANGES | PARCEL_RANGES) if getattr(args, key) is not None}
+    overrides = {key: getattr(args, key) for key in options if getattr(args, key) is not None}
     try:
         path, result = compose(args.project, args.template, args.destination, args.name, args.profile, overrides)
     except (ValueError, OSError) as error:

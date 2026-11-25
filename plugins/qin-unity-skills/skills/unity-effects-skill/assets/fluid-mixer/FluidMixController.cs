@@ -21,6 +21,9 @@ namespace Qin.UnityEffects.Fluids
         [SerializeField] private ComputeShader _program;
         [SerializeField] private SOFluidMixRecipe _recipe;
         [SerializeField] private Transform _obstacleAnchor;
+        [SerializeField] private Material _rainMaterial;
+        private SideRainRenderer _rain;
+        private bool _useRain;
 
         [Tooltip("Optional sorting layer for all three draws. For 2D refraction, select a layer above the camera colour capture.")]
         [SerializeField] private string _waterSortingLayer;
@@ -52,6 +55,8 @@ namespace Qin.UnityEffects.Fluids
         private void OnDisable()
         {
             Recycle();
+            _rain?.Dispose();
+            _rain = null;
             _simulation?.Dispose();
             _simulation = null;
         }
@@ -89,8 +94,13 @@ namespace Qin.UnityEffects.Fluids
             double admission = _stoppedAt < 0 ? feedEnd : System.Math.Min(_stoppedAt, feedEnd);
             _simulation.Advance(_seconds, admission, obstacle, _recipe.Pressure);
             if (_recipe.SurfaceWaves)
-                BindField(_surface, _simulation.Waterline, 0f, weight);
-            if (_recipe.Feed != SOFluidMixRecipe.Inlet.SurfaceImpulse)
+                BindField(_surface, _simulation.Waterline, _useRain ? -1f : 0f, weight);
+            if (_useRain)
+            {
+                _rain ??= new SideRainRenderer(transform, _volume, _rainMaterial);
+                _rain.Draw(_simulation, _recipe, castTime, weight);
+            }
+            else if (_recipe.Feed != SOFluidMixRecipe.Inlet.SurfaceImpulse)
                 BindField(_volume, _simulation.Film, 1f, weight);
             if (_sprayStarted)
                 _spray.SetFloat(ReleaseWeight, weight);
@@ -125,6 +135,7 @@ namespace Qin.UnityEffects.Fluids
                 _spray.ResetOverride(MaterialState);
                 _sprayStarted = false;
             }
+            _rain?.Hide();
             if (_surface) { _surface.enabled = false; _surface.SetPropertyBlock(null); }
             if (_volume) { _volume.enabled = false; _volume.SetPropertyBlock(null); }
             CurrentStage = VisualStage.Recycled;
@@ -144,6 +155,7 @@ namespace Qin.UnityEffects.Fluids
                 if (layer.name != layerName) continue;
                 _surface.sortingLayerID = layer.id;
                 _volume.sortingLayerID = layer.id;
+                _rain?.SetSortingLayer(layer.id);
                 _spray.GetComponent<Renderer>().sortingLayerID = layer.id;
                 _waterSortingLayer = layerName;
                 return;
@@ -165,11 +177,12 @@ namespace Qin.UnityEffects.Fluids
                 return;
             _block ??= new MaterialPropertyBlock();
             _simulation ??= new FluidMixSimulation(_program);
-            _simulation.Reset(_recipe, seed, _recipe.Strength * Mathf.Clamp01(charge));
+            _useRain = _recipe.RainExposure > 0f && _rainMaterial;
+            _simulation.Reset(_recipe, seed, _recipe.Strength * Mathf.Clamp01(charge), _useRain);
             _seconds = 0f;
             _stoppedAt = -1f;
             _lastSampleFrame = Time.frameCount;
-            _sprayStarted = _recipe.Spray && _recipe.Feed != SOFluidMixRecipe.Inlet.SurfaceImpulse;
+            _sprayStarted = !_useRain && _recipe.Spray && _recipe.Feed != SOFluidMixRecipe.Inlet.SurfaceImpulse;
             if (_sprayStarted)
             {
                 _spray.resetSeedOnPlay = false;

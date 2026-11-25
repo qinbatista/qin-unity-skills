@@ -38,6 +38,7 @@ namespace Qin.UnityEffects.Fluids
         private static readonly int DurationId = Shader.PropertyToID("_Duration");
         private static readonly int CurtainHoldId = Shader.PropertyToID("_CurtainHold");
         private static readonly int FeedDurationId = Shader.PropertyToID("_FeedDuration");
+        private static readonly int RainExposureId = Shader.PropertyToID("_RainExposure");
         private static readonly int DropCountId = Shader.PropertyToID("_DropCount");
         private static readonly int DropSpanId = Shader.PropertyToID("_DropSpan");
         private static readonly int StrengthId = Shader.PropertyToID("_Strength");
@@ -82,6 +83,7 @@ namespace Qin.UnityEffects.Fluids
         private int _ballisticThroughStep;
         private bool _continuousFeed;
         private bool _hasLiquid;
+        private bool _hasFilm;
         private bool _hasWaves;
         private bool _hasObstacle;
         private bool _denseVolume;
@@ -144,7 +146,7 @@ namespace Qin.UnityEffects.Fluids
                 && SystemInfo.IsFormatSupported(GraphicsFormat.R32G32_SFloat, GraphicsFormatUsage.LoadStore);
         }
 
-        internal void Reset(SOFluidMixRecipe recipe, uint seed, float strength)
+        internal void Reset(SOFluidMixRecipe recipe, uint seed, float strength, bool sideRain)
         {
             if (recipe == null)
                 throw new ArgumentNullException(nameof(recipe));
@@ -154,6 +156,7 @@ namespace Qin.UnityEffects.Fluids
             _lastStep = Mathf.CeilToInt(recipe.Duration * StepsPerSecond);
             _continuousFeed = recipe.ContinuousFeed;
             _hasLiquid = (int)recipe.Feed != 0;
+            _hasFilm = _hasLiquid && !sideRain;
             _hasWaves = recipe.SurfaceWaves;
             _hasObstacle = recipe.SolidObstacle;
             _denseVolume = recipe.Feed == SOFluidMixRecipe.Inlet.FallingMass;
@@ -165,6 +168,7 @@ namespace Qin.UnityEffects.Fluids
             _commands.SetComputeFloatParam(_program, CurtainHoldId, recipe.CurtainHold);
             _commands.SetComputeFloatParam(_program, FeedDurationId, recipe.FeedDuration);
             _commands.SetComputeIntParam(_program, DropCountId, recipe.DropCount);
+            _commands.SetComputeFloatParam(_program, RainExposureId, sideRain ? recipe.RainExposure : 0f);
             _commands.SetComputeFloatParam(_program, DropSpanId, recipe.DropSpan);
             _commands.SetComputeFloatParam(_program, StrengthId, strength);
             _commands.SetComputeFloatParam(_program, GravityId, Mathf.Abs(recipe.Gravity));
@@ -189,7 +193,7 @@ namespace Qin.UnityEffects.Fluids
             }
             _commands.SetComputeVectorParam(_program, ObstacleId, Vector4.zero);
             ClearCells();
-            ReconstructFilm();
+            if (!sideRain) ReconstructFilm();
             ProjectWaterline();
             Graphics.ExecuteCommandBuffer(_commands);
         }
@@ -224,7 +228,7 @@ namespace Qin.UnityEffects.Fluids
                 if (_hasWaves)
                     IntegrateWave();
             }
-            if (_hasLiquid)
+            if (_hasFilm)
             {
                 if (_continuousFeed)
                 {
@@ -321,6 +325,7 @@ namespace Qin.UnityEffects.Fluids
             Bind(_predict, PredictionsId, _positions);
             Bind(_predict, ImpulsesId, _impulses);
             _commands.SetComputeTextureParam(_program, _predict, WaveReadId, Waves);
+            _commands.SetComputeTextureParam(_program, _predict, SprayId, Spray);
             Dispatch(_predict, ParticleGroups);
             if (!freeFlight)
             {
@@ -330,6 +335,7 @@ namespace Qin.UnityEffects.Fluids
             Bind(_velocity, PredictionsId, _positions);
             Bind(_velocity, ParticlesId, Particles);
             Bind(_velocity, DensityId, _density);
+            Bind(_velocity, ImpulsesId, _impulses);
             _commands.SetComputeTextureParam(_program, _velocity, SprayId, Spray);
             Dispatch(_velocity, ParticleGroups);
         }

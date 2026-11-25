@@ -240,6 +240,11 @@ public sealed partial class QinFluidReplay
         BindReceiverWater(controller);
         foreach (var draw in instance.GetComponentsInChildren<MeshRenderer>(true))
         {
+            if (draw.sharedMaterial.shader.name == "Qin/Water/Side Rain")
+            {
+                Assert.That(controller.Recipe.RainExposure, Is.GreaterThan(0f));
+                continue;
+            }
             Assert.That(AssetDatabase.GetAssetPath(draw.sharedMaterial.shader), Does.EndWith(".shadergraph"));
             Material material = new(draw.sharedMaterial);
             material.SetColor(ReflectionTint, new Color(.65f, .94f, .98f, 1f));

@@ -8,7 +8,7 @@ from fluid_replay_checks import live, match_receivers, read_state, require
 BRIEFS = {
     "WeightlessMass": ("mass", {"gravity": 0, "duration": 3.6}),
     "SingleLedgeDrop": ("drip", {"count": 1, "span": 0}),
-    "WideCloudburst": ("rain", {"count": 160, "span": 5}),
+    "WideCloudburst": ("rain", {"count": 160, "span": 5, "rain-exposure": .035}),
 }
 CASES = tuple(BRIEFS)
 

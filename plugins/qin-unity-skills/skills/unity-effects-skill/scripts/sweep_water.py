@@ -6,8 +6,8 @@ from pathlib import Path
 import re
 import shutil
 
-from compose_water import (CHANNEL_BASES, DROP_DEFAULTS, PARCEL_BASES, PARCEL_RANGES,
-                           SPELL_BASES, TOPDOWN_BASES, TOPDOWN_RANGES, channel_ranges, compose)
+from compose_water import (CHANNEL_BASES, DROP_DEFAULTS, PARCEL_BASES, SPELL_BASES,
+                           TOPDOWN_BASES, TOPDOWN_RANGES, channel_ranges, compose, parcel_ranges)
 from fluid_mixer import DEFAULT, install, meta_guid
 
 
@@ -34,9 +34,7 @@ def inputs(base, profile):
         donor = base / "Presets" / (PARCEL_BASES[profile] + ".asset")
     defaults = recipe_values(donor.read_text(encoding="utf-8"))
     defaults.update(DROP_DEFAULTS.get(profile, {}))
-    ranges = {key: value for key, value in PARCEL_RANGES.items()
-              if key not in ("count", "span") or profile in ("rain", "drip")}
-    return ranges, defaults
+    return parcel_ranges(profile), defaults
 
 
 def read_authored(prefab, ranges, overrides, defaults):

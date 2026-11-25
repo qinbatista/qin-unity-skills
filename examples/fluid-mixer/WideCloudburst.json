@@ -1,0 +1,71 @@
+{
+  "case": "QinFluidReplay.WideCloudburstProbe",
+  "device": [
+    "6000.6.7f1",
+    "Apple M3 Max",
+    "Metal"
+  ],
+  "seed": 29411,
+  "framesPerMode": 114,
+  "fps": 30,
+  "camera": {
+    "dimensions": [
+      960,
+      540
+    ],
+    "orthographicSizeM": 1.64,
+    "worldCentreXY": [
+      0,
+      1.1
+    ]
+  },
+  "modeSha256OfOrderedPngDigests": {
+    "normal": "e0fcf163f9db3bf19cb461d5b8a760547890b720b28f4340bb98815cf804d27e",
+    "no-waves": "db6670ebbb1171723da3260477fba1f659275e9e78a832b1d7c789cc9989c211",
+    "legacy": "d3b74ab0acd08c8f16e0356547e11f1e5b4fe6766dee2eb990756d8616f9801f"
+  },
+  "recipeSha256": "55309d41060b391cf9acb8b90088dae57e9f1f49e816cb76b39342ffb8b63395",
+  "fixtureSha256": "846fd488c0cf7d2adbd16bb3a0d657abc07021650ed4906e5e31b7c242757b38",
+  "count": 160,
+  "sourceWidthM": 5,
+  "templateManifestSha256": "4f69d4ff7bacba93db23519ae271170e5a748317266869ed72c9b635e4f2f2b4",
+  "recordedImpacts": 160,
+  "firstImpactSeconds": 0.753098965,
+  "lastImpactSeconds": 2.938755,
+  "firstObservedBirthSpanM": 4.907036542892456,
+  "firstNonzeroWaveFrame": 23,
+  "identicalPreImpactCameraFrames": 23,
+  "matchedPrecontactParcelSamples": 2823,
+  "peakAbsoluteWaveHeightM": 0.023739859461784363,
+  "activeStateSamplesPerMode": 108,
+  "firstCorrectedWaveFieldFrame": 75,
+  "allNoWaveHeightsZero": true,
+  "allModesClear": true,
+  "matchedOriginalLegacyFrames": 114,
+  "oldAndNewGpuSnapshotsEqualUntilFrameExclusive": 75,
+  "previouslyUnrecordedImpacts": [
+    {
+      "id": 127,
+      "impactSeconds": 2.511111,
+      "impactXMetres": -0.3995756,
+      "downwardMetresPerSecond": 5.84227753,
+      "firstFollowingVideoFrame": 76,
+      "peakLocalHeightChangeFromLegacyM": 0.004629381932318211
+    },
+    {
+      "id": 141,
+      "impactSeconds": 2.68888879,
+      "impactXMetres": -1.06461072,
+      "downwardMetresPerSecond": 5.86731529,
+      "firstFollowingVideoFrame": 81,
+      "peakLocalHeightChangeFromLegacyM": 0.005140932276844978
+    }
+  ],
+  "sampleFilm": {
+    "path": "unity-effects-skill/assets/wide-cloudburst-preview.mp4",
+    "sha256": "6e3b097d6886681fce93b4151098df137e5e1e62a6ae1ec5b8d8e133ab2249e8",
+    "frames": 114,
+    "fps": 30
+  },
+  "contactsCsvSha256": "b0e9ca55966ad3f7e020a0828c216ad980bbf6db7e52492a4939047703acb3d3"
+}

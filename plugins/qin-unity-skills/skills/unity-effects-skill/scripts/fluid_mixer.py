@@ -86,11 +86,14 @@ def install(project, relative=DEFAULT, upgrade=False):
 
     with project_lock(version):
         cache = project / "Cache"
-        prior = json.loads((ASSETS / "fluid-mixer-previous.json").read_text(encoding="utf-8"))["files"] if upgrade else {}
+        prior_releases = []
+        if upgrade:
+            catalog = json.loads((ASSETS / "fluid-mixer-previous.json").read_text(encoding="utf-8"))
+            prior_releases = [catalog["files"], *catalog.get("olderReleases", [])]
         key = hashlib.sha256(relative.as_posix().encode()).hexdigest()[:16]
         backup = cache / ("temp-fluid-upgrade-" + key) / "original"
         if upgrade and backup.exists():
-            if not matches_prior(backup, prior):
+            if not any(matches_prior(backup, release) for release in prior_releases):
                 raise ValueError(f"Preserved an unrecognized upgrade backup at {backup}.")
             if not target.exists():
                 os.rename(backup, target)
@@ -104,7 +107,7 @@ def install(project, relative=DEFAULT, upgrade=False):
         if replacing:
             if target.is_dir() and all((target/p).is_file() and digest(target/p) == signature for p,signature in files.items()):
                 return target, "already installed"
-            if not upgrade or not matches_prior(target, prior):
+            if not any(matches_prior(target, release) for release in prior_releases):
                 raise ValueError(f"Existing data at {target} was preserved. Use --upgrade for the intact previous release. "
                                  "Move custom assets with Unity before upgrading a modified template.")
         for root in (assets, project / "Packages"):
