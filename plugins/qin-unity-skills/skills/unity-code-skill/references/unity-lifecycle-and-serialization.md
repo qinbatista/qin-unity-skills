@@ -36,7 +36,7 @@ Apply [current-operation and lifetime ownership](https://github.com/qinbatista/q
 
 - Prefer `[SerializeField] private ConcreteType _field;` for Inspector bindings. Do not expose public mutable fields merely for serialization.
 - Preserve serialized field compatibility. Use Unity's supported rename migration when an existing serialized name changes; do not silently orphan prefab or scene data.
-- Treat ScriptableObjects as authored/shared configuration unless the project explicitly owns mutable runtime state there. Do not use a mutable ScriptableObject as an accidental save file or hidden singleton.
+- Bind shared values and data operations through their domain SO. Start mutable session state from authored defaults and declare the local and online fields explicitly. Apply the [SO design and compatibility checks](scriptableobject-data-contracts.md#design-and-review-a-data-owner).
 
 For an authored `.asset` change in Editor tooling, edit the existing asset with `SerializedObject`, call `ApplyModifiedProperties()`, then `AssetDatabase.SaveAssetIfDirty(asset)` when the tool owns the save. For direct field edits, call `Undo.RecordObject` before the change and `EditorUtility.SetDirty` before saving. Reimport and read the serialized field from the same asset. Keep these APIs in an Editor assembly.
 
@@ -72,6 +72,8 @@ The [Manager example](unity-game-code-structure-design.md#singleton-managers) cr
 Persist value fields and stable IDs. Keep Prefab, scene and other `UnityEngine.Object` references in their authored owner. A type with a separate save schema can override `SerializeLocalData()` and `RestoreLocalData()` together. The paired prepare/restore hooks and before/after load hooks support existing subclasses. The default format preserves `_fileName`, `_timeStamp` and the lowercase SHA-256 of the pretty JSON with `_hashValue` empty. It also reads the original legacy wrapper containing one Base64-encoded JSON string. The next save writes plain JSON. When changing a shipped schema, validate and migrate an actual old file before writing the new layout.
 
 Only an absent file initializes defaults automatically. A failed read or checksum mismatch leaves the file in place, restores the previous serialized values and blocks writes for that object. Retry `LoadLocalData()` after repair, or call `Clean()` when the caller explicitly wants to reset and persist defaults. Verify a first launch, a fresh instance reading a changed value, and a damaged file surviving a failed reload and teardown.
+
+For a versioned DTO, emit `LocalChecksum` in the field covered by the paired decoder. The base serializes once with an empty checksum, signs those bytes and serializes again for the committed file. The [wallet example](scriptableobject-data-contracts.md#spell-catalog-and-player-wallet) verifies the original version before applying a migration.
 
 ## Parallel work
 

@@ -14,6 +14,7 @@ public abstract class SOLocalData : ScriptableObject, ISerializationCallbackRece
     [NonSerialized] private float _lastAutoSaveTime = float.NegativeInfinity;
 
     protected string FileName { get => _fileName; set => _fileName = value; }
+    protected string LocalChecksum => _hashValue;
 
     private string FilePath
     {

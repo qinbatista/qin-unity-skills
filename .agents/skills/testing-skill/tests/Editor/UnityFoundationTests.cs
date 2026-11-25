@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
-public sealed class UnityFoundationTests
+public sealed partial class UnityFoundationTests
 {
     private const string RootVariable = "AI_MANAGER_PERSISTENCE_ROOT";
     private string _previousRoot;

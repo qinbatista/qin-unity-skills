@@ -1,4 +1,4 @@
-"""Assemble the two published C# bases and their documented consumers for Unity Test Runner."""
+"""Assemble the published C# foundations, documented consumers and previous writer's fixtures."""
 
 import argparse
 import json
@@ -30,8 +30,14 @@ def prepare(run):
     settings.mkdir()
     shutil.copy2(sample / "ProjectSettings/ProjectVersion.txt", settings)
 
-    for name in ("Singleton.cs", "SOLocalData.cs"):
+    for name in ("Singleton.cs", "SOLocalData.cs", "SOSpellCatalog.cs", "SOPlayerWallet.cs"):
         shutil.copy2(PACK / "assets" / name, runtime)
+    old_formats = Path(__file__).with_name("fixtures") / "scriptableobjects"
+    shutil.copy2(old_formats / "SOSpellCatalog.cs.meta", runtime)
+    fixtures = fixture / "Assets/Fixtures"
+    fixtures.mkdir()
+    for name in ("SpellCatalogV1.asset", "WalletV1.json"):
+        shutil.copy2(old_formats / name, fixtures)
     examples = {
         "AudioPreferencesManager": "references/unity-game-code-structure-design.md#singleton-managers",
         "SOAudioPreferences": "references/unity-lifecycle-and-serialization.md#scriptableobject-local-files",
@@ -42,7 +48,8 @@ def prepare(run):
     (runtime / "Foundations.asmdef").write_text(json.dumps({"name": "Foundations"}), encoding="utf-8")
     assembly = {"name": "Foundations.EditorTests", "references": ["Foundations"], "includePlatforms": ["Editor"], "optionalUnityReferences": ["TestAssemblies"]}
     (editor / "Foundations.EditorTests.asmdef").write_text(json.dumps(assembly), encoding="utf-8")
-    shutil.copy2(Path(__file__).with_name("Editor") / "UnityFoundationTests.cs", editor)
+    for name in ("UnityFoundationTests.cs", "ScriptableObjectDataTests.cs"):
+        shutil.copy2(Path(__file__).with_name("Editor") / name, editor)
     return fixture
 
 

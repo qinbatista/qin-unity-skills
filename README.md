@@ -54,6 +54,8 @@ The [Job State Batches sample](examples/job-state-batches/README.md) contains fi
 
 For a reusable gameplay foundation, the [Singleton Manager](unity-code-skill/references/unity-game-code-structure-design.md#singleton-managers) owns one runtime [ScriptableObject with a local save file](unity-code-skill/references/unity-lifecycle-and-serialization.md#scriptableobject-local-files). Both references include the C# base and a working consumer.
 
+The [ScriptableObject data contracts](unity-code-skill/references/scriptableobject-data-contracts.md#design-and-review-a-data-owner) cover keyed spell records, shared session state, versioned local and online wallet formats, and native replay of older assets and saves.
+
 | Skill | What to inspect |
 | --- | --- |
 | [Unity Code](unity-code-skill/SKILL.md) | [C# style and runtime ownership](examples/charge-pulse/CASEBOOK.md#unity-code) · [Charge controller](examples/charge-pulse/Assets/Scripts/ChargePulse/ChargePulseController.cs) |

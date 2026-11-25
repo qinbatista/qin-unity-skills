@@ -12,6 +12,7 @@ Apply these rules to gameplay implementation, architecture proposals and code ex
 ## Data
 
 - Managers serialize only the feature's ScriptableObject configuration references. Controllers keep their own bindings and consume each tunable from its existing authored owner.
+- Bind multiple readers and writers to the same domain SO. Keep operations on the shared data with that SO. Apply the [ScriptableObject contract](scriptableobject-data-contracts.md#design-and-review-a-data-owner) for field access, value records, persistence and migration.
 - Keep fields with the same identity, writer and lifetime in one record. Keep local runtime state with its owner. Create an unmanaged Job snapshot only for an actual execution boundary, using only the fields that Job reads or writes.
 - Keep immutable constants, protocol keys, shader names and enums in code. Store authored configuration in its existing asset owner.
 
@@ -21,7 +22,7 @@ Reuse the receiving game's existing `Singleton<T>` when present. For a game with
 
 Call `base.Awake()` before acquiring resources. A duplicate can finish running `Awake` before Unity destroys it, so check `Instance != this` before starting work that belongs to the registered owner. Release only the resources this component acquired and call `base.OnDestroy()` even if release fails. Other components can read `Instance` after registration, usually in `Start`. The public setter supports existing fixture bindings. Gameplay code leaves registration to the base.
 
-This Manager creates one runtime [settings object](unity-lifecycle-and-serialization.md#scriptableobject-local-files). A caller can change the volume through `AudioPreferencesManager.Instance.Settings.SetVolume(value)`.
+This Manager creates and retires one runtime [settings object](unity-lifecycle-and-serialization.md#scriptableobject-local-files). At composition time, bind its `Settings` instance to each consumer. A consumer changes volume through its bound SO's `SetVolume(value)`.
 
 ```csharp
 using UnityEngine;
