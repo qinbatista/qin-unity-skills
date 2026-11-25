@@ -40,6 +40,12 @@ Run the class from a task-owned snapshot, with a graphics device and an optional
 python3 -B unity-code-skill/scripts/unity_cli_daily.py test "<task-project>" --non-interactive --no-pager --mode EditMode --filter ResponsiveLayoutCases --output "<task-cache>/ui-layout-results.xml" -- -logFile "<task-cache>/ui-layout.log"
 ```
 
+### Compact HUD regression
+
+At 360 × 780, UI Toolkit measured the German Pack label, “Gepäck”, at 78 panel units wide. The original button had 76 units available for text. Widening the button from 80 to 88 units left 84 units inside its two-unit borders. Both languages fit with the full 48-unit hit height.
+
+Unity 6000.6.7f1 passed all five screen tests across 16 viewport profiles and two locales. The run produced 229 native frames, including 160 screen views, 32 Canvas dialog comparisons, 32 scrolled journal views and five interaction states. [Native layout comparison](ui-layout-preview.jpg)
+
 ## Run the focused tests
 
 Follow the [daily Unity CLI gate](../../unity-code-skill/references/unity-cli.md). Run the commands from the repository root with a task-owned project copy and log directory. Use `py -3` in place of `python3` in Windows PowerShell. The runtime case uses the built-in render pipeline and needs a graphics device. It exercises scripted UI Toolkit navigation input and checks full-viewport layouts at 3840 × 2160, 1280 × 720 and 1080 × 1440.
