@@ -9,6 +9,7 @@ Use the smallest maintained case that can establish the change. Run from the rep
 
 | Purpose | Level | Runner and owner |
 | --- | --- | --- |
+| Sprite Lit Tint responds to Light 2D, preserves HDR and transparent sprite coverage, and applies renderer alpha once | 2 graphics-enabled EditMode | In an isolated URP 17.6 Renderer 2D fixture, copy [SpriteLitTint.shadergraph](../../../unity-effects-skill/assets/SpriteLitTint.shadergraph) to `Assets/SpriteLitTint.shadergraph` and [SpriteLitTintCases.cs](tests/Editor/SpriteLitTintCases.cs) to the Editor test assembly referencing URP runtime, URP 2D runtime and Core runtime. Run Unity CLI EditMode with filter `SpriteLitTintCases`. |
 | Every documented physical water recipe authors a saved prefab and corresponds to a real native capture | 2 | [Recipe guide authoring](tests/test_fluid_mixer.py), Python unittest, and [native replay](../../../unity-effects-skill/references/water-recipes-2d.md#install-and-author-a-named-effect) with both receivers. |
 | Repeated RockImpact casts retain their solver resources while the controller is enabled, preserve the simulated result, and release the resources on disable | 2 | [Water reuse replay](../../../unity-effects-skill/references/fluid-mixer.md#verify-resource-reuse-across-casts), `--case reuse` in both receiving projects. |
 | Fluid template installs atomically, handles an identical reinstall, protects custom data and GUID bindings | 1 | [Installer cases](tests/test_fluid_mixer.py), Python unittest. |

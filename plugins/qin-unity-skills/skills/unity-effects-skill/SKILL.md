@@ -25,6 +25,8 @@ Keep the full requested subject list and its order. The single-subject requireme
 
 | Operation | Read for this task |
 | --- | --- |
+| Create or revise a 2D sprite shader | [Build a Sprite Lit HDR graph](references/sprite-lit-graphs.md#start-with-the-renderer), [organize its nodes and notes](references/sprite-lit-graphs.md#lay-out-the-editable-graph) and [test its lighting, HDR and coverage](references/sprite-lit-graphs.md#verify-the-rendered-shader). |
+| Create or revise a 3D mesh shader | [Choose the pipeline material and verify its mesh passes](references/graph-and-shader.md#author-a-3d-mesh-material). |
 | Find or adapt a reference | [Use an existing effect or reference](#use-an-existing-effect-or-reference). |
 | Make or verify 2D water flow, a water spell or a fluid interaction | [Choose the water simulation](references/fluid-mixer.md#choose-the-water-simulation) by its source, boundary and response. Use this entry for general water requests. [Build each of the 16 recipes](references/water-recipes-2d.md#select-a-template-and-control), [bind a water spell or waterfall](references/water-recipes-2d.md#bind-a-water-spell-and-a-waterfall-to-a-game-camera), or [drive a closed basin from a moving container](references/water-recipes-2d.md#bind-a-moving-container-to-a-closed-basin). |
 | Create 2D rain hitting water, a ledge drip or a fountain from a brief | [Author the bound recipe and prefab](references/fluid-mixer.md#author-a-water-effect-from-parameters), then run the native inlet cases. |

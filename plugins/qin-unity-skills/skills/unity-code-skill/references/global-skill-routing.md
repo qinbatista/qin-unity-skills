@@ -16,6 +16,7 @@ Pick the result below, open its domain menu, then read the linked headings for t
 | Author motion, fix a jittering gait or sliding foot, or change Animator, 2D rig, Spine or 3D clip playback | [Animation](../../unity-animation-skill/SKILL.md) |
 | Create or verify 2D water flow, a water spell, a waterfall or fluid collisions | [Effects operations for simulated water](../../unity-effects-skill/SKILL.md#choose-an-operation) |
 | Preview a star field, aurora or explicitly requested animated material study | [Effects operations for material studies](../../unity-effects-skill/SKILL.md#choose-an-operation) |
+| Create a 2D Sprite Lit shader or a 3D mesh shader | [Effects shader operations](../../unity-effects-skill/SKILL.md#choose-an-operation) |
 | Change particles, VFX Graph, Shader Graph, material lighting, emission, overdraw or motion inside an effect | [Effects](../../unity-effects-skill/SKILL.md) |
 | Reproduce a fault, choose a runner, profile a frame or verify runtime behavior | [Testing](../../unity-testing-skill/SKILL.md) |
 | Choose a simulation or physics model, remove recurring work, reuse effects, or manage asset lifetimes | [Performance](../../unity-performance-skill/SKILL.md) |

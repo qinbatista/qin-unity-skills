@@ -2,6 +2,8 @@
 
 The [Effects entry](../../../unity-effects-skill/SKILL.md) selects reuse or creation. Use YoFaAssets' catalog and `effect-id` to bind linked reference assets. [Staged effects](../../../unity-effects-skill/references/staged-effects.md) owns formation and lifecycle. [Rendering and verification](../../../unity-effects-skill/references/rendering-and-verification.md) owns renderer binding, material lifetime and native checks. Linked games apply YoFaAssets' full profile to their own effect packages.
 
+For 2D world sprites, use the [Sprite Lit authoring and native lighting checks](../../../unity-effects-skill/references/sprite-lit-graphs.md). For 3D surfaces use the [mesh material route](../../../unity-effects-skill/references/graph-and-shader.md#author-a-3d-mesh-material).
+
 For a straight cut or occluder outline on a free material surface, use [edge diagnosis and native comparison](../../../unity-effects-skill/references/rendering-and-verification.md#trace-an-unexplained-straight-edge) and [surface reconstruction](../../../unity-effects-skill/references/staged-effects.md#continue-a-free-surface-through-occlusion).
 
 For a reproduction claim, follow [the declared input and output boundary](../../../unity-effects-skill/references/graph-and-shader.md#rebuild-from-declared-inputs). Record the available authoring, fresh import, native motion and transfer evidence for each requested example.
