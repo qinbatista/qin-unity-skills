@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-ART = Path(__file__).resolve().parent / "Art"
+ART = Path(__file__).resolve().parents[2] / "unity-performance-skill/assets/image-optimization/Art"
 
 
 def draw_source_strip(captures):

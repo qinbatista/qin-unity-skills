@@ -7,7 +7,7 @@
     "ImportAtlas.json": "2f696692f001133e24b4a6f18b3b428fef33f81eb3ebc37e355a9d96f132b1f6",
     "UI-Canvas.png": "cf5d18abcb53d9df501ed132a74d70ae4950f1ad0823693e22448b605b18aa6e",
     "UI.png": "05f4c7f136719d7cad2f76969603df1d1b0aa05ad9411efcd32e115d5ae65562",
-    "Woodland.unitypackage": "3e05a551ffe96a953a9cc984b14af87e2f0235adc767569d835dcdacd34bd0fd",
+    "Woodland.unitypackage": "91334b9490a054a9d2e19ff802444876896803120ffcebe0fbe3f14df0566a40",
     "World.png": "c8221ae68b8355f36a73b3e63373fbf159aa0164e5566dc33c05814ff3ba166a"
   },
   "cases": [
@@ -15,23 +15,34 @@
     "ImportAtlasExample.CrownKeepsItsWorldSizeAndTreePartsShareOnePackedPage",
     "WorldArtExample.GroundAndOakResizeFromSharedArtwork"
   ],
+  "packageVersions": {
+    "com.unity.modules.animation": "1.0.0",
+    "com.unity.modules.imageconversion": "1.0.0",
+    "com.unity.modules.imgui": "1.0.0",
+    "com.unity.modules.particlesystem": "1.0.0",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.uielements": "1.0.0",
+    "com.unity.test-framework": "1.8.0",
+    "com.unity.ugui": "2.6.0"
+  },
   "sourceSha256": {
-    "examples/charge-pulse/Assets/Prefabs/ChargePulse/PulseTheme.tss": "682e2b1c6cc1d6e332c15f56c840f7d8282cb1e5bc627eb6664580352a752fda",
-    "examples/charge-pulse/Packages/manifest.json": "613e2a71dfbbdd193e3ba24e9f4c7898a14c2fbcf1fb8d1f0c2bcdc3463216c0",
-    "examples/charge-pulse/Packages/packages-lock.json": "4db03eb03da175d93ee797d640682205e5e7c4617bd6aa37c74403d7147d7ec9",
-    "examples/charge-pulse/ProjectSettings/ProjectVersion.txt": "2a88e6864b6f54588287bed3bc6e9260e65bd49498910cca4478770ca8a5d674",
-    "examples/image-optimization/Art/UI/Watchtower.png": "8e88ba1e801bba3ecc369390a9eb99219c14fe97e7e28df721b56cd9b03bf39b",
-    "examples/image-optimization/Art/UI/WoodlandFrame.png": "947e4396c5c072dc49833778666794aea0aff41c3e8103b6f423af5b3b94fbb6",
-    "examples/image-optimization/Art/World/Ground.png": "6357c3d85846bdb864a66525bc833f2b4622123e0f5f9fd29c39f9199c4bfd48",
-    "examples/image-optimization/Art/World/TreeBase.png": "f2e03325caa1b430e31567e0a42bf104ea03d3073675bb5dac397f19769f54d6",
-    "examples/image-optimization/Art/World/TreeCrown.png": "7bc50ea5a40bb617ead7d68593a207b0916f421f44ae0a703e1945db5fd21d43",
-    "examples/image-optimization/Art/World/TreeTrunk.png": "e444179388a85a9785767376269969a97091a73586300b2c8a2e6a481afaf8ee",
-    "examples/image-optimization/Art/World/Valley.png": "98ee30803dc7fd877a3d4316bcd1d23ca587c36ca7d3b9bb4b0ea7de0360efd5",
-    "examples/image-optimization/Editor/ControlArtExample.cs": "7b8aa0e56bc8b67fbc19a7cbccaab10f1568c421f46a6c749c89e0a4edecc531",
-    "examples/image-optimization/Editor/ImportAtlasExample.cs": "ed3931bc13e00030112ee7d7b7ac2ab14dfde20ad84053c077312be27cb15003",
-    "examples/image-optimization/Editor/WorldArtExample.cs": "2111f8c2539370b7f0a54065b409cea9eea04affe0ff00866d8f490bc1891b92",
-    "plugins/qin-unity-skills/skills/unity-assets-skill/assets/Editor/WorldRepeatSprite.cs": "4f1f6b42f5eb322298b2ef892272da181e19cbb1aff665d5f3cb3b5ab53fb110",
-    "plugins/qin-unity-skills/skills/unity-ui-skill/assets/ResizableBacking.uss": "75bd9864f4c67e6b0ce2d0aed1e7718b91258e2dfe9191a1f757ef4fbc582cd3"
+    "unity-assets-skill/assets/Editor/WorldRepeatSprite.cs": "4f1f6b42f5eb322298b2ef892272da181e19cbb1aff665d5f3cb3b5ab53fb110",
+    "unity-performance-skill/assets/image-optimization/Art/UI/Watchtower.png": "8e88ba1e801bba3ecc369390a9eb99219c14fe97e7e28df721b56cd9b03bf39b",
+    "unity-performance-skill/assets/image-optimization/Art/UI/WoodlandFrame.png": "947e4396c5c072dc49833778666794aea0aff41c3e8103b6f423af5b3b94fbb6",
+    "unity-performance-skill/assets/image-optimization/Art/World/Ground.png": "6357c3d85846bdb864a66525bc833f2b4622123e0f5f9fd29c39f9199c4bfd48",
+    "unity-performance-skill/assets/image-optimization/Art/World/TreeBase.png": "f2e03325caa1b430e31567e0a42bf104ea03d3073675bb5dac397f19769f54d6",
+    "unity-performance-skill/assets/image-optimization/Art/World/TreeCrown.png": "7bc50ea5a40bb617ead7d68593a207b0916f421f44ae0a703e1945db5fd21d43",
+    "unity-performance-skill/assets/image-optimization/Art/World/TreeTrunk.png": "e444179388a85a9785767376269969a97091a73586300b2c8a2e6a481afaf8ee",
+    "unity-performance-skill/assets/image-optimization/Art/World/Valley.png": "98ee30803dc7fd877a3d4316bcd1d23ca587c36ca7d3b9bb4b0ea7de0360efd5",
+    "unity-performance-skill/assets/image-optimization/Editor/ControlArtExample.cs": "c576b48da5443243c8a2c327a9bb3a4123ebebd383b662376feeea894f4125dd",
+    "unity-performance-skill/assets/image-optimization/Editor/ImportAtlasExample.cs": "ed3931bc13e00030112ee7d7b7ac2ab14dfde20ad84053c077312be27cb15003",
+    "unity-performance-skill/assets/image-optimization/Editor/WorldArtExample.cs": "2111f8c2539370b7f0a54065b409cea9eea04affe0ff00866d8f490bc1891b92",
+    "unity-performance-skill/assets/image-optimization/ImageExample.Tests.asmdef": "7e31dc54ea46c6114597b5022272ed07833f29740324ba3e2af140b860fe9b9d",
+    "unity-performance-skill/assets/image-optimization/Packages/manifest.json": "613e2a71dfbbdd193e3ba24e9f4c7898a14c2fbcf1fb8d1f0c2bcdc3463216c0",
+    "unity-performance-skill/assets/image-optimization/Packages/packages-lock.json": "4db03eb03da175d93ee797d640682205e5e7c4617bd6aa37c74403d7147d7ec9",
+    "unity-performance-skill/assets/image-optimization/ProjectSettings/ProjectVersion.txt": "2a88e6864b6f54588287bed3bc6e9260e65bd49498910cca4478770ca8a5d674",
+    "unity-performance-skill/assets/image-optimization/PulseTheme.tss": "682e2b1c6cc1d6e332c15f56c840f7d8282cb1e5bc627eb6664580352a752fda",
+    "unity-ui-skill/assets/ResizableBacking.uss": "75bd9864f4c67e6b0ce2d0aed1e7718b91258e2dfe9191a1f757ef4fbc582cd3"
   },
   "unity": "6000.6.7f1"
 }

@@ -25,7 +25,7 @@ Verify the assigned Sprite or texture, exact accepted bytes, native import and a
 
 ## Resize buttons and panels
 
-The [woodland control example](https://github.com/qinbatista/qin-unity-skills/tree/master/examples/image-optimization) shows the small frame texture, its stretched and tiled instances, and native captures from UI Toolkit and Canvas.
+Run the [installed woodland replay](../../unity-performance-skill/references/performance-cases.md#replay-the-image-optimization-examples) to regenerate both UI hosts in a fresh project. The [woodland control example](https://github.com/qinbatista/qin-unity-skills/tree/master/examples/image-optimization) shows the small frame texture, its stretched and tiled instances, and native captures from UI Toolkit and Canvas.
 
 Keep one compact backing for each distinct appearance. Measure the four cuts in source pixels from the outer edges to where the center can extend. Leave a positive center on each extensible axis. Stretch a flat middle, tile a seamless pattern, and keep unique ornaments, icons and localized text in separate slots. Preserve intact illustrated panels when a cut would cross important detail. The layout owns the final width, height, content padding and hit region.
 

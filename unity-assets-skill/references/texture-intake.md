@@ -34,7 +34,7 @@ Locate sizing drift in the source canvas, export, copied file, importer or consu
 
 ### Build resizable world sprites
 
-Inspect the ground period, tree base, trunk and crown beside their [native Unity renders and import measurements](https://github.com/qinbatista/qin-unity-skills/tree/master/examples/image-optimization). Resize the examples through the same SpriteRenderer properties used below.
+Inspect the ground period, tree base, trunk and crown beside their [native Unity renders and import measurements](https://github.com/qinbatista/qin-unity-skills/tree/master/examples/image-optimization). Run the [installed woodland replay](../../unity-performance-skill/references/performance-cases.md#replay-the-image-optimization-examples) to reproduce the world, UI, import and atlas cases. Resize the examples through the same SpriteRenderer properties used below.
 
 Choose one seamless period at the intended world density. Keep unique silhouettes, landmarks and end pieces as separate art or fixed borders. A 250 × 125 pixel ground period at 1000 PPU covers 0.25 × 0.125 m at unit scale. An 8 m strip uses the same period 32 times. Budget its import for the largest on-screen size of **one period** at the closest supported camera.
 

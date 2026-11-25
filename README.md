@@ -40,7 +40,7 @@ Use this shared Skill library as a starting point and choose the best approach f
 
 ## Examples
 
-The [illustrated image optimization replay](examples/image-optimization/README.md) shows one ground tile across two platforms, oak trees with adjustable trunks, compact UI artwork at several sizes, a real target import and a packed Sprite Atlas. Open the Unity captures beside the source pieces or reproduce them with the included command.
+The [illustrated image optimization replay](examples/image-optimization/README.md) shows one ground tile across two platforms, oak trees with adjustable trunks, compact UI artwork at several sizes, a real target import and a packed Sprite Atlas. Open the Unity captures beside the source pieces, or [reproduce every image case from the installed pack](unity-performance-skill/references/performance-cases.md#replay-the-image-optimization-examples).
 
 The [Charge Pulse sample](examples/charge-pulse/README.md) follows one button press through gameplay code, UI, animation and an effect. Start with the [project structure](examples/charge-pulse/CASEBOOK.md#project-structure) or open any of the 52 cases.
 

@@ -27,4 +27,5 @@ Use the [completion review](#review-every-unity-task) for every Unity request. F
 | Many similar objects, followers or characters | [Choose the simulation owner](references/simulation-and-effects.md#choose-the-simulation-owner) |
 | Objects affect each other, hit a player or need pickup behavior | [Choose a collision model](references/simulation-and-effects.md#choose-a-collision-model) or [simplify a ground pickup](references/simulation-and-effects.md#simplify-a-ground-pickup) |
 | Concurrent explosions, expensive shaders or particle overdraw | [Reuse an impact effect](references/simulation-and-effects.md#reuse-an-impact-effect) or [reduce shader and VFX cost](references/simulation-and-effects.md#reduce-shader-and-vfx-cost) |
+| Repeated world art, resizable UI or a large sprite import | [Replay the image optimization examples](references/performance-cases.md#replay-the-image-optimization-examples). |
 | A frame spike has no known cause, or a proposed improvement needs proof | [Compare the same workload](references/measure-and-verify.md#compare-the-same-workload) |

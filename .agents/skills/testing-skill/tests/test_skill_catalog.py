@@ -115,12 +115,16 @@ class PublicSkillCatalogTests(unittest.TestCase):
                         shared_reader = resolved == PROJECT / "unity-code-skill/scripts/read_topic.py"
                         image_audit = resolved == PROJECT / "unity-assets-skill/SKILL.md" and target.endswith("#admit-artwork-and-textures")
                         review = resolved == PERFORMANCE / "SKILL.md" and target.endswith("#review-every-unity-task")
+                        image_replay = (
+                            resolved == PERFORMANCE / "references/performance-cases.md"
+                            and target.endswith("#replay-the-image-optimization-examples")
+                        )
                         performance_handoff = package == PERFORMANCE and any(
                             resolved == entry_path or (entry_path.parent / "references") in resolved.parents
                             for entry_path in entries
                         )
                         self.assertTrue(
-                            routed_entry or shared_reader or image_audit or review or performance_handoff
+                            routed_entry or shared_reader or image_audit or review or image_replay or performance_handoff
                             or resolved in SHARED_GUIDES or package in resolved.parents
                         )
                         self.assertTrue(resolved.is_file())

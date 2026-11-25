@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
@@ -79,12 +81,15 @@ public sealed class ControlArtExample
             yield return null;
             yield return null;
             Assert.That(quest.resolvedStyle.unitySliceType, Is.EqualTo(SliceType.Tiled));
+            Assert.That(quest.worldBound.size, Is.EqualTo(new Vector2(735, 154)));
+            Assert.That(map.worldBound.size, Is.EqualTo(new Vector2(160, 60)));
+            Assert.That(advance.worldBound.size, Is.EqualTo(new Vector2(267, 60)));
             Assert.That((quest.worldBound.width - 16) % 16, Is.Not.Zero, "The last tile must be partial.");
             foreach (VisualElement control in new VisualElement[] { quest, map, advance })
                 Assert.That(control.resolvedStyle.backgroundImage.sprite, Is.SameAs(frame));
             Assert.That(landmark.worldBound.size, Is.EqualTo(Vector2.one * 96));
             Assert.That(landmark.resolvedStyle.backgroundImage.sprite, Is.SameAs(tower));
-            Capture(target, "UI.png");
+            Capture(target, "UI.png", new Vector2Int(32, 261), new Vector2Int(208, 261), new Vector2Int(640, 105));
             ClickExtendedEdge(map);
             ClickExtendedEdge(advance);
             yield return null;
@@ -185,6 +190,7 @@ public sealed class ControlArtExample
     {
         GameObject canvasHost = new GameObject("Trail supplies", typeof(RectTransform), typeof(Canvas)) { layer = 31 };
         Camera camera = new GameObject("Canvas camera").AddComponent<Camera>();
+        EventSystem events = new GameObject("Canvas click replay").AddComponent<EventSystem>();
         RenderTexture target = new RenderTexture(560, 136, 24);
         try
         {
@@ -202,22 +208,26 @@ public sealed class ControlArtExample
             camera.backgroundColor = Backdrop;
             camera.targetTexture = target;
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            CanvasControl(canvas, frame, "Rations", -150, 192, CanvasImage.Type.Sliced, font);
-            CanvasControl(canvas, frame, "Gather supplies", 102, 273, CanvasImage.Type.Tiled, font);
+            UnityEngine.UI.Button rations = CanvasControl(canvas, frame, "Rations", -150, 192, CanvasImage.Type.Sliced, font);
+            UnityEngine.UI.Button supplies = CanvasControl(canvas, frame, "Gather supplies", 102, 273, CanvasImage.Type.Tiled, font);
+            UnityEngine.UI.GraphicRaycaster raycaster = canvasHost.AddComponent<UnityEngine.UI.GraphicRaycaster>();
             Canvas.ForceUpdateCanvases();
             camera.Render();
-            Capture(target, "UI-Canvas.png");
+            Capture(target, "UI-Canvas.png", new Vector2Int(34, 36), new Vector2Int(245, 36), new Vector2Int(332, 47));
+            ClickCanvasEdge(rations, raycaster, events, camera);
+            ClickCanvasEdge(supplies, raycaster, events, camera);
         }
         finally
         {
             camera.targetTexture = null;
+            Object.Destroy(events.gameObject);
             Object.Destroy(canvasHost);
             Object.Destroy(camera.gameObject);
             Object.Destroy(target);
         }
     }
 
-    static void CanvasControl(Canvas canvas, Sprite frame, string title, int x, int width, CanvasImage.Type type, Font font)
+    static UnityEngine.UI.Button CanvasControl(Canvas canvas, Sprite frame, string title, int x, int width, CanvasImage.Type type, Font font)
     {
         GameObject holder = new GameObject(title, typeof(RectTransform)) { layer = 31 };
         RectTransform rect = (RectTransform)holder.transform;
@@ -244,9 +254,52 @@ public sealed class ControlArtExample
         text.raycastTarget = false;
         Assert.That(image.sprite, Is.SameAs(frame));
         Assert.That(image.hasBorder, Is.True);
+        return button;
     }
 
-    static void Capture(RenderTexture target, string name)
+    static void ClickCanvasEdge(UnityEngine.UI.Button button, UnityEngine.UI.GraphicRaycaster raycaster, EventSystem events, Camera camera)
+    {
+        RectTransform rect = (RectTransform)button.transform;
+        Vector2 edge = camera.WorldToScreenPoint(rect.TransformPoint(new Vector2(rect.rect.xMax - 4, rect.rect.center.y)));
+        PointerEventData pointer = new PointerEventData(events) { position = edge, button = PointerEventData.InputButton.Left };
+        List<RaycastResult> hits = new List<RaycastResult>();
+        raycaster.Raycast(pointer, hits);
+        Assert.That(hits, Is.Not.Empty, button.name);
+        Assert.That(hits[0].gameObject, Is.SameAs(button.gameObject), button.name);
+        int clicks = 0;
+        button.onClick.AddListener(() => clicks++);
+        ExecuteEvents.Execute(hits[0].gameObject, pointer, ExecuteEvents.pointerClickHandler);
+        Assert.That(clicks, Is.EqualTo(1), button.name);
+    }
+
+    static void AssertFramePixels(Texture2D image, Vector2Int firstCorner, Vector2Int secondCorner, Vector2Int center)
+    {
+        Color32 Pixel(Vector2Int origin, int x, int y) => image.GetPixel(origin.x + x, image.height - 1 - origin.y - y);
+        HashSet<Color32> cornerColors = new HashSet<Color32>();
+        int cornerMatches = 0;
+        for (int y = 0; y < 8; y++)
+        for (int x = 0; x < 8; x++)
+        {
+            Color32 pixel = Pixel(firstCorner, x, y);
+            cornerColors.Add(pixel);
+            if (pixel.Equals(Pixel(secondCorner, x, y))) cornerMatches++;
+        }
+        Assert.That(cornerColors.Count, Is.GreaterThan(2), "The fixed border must contain painted detail.");
+        Assert.That(cornerMatches, Is.GreaterThanOrEqualTo(56), "The two sizes must retain the same 8-pixel corner.");
+        int repeatMatches = 0;
+        int neighboringDifferences = 0;
+        for (int y = 0; y < 8; y++)
+        for (int x = 0; x < 16; x++)
+        {
+            Color32 pixel = Pixel(center, x, y);
+            if (pixel.Equals(Pixel(center, x + 16, y))) repeatMatches++;
+            if (!pixel.Equals(Pixel(center, x + 1, y))) neighboringDifferences++;
+        }
+        Assert.That(neighboringDifferences, Is.GreaterThan(12), "The tiled center must show a visible motif.");
+        Assert.That(repeatMatches, Is.EqualTo(128), "The painted center must repeat at its original 16-pixel pitch.");
+    }
+
+    static void Capture(RenderTexture target, string name, Vector2Int firstCorner, Vector2Int secondCorner, Vector2Int center)
     {
         string directory = Environment.GetEnvironmentVariable("IMAGE_EXAMPLE_OUTPUT");
         Assert.That(directory, Is.Not.Null.And.Not.Empty);
@@ -258,6 +311,7 @@ public sealed class ControlArtExample
             RenderTexture.active = target;
             image.ReadPixels(new Rect(0, 0, target.width, target.height), 0, 0);
             image.Apply();
+            AssertFramePixels(image, firstCorner, secondCorner, center);
             File.WriteAllBytes(Path.Combine(directory, name), image.EncodeToPNG());
         }
         finally

@@ -47,6 +47,22 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertIn("## Choose an operation", result.stdout)
                 self.assertNotIn("description:", result.stdout)
 
+    def test_image_cases_reach_the_installed_runner_from_their_owning_routes(self):
+        anchor = "#replay-the-image-optimization-examples"
+        section = read_topic("performance", "references/performance-cases.md" + anchor)
+        self.assertIn("scripts/replay_image_optimization.py", section)
+        self.assertIn("scripts/compare_image_replays.py", section)
+        for domain, entry in [
+            ("code", "references/global-skill-routing.md#choose-by-task"),
+            ("assets", "references/texture-intake.md#build-resizable-world-sprites"),
+            ("ui", "references/artwork-intake.md#resize-buttons-and-panels"),
+            ("performance", "#choose-an-operation"),
+        ]:
+            with self.subTest(domain=domain):
+                menu = read_topic(domain, entry)
+                route = next(link for link in re.findall(r"\]\(([^)]+)\)", menu) if link.endswith(anchor))
+                self.assertEqual(read_topic(domain, str(Path(entry.split("#")[0]).parent / route)), section)
+
     def test_water_flow_and_spells_reach_the_solver_from_both_installed_menus(self):
         task_menu = run_reader()
         self.assertEqual(task_menu.returncode, 0, task_menu.stderr)

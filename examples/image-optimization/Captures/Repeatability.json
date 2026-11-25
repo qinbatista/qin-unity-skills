@@ -1,0 +1,57 @@
+{
+  "activeTarget": "StandaloneOSX",
+  "casesPerReceiver": [
+    "ControlArtExample.OneFrameFitsQuestPanelAndActions",
+    "ImportAtlasExample.CrownKeepsItsWorldSizeAndTreePartsShareOnePackedPage",
+    "WorldArtExample.GroundAndOakResizeFromSharedArtwork"
+  ],
+  "imports": [
+    {
+      "optimizedTextureBytes": 394224,
+      "originalTextureBytes": 3539952
+    },
+    {
+      "optimizedTextureBytes": 394224,
+      "originalTextureBytes": 3539952
+    }
+  ],
+  "matchingAtlasRegions": {
+    "TreeBase": {
+      "rgbaSha256": "03f2c3f0424158b584875b357975f0c5ca48f0c214ffabc0d61bfa0c7c1c9640",
+      "size": [
+        320,
+        120
+      ]
+    },
+    "TreeCrown": {
+      "rgbaSha256": "dcc84431f5b3191152728ba513cf4e39e8e7a0a16bf01cddfb68a4ba20f7c742",
+      "size": [
+        768,
+        576
+      ]
+    },
+    "TreeTrunk": {
+      "rgbaSha256": "2acdfa445f741ba60c54ac684505bc64382245f93e823160f386450a4caa6149",
+      "size": [
+        144,
+        144
+      ]
+    }
+  },
+  "matchingFrameRgbaSha256": {
+    "Import-After.png": "4a1ad25b846f21a5acbb272e48d4e027ff67af9004d67d7e44dea3084055c303",
+    "Import-Before.png": "330692a1e3c9cc48edd43ed07340b6ca4856b057fd1713d38f5e46710e827c94",
+    "UI-Canvas.png": "815a2342f947864b19e73dec32675f903fed7a957156a1776940f81323d67618",
+    "UI.png": "b9c87b6bc34f5477bb0699cd7e06b0b173f36d5b17c22ede9d9a2c8a8c4ceed9",
+    "World.png": "724651a8a554e5c33d2243756573caf296faa0f3f95c841499274fc0941ba565"
+  },
+  "receiverPrefabGuids": [
+    "4000e020cdf9340f3b24e135867d4321",
+    "a745e03ebc15a47c2b217381b1fa5225"
+  ],
+  "replayReceiptSha256": [
+    "569d241e606410c2161262a8563d24657ded9e0fbcc1ce145de332cd84ff7f7f",
+    "a19d475ae8f806c98d1bf4cc525ec1ab91d01479c616cb22d14fc876472a5606"
+  ],
+  "unity": "6000.6.7f1"
+}
