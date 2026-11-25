@@ -1,0 +1,633 @@
+{
+  "editor": "6000.6.7f1",
+  "pipeline": "URP Universal Renderer, VFX Graph and Shader Graph 17.6.0",
+  "scope": "Graphics-enabled Unity Editor Play Mode on Metal. Independent clean receivers with separately authored graphs and small recipe variations.",
+  "camera": {
+    "projection": "orthographic XY",
+    "sizePixels": [
+      480,
+      320
+    ],
+    "simulatedTicksPerSecond": 60,
+    "normalFrameStride": 3,
+    "pulseFrameStride": 6,
+    "sourceClosedAfterTick": 18,
+    "seed": 1729
+  },
+  "author": {
+    "path": "unity-effects-skill/scripts/particle-graph-trials/QinParticleGraphAuthor.cs",
+    "sha256": "6087ea43b28ea84e1dbb51fd115752d3c199464f59b3712189ce935dfc17a225"
+  },
+  "capture": {
+    "path": "unity-effects-skill/scripts/particle-graph-replay/GraphTrialCapture.cs",
+    "sha256": "bcffa44b467f9130f7dc2d81c765c8eb2fa2206669b02211a411b3cba1c307b3"
+  },
+  "comparisons": "One graph asset and one VisualEffect component per trial. Rain contains two particle systems. The governed comparisons are in unity-effects-skill/scripts/particle_graph_checks.py.",
+  "effects": {
+    "Rain": [
+      {
+        "creation": 1,
+        "graphGuid": "8c91b90b43cb049a5996dab0b59733ed",
+        "graphSha256": "060be0b2dd47eed6ccca71442e4c3c05b193f5e7113be42766fe8f62f9419e67",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortFallPixels": 108.35621643066406,
+          "splashLiftPixelsAtRaisedGround": 40.239688873291016
+        },
+        "driverShiftPixels": 55.95692443847656,
+        "meanOccupiedPixelsAtMaturity": 1441.4,
+        "systems": [
+          {
+            "name": "Rain",
+            "capacity": 64,
+            "peakSampledAlive": 35
+          },
+          {
+            "name": "Splash",
+            "capacity": 128,
+            "peakSampledAlive": 62
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1477,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "liveAtTick66": {
+          "Rain": 0,
+          "Splash": 38
+        },
+        "layout": {
+          "groups": 6,
+          "visibleNodes": 13,
+          "contexts": 8,
+          "blocks": 20
+        },
+        "capacityComparison": {
+          "initialCapacities": [
+            96,
+            128
+          ],
+          "finalCapacities": [
+            64,
+            128
+          ],
+          "occupiedPixelCountDifferenceFraction": 0.004287
+        }
+      },
+      {
+        "creation": 2,
+        "graphGuid": "dd7c31b7158af4f32ac840762ae82433",
+        "graphSha256": "1ddeef53e543995733a679502f216c2434e65b2827098443724032a828eff1dd",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortFallPixels": 112.29595947265625,
+          "splashLiftPixelsAtRaisedGround": 39.417537689208984
+        },
+        "driverShiftPixels": 56.340301513671875,
+        "meanOccupiedPixelsAtMaturity": 1561,
+        "systems": [
+          {
+            "name": "Rain",
+            "capacity": 64,
+            "peakSampledAlive": 39
+          },
+          {
+            "name": "Splash",
+            "capacity": 128,
+            "peakSampledAlive": 62
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1555,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "liveAtTick66": {
+          "Rain": 0,
+          "Splash": 41
+        },
+        "layout": {
+          "groups": 6,
+          "visibleNodes": 13,
+          "contexts": 8,
+          "blocks": 20
+        }
+      },
+      {
+        "creation": 3,
+        "graphGuid": "1209ada5fea08495a988529ea2d1cd87",
+        "graphSha256": "916b16742e7eaf820ae27bb31fe3f922f9aed4f72c004de932be5654c968c368",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortFallPixels": 112.33464813232422,
+          "splashLiftPixelsAtRaisedGround": 39.6993293762207
+        },
+        "driverShiftPixels": 56.60493469238281,
+        "meanOccupiedPixelsAtMaturity": 1662.8,
+        "systems": [
+          {
+            "name": "Rain",
+            "capacity": 64,
+            "peakSampledAlive": 42
+          },
+          {
+            "name": "Splash",
+            "capacity": 128,
+            "peakSampledAlive": 65
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1676,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "liveAtTick66": {
+          "Rain": 0,
+          "Splash": 44
+        },
+        "layout": {
+          "groups": 6,
+          "visibleNodes": 13,
+          "contexts": 8,
+          "blocks": 20
+        }
+      }
+    ],
+    "Embers": [
+      {
+        "creation": 1,
+        "graphGuid": "c3bea72cd34bd49d8abc9fa383eba6f2",
+        "graphSha256": "eb6ce9dd0e0123f712c8df1e410b3ffe0248bc116ce4f68cc1d09d2f1d79fe8e",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortRisePixels": 80.93762969970703
+        },
+        "driverShiftPixels": 55.490509033203125,
+        "meanOccupiedPixelsAtMaturity": 1182.5,
+        "systems": [
+          {
+            "name": "Embers",
+            "capacity": 96,
+            "peakSampledAlive": 38
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1141,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 11
+        },
+        "capacityComparison": {
+          "initialCapacities": [
+            128
+          ],
+          "finalCapacities": [
+            96
+          ],
+          "occupiedPixelCountDifferenceFraction": 0.0
+        }
+      },
+      {
+        "creation": 2,
+        "graphGuid": "066b1a7569dde44919f889debe37389d",
+        "graphSha256": "16b8c6844375f0b678f47a7df37afcc18e32eb090e6eeb55c3e94718e294c3d5",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortRisePixels": 85.96176147460938
+        },
+        "driverShiftPixels": 55.63873291015625,
+        "meanOccupiedPixelsAtMaturity": 1244.8,
+        "systems": [
+          {
+            "name": "Embers",
+            "capacity": 96,
+            "peakSampledAlive": 40
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1224,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 11
+        }
+      },
+      {
+        "creation": 3,
+        "graphGuid": "f24097c9f39704046a9d2a2500149da8",
+        "graphSha256": "b411b554488de6ac1e1695b53889c40db2842a4c69052c3061277dd5c1816da4",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortRisePixels": 88.10582733154297
+        },
+        "driverShiftPixels": 55.59956359863281,
+        "meanOccupiedPixelsAtMaturity": 1303,
+        "systems": [
+          {
+            "name": "Embers",
+            "capacity": 96,
+            "peakSampledAlive": 43
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1286,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 11
+        }
+      }
+    ],
+    "Fountain": [
+      {
+        "creation": 1,
+        "graphGuid": "7dda9a8379c704fc885c4e88abe3a0a7",
+        "graphSha256": "7236a1e87d7ce465eacc360f4b68ff6c74bf37bed73940815507a67cc0e8116e",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortRiseToApexPixels": 63.54975891113281,
+          "cohortFallAfterApexPixels": 34.79206848144531,
+          "apexTick": 54
+        },
+        "driverShiftPixels": 57.3763427734375,
+        "meanOccupiedPixelsAtMaturity": 1431.7,
+        "systems": [
+          {
+            "name": "Fountain",
+            "capacity": 128,
+            "peakSampledAlive": 74
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1447,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 10
+        },
+        "capacityComparison": {
+          "initialCapacities": [
+            160
+          ],
+          "finalCapacities": [
+            128
+          ],
+          "occupiedPixelCountDifferenceFraction": 0.0
+        }
+      },
+      {
+        "creation": 2,
+        "graphGuid": "2d736c0113f5b4cfeac1e2b64e807bde",
+        "graphSha256": "cfcf1b8ec042817b95f39461a759ea9c6d352270ef5fc70cbc47e9cf423d4387",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortRiseToApexPixels": 65.80451965332031,
+          "cohortFallAfterApexPixels": 34.85411071777344,
+          "apexTick": 54
+        },
+        "driverShiftPixels": 56.82670593261719,
+        "meanOccupiedPixelsAtMaturity": 1500.8,
+        "systems": [
+          {
+            "name": "Fountain",
+            "capacity": 128,
+            "peakSampledAlive": 78
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1539,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 10
+        }
+      },
+      {
+        "creation": 3,
+        "graphGuid": "b05398459af3c49a991c5e2b1f95f36a",
+        "graphSha256": "e347cbaf919fb3e7d76a3aca7ee77f37076624f5e51959293510b600e45cb89b",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortRiseToApexPixels": 65.46493530273438,
+          "cohortFallAfterApexPixels": 35.83123779296875,
+          "apexTick": 54
+        },
+        "driverShiftPixels": 56.9853515625,
+        "meanOccupiedPixelsAtMaturity": 1567.7,
+        "systems": [
+          {
+            "name": "Fountain",
+            "capacity": 128,
+            "peakSampledAlive": 82
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1565,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 10
+        }
+      }
+    ],
+    "Leaves": [
+      {
+        "creation": 1,
+        "graphGuid": "83571ab4ed9a64b90a5aa961264f3476",
+        "graphSha256": "33f25969655cabfb24817a3b705a3c13b22dc0b11dc8ae05f7292a2bda0fa14e",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortDownwindTravelPixels": 109.21150207519531,
+          "cohortDescentPixels": 50.97184753417969
+        },
+        "driverShiftPixels": 48.47021484375,
+        "meanOccupiedPixelsAtMaturity": 1634,
+        "systems": [
+          {
+            "name": "Leaves",
+            "capacity": 44,
+            "peakSampledAlive": 14
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1839,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 13
+        },
+        "capacityComparison": {
+          "initialCapacities": [
+            64
+          ],
+          "finalCapacities": [
+            44
+          ],
+          "occupiedPixelCountDifferenceFraction": 0.0
+        }
+      },
+      {
+        "creation": 2,
+        "graphGuid": "78b6d30c1562143299082318d7a60416",
+        "graphSha256": "4e0b6a83580d7446c08ccfceac3ab3203857827a286d12b8082fe49c056fdbaa",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortDownwindTravelPixels": 100.52854919433594,
+          "cohortDescentPixels": 45.69303894042969
+        },
+        "driverShiftPixels": 47.43141174316406,
+        "meanOccupiedPixelsAtMaturity": 1759.5,
+        "systems": [
+          {
+            "name": "Leaves",
+            "capacity": 44,
+            "peakSampledAlive": 15
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 1950,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 13
+        }
+      },
+      {
+        "creation": 3,
+        "graphGuid": "3d061ad84dafc4cdca43fd69272ede09",
+        "graphSha256": "8d983adb6f45bb9b03e0215c41f9dac9c24087f385e109e407c8ca9d2969747d",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortDownwindTravelPixels": 109.41285705566406,
+          "cohortDescentPixels": 46.6649169921875
+        },
+        "driverShiftPixels": 48.72459411621094,
+        "meanOccupiedPixelsAtMaturity": 1926.5,
+        "systems": [
+          {
+            "name": "Leaves",
+            "capacity": 44,
+            "peakSampledAlive": 16
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 2122,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 13
+        }
+      }
+    ],
+    "Motes": [
+      {
+        "creation": 1,
+        "graphGuid": "41d88bfaf59e04963b8fd654c408f9ac",
+        "graphSha256": "470458b49f02e256906674c1fc56923a106a1f74a3f94e95dd30d6c75644eccf",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortContractionPixels": 51.1875
+        },
+        "driverShiftPixels": 16.473785400390625,
+        "meanOccupiedPixelsAtMaturity": 2304.5,
+        "systems": [
+          {
+            "name": "Motes",
+            "capacity": 104,
+            "peakSampledAlive": 44
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 2380,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 9
+        },
+        "capacityComparison": {
+          "initialCapacities": [
+            128
+          ],
+          "finalCapacities": [
+            104
+          ],
+          "occupiedPixelCountDifferenceFraction": 0.0
+        }
+      },
+      {
+        "creation": 2,
+        "graphGuid": "b45754851021f4cdb9a46791379e1f3d",
+        "graphSha256": "d7cd058273828c3c8a775b2d5469d4f4fb0f84f9345ca4a152bff61ff92d0fd8",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortContractionPixels": 50.74967002868652
+        },
+        "driverShiftPixels": 17.353134155273438,
+        "meanOccupiedPixelsAtMaturity": 2381.6,
+        "systems": [
+          {
+            "name": "Motes",
+            "capacity": 104,
+            "peakSampledAlive": 46
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 2381,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 9
+        }
+      },
+      {
+        "creation": 3,
+        "graphGuid": "ad8338cc22dc740cb88accd203abcad8",
+        "graphSha256": "4925015b8ca83fe9e715184abb6345b267468b32f15c8b0ab14ef8352fa86546",
+        "backend": "Metal / Apple M3 Max",
+        "landmarks": {
+          "cohortContractionPixels": 49.54224395751953
+        },
+        "driverShiftPixels": 16.290252685546875,
+        "meanOccupiedPixelsAtMaturity": 2472.4,
+        "systems": [
+          {
+            "name": "Motes",
+            "capacity": 104,
+            "peakSampledAlive": 48
+          }
+        ],
+        "visiblePixelsAfterStop": 0,
+        "visiblePixelsOnReplay": 2391,
+        "extremeInputSamples": 12,
+        "shader": "Packages/com.unity.visualeffectgraph/ShaderGraph/VFXDefault.shadergraph",
+        "layout": {
+          "groups": 3,
+          "visibleNodes": 6,
+          "contexts": 4,
+          "blocks": 9
+        }
+      }
+    ]
+  },
+  "delivery": {
+    "middleVariation": 2,
+    "packageSha256": "372c50de741451b4551b84b23d3a7278e51016c9a5c28568635f18dfe10a63db",
+    "comparisonVideoSha256": "150069a9094e8bf16b493694739e13881cf61715d650bc1fa326cfae4691180a",
+    "transfer": "All 19 ZIP entries matched the source bytes. A fourth URP receiver resolved the five original GUIDs and their dependencies, found each graph's live Driver input and enumerated its native particle systems."
+  },
+  "nativeCases": [
+    {
+      "creation": 1,
+      "results": [
+        {
+          "name": "ShowTrials(\"Rain-1\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Embers-1\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Fountain-1\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Leaves-1\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Motes-1\")",
+          "result": "Passed"
+        }
+      ]
+    },
+    {
+      "creation": 2,
+      "results": [
+        {
+          "name": "ShowTrials(\"Rain-2\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Embers-2\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Fountain-2\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Leaves-2\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Motes-2\")",
+          "result": "Passed"
+        }
+      ]
+    },
+    {
+      "creation": 3,
+      "results": [
+        {
+          "name": "ShowTrials(\"Rain-3\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Embers-3\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Fountain-3\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Leaves-3\")",
+          "result": "Passed"
+        },
+        {
+          "name": "ShowTrials(\"Motes-3\")",
+          "result": "Passed"
+        }
+      ]
+    }
+  ],
+  "boundsAndGroups": "Serialized group membership and non-overlap were checked on all 15 assets. Native samples also project renderer bounds at the supported driver and ground-height extremes.",
+  "configuredSlotsAcrossFive": {
+    "before": 704,
+    "after": 564,
+    "scope": "One instance of each example. The count is a simulation setting, independent of GPU buffer alignment and frame-time cost."
+  }
+}
