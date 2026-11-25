@@ -4,9 +4,15 @@ from pathlib import Path
 import os
 import shutil
 import subprocess
+import sys
+import tempfile
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 
+from fluid_application_checks import APPLICATIONS
 from fluid_replay_checks import FORMS
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "unity-code-skill/scripts"))
+from hidden_process import hidden_process_options
 
 LANDMARK_FRAMES = (12, 24, 38, 47, 57)
 MASK_SIZE = (96, 54)
@@ -208,15 +214,66 @@ def review_application_images(folder, case, physics):
     return visual
 
 
+def encode_native_frames(source, output):
+    encoder = shutil.which("ffmpeg")
+    if encoder is None:
+        raise ValueError("Install ffmpeg on PATH to export the native video.")
+    command = [encoder, "-nostdin", "-loglevel", "error", "-framerate", "30", "-start_number", "0",
+               "-i", str(source / "%04d.png"), "-an", "-c:v", "libx264", "-threads", "3",
+               "-crf", "15", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output)]
+    subprocess.run(command, check=True, timeout=120, **hidden_process_options())
+
+
+def export_valve_comparison(folder, output):
+    """Show both valve schedules at the same tick, with labels outside the camera frame."""
+    with Image.open(folder / "normal/0000.png") as first:
+        width = first.width
+    with tempfile.TemporaryDirectory(prefix="temp-valves-", dir=output.parent) as temporary:
+        labels = Path(temporary) / "labels.png"
+        header = Image.new("RGB", (width * 2, 48), (15, 29, 35))
+        draw = ImageDraw.Draw(header)
+        for x, seconds in ((0, 7.4), (width, 2.4)):
+            draw.text((x + 16, 7), f"Valve closes at {seconds:.1f} s", font=font(25), fill="white")
+        header.save(labels)
+        command = [shutil.which("ffmpeg"), "-nostdin", "-loglevel", "error",
+                   "-framerate", "30", "-i", str(folder / "normal/%04d.png"),
+                   "-framerate", "30", "-i", str(folder / "early-stop/%04d.png"),
+                   "-loop", "1", "-framerate", "30", "-i", str(labels),
+                   "-filter_complex_threads", "2", "-filter_complex",
+                   "[0:v][1:v]hstack=shortest=1[water];[2:v][water]vstack=shortest=1[view]",
+                   "-map", "[view]", "-an", "-c:v", "libx264", "-threads", "3", "-crf", "17",
+                   "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(output)]
+        subprocess.run(command, check=True, timeout=180, **hidden_process_options())
+
+
+def export_subject_videos(work, report):
+    """Publish one uncropped full-rate movie per case accepted by this replay."""
+    destination = work / "Subjects"
+    if destination.exists():
+        raise FileExistsError(destination)
+    captures = work / "A/captures"
+    videos = {}
+    with tempfile.TemporaryDirectory(prefix="temp-subjects-", dir=work) as temporary:
+        staging = Path(temporary) / "Subjects"
+        staging.mkdir()
+        for group in ("cases", "applications", "channels", "inlets"):
+            for case in report.get(group, {}):
+                if group == "applications":
+                    name = APPLICATIONS[case][1]
+                    shutil.copyfile(work / (name + ".mp4"), staging / (name + ".mp4"))
+                else:
+                    name = case
+                    sequence = "frames" if group == "cases" else "normal"
+                    encode_native_frames(captures / name / sequence, staging / (name + ".mp4"))
+                videos[name] = (Path("Subjects") / (name + ".mp4")).as_posix()
+        staging.rename(destination)
+    return videos
+
+
 def export_application(folder, output, video):
     source = folder / "normal"
     if video:
-        encoder = shutil.which("ffmpeg")
-        options = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}
-        subprocess.run([encoder, "-nostdin", "-loglevel", "error", "-framerate", "30", "-start_number", "0",
-                        "-i", str(source / "%04d.png"), "-an", "-c:v", "libx264", "-threads", "3",
-                        "-crf", "15", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-                        str(output.with_suffix(".mp4"))], check=True, timeout=120, **options)
+        encode_native_frames(source, output.with_suffix(".mp4"))
     frames = []
     for path in sorted(source.glob("*.png"))[::2]:
         with Image.open(path) as frame:

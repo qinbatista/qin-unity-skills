@@ -13,6 +13,7 @@ public sealed partial class QinFluidReplay
     private const int ReleaseFrame = 10;
     private const int CurtainFrames = 92;
     private const int FallStopFrame = 222;
+    private const int EarlyStopFrame = 72;
     private const int FallFrames = 292;
     private const float NeedleSpeed = 8.45f;
     private static readonly int ReflectionTint = Shader.PropertyToID("_ReflectionTint");
@@ -20,6 +21,21 @@ public sealed partial class QinFluidReplay
     private static readonly int WaterOptics = Shader.PropertyToID("_WaterOptics");
 
     private readonly List<Object> applicationResources = new();
+
+    // Receiving games supply these optional partial methods from their own test assembly.
+    partial void SelectApplicationFloor(ref float y);
+    partial void BindReceiverStage(bool waterfall, ref bool handled);
+    partial void BindReceiverWater(FluidMixController controller);
+
+    private float ApplicationFloor
+    {
+        get
+        {
+            float y = SurfaceY;
+            SelectApplicationFloor(ref y);
+            return y;
+        }
+    }
 
     [UnityTest]
     public IEnumerator ApplyWaterCurtain()
@@ -29,17 +45,17 @@ public sealed partial class QinFluidReplay
         DrawApplicationStage(false);
         Transform anchor = new GameObject("Contact anchor").transform;
         anchor.SetParent(stage.transform, false);
-        anchor.position = new Vector3(.92f, SurfaceY + 1.02f, 0f);
+        anchor.position = new Vector3(.92f, ApplicationFloor + 1.02f, 0f);
         var collider = anchor.gameObject.AddComponent<CircleCollider2D>();
         collider.radius = .32f;
         Physics2D.SyncTransforms();
 
-        var gather = OpenVariant("Vortex", new Vector3(-2.69f, SurfaceY + .948f, 0f));
+        var gather = OpenVariant("Vortex", new Vector3(-2.69f, ApplicationFloor + .948f, 0f));
         gather.transform.localScale = Vector3.one * .245f;
         gather.transform.rotation = Quaternion.Euler(0f, 0f, 22f);
         gather.SetRecipe(gather.Recipe);
-        var needle = OpenVariant("WaterNeedle2D", new Vector3(0, SurfaceY, 0));
-        var curtain = OpenVariant("WaterCurtain2D", new Vector3(0, SurfaceY, 0));
+        var needle = OpenVariant("WaterNeedle2D", new Vector3(0, ApplicationFloor, 0));
+        var curtain = OpenVariant("WaterCurtain2D", new Vector3(0, ApplicationFloor, 0));
         needle.SetObstacleAnchor(anchor);
         curtain.SetObstacleAnchor(anchor);
         // Clear colour history before the first capture.
@@ -69,7 +85,7 @@ public sealed partial class QinFluidReplay
             int hitFrame = -1;
             float targetX = 0f;
             float previousX = needle.Recipe.Origin.x;
-            float rayHeight = SurfaceY + needle.Recipe.Origin.y;
+            float rayHeight = ApplicationFloor + needle.Recipe.Origin.y;
             uint seed = mode == "variation" ? Seed ^ 0x9e3779b9u : Seed;
             int probe = 0;
             int[] samples = { 3, 10, 14, 20, 26, 35, 45 };
@@ -96,7 +112,7 @@ public sealed partial class QinFluidReplay
                             hitFrame = frame;
                             needle.EndCast();
                             targetX = collider.bounds.center.x;
-                            curtain.transform.position = new Vector3(targetX, SurfaceY, 0f);
+                            curtain.transform.position = new Vector3(targetX, ApplicationFloor, 0f);
                             curtain.BeginCast(seed ^ 63u);
                         }
                         previousX = frontX;
@@ -137,7 +153,7 @@ public sealed partial class QinFluidReplay
     {
         string root = ApplicationCapture("Waterfall2D");
         SetApplicationCamera();
-        var fall = OpenVariant("ContinuousWaterfall", new Vector3(0, SurfaceY, 0));
+        var fall = OpenVariant("ContinuousWaterfall", new Vector3(0, ApplicationFloor, 0));
         SOFluidMixRecipe original = fall.Recipe;
         Assert.That(original.ContinuousFeed && original.PlayOnEnable, Is.True);
         for (int frame = 0; frame < 12; frame++) yield return null;
@@ -156,22 +172,23 @@ public sealed partial class QinFluidReplay
         settings.FindProperty("_responses").intValue &= ~(int)SOFluidMixRecipe.Response.SurfaceWaves;
         settings.ApplyModifiedPropertiesWithoutUndo();
         int[] samples = { 12, 23, 32, 66, 81, 96, 132, 162, 190, 221, 231, 253, 279 };
-        foreach (var mode in new[] { "normal", "no-waves", "variation" })
+        foreach (var mode in new[] { "normal", "no-waves", "variation", "early-stop" })
         {
             string folder = Path.Combine(root, mode);
             Directory.CreateDirectory(folder);
+            int stopFrame = mode == "early-stop" ? EarlyStopFrame : FallStopFrame;
             fall.SetRecipe(mode == "no-waves" ? stillPool : original);
             fall.BeginCast(mode == "variation" ? Seed ^ 0x9e3779b9u : Seed);
             for (int frame = 0; frame < FallFrames; frame++)
             {
                 float time = frame / (float)Fps;
                 fall.SetCastTime(time);
-                if (frame == FallStopFrame) fall.EndCast();
+                if (frame == stopFrame) fall.EndCast();
                 yield return null;
                 fall.SetCastTime(time);
 
                 bool probe = System.Array.IndexOf(samples, frame) >= 0;
-                if (mode == "normal" || probe) SaveFrame(folder, frame);
+                if (mode == "normal" || mode == "early-stop" || probe) SaveFrame(folder, frame);
                 if (probe)
                 {
                     byte[] settled = State(fall);
@@ -183,9 +200,9 @@ public sealed partial class QinFluidReplay
                     File.WriteAllBytes(Path.Combine(folder, $"state-{frame:D2}.bin"), settled);
                 }
                 if (frame == 162 && mode == "normal") SaveOptics(root);
-                if (frame >= 66 && frame < FallStopFrame)
+                if (frame >= 66 && frame < stopFrame)
                     Assert.That(fall.CurrentStage, Is.EqualTo(FluidMixController.VisualStage.Releasing), "Continuous inlet retired while still open");
-                if (frame > FallStopFrame && frame < FallStopFrame + Fps)
+                if (frame > stopFrame && frame < stopFrame + Fps)
                     Assert.That(fall.CurrentStage, Is.EqualTo(FluidMixController.VisualStage.Retracting));
             }
             Assert.That(fall.CurrentStage, Is.EqualTo(FluidMixController.VisualStage.Recycled));
@@ -206,7 +223,7 @@ public sealed partial class QinFluidReplay
     {
         stage.transform.Find("Fluid lighting backdrop").gameObject.SetActive(false);
         camera.orthographicSize = 2.16f;
-        camera.transform.position = new Vector3(0f, SurfaceY + 1.24f, -10f);
+        camera.transform.position = new Vector3(0f, ApplicationFloor + 1.24f, -10f);
     }
 
     private FluidMixController OpenVariant(string name, Vector3 position, string path = null)
@@ -220,6 +237,7 @@ public sealed partial class QinFluidReplay
         Assert.That(controller.Recipe.name, Is.EqualTo(name));
         Assert.That(instance.GetComponentsInChildren<ParticleSystem>(true), Is.Empty);
         controller.SetWaterSortingLayer(WaterLayer);
+        BindReceiverWater(controller);
         foreach (var draw in instance.GetComponentsInChildren<MeshRenderer>(true))
         {
             Assert.That(AssetDatabase.GetAssetPath(draw.sharedMaterial.shader), Does.EndWith(".shadergraph"));
@@ -254,6 +272,9 @@ public sealed partial class QinFluidReplay
 
     private void DrawApplicationStage(bool waterfall)
     {
+        bool handled = false;
+        BindReceiverStage(waterfall, ref handled);
+        if (handled) return;
         const int width = 768;
         const int height = 432;
         float viewHeight = 2f * camera.orthographicSize;

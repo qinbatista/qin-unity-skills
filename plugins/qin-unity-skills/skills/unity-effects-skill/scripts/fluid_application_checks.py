@@ -54,6 +54,27 @@ def curtain_physics(folder):
             "opticsFrame": hit + 14}
 
 
+def valve_control(folder):
+    def live_count(tick, mode):
+        return len(live(sample(folder, tick, mode)[0]))
+
+    before = 66
+    require(sample(folder, before) == sample(folder, before, "early-stop")
+            and frame(folder, before).read_bytes() == frame(folder, before, "early-stop").read_bytes(),
+            "Changing the future valve closing time changed the current fluid or image")
+    ticks = (81, 96, 132, 162)
+    early = [live_count(tick, "early-stop") for tick in ticks]
+    normal = [live_count(tick, "normal") for tick in ticks]
+    require(0 < early[1] < early[0] < 384 and early[-1] == 0 and normal == [384] * len(ticks),
+            "An early valve closure must leave downstream parcels, drain them and diverge from the open inlet")
+    require(frame(folder, 162, "early-stop").read_bytes() == (folder / "dry.png").read_bytes()
+            and frame(folder, 162).read_bytes() != frame(folder, 162, "early-stop").read_bytes(),
+            "The early valve closure must remove the drawn water while the other inlet remains visible")
+    return {"earlyCloseSeconds": 2.4, "normalCloseSeconds": 7.4, "matchedBeforeCloseFrame": before,
+            "sampleFrames": list(ticks), "earlyLiveParcels": early, "normalLiveParcels": normal,
+            "earlyClosureMatchesDryAtFrame": 162}
+
+
 def waterfall_physics(folder):
     steady = (66, 81, 96, 132, 162, 190, 221)
     snapshots = [sample(folder, k) for k in steady]
@@ -75,7 +96,7 @@ def waterfall_physics(folder):
             "Closing the source must drain the falling sheet before retiring the basin")
     require(frame(folder, 162).read_bytes() != frame(folder, 162, "variation").read_bytes(),
             "Seeded waterfall detail did not change the image")
-    return {"feedOpenSeconds": 7.4, "steadySamples": len(steady),
+    return {"valveControl": valve_control(folder), "feedOpenSeconds": 7.4, "steadySamples": len(steady),
             "minimumFallingParcelsAtInlet": minimum_inlet, "minimumPoolHeightMagnitude": minimum_wave,
             "minimumDistanceFromRockCentreMetres": clearance,
             "parcelsAfterShutoff": [len(p) for p in later], "settledFractionAt843s": settled,

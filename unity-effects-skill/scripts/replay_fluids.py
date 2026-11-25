@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -20,6 +21,9 @@ from fluid_replay_checks import FORMS, review
 
 HERE = Path(__file__).resolve().parent
 CLI = HERE.parents[1] / "unity-code-skill/scripts/unity_cli_daily.py"
+sys.path.insert(0, str(CLI.parent))
+from hidden_process import hidden_process_options
+
 EDITOR_VERSION = "6000.6.7f1"
 PACKAGES = {
     "com.unity.render-pipelines.universal": "17.6.0",
@@ -35,10 +39,9 @@ def digest(path):
 
 
 def run_command(command, project, env, log):
-    options = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}
     with log.open("w", encoding="utf-8") as stream:
         completed = subprocess.run(command, cwd=project, env=env, stdin=subprocess.DEVNULL,
-                                   stdout=stream, stderr=subprocess.STDOUT, timeout=1530, **options)
+                                   stdout=stream, stderr=subprocess.STDOUT, timeout=1530, **hidden_process_options())
     if completed.returncode:
         raise RuntimeError(f"Unity exited with {completed.returncode}. See {log} and its adjacent Unity log.")
 
@@ -46,14 +49,21 @@ def run_command(command, project, env, log):
 def native_parent(work):
     if sys.platform != "darwin" or len(os.fsencode(work / "temp-f-12345678")) <= 70:
         return work
-    # The macOS UPM socket has a short path limit. Keep it in the same task workspace.
-    parent = next((p for p in work.parents if p.name == "Cache" and len(os.fsencode(p / "temp-f-12345678")) <= 70), None)
-    if parent is None:
-        raise ValueError("Use a shorter work path, or put it in a task run below a short project Cache.")
-    return parent
+    # APFS exposes a short name for the same directory, including on long task paths.
+    stat = work.stat()
+    short = Path("/.vol") / str(stat.st_dev) / str(stat.st_ino)
+    if not short.is_dir() or not short.samefile(work):
+        raise ValueError("Use a shorter task-owned path on this volume for native Unity IPC.")
+    with tempfile.TemporaryDirectory(prefix="ipc-", dir=short) as test:
+        probe = Path(test) / "socket"
+        with socket.socket(socket.AF_UNIX) as connection:
+            connection.bind(str(probe))
+            if not (work / probe.parent.name / probe.name).is_socket():
+                raise OSError("The native socket must resolve inside the task-owned replay directory.")
+    return short
 
 
-def lane(label, work, editor, seed, case):
+def lane(label, work, editor, seed, case, launcher, temp_parent):
     base = work / label
     project = base / "project"
     for folder in ("Assets", "Packages", "ProjectSettings"):
@@ -87,14 +97,14 @@ def lane(label, work, editor, seed, case):
     common = ["--editor-path",str(editor),"--timeout","1470","--non-interactive","--no-pager"]
     filters = {"gallery": "QinFluidReplay.Replay", "all": "QinFluidReplay", "channels": "QinFluidReplay.FlowChannel", "inlets": "QinFluidReplay.CastWaterVariant"}
     selected = filters[case] if case in filters else "QinFluidReplay." + APPLICATIONS[case][0]
-    with tempfile.TemporaryDirectory(prefix="temp-f-", dir=native_parent(work)) as scratch:
+    with tempfile.TemporaryDirectory(prefix="temp-f-", dir=temp_parent) as scratch:
         env.update(TMPDIR=scratch,TEMP=scratch,TMP=scratch)
-        run_command([sys.executable,"-B",str(CLI),"run",str(project),*common,"--log-file",str(base/"import.log"),
+        run_command([sys.executable,"-B",str(launcher),"run",str(project),*common,"--log-file",str(base/"import.log"),
                      "--no-tail","--","-job-worker-count","3","-executeMethod","QinFluidReplay.Configure"],
                     project,env,base/"import-cli.log")
         if "QIN_FLUID_RECEIVER_READY" not in (base/"import.log").read_text(errors="replace"):
             raise RuntimeError(f"Editor setup did not finish. See {base/'import.log'}")
-        run_command([sys.executable,"-B",str(CLI),"test",str(project),*common,"--mode","EditMode",
+        run_command([sys.executable,"-B",str(launcher),"test",str(project),*common,"--mode","EditMode",
                      "--filter",selected,"--output",str(base/"tests.xml"),"--",
                      "-job-worker-count","3","-logFile",str(base/"play.log")],project,env,base/"play-cli.log")
     tests = list(ET.parse(base/"tests.xml").iter("test-case"))
@@ -113,29 +123,31 @@ def lane(label, work, editor, seed, case):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--editor",type=Path,required=True,help="Unity 6000.6.7f1 editor (.app on macOS)")
+    parser.add_argument("--launcher", type=Path, default=CLI, help="Receiving project's registered Unity CLI Python launcher")
     parser.add_argument("--work",type=Path,required=True,help="New output directory inside the active task Cache")
     parser.add_argument("--seed",type=int,default=29411)
     parser.add_argument("--case", choices=("gallery", *APPLICATIONS, "channels", "inlets", "all"), default="gallery",
                         help="Select gallery, attack, waterfall, channel generation or the complete suite")
     parser.add_argument("--preview",action="store_true",help="Also write FluidMixer.gif; requires Pillow")
-    parser.add_argument("--video", action="store_true", help="Also write a full-rate H.264 reference. Requires Pillow and ffmpeg")
+    parser.add_argument("--video", action="store_true", help="Also write the gallery and individual native case movies at 30 fps. Requires Pillow and ffmpeg")
     args=parser.parse_args()
     if args.video and not shutil.which("ffmpeg"):
         parser.error("Install ffmpeg on PATH to export the optional MP4.")
     media = args.preview or args.video
     if not (0 <= args.seed <= 0xffffffff):
         parser.error("Provide a 32-bit unsigned seed.")
-    if not CLI.is_file():
-        parser.error("Install the full qin-unity-skills pack; the native launcher belongs to unity-code-skill.")
+    launcher = args.launcher.resolve()
+    if not launcher.is_file():
+        parser.error(f"Missing Unity CLI launcher at {launcher}. Select the registered launcher or install the full pack.")
     work = args.work.resolve()
     if work.exists():
         parser.error(f"Choose a new work directory. Existing data at {work} is preserved.")
     if media:
         import fluid_preview
     work.mkdir(parents=True)
-    native_parent(work)
+    temp_parent = native_parent(work)
     with ThreadPoolExecutor(max_workers=2) as workers:
-        futures = [workers.submit(lane,label,work,args.editor.resolve(),args.seed,args.case) for label in ("A","B")]
+        futures = [workers.submit(lane,label,work,args.editor.resolve(),args.seed,args.case,launcher,temp_parent) for label in ("A","B")]
         first,second = [f.result() for f in futures]
     expected = json.loads(MANIFEST.read_text(encoding="utf-8"))["files"]
     if first != second or first != expected:
@@ -162,6 +174,10 @@ def main():
                 name = APPLICATIONS[case][1]
                 app["visual"] = fluid_preview.review_application_images(captures / name, case, app["physics"])
                 fluid_preview.export_application(captures / name, work / name, args.video)
+                if case == "waterfall" and args.video:
+                    valve_movie = work / "WaterfallValveControl.mp4"
+                    fluid_preview.export_valve_comparison(captures / name, valve_movie)
+                    app["valveVideo"] = valve_movie.name
             report["applications"][case] = app
     if args.case in ("all", "channels", "inlets"):
         authored = [(work / label / "authored.json").read_bytes() for label in ("A", "B")]
@@ -180,6 +196,8 @@ def main():
         if media:
             from channel_preview import export_inlets
             export_inlets(captures, work, args.video)
+    if args.video:
+        report["subjectVideos"] = fluid_preview.export_subject_videos(work, report)
     (work / "FluidVerification.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(f"Verified {args.case} in both receivers. Evidence: {work / 'FluidVerification.json'}")
 

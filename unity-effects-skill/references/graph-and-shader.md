@@ -55,6 +55,8 @@ Seed each region and particle at birth. Vary local timing, velocity, phase, widt
 
 ### Build water as moving material
 
+For water flow or a water spell, [choose the physical simulation](fluid-mixer.md#choose-the-water-simulation) and [open its authored prefab, control and native film](water-recipes-2d.md#select-a-template-and-control). Use the simulated thickness, waterline and velocity to drive the rendering steps below.
+
 **HARD REQUIREMENT FOR WATER.** In the standalone GIF, trace where the water comes from, how the main volume moves, what bends or tears its edge and where it goes after contact or release. Show every applicable phase through the last visible water. Choose editable Shader and VFX references for the specific mechanisms and record the parts already supported by the game's renderer. Use an article or the reviewed GIF for an uncovered mechanism.
 
 - Guide highlights, thickness and gaps in the local direction of transport. Parameterize curved sheets and rims along their surface and vary velocity across their width. Keep a readable transparent region. Add foam selectively at an active crest, tear or contact, and use a soft, curved free edge. A level edge needs support from the actual waterline or contact plane.

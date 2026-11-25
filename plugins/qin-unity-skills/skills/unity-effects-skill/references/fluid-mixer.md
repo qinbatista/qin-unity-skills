@@ -2,6 +2,20 @@
 
 Use the installed editable template for a travelling ripple, falling water mass, free jet, solid impact, opposed jets, waterfall or converging vortex. A single prefab combines an inlet, persistent GPU state, optional receiving surface, collision, and spray. The Skill contains the runtime, native graphs, materials, seven starting recipes, two 2D applications and their independent replays. Watch the seven subjects at their native playback speed in the [30 fps reference film](../assets/fluid-motion.mp4) or [looping GIF](../assets/fluid-motion.gif).
 
+## Choose the water simulation
+
+Use this entry for 2D water flow and water spells. Use the [profile, prefab and replay guide](water-recipes-2d.md#install-and-author-a-named-effect) for the executable steps and per-case controls. Choose what supplies water, where it can travel and what receives its momentum. For a combined water and star effect, give the fluid its physical driver and attach the stellar rendering to the requested scene or cast phase.
+
+| Water to reproduce | Start from | What to change in a matched replay |
+| --- | --- | --- |
+| A ripple, falling mass, free jet, jet against a rock, opposing jets, finite waterfall or vortex | [Seven parcel and surface recipes](#choose-and-combine) | Remove the relevant impulse, gravity, solid or inlet. Follow crest position, falling mass, deflection or circulation at the same tick. |
+| Water needle opens a curtain on hit, holds, closes and drains | [Combat application](#2d-application-replays) | Disable the recipient collider. Compare the hit time, first wet frame and runoff with the same launch that misses. |
+| A continuous waterfall splits around a rock and feeds a pool | [Sustained inlet](#2d-application-replays) | Close the inlet during steady flow. Watch the upper sheet drain and measure the remaining water or waves downstream. |
+| Current in a river, shore advance and retreat, basin slosh or a custom cove | [Shallow-water channels](channel-water.md#reproduce-the-variants) | Remove the forcing with the bed and walls held fixed. Compare discharge, wet front or the difference between the wall heights. |
+| Rain reaching water, a ledge dripping or a fountain returning to a pool | [Inlet composer](#author-a-water-effect-from-parameters) | Track births, vertical velocity and landing. Read the pool response with contact transfer enabled and disabled. |
+
+[Install the editable template](#install-into-a-receiving-game), align the [XY gameplay camera](#side-view-contract), then [replay each selected case](#reproduce-twice-from-the-installed-skill). Keep the seed, clock, camera and scene the same for each physical control. Read both the solver state and the corresponding visible response. For a game example show the water in its receiving camera and name the gameplay input that drove it. Check [refraction and colour reversal](#bind-the-rendering-and-trigger) separately on the moving water.
+
 ## Install into a receiving game
 
 Use the game's planning brief to select one subject, its trigger, camera, attachment and sorting layer. Match the reference's free flight, first contact and settling before changing the recipe. Confirm the project's render pipeline and package lock. The supplied receiver uses Unity 6000.6.7f1 with URP, Shader Graph and VFX Graph 17.6.0. The runtime requires a compute-capable GPU with random-write RGBA16F, RGBA32F and RG32F textures as checked by FluidMixSimulation. Run the native replay again when porting to a different editor, pipeline or backend.
@@ -84,11 +98,13 @@ Use a detailed receiving backdrop to check refraction and local colour reversal 
 
 ## Reproduce twice from the installed Skill
 
-Run the [replay command](../scripts/replay_fluids.py) from this Skill with a new output directory under the current task Cache. It only sets up its own two blank receivers. It invokes the Unity Code launcher's graphics-enabled batch mode and installs the same template at two different Assets paths. Both receivers use procedural lighting and their own 2D colour capture. Use `--case all` for the gallery, both applications and the generated side-view channels, or select `--case curtain` or `--case waterfall` to replay one application. Python's standard library suffices for the tests. Add Pillow for the optional GIF and install ffmpeg on PATH for the 30 fps MP4.
+Run the [replay command](../scripts/replay_fluids.py) from this Skill with a new output directory under the current task Cache. It only sets up its own two blank receivers. It invokes the registered Python launcher selected with `--launcher` (Unity Code by default) in graphics-enabled batch mode and installs the same template at two different Assets paths. Both receivers use procedural lighting and their own 2D colour capture. Use `--case all` for the gallery, both applications, four channel variants and three airborne inlets, or select `--case curtain` or `--case waterfall` to replay one application. Python's standard library suffices for the tests. Add Pillow for the optional GIF and install ffmpeg on PATH for the 30 fps MP4.
 
 ```sh
 python3 -B scripts/replay_fluids.py --editor "/path/to/Unity.app" --work "/path/to/task/Cache/temp-run/fluids" --case all --preview --video
 ```
+
+With `--video`, open `Subjects/<capture name>.mp4` for an individual case in its original framing and at its recorded 30 fps. The `subjectVideos` field in `FluidVerification.json` maps each verified capture to its film. A complete run exports 16 individually playable films.
 
 The default seed is 29411. Each gallery recipe records 84 frames at 30 fps. The attack records 92 frames and the falls record 292, including 7.4 seconds of open supply and the closing tail. Compare both receivers' native images and GPU states, with one physical term disabled at a time. Each run also checks held time, another seed, same-instance recast, camera clearance after normal end and interruption, and the optical controls. `FluidVerification.json` records the graphics backend, packages, input hashes, matched frames and measured motion. `FluidMixer.gif` is built from the actual captured frames. Use `captures/<gallery-recipe>/frames` or `captures/<application>/normal` in either receiver for full-resolution review. With the default seed, requesting either preview also compares the wet silhouette against five frozen reference frames per recipe. The [reference sheet](../assets/fluid-silhouettes.png) stores the side-view wet coverage. The native depth control moves the falling water by 0.52 metres along Z while requiring identical XY state and rendered pixels. The horizontal ripple must widen while staying near its original waterline. The report gives the intersection-over-union score for every comparison. Each must reach 0.85. Other seeds keep the physical checks and compare the two independent receivers. Inspect the recorded motion at normal speed for artistic approval.
 

@@ -1,6 +1,6 @@
 ---
 name: unity-effects-skill
-description: Create Unity gameplay effects with VFX Graph and Shader Graph. Install and reproduce seven editable GPU water forms, a hit-triggered 2D water curtain and a continuous waterfall drawn in the side-view XY plane, play 24 water, sky and spell materials, adapt Particle System references, animate each visible part, and compare native playback with the original.
+description: Create Unity gameplay effects with VFX Graph and Shader Graph. Simulate 2D water flow and water spells with persistent GPU parcels, surface waves and shallow-water channels. Replay individual water bodies, collisions, inlets and hits through an XY gameplay camera. Author animated sky and spell materials, adapt Particle System references, animate each visible part, and compare native playback with the original.
 ---
 
 # Unity Effects
@@ -26,11 +26,11 @@ Keep the full requested subject list and its order. The single-subject requireme
 | Operation | Read for this task |
 | --- | --- |
 | Find or adapt a reference | [Use an existing effect or reference](#use-an-existing-effect-or-reference). |
-| Make or reuse water, ripples, a falling mass, jets, impacts, a waterfall or a vortex | [Install and compose the seven fluid recipes](references/fluid-mixer.md#install-into-a-receiving-game) and [replay them twice from this Skill](references/fluid-mixer.md#reproduce-twice-from-the-installed-skill). |
+| Make or verify 2D water flow, a water spell or a fluid interaction | [Choose the water simulation](references/fluid-mixer.md#choose-the-water-simulation) by its source, boundary and response. Use this entry for general water requests. [Build each of the 16 recipes](references/water-recipes-2d.md#select-a-template-and-control), [bind a water spell or waterfall](references/water-recipes-2d.md#bind-a-water-spell-and-a-waterfall-to-a-game-camera), or [drive a closed basin from a moving container](references/water-recipes-2d.md#bind-a-moving-container-to-a-closed-basin). |
 | Create 2D rain hitting water, a ledge drip or a fountain from a brief | [Author the bound recipe and prefab](references/fluid-mixer.md#author-a-water-effect-from-parameters), then run the native inlet cases. |
 | Create a custom 2D river, shore or sloshing basin | [Choose the boundary, author a named prefab and reproduce its motion](references/channel-water.md#author-another-water-body). |
 | Adapt water to a side-scrolling 2D game | [Match the gameplay plane](references/fluid-mixer.md#side-view-contract), then [compose a hit-triggered curtain or continuous waterfall](references/fluid-mixer.md#2d-application-replays). |
-| Select a stream, aurora, star field or water/stellar spell for a 2D camera | [24 material subjects, prefab and native replay](references/flow-sky-2d.md#pick-a-subject). |
+| Preview a star field, aurora or explicitly requested animated material study | [24 material subjects, prefab and native replay](references/flow-sky-2d.md#pick-a-subject). |
 | Reproduce a case or audit a set of examples | [Rebuild from declared inputs](references/graph-and-shader.md#rebuild-from-declared-inputs) and [compare independent native replays](references/graph-and-shader.md#compare-two-independent-replays). Give each example its own result. |
 | A visible object, wing, leaf or light shaft appears frozen | [Plan each object's local motion](references/staged-effects.md#decompose-every-visible-object), [build the two graphs](references/graph-and-shader.md#author-the-live-graphs) and [test the individual parts](references/rendering-and-verification.md#verify-local-motion-per-object). |
 | Translate an editable Particle System or design a new GPU effect | [Graph and shader production](references/graph-and-shader.md). Use the [conversion table](references/graph-and-shader.md#translate-the-executing-source) for source ports and the [paired replay](references/graph-and-shader.md#compare-two-independent-replays) for both entry paths. |
@@ -51,7 +51,7 @@ Before building or revising the runtime, make and inspect a [full motion study](
 2. Adapt each numbered effect and play it alone. Apply the principle to compatible source emitters, curves, shader logic or game-owned materials. Check whether the source's axes, timing, camera and lifetime still make sense for this ability. Follow [progressive formation](references/staged-effects.md#progressive-formation-and-layers) and [bind the production renderer](references/rendering-and-verification.md#bind-the-renderer-and-source).
 3. Compare the complete effect with the GIF at the same trigger, scale and playback speed. For a likeness request or source conversion, also [compare the native effect directly with the original](references/rendering-and-verification.md#compare-the-native-effect-with-the-original). Drive the documented gameplay action and observe its outcome and cue on the same instance. Repair a failing layer and replay. When the layers pass alone and the whole gesture still reads incorrectly, revisit their roles, overlap and order.
 
-For a liquid surface or effect, follow the [water motion and isolated playback requirements](references/graph-and-shader.md#build-water-as-moving-material). When the brief calls for actual fluid simulation, [verify the evolving body and its causal response](references/graph-and-shader.md#simulate-the-body-when-its-motion-depends-on-fluid-interaction).
+For water flow, [select the simulation](references/fluid-mixer.md#choose-the-water-simulation) and [verify the evolving body and its causal response](references/graph-and-shader.md#simulate-the-body-when-its-motion-depends-on-fluid-interaction). Apply the [water rendering requirements](references/graph-and-shader.md#build-water-as-moving-material) to the resulting body.
 
 ## Verify the native result
 

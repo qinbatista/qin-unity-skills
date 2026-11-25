@@ -47,6 +47,25 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertIn("## Choose an operation", result.stdout)
                 self.assertNotIn("description:", result.stdout)
 
+    def test_water_flow_and_spells_reach_the_solver_from_both_installed_menus(self):
+        task_menu = run_reader()
+        self.assertEqual(task_menu.returncode, 0, task_menu.stderr)
+        water = next(row for row in task_menu.stdout.splitlines() if "2D water flow, a water spell" in row)
+        material = next(row for row in task_menu.stdout.splitlines() if "explicitly requested animated material study" in row)
+        for row in (water, material):
+            target = re.search(r"unity-effects-skill/SKILL\.md(#[^)]+)", row).group(1)
+            self.assertEqual(read_topic("effects", target), read_topic("effects", "#choose-an-operation"))
+        effect_menu = read_topic("effects", "#choose-an-operation")
+        water = next(row for row in effect_menu.splitlines() if "2D water flow, a water spell" in row)
+        section = read_topic("effects", re.search(r"\]\(([^)]+)\)", water).group(1))
+        self.assertIn("#choose-and-combine", section)
+        self.assertIn("channel-water.md#reproduce-the-variants", section)
+        self.assertIn("#author-a-water-effect-from-parameters", section)
+        self.assertIn("#2d-application-replays", section)
+        self.assertIn("solver state", section)
+        material = next(row for row in effect_menu.splitlines() if "explicitly requested animated material study" in row)
+        self.assertIn("flow-sky-2d.md#pick-a-subject", material)
+
     def test_pack_changes_route_to_the_contribution_workflow(self):
         code_menu = read_topic("code", "#choose-an-operation")
         pack_menu = run_reader()

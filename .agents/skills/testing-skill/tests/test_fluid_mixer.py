@@ -1,6 +1,10 @@
 """Protect portable fluid installation, identity and the user's existing assets."""
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+import hashlib
+import json
+import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -11,6 +15,10 @@ SCRIPTS = REPO / "unity-effects-skill/scripts"
 sys.path.insert(0,str(SCRIPTS))
 import fluid_mixer
 from compose_water import compose
+from channel_replay_checks import CHANNELS
+from fluid_application_checks import APPLICATIONS
+from fluid_replay_checks import FORMS
+from inlet_replay_checks import INLETS
 
 
 class FluidInstallTests(unittest.TestCase):
@@ -74,6 +82,30 @@ class FluidInstallTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Invalid count"): rain({"count": 3.5})
         with self.assertRaisesRegex(ValueError, "duration"): rain({"duration": .5})
         self.assertEqual(donor.read_bytes(), original)
+
+    def test_recipe_guide_authors_each_native_capture(self):
+        template = "Assets/Effects/Water"
+        fluid_mixer.install(self.project, template)
+        installed = REPO / "plugins/qin-unity-skills/skills/unity-effects-skill"
+        guide = (installed / "references/water-recipes-2d.md").read_text(encoding="utf-8")
+        rows = re.findall(r"^\| (\w+) \| (`[^|]+) \| (.+) \|$", guide, re.MULTILINE)
+        expected = {*FORMS, *CHANNELS, *INLETS, *(item[1] for item in APPLICATIONS.values())}
+        self.assertCountEqual([name for name, _, _ in rows], expected)
+        films = json.loads((installed / "assets/fluid-subjects/Verification.json").read_text())["films"]
+        self.assertEqual(set(films), expected)
+        for capture, profiles, setup in rows:
+            film = films[capture]
+            self.assertIn("[Watch](../" + film["file"] + ")", setup)
+            self.assertEqual(hashlib.sha256((installed / film["file"]).read_bytes()).hexdigest(), film["sha256"])
+            options = re.search(r"`(--depth [^`]+)`", setup)
+            arguments = shlex.split(options[1]) if options else []
+            settings = {key.removeprefix("--"): float(value) for key, value in zip(arguments[::2], arguments[1::2])}
+            for profile in re.findall(r"`([a-z]+)`", profiles):
+                with self.subTest(capture=capture, profile=profile):
+                    prefab, status = compose(self.project, template, "Assets/GameWater",
+                                             capture + "_" + profile, profile, settings)
+                    self.assertEqual(status, "composed")
+                    self.assertTrue(prefab.is_file())
 
     def test_conflict_in_embedded_package_and_path_escape(self):
         packages=self.project/"Packages/some.other.package"
