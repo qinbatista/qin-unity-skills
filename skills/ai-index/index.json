@@ -217,6 +217,16 @@
       ]
     },
     {
+      "id": "unity-tech-explain",
+      "summary": "Three-part technical explanations of Unity Skills, verified source, usage, and execution diagrams across projects",
+      "document": "skills/ai-index/modules/unity-tech-explain.md",
+      "sources": ["unity-tech-explain-skill"],
+      "dependencies": [
+        {"module": "unity-code", "reason": "Owns the installed task menu, the section reader and the wallet implementation used by the walkthrough."},
+        {"module": "catalog", "reason": "Ships and checks explanation routing from every public domain."}
+      ]
+    },
+    {
       "id": "catalog",
       "summary": "Public task and domain routing, extension ownership, plugin distribution, YoFaAssets comparison and repository tests",
       "document": "skills/ai-index/modules/catalog.md",

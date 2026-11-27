@@ -133,6 +133,19 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertIsNotNone(link, "The direct domain menu must reach the performance review")
                 self.assertEqual(read_topic(domain, link.group(1)), review)
 
+    def test_direct_domains_reach_the_installed_explanation_format(self):
+        explanation = PACK / "unity-tech-explain-skill/SKILL.md"
+        expected = explanation.read_text(encoding="utf-8")
+        link = "../unity-tech-explain-skill/SKILL.md"
+        for entry in sorted(PACK.glob("unity-*-skill/SKILL.md")):
+            if entry == explanation:
+                continue
+            domain = entry.parent.name.removeprefix("unity-").removesuffix("-skill")
+            with self.subTest(domain=domain):
+                menu = read_topic(domain, "#choose-an-operation")
+                self.assertIn(f"]({link})", menu)
+                self.assertEqual(read_topic(domain, link), expected)
+
     def test_performance_menu_opens_implementation_and_measurement_sections(self):
         menu = run_reader("performance")
         self.assertEqual(menu.returncode, 0, menu.stderr)

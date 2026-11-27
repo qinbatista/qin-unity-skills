@@ -1,6 +1,8 @@
 # qin-unity-skills
 
-One [Unity task menu](unity-code-skill/references/global-skill-routing.md#choose-by-task) routes to seven domain Skills. Start there or invoke `$unity-code-skill` for mixed or unfamiliar Unity work. A known domain can start at its own Skill. Each operation links to its rules and verification. The [section reader](unity-code-skill/references/global-skill-routing.md#read-one-section) can return just those headings. Add the [Codex Skill pack](https://github.com/qinbatista/qin-codex-skills) for general task execution and verification.
+One [Unity task menu](unity-code-skill/references/global-skill-routing.md#choose-by-task) routes to eight Skills. Start there or invoke `$unity-code-skill` for mixed or unfamiliar Unity work. A known domain can start at its own Skill. Each operation links to its rules and verification. The [section reader](unity-code-skill/references/global-skill-routing.md#read-one-section) can return just those headings. Add the [Codex Skill pack](https://github.com/qinbatista/qin-codex-skills) for general task execution and verification.
+
+[Unity Tech Explain](unity-tech-explain-skill/SKILL.md) gives Unity questions a three-part answer with a short principle, code and usage at the owning file and method, and numbered steps with a diagram. It applies across domains, including explanations of a Skill itself. See the [ScriptableObject storage walkthrough](unity-tech-explain-skill/references/scriptableobject-storage.md) and [global Codex activation](unity-code-skill/references/global-skill-routing.md#require-routing-across-projects).
 
 Every Unity task ends with a [runtime cost review](unity-performance-skill/SKILL.md#review-every-unity-task). For example, a coin can follow the player within pickup range while the CPU owns its reward. A burst of decorative sparks can share an effect emitter. Unity Performance explains how to choose those designs and test the busiest frame, overlapping events and teardown. The installed [optimization casebook](unity-performance-skill/references/performance-cases.md) includes a native replay command. Use it to select cases and add receiving-game regressions for costs uncovered during ordinary feature work. The [verified Unity replay](examples/performance-cases/Verification.json) records the Editor, packages, fixture hash and individual case outcomes.
 
@@ -19,7 +21,7 @@ Paste this into an AI assistant with a local terminal.
 ```text
 Install qin-unity-skills on this computer using the Python 3 installer at
 https://raw.githubusercontent.com/qinbatista/qin-codex-skills/master/management-skill/scripts/install_skill_pack.py
-Run its install qin-unity-skills action and verify the seven SKILL.md files
+Run its install qin-unity-skills action and verify the eight SKILL.md files
 under ~/.agents/skills/qin-unity-skills/. Report the installed Skill names.
 ```
 
@@ -65,6 +67,7 @@ The [ScriptableObject data contracts](unity-code-skill/references/scriptableobje
 | [Unity Effects](unity-effects-skill/SKILL.md) | [Particles, shaders, Graph bindings and replay](examples/charge-pulse/CASEBOOK.md#unity-effects) |
 | [Unity Performance](unity-performance-skill/SKILL.md) | [C# hot paths, pooling and asset lifetimes](unity-performance-skill/references/runtime-code.md) · [Simulation, physics and visual effects in 2D](unity-performance-skill/references/simulation-and-effects.md) · [Before-and-after measurement](unity-performance-skill/references/measure-and-verify.md) |
 | [Unity Testing](unity-testing-skill/SKILL.md) | [Native tests and evidence checks](examples/charge-pulse/CASEBOOK.md#unity-testing-and-repository-skills) · [Run the cases](examples/charge-pulse/CASEBOOK.md#run-the-cases) |
+| [Unity Tech Explain](unity-tech-explain-skill/SKILL.md) | [ScriptableObject storage from reward to restart](unity-tech-explain-skill/references/scriptableobject-storage.md) |
 
 <details>
 <summary>All 52 cases by name</summary>
@@ -78,6 +81,6 @@ The [ScriptableObject data contracts](unity-code-skill/references/scriptableobje
 
 </details>
 
-To use the cases on another Unity project, start with its rules and registered workflows. The seven Skills fill the gaps with portable methods. Follow the [Unity CLI workflow](unity-code-skill/references/unity-cli.md) for background execution and standalone CLI updates. For a YoFaAssets-linked game, see the [shared workflow map](docs/yofaassets-comparison.md).
+To use the cases on another Unity project, start with its rules and registered workflows. The public Skills supply portable methods. Follow the [Unity CLI workflow](unity-code-skill/references/unity-cli.md) for background execution and standalone CLI updates. For a YoFaAssets-linked game, see the [shared workflow map](docs/yofaassets-comparison.md).
 
 The [project AI index](skills/ai-index/SKILL.md) and [test map](.agents/skills/testing-skill/SKILL.md) cover this repository. GitHub Actions keeps the native marketplace files current on `master`. The grouped installer reads the seven-Skill package from the `master` archive.

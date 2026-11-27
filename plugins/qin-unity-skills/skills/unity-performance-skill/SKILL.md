@@ -7,6 +7,8 @@ description: Review runtime cost on every Unity task, including requests that om
 
 **Project rules come first.** Follow the project's rules and registered workflows. Use the [standalone CLI gate](../unity-code-skill/references/unity-cli.md#standalone-cli) when permitted and no project or registered shared owner governs Unity CLI.
 
+Use [Unity Tech Explain](../unity-tech-explain-skill/SKILL.md) when explaining how a Unity Skill, feature or code path works.
+
 Use the [completion review](#review-every-unity-task) for every Unity request. For a linked game, use the registered `game-code-logic` and applicable `game-effect` or `unity-game-testing` workflow. Select a method that fits the receiving game and [share reusable improvements](../unity-code-skill/references/contributing.md#submit-a-skill-change).
 
 ## Review every Unity task

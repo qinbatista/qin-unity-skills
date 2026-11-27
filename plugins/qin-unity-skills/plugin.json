@@ -1,15 +1,15 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "qin-unity-skills",
-  "version": "1.4.0",
-  "description": "Unity code, asset import, UI, animation, effects, testing and test builds, with a performance review for runtime costs and simulation choices.",
+  "version": "1.5.0",
+  "description": "Unity code, technical explanations, asset import, UI, animation, effects, testing and test builds, with a performance review for runtime costs and simulation choices.",
   "repository": "https://github.com/qinbatista/qin-unity-skills",
   "author": { "name": "Qin" },
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "Qin Unity Skills",
-        "shortDescription": "Unity C#, performance, assets, UI, animation, VFX and testing",
+        "shortDescription": "Unity development, testing and code walkthroughs",
         "category": "Game Development"
       }
     }

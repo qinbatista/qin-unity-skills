@@ -12,6 +12,7 @@ UNITY_CLI_GUIDE = PROJECT / "unity-code-skill/references/unity-cli.md"
 UNITY_ROUTING_GUIDE = PROJECT / "unity-code-skill/references/global-skill-routing.md"
 SHARED_GUIDES = {UNITY_CLI_GUIDE, PROJECT / "unity-code-skill/references/contributing.md"}
 PERFORMANCE = PROJECT / "unity-performance-skill"
+TECH_EXPLAIN = PROJECT / "unity-tech-explain-skill/SKILL.md"
 
 
 class PublicSkillCatalogTests(unittest.TestCase):
@@ -113,6 +114,7 @@ class PublicSkillCatalogTests(unittest.TestCase):
                     with self.subTest(document=document.relative_to(PROJECT), target=target):
                         routed_entry = document == UNITY_ROUTING_GUIDE and resolved in entries
                         shared_reader = resolved == PROJECT / "unity-code-skill/scripts/read_topic.py"
+                        explanation = resolved == TECH_EXPLAIN
                         image_audit = resolved == PROJECT / "unity-assets-skill/SKILL.md" and target.endswith("#admit-artwork-and-textures")
                         review = resolved == PERFORMANCE / "SKILL.md" and target.endswith("#review-every-unity-task")
                         image_replay = (
@@ -123,10 +125,9 @@ class PublicSkillCatalogTests(unittest.TestCase):
                             resolved == entry_path or (entry_path.parent / "references") in resolved.parents
                             for entry_path in entries
                         )
-                        self.assertTrue(
-                            routed_entry or shared_reader or image_audit or review or image_replay or performance_handoff
-                            or resolved in SHARED_GUIDES or package in resolved.parents
-                        )
+                        shared_entry = routed_entry or shared_reader or explanation
+                        standard_link = image_audit or review or image_replay or resolved in SHARED_GUIDES
+                        self.assertTrue(shared_entry or standard_link or performance_handoff or package in resolved.parents)
                         self.assertTrue(resolved.is_file())
                         linked_files.add(resolved)
             with self.subTest(package=package.name):
