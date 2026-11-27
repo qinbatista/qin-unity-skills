@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 // One atomic compare-and-swap record per (domain scope, key). No whole-domain scan on a write.
-public sealed class SOFileKeyStore : ISOLocalDataStore
+public sealed class SOFileKeyStore : ISOWriteThroughStore
 {
     private static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
     private readonly string _directory;
@@ -29,11 +29,13 @@ public sealed class SOFileKeyStore : ISOLocalDataStore
 
     public Task<SODataRecord> WriteAsync(string scope, string key, string value, string expectedRevision, CancellationToken cancellation)
     {
-        return Task.Run(() =>
-        {
-            string revision = SOFileStorage.Commit(RecordPath(scope, key), value, expectedRevision, true, false, cancellation);
-            return new SODataRecord(value, revision);
-        }, cancellation);
+        return Task.Run(() => Write(scope, key, value, expectedRevision, cancellation), cancellation);
+    }
+
+    public SODataRecord Write(string scope, string key, string value, string expectedRevision, CancellationToken cancellation)
+    {
+        string revision = SOFileStorage.Commit(RecordPath(scope, key), value, expectedRevision, true, false, cancellation);
+        return new SODataRecord(value, revision);
     }
 
     private string RecordPath(string scope, string key)

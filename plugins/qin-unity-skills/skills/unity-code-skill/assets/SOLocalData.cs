@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // Compatibility for existing LocalFile subclasses, including their old save path and Play lifecycle.
-// New domains inherit SODataController and select their mode on the authored asset.
+// A separate SODataController can attach to an existing runtime SO and own its storage mode.
 public abstract class SOLocalData : SODataController
 {
     public override SODataMode Mode => SODataMode.LocalFile;

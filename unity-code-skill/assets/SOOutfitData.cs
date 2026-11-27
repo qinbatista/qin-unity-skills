@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Game Data/Outfit")]
@@ -9,12 +8,6 @@ public sealed class SOOutfitData : SODataController
     public string HatId => hatId;
     public string BootsId => bootsId;
 
-    protected override void DefineDataKeys(SODataFields fields)
-    {
-        fields.Bind(nameof(hatId), () => hatId, value => hatId = value);
-        fields.Bind(nameof(bootsId), () => bootsId, value => bootsId = value);
-    }
-
-    public Task WearHatAsync(string id) => CommitChangeAsync(nameof(hatId), () => hatId = id);
-    public Task WearBootsAsync(string id) => CommitChangeAsync(nameof(bootsId), () => bootsId = id);
+    public void WearHat(string id) => hatId = id;
+    public void WearBoots(string id) => bootsId = id;
 }

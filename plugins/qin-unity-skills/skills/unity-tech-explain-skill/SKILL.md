@@ -21,7 +21,7 @@ Start directly with the unnumbered headings below in this order. Use the user's 
 
 ### Brief explanation
 
-Answer the question in one to three sentences. Name the owner, what triggers the behavior, and where the result goes when those details matter. For storage, identify what belongs to the authored asset, the running instance, the local file, and the cloud provider when present.
+Answer the question in one to three sentences. Name the owner, what triggers the behavior, and where the result goes when those details matter. For storage, identify what belongs to the authored asset, the running instance, the local file, and the cloud provider when present. Show the game's ordinary assignment or method and the controller's save or acknowledgement boundary.
 
 ### Concrete code
 

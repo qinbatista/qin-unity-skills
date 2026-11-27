@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-public abstract partial class SODataController
+public partial class SODataController
 {
     // Unity's default legacy serializer includes these three fields in the signed representation.
     [SerializeField, HideInInspector] private string _fileName;
@@ -23,7 +23,7 @@ public abstract partial class SODataController
     public virtual void SetPathName() { }
     public virtual void InitialValue()
     {
-        if (_snapshotDefaults != null) JsonUtility.FromJsonOverwrite(_snapshotDefaults, this);
+        RestoreOwner(_snapshotDefaults);
     }
     protected virtual void BeforeLocalDataLoad() { }
     protected virtual void AfterLocalDataLoad() { }
@@ -51,7 +51,7 @@ public abstract partial class SODataController
         {
             if (_scopedDirectory == null && !UsesLegacyPath) throw new InvalidOperationException("Open the local profile first.");
             if (string.IsNullOrWhiteSpace(_fileName)) SetPathName();
-            if (string.IsNullOrWhiteSpace(_fileName)) _fileName = GetType().Name;
+            if (string.IsNullOrWhiteSpace(_fileName)) _fileName = Owner.GetType().Name;
             if (_fileName.Contains("/") || _fileName.Contains("\\") || _fileName == "." || _fileName == ".." ||
                 _fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || _fileName == ".sodata")
                 throw new InvalidDataException("Expected a single save file name.");
@@ -61,18 +61,41 @@ public abstract partial class SODataController
 
     // Exclude the new Inspector configuration from the legacy checksum and from restored data.
     private static readonly Regex InspectorLines = new Regex("(?m)^    \"_(?:storageMode|storageId)\": [^\\r\\n]*(?:\\r?\\n|$)");
+    [Serializable]
+    private sealed class AttachedSnapshot
+    {
+        public int version;
+        public string data;
+        public string checksum;
+    }
+
     protected virtual string SerializeLocalData()
     {
         if (!_snapshotTypesChecked && !UsesLegacyPath)
         {
-            SODataFields.CheckSnapshot(GetType());
+            SODataFields.CheckSnapshot(Owner.GetType());
             _snapshotTypesChecked = true;
         }
+        if (AttachedPlain)
+            return JsonUtility.ToJson(new AttachedSnapshot { version = 1, data = JsonUtility.ToJson(Owner), checksum = _hashValue });
         return InspectorLines.Replace(JsonUtility.ToJson(this, true), string.Empty).Replace(",\n}", "\n}");
     }
 
     protected virtual bool RestoreLocalData(string savedData)
     {
+        if (AttachedPlain)
+        {
+            var snapshot = JsonUtility.FromJson<AttachedSnapshot>(savedData);
+            if (snapshot == null || snapshot.version != 1 || snapshot.data == null || JsonUtility.ToJson(snapshot) != savedData)
+                throw new InvalidDataException("Unsupported attached SO snapshot.");
+            string signature = snapshot.checksum;
+            snapshot.checksum = string.Empty;
+            if (GetSHA256(JsonUtility.ToJson(snapshot)) != signature) return false;
+            SODataFields.CheckSnapshot(Owner.GetType());
+            RestoreOwner(snapshot.data);
+            _hashValue = signature;
+            return true;
+        }
         _hashValue = string.Empty;
         JsonUtility.FromJsonOverwrite(savedData, this);
         string stored = _hashValue;
@@ -111,7 +134,8 @@ public abstract partial class SODataController
         string name = _fileName;
         string storageId = _storageId;
         SODataMode mode = _storageMode;
-        string previous = JsonUtility.ToJson(this);
+        string previous = JsonUtility.ToJson(Owner);
+        _muting++;
         try
         {
             BeforeLocalDataLoad();
@@ -122,10 +146,11 @@ public abstract partial class SODataController
             _snapshotRevision = revision;
             if (data == null) WriteSnapshot(path, false);
             _writeBlocked = false;
+            StorageError = null;
         }
         catch
         {
-            JsonUtility.FromJsonOverwrite(previous, this);
+            RestoreOwner(previous);
             throw;
         }
         finally
@@ -133,7 +158,9 @@ public abstract partial class SODataController
             _storageMode = mode;
             _storageId = storageId;
             _fileName = name;
+            _muting--;
         }
+        if (_scopedDirectory != null) _snapshotAccepted = JsonUtility.ToJson(Owner);
     }
 
     [ContextMenu("Save")]
@@ -148,6 +175,7 @@ public abstract partial class SODataController
     {
         string previousTime = _timeStamp;
         string previousHash = _hashValue;
+        _muting++;
         try
         {
             string data;
@@ -161,6 +189,8 @@ public abstract partial class SODataController
             }
             finally { RestoreAfterLocalSerialization(); }
             _snapshotRevision = reset ? SOFileStorage.WriteSnapshot(path, data) : SOFileStorage.WriteSnapshot(path, data, _snapshotRevision);
+            if (_scopedDirectory != null) _snapshotAccepted = JsonUtility.ToJson(Owner);
+            StorageError = null;
         }
         catch
         {
@@ -168,6 +198,7 @@ public abstract partial class SODataController
             _hashValue = previousHash;
             throw;
         }
+        finally { _muting--; }
     }
 
     [ContextMenu("Clean")]
@@ -175,15 +206,17 @@ public abstract partial class SODataController
     {
         if (!UsesSnapshot()) return;
         string path = FilePath;
-        string previous = JsonUtility.ToJson(this);
+        string previous = JsonUtility.ToJson(Owner);
         _writeBlocked = true;
+        _muting++;
         try
         {
             InitialValue();
             WriteSnapshot(path, true);
             _writeBlocked = false;
         }
-        catch { JsonUtility.FromJsonOverwrite(previous, this); throw; }
+        catch { RestoreOwner(previous); throw; }
+        finally { _muting--; }
     }
 
     protected void RequestAutoSave(float cooldownSeconds = 0.5f)

@@ -160,8 +160,9 @@ public sealed partial class UnityFoundationTests
             serialized.ApplyModifiedPropertiesWithoutUndo();
             runtime = UnityEngine.Object.Instantiate(asset);
             await runtime.OpenAsync("slot-a", new UnityCloudSaveKeyStore(player, () => "alice"));
-            await runtime.CreditCoinsAsync(37);
-            await runtime.CreditCoinsAsync(3);
+            runtime.CreditCoins(37);
+            runtime.CreditCoins(3);
+            await runtime.FlushAsync();
             Assert.AreEqual(40, runtime.Coins);
             Assert.AreEqual(0, asset.Coins);
             CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(runtime.GetStorageScope("slot-a"), "coins") }, player.Batches.Last());

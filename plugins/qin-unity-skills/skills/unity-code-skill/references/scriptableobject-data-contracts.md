@@ -2,7 +2,7 @@
 
 ## Design and review a data owner
 
-For a new or changed SO, identify the domain, authored defaults, runtime writer, readers and lifetime. For each field, trace one production consumer and decide whether it belongs in the local file, the online representation, both or neither. For the [SODataController template](so-data-controller.md#choose-one-mode-per-domain), select one storage policy for the entire domain and bind each durable field in the keyed modes. Use these ten checks when reviewing an existing game.
+For a new or changed SO, identify the domain, authored defaults, runtime writer, readers and lifetime. For each field, trace one production consumer and decide whether it belongs in the local file, the online representation, both or neither. For the [SODataController template](so-data-controller.md#choose-one-mode-per-domain), select one storage policy for the entire domain and keep the game's fields and methods intact. The controller discovers serializable fields and supplies the write boundary. Use these ten checks when reviewing an existing game.
 
 | Rule | Design | Acceptance |
 | --- | --- | --- |

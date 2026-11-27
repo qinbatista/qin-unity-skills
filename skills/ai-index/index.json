@@ -25,9 +25,9 @@
         {
           "id": "open-so-storage",
           "file": "unity-code-skill/assets/SODataController.cs",
-          "symbol": "SODataController.OpenAsync",
-          "anchor": "public async Task OpenAsync(",
-          "summary": "Open a scoped SO with its selected snapshot, local key, cloud key or realtime provider, or keep session-only data."
+          "symbol": "SODataController.AttachAsync",
+          "anchor": "public async Task AttachAsync(",
+          "summary": "Bind a storage policy to an existing runtime SO, load the scoped data and observe its ordinary field writes."
         },
         {
           "id": "save-local-data",

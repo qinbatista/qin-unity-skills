@@ -42,6 +42,12 @@ public interface ISODataKeyStore
 // Acknowledges writes only after the native database or filesystem transaction commits.
 public interface ISOLocalDataStore : ISODataKeyStore { }
 
+// A raw C# assignment can return with its local transaction committed on these providers.
+public interface ISOWriteThroughStore : ISOLocalDataStore
+{
+    SODataRecord Write(string scope, string key, string value, string expectedRevision, CancellationToken cancellation);
+}
+
 public interface ISORealtimeDataStore : ISODataKeyStore
 {
     // Deliver an initial value (including null) before completion, then ordered changes on the Unity thread.

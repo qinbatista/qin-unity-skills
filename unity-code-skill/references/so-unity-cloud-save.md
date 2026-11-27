@@ -1,17 +1,18 @@
 # Unity Cloud Save for DirectAccessOnline
 
-The optional [UnityCloudSaveKeyStore](../assets/Providers/UnityCloudSave/UnityCloudSaveKeyStore.cs) stores one registered field per Cloud Save Player Data key. It uses the signed-in player in the initialized Unity Services environment. Use this adapter for player-writable data. Currency issued by a purchase, leaderboard rewards and other server-authoritative changes belong behind a validated server operation.
+The optional [UnityCloudSaveKeyStore](../assets/Providers/UnityCloudSave/UnityCloudSaveKeyStore.cs) stores one discovered field per Cloud Save Player Data key. It uses the signed-in player in the initialized Unity Services environment. Use this adapter for player-writable data. Currency issued by a purchase, leaderboard rewards and other server-authoritative changes belong behind a validated server operation.
 
 ## Connect a game
 
 - Link the receiving project to its own Unity Project ID in Project Settings, select its UGS environment at initialization, enable Cloud Save and sign in through the game's Authentication provider. The template contains no project ID or credentials. Linked accounts can restore on another device with the same Unity Player ID and environment. [Unity setup](https://docs.unity.com/en-us/cloud-save/get-started)
 - Install `com.unity.services.cloudsave` 3.4.2. Copy the optional provider into the runtime assembly that sees the controller. Reference `Unity.Services.CloudSave`, `Unity.Services.Authentication` and `Unity.Services.Core` and add the scripting define `SO_DATA_UNITY_CLOUD_SAVE` to that assembly. An asmdef version define for package `com.unity.services.cloudsave` with expression `3.4.2` can supply it automatically. Other modes only need their selected providers.
-- Set the currency asset's **Storage Mode** to **Direct Access Online** and assign a stable **Storage Id**. After sign-in, open a runtime clone and await each mutation before displaying success. A game with multiple Unity Services instances can pass the matching player-data service and a function that returns its currently authorized player ID to the second constructor.
+- Set the currency asset's **Storage Mode** to **Direct Access Online** and assign a stable **Storage Id**. After sign-in, open a runtime clone and await the controller's flush before displaying a confirmed change. A game with multiple Unity Services instances can pass the matching player-data service and a function that returns its currently authorized player ID to the second constructor.
 
 ```csharp
 SOCurrencyData wallet = UnityEngine.Object.Instantiate(currencyDefaults);
 await wallet.OpenAsync("slot-a", new UnityCloudSaveKeyStore(), cancellation);
-await wallet.CreditCoinsAsync(3, cancellation);
+wallet.CreditCoins(3);
+await wallet.FlushAsync();
 ```
 
 Close the instance with `wallet.CloseData()` and destroy the clone when leaving that profile. On restart, open a fresh clone with the same player, environment, slot and Storage Id. The controller reads the committed fields. `UnityCloudSaveKeyStore.GetCloudKey(wallet.GetStorageScope("slot-a"), "coins")` returns the exact Dashboard key.

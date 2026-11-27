@@ -1,40 +1,40 @@
 # ScriptableObject storage example
 
-*When I collect three coins, when are they written and how does a new session recover them?*
+*Can an existing wallet keep its own ordinary field and method while the controller saves a pickup?*
 
 ## Brief explanation
 
-In the pack's `DirectAccess` currency example, the runtime SO holds the displayed balance. Each successful reward writes only the currency key to the device. A new clone reads the committed balance when the game opens the same profile and storage ID.
+Yes. The pack's currency method only changes its balance. A separate controller can also attach to a game-owned plain ScriptableObject. For native DirectAccess, the assignment writes only the changed field before returning.
 
 ## Concrete code
 
-**`unity-code-skill/assets/SOCurrencyData.cs` · `SOCurrencyData.CreditCoins` and `CreditCoinsAsync`** (pack sample)
+**`unity-code-skill/assets/SOCurrencyData.cs` · `SOCurrencyData.CreditCoins`** (pack sample)
 
 ```csharp
 public sealed class SOCurrencyData : SODataController
 {
-    // Other members omitted
+    [SerializeField] private int coins;
+    public int Coins => coins;
+
     public void CreditCoins(int amount)
     {
         if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
         coins = checked(coins + amount);
     }
-
-    public Task CreditCoinsAsync(int amount, CancellationToken cancellation = default) =>
-        CommitChangeAsync(nameof(coins), () => CreditCoins(amount), cancellation);
 }
 ```
 
-The pickup owner calls `await wallet.CreditCoinsAsync(3)` before showing the new balance. `unity-code-skill/assets/SOKeySession.cs` · `SOKeySession.ChangeAsync` stages that one field, awaits the store's conditional write and applies the acknowledged result.
+Bootstrap opens the runtime clone with `await wallet.OpenAsync("slot-a")`. The pickup calls `wallet.CreditCoins(3)`. With an existing plain SO, bootstrap uses `await storage.AttachAsync(wallet, "slot-a")` instead. Its own `wallet.money += 3` call works in the same way.
 
 ## Detailed explanation and steps
 
-Set the currency asset to `DirectAccess`. Bootstrap clones it, then calls `await wallet.OpenAsync("slot-a")`. The disk reader loads the accepted key or retains the authored initial balance for a new profile.
+In `unity-code-skill/assets/SODataController.cs`, `SODataController.AttachAsync` loads the matching profile and binds the runtime object. The Editor compiler places an observer after regular field assignments. In `unity-code-skill/assets/SOKeySession.cs`, `SOKeySession.Assigned` captures that field.
 
 ```text
-slot-a holds 37 → CreditCoinsAsync(3) → write the coins key against its revision
-  ├─ device acknowledges → display 40 → restart opens slot-a → 40
-  └─ stale revision      → the other writer wins → reopen reads the winning value
+slot holds 37 → CreditCoins(3) → coins becomes 40
+  ├─ DirectAccess → native coins record is flushed → reopen slot → 40
+  ├─ DirectAccessOnline → request pending → await FlushAsync → cloud accepts 40
+  └─ None → runtime clone holds 40 → reopen → authored balance
 ```
 
-With `None`, the same reward changes the shared clone for this session. A new clone starts from the authored balance. Use the receiving game's real storage owner, calls and save format when explaining its behavior.
+Use the receiving game's real class, writer, profile and storage mode when explaining that game's behavior. For an in-place collection edit, distinguish the next automatic checkpoint from an explicit immediate flush.

@@ -45,7 +45,7 @@ static class SOFileStorage
         {
             cancellation.ThrowIfCancellationRequested();
             EnsureDirectory(metadata);
-            using FileStream writer = AcquireWriter(metadata, cancellation);
+            using IDisposable writer = AcquireWriter(metadata, cancellation);
             byte[] previous = ReadIfPresent(path);
             string previousRevision = previous == null ? null : SOFileEnvelope.Revision(previous);
             if (compareRevision && previousRevision != expectedRevision) throw new SODataConflictException("The saved SO data changed. Reload before retrying.");
@@ -119,7 +119,7 @@ static class SOFileStorage
         SyncDirectory(parent);
     }
 
-    private static FileStream AcquireWriter(string metadata, CancellationToken cancellation)
+    private static IDisposable AcquireWriter(string metadata, CancellationToken cancellation)
     {
         string path = Path.Combine(metadata, "writer.lock");
         for (int attempt = 0; ; attempt++)
@@ -140,14 +140,22 @@ static class SOFileStorage
         return code == 32 || code == 33 || code == 11 || code == 35;
     }
 
-    private static FileStream OpenWriter(string path)
+    private static IDisposable OpenWriter(string path)
     {
 #if SO_DARWIN || SO_LINUX
-        FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-        // The native nonblocking lock also protects against a second process or Editor.
-        if (flock(stream.SafeFileHandle.DangerousGetHandle().ToInt32(), 2 | 4) == 0) return stream;
+        // IL2CPP FileStream handles are runtime objects. Acquire and release the actual POSIX descriptor here.
+        const int readWrite = 2;
+        int descriptor = open(path, readWrite);
+        if (descriptor < 0 && Marshal.GetLastWin32Error() == 2)
+        {
+            // Leave the lock file in place. Its kernel lock is released when its descriptor closes.
+            using (new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite)) { }
+            descriptor = open(path, readWrite);
+        }
+        if (descriptor < 0) throw new IOException("Could not open the SO writer lock (errno " + Marshal.GetLastWin32Error() + ").");
+        if (flock(descriptor, 2 | 4) == 0) return new NativeWriterLock(descriptor);
         int error = Marshal.GetLastWin32Error();
-        stream.Dispose();
+        close(descriptor);
         throw new IOException("The SO storage writer lock is unavailable (errno " + error + ").", error);
 #else
         return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
@@ -163,7 +171,7 @@ static class SOFileStorage
         {
 #if SO_DARWIN || (SO_LINUX && (!UNITY_ANDROID || UNITY_EDITOR))
             // Android's emulated, application-specific storage enforces access independently of POSIX mode bits.
-            if (privateKey && fchmod(file.SafeFileHandle.DangerousGetHandle().ToInt32(), 384) != 0) throw new IOException("Could not set private SO key permissions (errno " + Marshal.GetLastWin32Error() + ").");
+            if (privateKey && chmod(pending, 384) != 0) throw new IOException("Could not set private SO key permissions (errno " + Marshal.GetLastWin32Error() + ").");
 #endif
             file.Write(bytes, 0, bytes.Length);
             file.Flush(true);
@@ -203,6 +211,18 @@ static class SOFileStorage
     }
 
 #if SO_DARWIN || SO_LINUX
+    private sealed class NativeWriterLock : IDisposable
+    {
+        private int _descriptor;
+        public NativeWriterLock(int descriptor) => _descriptor = descriptor;
+
+        public void Dispose()
+        {
+            int descriptor = Interlocked.Exchange(ref _descriptor, -1);
+            if (descriptor >= 0) close(descriptor);
+        }
+    }
+
 #if UNITY_IOS && !UNITY_EDITOR
     private const string NativeLibrary = "__Internal";
 #elif SO_DARWIN
@@ -211,7 +231,11 @@ static class SOFileStorage
     private const string NativeLibrary = "libc";
 #endif
     [DllImport(NativeLibrary, SetLastError = true)] private static extern int flock(int descriptor, int operation);
-    [DllImport(NativeLibrary, SetLastError = true)] private static extern int fchmod(int descriptor, uint permissions);
+#if SO_DARWIN
+    [DllImport(NativeLibrary, SetLastError = true)] private static extern int chmod(string path, ushort permissions);
+#elif !UNITY_ANDROID || UNITY_EDITOR
+    [DllImport(NativeLibrary, SetLastError = true)] private static extern int chmod(string path, uint permissions);
+#endif
     [DllImport(NativeLibrary, SetLastError = true)] private static extern int open(string path, int flags);
     [DllImport(NativeLibrary, SetLastError = true)] private static extern int fsync(int descriptor);
     [DllImport(NativeLibrary)] private static extern int close(int descriptor);

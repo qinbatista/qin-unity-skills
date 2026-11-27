@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -136,19 +137,22 @@ public sealed class SOUnityNetcodeTests
     private static IEnumerator VerifyCurrency(SOCurrencyData server, SOCurrencyData client, SOUnityNetcodeStore store)
     {
         Assert.AreEqual(37, client.Coins);
-        Assert.Throws<UnauthorizedAccessException>(() => client.CreditCoinsAsync(9).GetAwaiter().GetResult());
-        Assert.AreEqual(37, client.Coins);
         int notifications = 0;
         client.DataChanged += key => { if (key == "coins") notifications++; };
-        server.CreditCoinsAsync(3).GetAwaiter().GetResult();
+        server.CreditCoins(3);
+        yield return ConfirmServerWrite(server);
         yield return Until(() => client.Coins == 40, "currency SO push");
         Assert.AreEqual(40, server.Coins);
         Assert.AreEqual(1, notifications);
+        yield return ExpectDenied(client, () => client.CreditCoins(9));
+        Assert.AreEqual(40, client.Coins);
+        int beforeClose = notifications;
         client.CloseData();
-        server.CreditCoinsAsync(1).GetAwaiter().GetResult();
+        server.CreditCoins(1);
+        yield return ConfirmServerWrite(server);
         string scope = server.GetStorageScope(Profile);
         yield return Until(() => store.ReadAsync(scope, "coins", Token).Result.Value == "{\"value\":41}", "post-close push");
-        Assert.AreEqual(1, notifications);
+        Assert.AreEqual(beforeClose, notifications);
         Assert.AreEqual(37, client.Coins);
         Debug.Log("SO currency replay: server 37 + 3 = 40, client projected 40 on one push, closed SO stayed at its default 37 while the replica reached 41.");
     }
@@ -160,12 +164,38 @@ public sealed class SOUnityNetcodeTests
         Assert.AreEqual(Vector3.zero, opponentView.Position);
         int pushes = 0;
         opponentView.DataChanged += key => { if (key == "position") pushes++; };
-        server.SetPositionAsync(acceptedPosition).GetAwaiter().GetResult();
+        server.SetPosition(acceptedPosition);
+        yield return ConfirmServerWrite(server);
         yield return Until(() => opponentView.Position == acceptedPosition, "opponent's world position");
         Assert.AreEqual(1, pushes);
-        Assert.Throws<UnauthorizedAccessException>(() => opponentView.SetPositionAsync(Vector3.one).GetAwaiter().GetResult());
+        yield return ExpectDenied(opponentView, () => opponentView.SetPosition(Vector3.one));
         Assert.AreEqual(acceptedPosition, opponentView.Position);
         Debug.Log("SO opponent replay: the server accepted (4.5, 0, -2), the remote SO received that Vector3 in one push, and a client position override was rejected.");
+    }
+
+    private static IEnumerator ConfirmServerWrite(SODataController owner)
+    {
+        Task confirmed = owner.FlushAsync();
+        yield return Until(() => confirmed.IsCompleted, "server acknowledgement");
+        confirmed.GetAwaiter().GetResult();
+    }
+
+    private static IEnumerator ExpectDenied(SODataController replica, Action change)
+    {
+        Exception error = null;
+        Task acknowledgement = null;
+        try
+        {
+            change();
+            acknowledgement = replica.FlushAsync();
+        }
+        catch (Exception failure) { error = failure.GetBaseException(); }
+        if (acknowledgement != null)
+        {
+            yield return Until(() => acknowledgement.IsCompleted, "client write rejection");
+            error = acknowledgement.Exception?.GetBaseException();
+        }
+        Assert.IsInstanceOf<UnauthorizedAccessException>(error);
     }
 
     private NetworkManager CreatePeer(string name, ushort port, GameObject prefab)
