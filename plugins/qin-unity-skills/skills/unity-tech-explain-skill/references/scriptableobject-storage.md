@@ -1,48 +1,42 @@
 # ScriptableObject storage example
 
-*How do I give a wallet three coins and get the balance back after restarting?*
+*My wallet SO already has a coin balance. Where should adding three coins happen?*
 
 ## Brief explanation
 
-The wallet's `int money` field holds the player's coin count. A pickup changes that field directly.
+In this shared template, `SOCurrencyData` owns the balance. Gameplay reads `wallet.Coins` and calls `wallet.CreditCoins(3)` when a pickup succeeds. The SO checks the amount and changes its own private field.
 
 ## Concrete code
 
-The starting balance belongs to the `NativeWalletDomain` SO. [Wallet source](https://github.com/qinbatista/qin-unity-skills/blob/025c192947faef58c8b8bdee5ac50faa5e336a6f/.agents/skills/testing-skill/tests/fixtures/scriptableobjects/NativeWalletDomain.cs#L6)
+The serialized field keeps its existing name, `coins`. The getter is public and the setter is private, so other classes can read the balance and the wallet controls each credit. [SOCurrencyData.cs](https://github.com/qinbatista/qin-unity-skills/blob/master/unity-code-skill/assets/SOCurrencyData.cs)
 
 ```csharp
-// NativeWalletDomain.cs
-public sealed class NativeWalletDomain : ScriptableObject
+// SOCurrencyData.cs
+public sealed class SOCurrencyData : SODataController
 {
-    public int money = 37;
-    // ...
-}
-```
+    [SerializeField] private int coins;
 
-Set the Storage Controller asset to `DirectAccess` in the Inspector. In this excerpt from the replay, `session` opens the wallet's slot on each launch. The first launch simulates one pickup. [NativeWalletProbe.Run](https://github.com/qinbatista/qin-unity-skills/blob/025c192947faef58c8b8bdee5ac50faa5e336a6f/.agents/skills/testing-skill/tests/fixtures/scriptableobjects/NativeWalletProbe.cs#L11)
-
-```csharp
-// NativeWalletProbe.cs
-public static class NativeWalletProbe
-{
-    private static async void Run()
+    public int Coins
     {
-        // ...
-        await session.AttachAsync(wallet, "native-wallet-replay");
-        if (!reopen)
-        {
-            wallet.money += 3;
-        }
-        // ...
+        get => coins;
+        private set => coins = value;
+    }
+
+    public void CreditCoins(int amount)
+    {
+        if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
+        Coins = checked(Coins + amount);
     }
 }
 ```
 
+Choose `DirectAccess` on the wallet asset. At profile entry the bootstrap opens its runtime copy with `await wallet.OpenAsync("slot-a")`. The pickup calls `wallet.CreditCoins(3)` and the UI reads `wallet.Coins`.
+
 ## Detailed explanation and steps
 
 ```text
-37 coins → pick up 3 → the money record is written as 40
-Restart → open the same slot with the same controller settings → wallet.money is 40
+Slot holds 37 → CreditCoins(3) → the setter writes coins = 40 → the local key is committed
+Restart → open the same slot and storage ID → wallet.Coins returns 40
 ```
 
-The controller receives a notification when gameplay assigns the field. With native DirectAccess, that line returns after the changed field is on disk.
+The controller observes the backing-field assignment inside the setter. With native DirectAccess the record is on disk when the credit method returns.

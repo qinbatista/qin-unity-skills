@@ -146,25 +146,22 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertIn(f"]({link})", menu)
                 self.assertEqual(read_topic(domain, link), expected)
 
-    def test_wallet_walkthrough_shows_fields_and_calls_in_their_source_types(self):
+    def test_wallet_walkthrough_starts_with_the_currency_sos_own_api(self):
         section = read_topic("tech-explain", "references/scriptableobject-storage.md#concrete-code")
         blocks = re.findall(r"^```csharp\n(.*?)\n```$", section, re.MULTILINE | re.DOTALL)
-        cases = [
-            ("NativeWalletDomain.cs", ["public int money = 37;"]),
-            ("NativeWalletProbe.cs", ["private static async void Run()", "wallet.money += 3;"]),
-        ]
-        fixtures = Path(__file__).parent / "fixtures" / "scriptableobjects"
-        self.assertEqual(len(blocks), len(cases))
-        for block, (filename, members) in zip(blocks, cases):
-            with self.subTest(filename=filename):
-                path = fixtures / filename
-                source = path.read_text(encoding="utf-8")
-                declaration = next(line for line in source.splitlines() if f"class {path.stem}" in line)
-                self.assertTrue(block.startswith(f"// {filename}\n{declaration}\n{{\n"))
-                self.assertTrue(block.endswith("\n}"))
-                for member in members:
-                    self.assertIn(member, source)
-                    self.assertIn(member, block)
+        path = PACK / "unity-code-skill" / "assets" / "SOCurrencyData.cs"
+        source = path.read_text(encoding="utf-8")
+        self.assertTrue(blocks)
+        filename, body = blocks[0].split("\n", 1)
+        self.assertEqual(filename, f"// {path.name}")
+        self.assertTrue(body.startswith("public sealed class SOCurrencyData : SODataController\n{"))
+        self.assertTrue(body.endswith("\n}"))
+        self.assertIn(body, source)
+        for member in ("[SerializeField] private int coins;", "get => coins;", "private set => coins = value;",
+                       "public void CreditCoins(int amount)", "Coins = checked(Coins + amount);"):
+            self.assertIn(member, body)
+        for usage in ('wallet.OpenAsync("slot-a")', "wallet.CreditCoins(3)", "wallet.Coins"):
+            self.assertIn(usage, section)
 
     def test_performance_menu_opens_implementation_and_measurement_sections(self):
         menu = run_reader("performance")

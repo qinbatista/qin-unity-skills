@@ -90,9 +90,13 @@ public sealed partial class UnityFoundationTests
             await original.WriteAsync(oldScope, "coins", "{\"value\":37}", null, CancellationToken.None);
             await first.OpenAsync("profile/1");
             Assert.AreEqual(37, first.Coins);
-            first.CreditCoins(1);
-            first.CreditCoins(2);
-            Assert.AreEqual("{\"value\":40}", (await original.ReadAsync(oldScope, "coins", CancellationToken.None)).Value);
+            first.CreditCoins(3);
+            var saved = await original.ReadAsync(oldScope, "coins", CancellationToken.None);
+            Assert.AreEqual("{\"value\":40}", saved.Value);
+            Assert.Throws<ArgumentOutOfRangeException>(() => first.CreditCoins(0));
+            Assert.Throws<OverflowException>(() => first.CreditCoins(int.MaxValue));
+            Assert.AreEqual(40, first.Coins);
+            Assert.AreEqual(saved.Revision, (await original.ReadAsync(oldScope, "coins", CancellationToken.None)).Revision);
             await cold.OpenAsync("profile/1");
             Assert.AreEqual(40, cold.Coins);
             first.CreditCoins(2);

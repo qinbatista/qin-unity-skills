@@ -20,16 +20,15 @@ Split currency, equipment and tuning when their lifetime, durability or authorit
 - Copy the complete [WriteHooks](../assets/WriteHooks/SOData.Runtime.asmdef) and [CodeGen](../assets/CodeGen/Unity.SOData.CodeGen.asmdef) directories with their asmdefs intact. Add `com.unity.nuget.mono-cecil` 1.11.6 in Package Manager and reference `SOData.Runtime` from the controller's asmdef. The Editor compiler instruments source under Assets, including default Assembly-CSharp, separate data assemblies and their callers. A package-owned source asmdef can opt in by referencing `SOData.Runtime`. The compile step generates the field hooks and closed codecs used by IL2CPP. Plain gameplay source needs no storage references.
 - Copy one optional service adapter if the game uses it. The local modes require no cloud account or SDK. Bind both authored assets in the bootstrap and make one runtime instance of each for the active profile. Run their storage operations on Unity's main thread.
 
-For an existing wallet with a public `int money` and a controller asset configured as `DirectAccess` with storage ID `currency`, the only integration lives in the bootstrap.
+The packaged [SOCurrencyData](../assets/SOCurrencyData.cs) owns its balance. `Coins` has a public getter and a private setter backed by the existing serialized `coins` field. `CreditCoins` validates the amount and updates that property. Select `DirectAccess` and a stable storage ID on the wallet asset. The bootstrap opens its runtime instance and shares that instance with the pickup and UI.
 
 ```csharp
 var wallet = UnityEngine.Object.Instantiate(authoredWallet);
-var storage = UnityEngine.Object.Instantiate(currencyStorage);
-await storage.AttachAsync(wallet, "slot-a");  // Loads this profile into the existing SO.
-wallet.money += 3;                          // Original pickup call. Saves only money.
+await wallet.OpenAsync("slot-a");  // Once at profile entry.
+wallet.CreditCoins(3);            // At pickup. UI reads wallet.Coins.
 ```
 
-For the inherited [SOCurrencyData sample](../assets/SOCurrencyData.cs), use `await wallet.OpenAsync("slot-a")` and keep calling `wallet.CreditCoins(3)`. The original field is named `coins`, which preserves its existing storage key. [SOOutfitData](../assets/SOOutfitData.cs) likewise keeps ordinary `WearHat` and `WearBoots` methods. When leaving a profile, close the controller to detach and restore the clone's pre-open defaults, then destroy the owned runtime clones. For an online controller first await `FlushAsync` if pending changes must be acknowledged.
+For an existing SO that derives directly from `ScriptableObject`, instantiate a separate controller policy and call `await storage.AttachAsync(wallet, "slot-a")` at profile entry. Keep that SO's own methods, setters or public fields. [SOOutfitData](../assets/SOOutfitData.cs) likewise keeps ordinary `WearHat` and `WearBoots` methods. When leaving a profile, close the controller to detach and restore the clone's pre-open defaults, then destroy the owned runtime clones. For an online controller first await `FlushAsync` if pending changes must be acknowledged.
 
 ## Assignment and acknowledgement
 

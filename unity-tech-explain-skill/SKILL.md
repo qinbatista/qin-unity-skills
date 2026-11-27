@@ -21,13 +21,13 @@ Use the following three unnumbered headings in the user's language. The Chinese 
 
 ### Brief explanation
 
-Start with the thing the user can see or change. For an SO, name its actual field, its type and what its value means in the game. For an Editor workflow, start at the Inspector control or component they touch. Give the outcome in everyday language.
+Start with the thing the user can see or change. When they name an SO or a game, locate its actual domain class and public API. Explain what its value means and how gameplay reads or changes it. If only the shared template is available, identify it as a template. For an Editor workflow, start at the control or component they touch.
 
 ### Concrete code
 
-Start with the member the user works with. In each Unity C# excerpt, put the actual `.cs` filename in a comment on the first line. Show the real declaring type and its braces around the relevant members. For an SO, copy its class declaration including its base class, and put the field inside. Use `// ...` to omit unrelated members.
+Start with the member the user works with. In each Unity C# excerpt, put the actual `.cs` filename in a comment on the first line. Show the real declaring type, base class and braces. When an SO owns an operation, show its serialized backing field, the relevant property accessors with their actual visibility, and the method that changes the value. Use `// ...` to omit unrelated members.
 
-Then show the necessary setup and gameplay call in execution order. When the caller lives in another file, give it a separate block with that file's name, type and enclosing method. Label an excerpt when shortening a method, retain the condition that triggers the action, and link the exact source beside the block. Identify illustrative code explicitly. For an Editor-only task, show the setting and action the user needs.
+Give the consumer's ordinary call in one line when that shows how to use the SO. Follow the existing API, including its validation, side effects and save timing. Use test fixtures as evidence and identify them when the question concerns the test itself. If the caller's implementation matters, give it a separate block with its actual file, type, method and trigger. Link the sources and label illustrative code. For an Editor-only task, show the setting and action the user needs.
 
 ### Detailed explanation and steps
 
