@@ -1,40 +1,31 @@
 # ScriptableObject storage example
 
-*Can an existing wallet keep its own ordinary field and method while the controller saves a pickup?*
+*How do I give a wallet three coins and get the balance back after restarting?*
 
 ## Brief explanation
 
-Yes. The pack's currency method only changes its balance. A separate controller can also attach to a game-owned plain ScriptableObject. For native DirectAccess, the assignment writes only the changed field before returning.
+The wallet's `int money` field holds the player's coin count. A pickup changes that field directly.
 
 ## Concrete code
 
-**`unity-code-skill/assets/SOCurrencyData.cs` · `SOCurrencyData.CreditCoins`** (pack sample)
+The starting value is one line in the existing SO. [NativeWalletDomain.cs](https://github.com/qinbatista/qin-unity-skills/blob/025c192947faef58c8b8bdee5ac50faa5e336a6f/.agents/skills/testing-skill/tests/fixtures/scriptableobjects/NativeWalletDomain.cs#L15)
 
 ```csharp
-public sealed class SOCurrencyData : SODataController
-{
-    [SerializeField] private int coins;
-    public int Coins => coins;
-
-    public void CreditCoins(int amount)
-    {
-        if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
-        coins = checked(coins + amount);
-    }
-}
+public int money = 37;
 ```
 
-Bootstrap opens the runtime clone with `await wallet.OpenAsync("slot-a")`. The pickup calls `wallet.CreditCoins(3)`. With an existing plain SO, bootstrap uses `await storage.AttachAsync(wallet, "slot-a")` instead. Its own `wallet.money += 3` call works in the same way.
+Set the Storage Controller asset to `DirectAccess` in the Inspector. At startup, `session` is its runtime copy and `wallet` is the instance used in play. The two relevant lines from the player's replay are below. [NativeWalletProbe.Run](https://github.com/qinbatista/qin-unity-skills/blob/025c192947faef58c8b8bdee5ac50faa5e336a6f/.agents/skills/testing-skill/tests/fixtures/scriptableobjects/NativeWalletProbe.cs#L25)
+
+```csharp
+await session.AttachAsync(wallet, "native-wallet-replay"); // Once when opening the save slot.
+wallet.money += 3;                                        // When the player picks up three coins.
+```
 
 ## Detailed explanation and steps
 
-In `unity-code-skill/assets/SODataController.cs`, `SODataController.AttachAsync` loads the matching profile and binds the runtime object. The Editor compiler places an observer after regular field assignments. In `unity-code-skill/assets/SOKeySession.cs`, `SOKeySession.Assigned` captures that field.
-
 ```text
-slot holds 37 → CreditCoins(3) → coins becomes 40
-  ├─ DirectAccess → native coins record is flushed → reopen slot → 40
-  ├─ DirectAccessOnline → request pending → await FlushAsync → cloud accepts 40
-  └─ None → runtime clone holds 40 → reopen → authored balance
+37 coins → pick up 3 → the money record is written as 40
+Restart → open the same slot with the same controller settings → wallet.money is 40
 ```
 
-Use the receiving game's real class, writer, profile and storage mode when explaining that game's behavior. For an in-place collection edit, distinguish the next automatic checkpoint from an explicit immediate flush.
+The controller receives a notification when gameplay assigns the field. With native DirectAccess, that line returns after the changed field is on disk.

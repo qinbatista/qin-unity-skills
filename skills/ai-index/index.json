@@ -225,7 +225,7 @@
     },
     {
       "id": "unity-tech-explain",
-      "summary": "Unnumbered Unity explanations with verified source and usage, ordered steps, and optional plain-text diagrams",
+      "summary": "Unity explanations from the user-owned field or Inspector control through setup, gameplay action and observable result",
       "document": "skills/ai-index/modules/unity-tech-explain.md",
       "sources": ["unity-tech-explain-skill"],
       "dependencies": [
