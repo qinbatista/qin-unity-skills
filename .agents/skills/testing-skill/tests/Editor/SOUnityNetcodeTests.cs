@@ -62,6 +62,9 @@ public sealed class SOUnityNetcodeTests
 
         var replica = first.SpawnManager.SpawnedObjects[id].GetComponent<SOUnityNetcodeStore>();
         Assert.AreNotSame(authority, replica);
+        SOCurrencyData wallet = ScriptableObject.CreateInstance<SOCurrencyData>();
+        try { Assert.Throws<ArgumentException>(() => wallet.OpenAsync(Profile, authority).GetAwaiter().GetResult()); }
+        finally { Object.Destroy(wallet); }
         List<SODataRecord> changes = new List<SODataRecord>();
         using var subscription = replica.SubscribeAsync(Scope, Key, changes.Add, Token).GetAwaiter().GetResult();
         Assert.AreEqual(1, changes.Count);

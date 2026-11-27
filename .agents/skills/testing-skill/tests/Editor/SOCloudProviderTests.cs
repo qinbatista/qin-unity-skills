@@ -146,6 +146,67 @@ public sealed partial class UnityFoundationTests
     }
 
     [UnityTest]
+    public IEnumerator AccountCurrencyCreditsTheOriginalCloudKeyAndRestoresOnlyTheConfirmedBalance() => RunCloudCase(VerifyCloudCurrencyAsync());
+
+    private async Task VerifyCloudCurrencyAsync()
+    {
+        CloudPlayerFixture player = new CloudPlayerFixture();
+        UnityCloudSaveKeyStore firstDevice = new UnityCloudSaveKeyStore(player, () => "alice");
+        UnityCloudSaveKeyStore secondDevice = new UnityCloudSaveKeyStore(player, () => "alice");
+        SOCurrencyData first = Domain<SOCurrencyData>(SODataMode.DirectAccess, "wallet");
+        SOCurrencyData cold = UnityEngine.Object.Instantiate(first);
+        const string scope = "profile%2F1/wallet";
+        CancellationToken token = CancellationToken.None;
+        SOFileKeyStore previousLocal = new SOFileKeyStore(Path.Combine(_root, "SOData", "keys"));
+        try
+        {
+            SODataRecord local = await previousLocal.WriteAsync(scope, "coins", "{\"value\":81}", null, token);
+            await first.OpenAsync("profile/1", firstDevice);
+            Assert.AreEqual(0, first.Coins);
+            Assert.IsNull(await firstDevice.ReadAsync(scope, "coins", token));
+            first.CloseData();
+
+            await firstDevice.WriteAsync(scope, "coins", "{\"value\":37}", null, token);
+            await first.OpenAsync("profile/1", firstDevice);
+            Assert.AreEqual(37, first.Coins);
+            first.CreditCoins(3);
+            await first.FlushAsync();
+            CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(scope, "coins") }, player.Batches.Last());
+            Assert.AreEqual("{\"value\":40}", (await secondDevice.ReadAsync(scope, "coins", token)).Value);
+            int writes = player.Batches.Count;
+            Assert.Throws<ArgumentOutOfRangeException>(() => first.CreditCoins(0));
+            Assert.Throws<OverflowException>(() => first.CreditCoins(int.MaxValue));
+            Assert.AreEqual(writes, player.Batches.Count);
+
+            await cold.OpenAsync("profile/1", secondDevice);
+            Assert.AreEqual(40, cold.Coins);
+            first.CreditCoins(2);
+            await first.FlushAsync();
+            await ExpectCloudFailure<SODataConflictException>(cold.CreditCoinsAsync(10));
+            Assert.AreEqual(40, cold.Coins);
+            cold.CloseData();
+            await cold.OpenAsync("profile/1", secondDevice);
+            Assert.AreEqual(42, cold.Coins);
+            await cold.CreditCoinsAsync(1);
+            await ExpectError<OperationCanceledException>(() => cold.CreditCoinsAsync(5, new CancellationToken(true)));
+            Assert.AreEqual(43, cold.Coins);
+
+            player.DropAcknowledgementFor = UnityCloudSaveKeyStore.GetCloudKey(scope, "coins");
+            await ExpectCloudFailure<IOException>(cold.CreditCoinsAsync(1));
+            Assert.AreEqual(43, cold.Coins);
+            cold.CloseData();
+            player.DropAcknowledgementFor = null;
+            await cold.OpenAsync("profile/1", secondDevice);
+            Assert.AreEqual(44, cold.Coins);
+            cold.CloseData();
+            await cold.OpenAsync("profile%2F1", secondDevice);
+            Assert.AreEqual(0, cold.Coins);
+            Assert.AreEqual(local.Revision, (await previousLocal.ReadAsync(scope, "coins", token)).Revision);
+        }
+        finally { UnityEngine.Object.DestroyImmediate(first); UnityEngine.Object.DestroyImmediate(cold); }
+    }
+
+    [UnityTest]
     public IEnumerator CloudSaveOutfitCloneRestoresThroughTheGameplayEntry() => RunCloudCase(VerifyCloudOutfitAsync());
 
     private static async Task VerifyCloudOutfitAsync()

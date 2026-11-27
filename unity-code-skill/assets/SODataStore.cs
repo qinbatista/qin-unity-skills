@@ -54,3 +54,6 @@ public interface ISORealtimeDataStore : ISODataKeyStore
     // Dispose to detach. The provider owns its transport and the authority to write.
     Task<IDisposable> SubscribeAsync(string scope, string key, Action<SODataRecord> receive, CancellationToken cancellation);
 }
+
+// Match-scoped state ends with its server. Persistent providers can also implement ISORealtimeDataStore directly.
+public interface ISOMatchSessionStore : ISORealtimeDataStore { }

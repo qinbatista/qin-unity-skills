@@ -68,7 +68,7 @@ public sealed partial class UnityFoundationTests
             {
                 EnumField fixedField = (EnumField)drawer.CreatePropertyGUI(walletProperties.FindProperty("_storageMode"));
                 Assert.AreEqual("Storage Mode", fixedField.label);
-                Assert.AreEqual(SODataMode.DirectAccess, fixedField.value);
+                Assert.AreEqual(SODataMode.DirectAccessOnline, fixedField.value);
                 Assert.IsFalse(fixedField.enabledSelf);
                 EnumField editableField = (EnumField)drawer.CreatePropertyGUI(outfitProperties.FindProperty("_storageMode"));
                 Assert.AreEqual(SODataMode.LocalFile, editableField.value);
@@ -83,30 +83,37 @@ public sealed partial class UnityFoundationTests
 
     [TestCase(SODataMode.None)]
     [TestCase(SODataMode.LocalFile)]
-    [TestCase(SODataMode.DirectAccessOnline)]
+    [TestCase(SODataMode.DirectAccess)]
     [TestCase(SODataMode.RealtimeOnline)]
     public async Task CurrencyRejectsConflictingPoliciesBeforeAnyBindingOrWrite(SODataMode mismatch)
     {
         SOCurrencyData wallet = Domain<SOCurrencyData>(mismatch);
         SODataController other = Domain<SODataController>(mismatch);
-        SODataController local = Domain<SODataController>(SODataMode.DirectAccess);
+        SODataController online = Domain<SODataController>(SODataMode.DirectAccessOnline);
+        DelayedStore cloud = new DelayedStore();
         try
         {
-            Assert.AreEqual(SODataMode.DirectAccess, wallet.Mode);
+            Assert.AreEqual(SODataMode.DirectAccessOnline, wallet.Mode);
             Assert.Throws<InvalidOperationException>(() => wallet.CreditCoins(3));
             await ExpectError<InvalidOperationException>(() => other.AttachAsync(wallet, "slot"));
-            await ExpectError<ArgumentException>(() => wallet.OpenAsync("slot", new DelayedStore()));
+            await ExpectError<ArgumentNullException>(() => wallet.OpenAsync("slot"));
+            await ExpectError<ArgumentException>(() => wallet.OpenAsync("slot", new SOFileKeyStore(_root)));
             Assert.Throws<InvalidOperationException>(() => wallet.CreditCoins(3));
             Assert.AreEqual(0, wallet.Coins);
             Assert.IsFalse(Directory.Exists(_root));
-            await local.AttachAsync(wallet, "slot");
+            await online.AttachAsync(wallet, "slot", cloud);
             wallet.CreditCoins(3);
-            local.CloseData();
-            Assert.Throws<InvalidOperationException>(() => wallet.CreditCoins(2));
-            await wallet.OpenAsync("slot");
             Assert.AreEqual(3, wallet.Coins);
+            Task receipt = online.FlushAsync();
+            Assert.IsFalse(receipt.IsCompleted);
+            Assert.AreEqual("{\"value\":3}", cloud.Writes[0].Value);
+            cloud.Accept(0, "revision-1");
+            await receipt;
+            online.CloseData();
+            Assert.Throws<InvalidOperationException>(() => wallet.CreditCoins(2));
+            Assert.IsFalse(Directory.Exists(_root));
         }
-        finally { Object.DestroyImmediate(local); Object.DestroyImmediate(other); Object.DestroyImmediate(wallet); }
+        finally { Object.DestroyImmediate(online); Object.DestroyImmediate(other); Object.DestroyImmediate(wallet); }
     }
 
     [Test]
@@ -147,49 +154,9 @@ public sealed partial class UnityFoundationTests
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
             SOCurrencyData wallet = AssetDatabase.LoadAssetAtPath<SOCurrencyData>(path);
             Assert.AreEqual(11, wallet.Coins);
-            Assert.AreEqual(SODataMode.DirectAccess, wallet.Mode);
+            Assert.AreEqual(SODataMode.DirectAccessOnline, wallet.Mode);
         }
         finally { AssetDatabase.DeleteAsset(path); }
-    }
-
-    [Test]
-    public async Task DirectAccessOrdinaryCreditWritesTheOriginalWalletKeyBeforeReturning()
-    {
-        SOCurrencyData first = Domain<SOCurrencyData>(SODataMode.None, "wallet");
-        var cold = Object.Instantiate(first);
-        try
-        {
-            // Seed the field name, wire shape and profile scope used by the previous release.
-            SOFileKeyStore original = new SOFileKeyStore(Path.Combine(_root, "SOData", "keys"));
-            const string oldScope = "profile%2F1/wallet";
-            await original.WriteAsync(oldScope, "coins", "{\"value\":37}", null, CancellationToken.None);
-            await first.OpenAsync("profile/1");
-            Assert.AreEqual(37, first.Coins);
-            first.CreditCoins(3);
-            var saved = await original.ReadAsync(oldScope, "coins", CancellationToken.None);
-            Assert.AreEqual("{\"value\":40}", saved.Value);
-            Assert.Throws<ArgumentOutOfRangeException>(() => first.CreditCoins(0));
-            Assert.Throws<OverflowException>(() => first.CreditCoins(int.MaxValue));
-            Assert.AreEqual(40, first.Coins);
-            Assert.AreEqual(saved.Revision, (await original.ReadAsync(oldScope, "coins", CancellationToken.None)).Revision);
-            await cold.OpenAsync("profile/1");
-            Assert.AreEqual(40, cold.Coins);
-            first.CreditCoins(2);
-            Assert.Throws<SODataConflictException>(() => cold.CreditCoins(10));
-            Assert.AreEqual(40, cold.Coins);
-            cold.CloseData();
-            await cold.OpenAsync("profile/1");
-            Assert.AreEqual(42, cold.Coins);
-            // An existing call site can still opt into the asynchronous compatibility extension.
-            await cold.CreditCoinsAsync(1);
-            await ExpectError<OperationCanceledException>(() => cold.CreditCoinsAsync(5, new CancellationToken(true)));
-            Assert.AreEqual(43, cold.Coins);
-            Assert.AreEqual("{\"value\":43}", (await original.ReadAsync(oldScope, "coins", CancellationToken.None)).Value);
-            cold.CloseData();
-            await cold.OpenAsync("profile%2F1");
-            Assert.AreEqual(0, cold.Coins);
-        }
-        finally { Object.DestroyImmediate(first); Object.DestroyImmediate(cold); }
     }
 
     [TestCase(SODataMode.LocalFile)]

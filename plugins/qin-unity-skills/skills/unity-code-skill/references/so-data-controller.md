@@ -11,7 +11,7 @@ A domain with a required storage policy overrides `RequiredMode`. Its Inspector 
 | `None` (default) | Speed or attack tuning | Consumers share one runtime instance. A fresh clone starts from the authored asset. There is no storage or subscription. |
 | `LocalFile` | Outfit | A managed field assignment writes one encrypted whole-domain snapshot. Opening the same profile restores the outfit together. |
 | `DirectAccess` | Offline currency or completed levels | A managed assignment to a field writes just that key. The built-in native store flushes and conditionally replaces the record before the assignment returns. Reopening loads accepted values. |
-| `DirectAccessOnline` | Signed-in progress | Assigning a field queues that key immediately. Gameplay sees the new local value while the request is pending. Await `FlushAsync` on the controller before confirming success. A fresh open reads the cloud. [Unity Cloud Save adapter](so-unity-cloud-save.md) |
+| `DirectAccessOnline` | Account currency and signed-in progress | Assigning a field queues that key immediately. Gameplay sees the new local value while the request is pending. Await `FlushAsync` on the controller before confirming success. A fresh open reads the cloud. [Unity Cloud Save adapter](so-unity-cloud-save.md) |
 | `RealtimeOnline` | Actors in a match | The authority publishes a changed key. Subscribed clients receive the initial state and subsequent updates. A late join reads the current match. [Unity Netcode adapter](so-unity-netcode.md) |
 
 Split currency, equipment and tuning when their lifetime, durability or authority differs. Group values that must change atomically in one small serializable record and assign the complete record. Give independent assets of the same type different stable IDs. Back up realtime match state separately if it must survive server restart.
@@ -23,15 +23,18 @@ Split currency, equipment and tuning when their lifetime, durability or authorit
 - Copy the complete [WriteHooks](../assets/WriteHooks/SOData.Runtime.asmdef) and [CodeGen](../assets/CodeGen/Unity.SOData.CodeGen.asmdef) directories with their asmdefs intact. Add `com.unity.nuget.mono-cecil` 1.11.6 in Package Manager and reference `SOData.Runtime` from the controller's asmdef. The Editor compiler instruments source under Assets, including default Assembly-CSharp, separate data assemblies and their callers. A package-owned source asmdef can opt in by referencing `SOData.Runtime`. The compile step generates the field hooks and closed codecs used by IL2CPP. Plain gameplay source needs no storage references.
 - Copy one optional service adapter if the game uses it. The local modes require no cloud account or SDK. Bind both authored assets in the bootstrap and make one runtime instance of each for the active profile. Run their storage operations on Unity's main thread.
 
-The packaged [SOCurrencyData](../assets/SOCurrencyData.cs) fixes `RequiredMode` to `DirectAccess` for offline currency. Give the asset a stable storage ID. The bootstrap opens its runtime instance and shares it with the pickup and UI. `CreditCoins` requires an open profile, validates the amount and updates the private setter. The field keeps its original asset data and the disk key `coins`. For a game whose existing wallet uses a different backend, retain that policy in the game's own class or migrate the existing balances before adopting the offline template.
+The packaged [SOCurrencyData](../assets/SOCurrencyData.cs) fixes `RequiredMode` to `DirectAccessOnline`. Give it a stable storage ID and open its runtime clone with a persistent provider after account sign-in. This pickup example uses player-writable [Unity Cloud Save](so-unity-cloud-save.md). Server-issued or purchased currency belongs to the game's validated grant or spend operation. Display the balance returned by that ledger.
 
 ```csharp
 SOCurrencyData wallet = UnityEngine.Object.Instantiate(authoredWallet);
-await wallet.OpenAsync("slot-a");  // Once at profile entry.
-wallet.CreditCoins(3);            // At pickup. UI reads wallet.Coins.
+await wallet.OpenAsync("slot-a", new UnityCloudSaveKeyStore());
+wallet.CreditCoins(3);       // Updates the SO and queues the remote coins key.
+await wallet.FlushAsync();   // The provider has confirmed the write on successful return.
 ```
 
 For an existing SO that derives directly from `ScriptableObject`, instantiate a separate controller policy and call `await storage.AttachAsync(wallet, "slot-a")` at profile entry. Keep that SO's own methods, setters or public fields. [SOOutfitData](../assets/SOOutfitData.cs) likewise keeps ordinary `WearHat` and `WearBoots` methods. When leaving a profile, close the controller to detach and restore the clone's pre-open defaults, then destroy the owned runtime clones. For an online controller first await `FlushAsync` if pending changes must be acknowledged.
+
+The remote `coins` record is scoped to its provider, account, environment, slot and storage ID. Local balances created by the 1.8 offline template stay on disk. Bringing those balances to an account requires an explicit game-owned migration that reconciles any existing server balance.
 
 ## Assignment and acknowledgement
 
@@ -47,4 +50,4 @@ The [compiler pass](../assets/CodeGen/SODataFieldWrites.cs) adds a call to [the 
 - The native filesystem backend targets iOS, Android, macOS, Windows and Linux. It uses a flushed temporary file, an atomic replacement and a writer lock. For browser storage, provide an `ISOLocalDataStore` and await `FlushAsync` for its IndexedDB acknowledgement.
 - The envelope checks the clear payload with MD5, encrypts it with AES-256-CBC and a fresh IV, authenticates the stored bytes with HMAC-SHA256 and encodes them in Base64. The local key lives in the storage directory's `.sodata` folder. Back up the key alongside the files. Keep economically sensitive grants under server authority.
 - [SOLocalData](../assets/SOLocalData.cs) preserves existing LocalFile paths, lifecycle, explicit saves and legacy reads. Existing inherited currency keys and their JSON values retain their previous format. Validate real old records and migrate explicitly when changing a domain ID, field name, file representation or service.
-- Implement `ISODataKeyStore` for another cloud service. Return null for confirmed absence, conditionally create or update, return the accepted revision and surface failures. An `ISORealtimeDataStore` subscription sends its initial state and ordered changes on the Unity thread and detaches on close. Scope each adapter to one account, environment or match.
+- Implement `ISODataKeyStore` for another persistent cloud service. Return null for confirmed absence, conditionally create or update, return the accepted revision and surface failures. An `ISORealtimeDataStore` subscription sends its initial state and ordered changes on the Unity thread and detaches on close. Mark temporary match backends with `ISOMatchSessionStore`. The online account mode rejects both a local store and a match-only store.

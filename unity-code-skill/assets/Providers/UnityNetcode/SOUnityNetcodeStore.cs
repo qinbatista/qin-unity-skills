@@ -10,7 +10,7 @@ using UnityEngine;
 
 // Optional NGO adapter. Copy this directory only into a receiver with Netcode for GameObjects.
 [RequireComponent(typeof(NetworkObject))]
-public sealed class SOUnityNetcodeStore : NetworkBehaviour, ISORealtimeDataStore
+public sealed class SOUnityNetcodeStore : NetworkBehaviour, ISOMatchSessionStore
 {
     [Tooltip("Default SO data scope. The server may set a profile-specific scope before spawning.")]
     [SerializeField] private string scope;

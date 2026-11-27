@@ -104,6 +104,7 @@ public partial class SODataController : ScriptableObject, ISerializationCallback
                 if (provider is ISOLocalDataStore) return provider;
                 throw new ArgumentException("DirectAccess requires a local transaction store.", nameof(provider));
             case SODataMode.DirectAccessOnline:
+                if (provider is ISOLocalDataStore || provider is ISOMatchSessionStore) throw new ArgumentException("DirectAccessOnline requires a persistent remote key store.", nameof(provider));
                 return provider ?? throw new ArgumentNullException(nameof(provider));
             case SODataMode.RealtimeOnline:
                 if (provider is ISORealtimeDataStore) return provider;

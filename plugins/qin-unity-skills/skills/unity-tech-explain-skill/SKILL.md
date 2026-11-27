@@ -23,6 +23,8 @@ Use the following three unnumbered headings in the user's language. The Chinese 
 
 Start with the thing the user can see or change. When they name an SO or a game, locate its actual domain class and public API. Explain what its value means and how gameplay reads or changes it. If only the shared template is available, identify it as a template. For an Editor workflow, start at the control or component they touch.
 
+For coins or account progress, follow the named game's actual writer and balance reader. A connected account wallet uses its persistent remote owner. In the shared SO template this is `DirectAccessOnline`; `DirectAccess` fits an explicitly offline wallet. When a server validates grants, show the server operation and the confirmed balance the client reads.
+
 ### Concrete code
 
 Start with the member the user works with. In each Unity C# excerpt, put the actual `.cs` filename in a comment on the first line. Show the real declaring type, base class and braces. When an SO owns an operation, show its serialized backing field, the relevant property accessors with their actual visibility, and the method that changes the value. Use `// ...` to omit unrelated members.
@@ -34,3 +36,5 @@ Give the consumer's ordinary call in one line when that shows how to use the SO.
 ### Detailed explanation and steps
 
 Follow the user's action to the observable result. A single text line with arrows can show a value changing or returning after restart. Use branches only if the question needs different outcomes. When asked how the supporting files work together, show usage first, then follow that same action and explain what each relevant file does. Stop once the reader can perform the action and tell whether it worked.
+
+For an online save, distinguish the in-memory value from remote acknowledgement. Follow one confirmed write back to a fresh read for the same account.

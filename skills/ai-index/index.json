@@ -34,7 +34,7 @@
           "file": "unity-code-skill/assets/SOCurrencyData.cs",
           "symbol": "SOCurrencyData.CreditCoins",
           "anchor": "public void CreditCoins(int amount)",
-          "summary": "After opening the fixed DirectAccess wallet, credit through its private setter and persist the original coins key."
+          "summary": "Open the fixed DirectAccessOnline account wallet, queue its coins key through the private setter and await the provider acknowledgement."
         },
         {
           "id": "save-local-data",

@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 public sealed class SOCurrencyData : SODataController
 {
     [SerializeField, FormerlySerializedAs("coins")] private int _coins;
-    public override SODataMode? RequiredMode => SODataMode.DirectAccess;
+    public override SODataMode? RequiredMode => SODataMode.DirectAccessOnline;
     public int Coins { get => _coins; private set => _coins = value; }
 
     protected override void DefineDataKeys(SODataFields fields) => fields.Bind(nameof(_coins), () => Coins, value => Coins = value, "coins");
