@@ -1,6 +1,6 @@
 ---
 name: unity-tech-explain-skill
-description: Explain how a Unity Skill, C# method, gameplay system, engine feature, or Editor workflow works. Automatically use three sections for the principle, source and usage, and a step-by-step diagram. Ordinary implementation status updates keep their requested format.
+description: Explain how a Unity Skill, C# method, gameplay system, engine feature, or Editor workflow works. Use unnumbered headings for the brief explanation, concrete code, and detailed steps. Add a plain-text diagram when it clarifies a flow or code structure. Ordinary implementation status updates keep their requested format.
 ---
 
 # Unity Tech Explain
@@ -17,20 +17,20 @@ Apply this Skill whenever the user asks what a Unity Skill, system or piece of c
 
 ## Write the answer
 
-Start directly with these three numbered sections in this order. For a focused question, aim for one or two excerpts and two to four steps. Expand only to explain another behavior the user needs. Give each fact once.
+Start directly with the unnumbered headings below in this order. Use the user's language. For Chinese answers, use the exact labels `简短说明`, `具体代码`, and `详细说明和步骤`. For a focused question, aim for one or two excerpts and two to four short steps. Give each fact once.
 
-### 1. Principle
+### Brief explanation
 
 Answer the question in one to three sentences. Name the owner, what triggers the behavior, and where the result goes when those details matter. For storage, identify what belongs to the authored asset, the running instance, the local file, and the cloud provider when present.
 
-### 2. Code and usage
+### Concrete code
 
 - For each necessary excerpt, put the verified project-relative file path and exact type or method above a fenced code block. Show the complete path as the visible label when linking. Verify any linked source line. Show the containing class declaration and the relevant method bodies with their real signatures. Use `// Other members omitted` outside those bodies. For a long method, label the excerpt and keep the statements and conditions needed to explain its behavior.
-- Under each block, use one or two sentences to explain the important line, its caller or trigger, and the effect. Give the shortest real call site or concrete usage line and any required Inspector, Prefab or asset binding. Put the full sequence and its relevant branches in section 3. Preserve exact identifiers and values when quoting source.
+- Under each block, use one or two sentences to explain the important line, its caller or trigger, and the effect. Give the shortest real call site or concrete usage line and any required Inspector, Prefab or asset binding. Put the full sequence and its relevant branches under Detailed explanation and steps. Preserve exact identifiers and values when quoting source.
 - For an asset or Editor workflow, show the owning asset or documented Editor location and its relevant setting or binding. For a general question or missing source, label any code and proposed file path as an example. Identify verified source gaps before making project-specific claims.
 
-### 3. Steps and diagram
+### Detailed explanation and steps
 
-Trace the actual trigger to the output in numbered steps. Use the same names as the source excerpts and show the order of relevant methods, data changes and lifecycle or failure branches. Include one compact Mermaid or plain-text diagram. A short arrow chain is enough for a single operation.
+Trace the relevant calls, state changes and outcomes in order. Use short bullets when there are multiple steps. When a call flow, decision branch or code structure is easier to follow visually, add one compact fenced `text` diagram. Use `→` for a call or transition and `├─` and `└─` for branches or structural children. Label the diagram with the verified names from the code. A straightforward explanation can end with prose or bullets alone.
 
 Use one concrete input and outcome when it clarifies the flow. When several methods participate, show the call order. Compare alternative approaches only when they answer the question, with a short condition for using each. End when the user can find the implementation, follow its behavior and use it.

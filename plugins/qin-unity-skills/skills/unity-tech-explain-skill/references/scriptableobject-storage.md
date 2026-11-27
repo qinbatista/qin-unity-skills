@@ -2,11 +2,11 @@
 
 *How does the packaged wallet keep coins after I restart the game?*
 
-## 1. Principle
+## Brief explanation
 
 The active `SOPlayerWallet` holds the balance in memory during play. `SOLocalData` writes a checksummed snapshot to `wallet.json` under `Application.persistentDataPath` and reads that file into the active wallet on the next start. A game's authored `.asset`, when used, can supply initial configuration for its runtime instance.
 
-## 2. Code and usage
+## Concrete code
 
 **`unity-code-skill/assets/SOPlayerWallet.cs` · `SOPlayerWallet.CreditCoins`** (pack sample)
 
@@ -42,15 +42,13 @@ public abstract class SOLocalData : ScriptableObject, ISerializationCallbackRece
 
 When saving is allowed and the cooldown has elapsed, `SaveDataAtLocal()` commits the JSON. A gameplay checkpoint can call `wallet.SaveDataAtLocal()` explicitly so a recent balance change skipped by the cooldown reaches the file.
 
-## 3. Steps and diagram
+## Detailed explanation and steps
+
+- `SaveDataAtLocal()` serializes the selected fields and checksum, writes a temporary sibling file, then moves or replaces it at `wallet.json`.
+- At startup, the wallet's `OnEnable()` calls `LoadLocalData()` in Play Mode. The wallet validates the file before restoring the balance. A missing file initializes and saves the defaults. An invalid file blocks writes and stays available for recovery.
 
 ```text
-Play Mode startup -> OnEnable() -> LoadLocalData() -> active wallet (37 coins)
-Reward -> CreditCoins(3) -> active wallet (40 coins)
-Autosave or checkpoint -> SaveDataAtLocal() -> wallet.json (40 coins)
-Next startup -> LoadLocalData() -> active wallet (40 coins)
+CreditCoins(3) → wallet balance 37 → 40
+  ├─ Save succeeds     → wallet.json = 40 → restart restores 40
+  └─ Exit before saving → wallet.json = 37 → restart restores 37
 ```
-
-1. When the runtime wallet is enabled in Play Mode, `OnEnable()` calls `LoadLocalData()`. A missing file initializes the defaults and saves them. An invalid existing file blocks writes and leaves the file available for recovery.
-2. `CreditCoins(3)` changes a loaded balance of 37 to 40. On a successful save, the owner serializes the selected fields, writes a temporary sibling file, then moves or replaces it at `wallet.json`.
-3. The next startup validates and restores `coin = 40`. If the game adds cloud sync, its adapter uploads the committed data for the active account and slot. A remote restore needs validation and a local commit before applying the restored data to the active wallet. The code shown here is the local save path.

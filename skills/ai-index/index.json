@@ -218,7 +218,7 @@
     },
     {
       "id": "unity-tech-explain",
-      "summary": "Three-part technical explanations of Unity Skills, verified source, usage, and execution diagrams across projects",
+      "summary": "Unnumbered Unity explanations with verified source and usage, ordered steps, and optional plain-text diagrams",
       "document": "skills/ai-index/modules/unity-tech-explain.md",
       "sources": ["unity-tech-explain-skill"],
       "dependencies": [
