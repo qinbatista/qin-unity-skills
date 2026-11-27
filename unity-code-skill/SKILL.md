@@ -1,6 +1,6 @@
 ---
 name: unity-code-skill
-description: Route mixed Unity requests and changes to this Skill pack. For C# use the code routes for gameplay architecture, lifecycle, Jobs, GC, serialization, SDKs and source checks, including ordinary C# outside Unity.
+description: Route mixed Unity requests and changes to this Skill pack. For C# use the code routes for gameplay architecture, lifecycle, Jobs, GC, serialization, local and cloud saves, SDKs and source checks, including ordinary C# outside Unity.
 ---
 
 # Unity Code
@@ -21,6 +21,7 @@ For linked gameplay use `explain game-code-logic`, or `explain yofa-plugin` for 
 | Plan folders or an existing game's feature | [Existing-game architecture](references/unity-cli.md#existing-game-architecture), then [Controller, Manager and data ownership](references/unity-game-code-structure-design.md#ownership) for a code design. |
 | Design or audit ScriptableObject fields, shared state, keyed records or local and online schema changes | Follow the [ten data ownership and compatibility checks](references/scriptableobject-data-contracts.md#design-and-review-a-data-owner) and the [spell and wallet examples](references/scriptableobject-data-contracts.md#spell-catalog-and-player-wallet). |
 | Define a scene Singleton or save ScriptableObject data to a local file | Use the [Singleton definition and Manager example](references/unity-game-code-structure-design.md#singleton-managers) and the [local save base and data example](references/unity-lifecycle-and-serialization.md#scriptableobject-local-files). Both include portable C# source. |
+| Save ScriptableObject data for an offline-capable game with optional cloud sync | [Local-first ScriptableObject cloud saves](references/local-first-cloud-saves.md#implement-a-local-first-save) pairs the local JSON with a replaceable cloud adapter. |
 | Write or review C# | [Style and method boundaries](references/unity-csharp-rules.md#c-style) and the [source check](#c-source-checks). Call the real owner directly. |
 | Choose a callback, handle reentry or edit serialized state | [Frame cadence](references/unity-lifecycle-and-serialization.md#frame-callbacks), [async ownership](references/unity-lifecycle-and-serialization.md#async-and-main-thread-safety) or [serialization](references/unity-lifecycle-and-serialization.md#serialization-and-authored-data), according to the change. |
 | Schedule Jobs or move Controllers in batches | [Scheduling and reuse](references/runtime-resources-and-gc.md#schedule-data-and-bound-reuse). For centralized movement the Job writes root positions and the Manager publishes one read-only batch after completion when Controllers consume it. [Completed Job batches](references/unity-game-code-structure-design.md#completed-job-batches) |

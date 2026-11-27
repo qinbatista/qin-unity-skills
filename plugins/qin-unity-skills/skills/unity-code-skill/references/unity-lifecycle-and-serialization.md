@@ -44,6 +44,8 @@ For an authored `.asset` change in Editor tooling, edit the existing asset with 
 
 For player-owned values, reuse the game's save base or copy [SOLocalData.cs](../assets/SOLocalData.cs) into its shared runtime assembly. This port of SpriteTamer's `SOLocalData` writes UTF-8 JSON under `Application.persistentDataPath`. Keep one live writer per file. Use a stable file name for each save and preserve the names, serialized fields and checksum format of existing saves. The original default file name is the concrete type name with no extension.
 
+For an offline-capable game with an optional provider, use the [local-first cloud save contract](local-first-cloud-saves.md#implement-a-local-first-save) to synchronize the committed bytes.
+
 ```csharp
 using UnityEngine;
 
