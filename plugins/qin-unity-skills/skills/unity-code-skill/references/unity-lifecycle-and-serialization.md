@@ -42,9 +42,7 @@ For an authored `.asset` change in Editor tooling, edit the existing asset with 
 
 ## ScriptableObject local files
 
-For player-owned values, reuse the game's save base or copy [SOLocalData.cs](../assets/SOLocalData.cs) into its shared runtime assembly. This port of SpriteTamer's `SOLocalData` writes UTF-8 JSON under `Application.persistentDataPath`. Keep one live writer per file. Use a stable file name for each save and preserve the names, serialized fields and checksum format of existing saves. The original default file name is the concrete type name with no extension.
-
-For an offline-capable game with an optional provider, use the [local-first cloud save contract](local-first-cloud-saves.md#implement-a-local-first-save) to synchronize the committed bytes.
+For new domains choose a [SODataController storage mode](so-data-controller.md#choose-one-mode-per-domain). Existing subclasses can keep [SOLocalData](../assets/SOLocalData.cs), which selects LocalFile and preserves their old file name and Play startup. Copy the shared controller files with the compatibility base. Use the following legacy consumer when replaying previous assets and the [local-first cloud save contract](local-first-cloud-saves.md#implement-a-local-first-save) for optional backup.
 
 ```csharp
 using UnityEngine;
@@ -71,7 +69,7 @@ The [Manager example](unity-game-code-structure-design.md#singleton-managers) cr
 
 `RequestAutoSave()` writes on an admitted change using unscaled time. Changes during the cooldown stay in memory until the next save. Call `SaveDataAtLocal()` at a required checkpoint, including the game's pause/suspend boundary when appropriate. `SaveWhenOwnerDestroyed()` flushes the last value during Play teardown. A save writes a sibling temporary file and replaces the committed file after serialization succeeds.
 
-Persist value fields and stable IDs. Keep Prefab, scene and other `UnityEngine.Object` references in their authored owner. A type with a separate save schema can override `SerializeLocalData()` and `RestoreLocalData()` together. The paired prepare/restore hooks and before/after load hooks support existing subclasses. The default format preserves `_fileName`, `_timeStamp` and the lowercase SHA-256 of the pretty JSON with `_hashValue` empty. It also reads the original legacy wrapper containing one Base64-encoded JSON string. The next save writes plain JSON. When changing a shipped schema, validate and migrate an actual old file before writing the new layout.
+The serializer checks the compact or formatted JSON with the subclass's existing SHA-256 contract. The file writer reads both legacy encodings and writes the current [encrypted envelope](so-data-controller.md#disk-and-provider-contracts). A stored revision guards each replacement against another writer.
 
 Only an absent file initializes defaults automatically. A failed read or checksum mismatch leaves the file in place, restores the previous serialized values and blocks writes for that object. Retry `LoadLocalData()` after repair, or call `Clean()` when the caller explicitly wants to reset and persist defaults. Verify a first launch, a fresh instance reading a changed value, and a damaged file surviving a failed reload and teardown.
 

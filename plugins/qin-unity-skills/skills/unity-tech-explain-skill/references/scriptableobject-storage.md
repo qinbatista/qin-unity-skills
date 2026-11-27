@@ -1,54 +1,40 @@
 # ScriptableObject storage example
 
-*How does the packaged wallet keep coins after I restart the game?*
+*When I collect three coins, when are they written and how does a new session recover them?*
 
 ## Brief explanation
 
-The active `SOPlayerWallet` holds the balance in memory during play. `SOLocalData` writes a checksummed snapshot to `wallet.json` under `Application.persistentDataPath` and reads that file into the active wallet on the next start. A game's authored `.asset`, when used, can supply initial configuration for its runtime instance.
+In the pack's `DirectAccess` currency example, the runtime SO holds the displayed balance. Each successful reward writes only the currency key to the device. A new clone reads the committed balance when the game opens the same profile and storage ID.
 
 ## Concrete code
 
-**`unity-code-skill/assets/SOPlayerWallet.cs` · `SOPlayerWallet.CreditCoins`** (pack sample)
+**`unity-code-skill/assets/SOCurrencyData.cs` · `SOCurrencyData.CreditCoins` and `CreditCoinsAsync`** (pack sample)
 
 ```csharp
-public sealed class SOPlayerWallet : SOLocalData
+public sealed class SOCurrencyData : SODataController
 {
     // Other members omitted
     public void CreditCoins(int amount)
     {
         if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
-        coin = checked(coin + amount);
-        RequestAutoSave();
+        coins = checked(coins + amount);
     }
+
+    public Task CreditCoinsAsync(int amount, CancellationToken cancellation = default) =>
+        CommitChangeAsync(nameof(coins), () => CreditCoins(amount), cancellation);
 }
 ```
 
-Bind the reward handler to the active wallet and call `wallet.CreditCoins(3)` when it grants three coins. The method updates the in-memory balance, then asks the save owner to persist it.
-
-**`unity-code-skill/assets/SOLocalData.cs` · `SOLocalData.RequestAutoSave`** (pack sample)
-
-```csharp
-public abstract class SOLocalData : ScriptableObject, ISerializationCallbackReceiver
-{
-    // Other members omitted
-    protected void RequestAutoSave(float cooldownSeconds = 0.5f)
-    {
-        if (_writeBlocked || !Application.isPlaying || Time.unscaledTime - _lastAutoSaveTime < cooldownSeconds) return;
-        SaveDataAtLocal();
-        _lastAutoSaveTime = Time.unscaledTime;
-    }
-}
-```
-
-When saving is allowed and the cooldown has elapsed, `SaveDataAtLocal()` commits the JSON. A gameplay checkpoint can call `wallet.SaveDataAtLocal()` explicitly so a recent balance change skipped by the cooldown reaches the file.
+The pickup owner calls `await wallet.CreditCoinsAsync(3)` before showing the new balance. `unity-code-skill/assets/SOKeySession.cs` · `SOKeySession.ChangeAsync` stages that one field, awaits the store's conditional write and applies the acknowledged result.
 
 ## Detailed explanation and steps
 
-- `SaveDataAtLocal()` serializes the selected fields and checksum, writes a temporary sibling file, then moves or replaces it at `wallet.json`.
-- At startup, the wallet's `OnEnable()` calls `LoadLocalData()` in Play Mode. The wallet validates the file before restoring the balance. A missing file initializes and saves the defaults. An invalid file blocks writes and stays available for recovery.
+Set the currency asset to `DirectAccess`. Bootstrap clones it, then calls `await wallet.OpenAsync("slot-a")`. The disk reader loads the accepted key or retains the authored initial balance for a new profile.
 
 ```text
-CreditCoins(3) → wallet balance 37 → 40
-  ├─ Save succeeds     → wallet.json = 40 → restart restores 40
-  └─ Exit before saving → wallet.json = 37 → restart restores 37
+slot-a holds 37 → CreditCoinsAsync(3) → write the coins key against its revision
+  ├─ device acknowledges → display 40 → restart opens slot-a → 40
+  └─ stale revision      → the other writer wins → reopen reads the winning value
 ```
+
+With `None`, the same reward changes the shared clone for this session. A new clone starts from the authored balance. Use the receiving game's real storage owner, calls and save format when explaining its behavior.

@@ -124,7 +124,7 @@ public sealed partial class UnityFoundationTests
             Assert.AreEqual(0, wallet.Coin);
             Assert.AreEqual(19, wallet.Money);
             Assert.Throws<ArgumentOutOfRangeException>(() => wallet.CreditCoins(0));
-            StringAssert.Contains("\"checksum\":", File.ReadAllText(path));
+            StringAssert.Contains("\"checksum\":", SOFileStorage.ReadSnapshot(path));
         }
         finally
         {

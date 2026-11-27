@@ -13,6 +13,7 @@ Pick the result below, open its domain menu, then read the linked headings for t
 | Explain how a Unity Skill, concept, code path or Editor workflow works and how to use it | [Unity Tech Explain](../../unity-tech-explain-skill/SKILL.md#write-the-answer) |
 | Implement, fix or review C#, gameplay ownership, Jobs, GC, SDKs or serialization | [Code](../SKILL.md) |
 | Design ScriptableObject data, share values across Controllers or evolve a save schema | [SO contracts and old-format replay](scriptableobject-data-contracts.md#design-and-review-a-data-owner) |
+| Select None, LocalFile, DirectAccess, DirectAccessOnline or RealtimeOnline for a domain SO | [SODataController template and adapters](so-data-controller.md#choose-one-mode-per-domain) |
 | Save progress locally and synchronize it to an optional cloud provider | [Local-first ScriptableObject cloud saves](local-first-cloud-saves.md#implement-a-local-first-save) |
 | Place or move assets, or inspect, import or compress an image, including 2D Sprites, 3D textures and UI art | [Assets](../../unity-assets-skill/SKILL.md) |
 | Right-size a world sprite at 1,000 PPU, extend terrain or a tree trunk, or resize a button or panel from one backing | [World sprites](../../unity-assets-skill/SKILL.md#choose-an-operation) · [UI artwork](../../unity-ui-skill/SKILL.md#choose-an-operation) · [Replay the image examples](../../unity-performance-skill/references/performance-cases.md#replay-the-image-optimization-examples) |

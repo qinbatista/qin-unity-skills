@@ -23,16 +23,23 @@
           "summary": "Register the first scene component for each concrete type and retire a duplicate host."
         },
         {
+          "id": "open-so-storage",
+          "file": "unity-code-skill/assets/SODataController.cs",
+          "symbol": "SODataController.OpenAsync",
+          "anchor": "public async Task OpenAsync(",
+          "summary": "Open a scoped SO with its selected snapshot, local key, cloud key or realtime provider, or keep session-only data."
+        },
+        {
           "id": "save-local-data",
-          "file": "unity-code-skill/assets/SOLocalData.cs",
-          "symbol": "SOLocalData.SaveDataAtLocal",
+          "file": "unity-code-skill/assets/SODataController.LocalFile.cs",
+          "symbol": "SODataController.SaveDataAtLocal",
           "anchor": "public void SaveDataAtLocal()",
-          "summary": "Write the checksummed JSON to a sibling file and commit it to the owning save path."
+          "summary": "Encrypt and conditionally replace the bound domain snapshot after it passes its serialization contract."
         },
         {
           "id": "load-local-data",
-          "file": "unity-code-skill/assets/SOLocalData.cs",
-          "symbol": "SOLocalData.LoadLocalData",
+          "file": "unity-code-skill/assets/SODataController.LocalFile.cs",
+          "symbol": "SODataController.LoadLocalData",
           "anchor": "public void LoadLocalData()",
           "summary": "Restore current JSON or the original legacy string, initialize a missing file and protect a rejected save."
         },

@@ -14,7 +14,7 @@ sys.path.insert(0, str(PACK / "scripts"))
 from read_topic import read_topic
 
 
-def prepare(run):
+def prepare(run, cloud=False, netcode=False):
     run = run.resolve(strict=True)
     if run.parent != PROJECT / "Cache" or not run.name.startswith("temp-"):
         raise ValueError("Use an allocated task directory under the project Cache.")
@@ -30,13 +30,16 @@ def prepare(run):
     settings.mkdir()
     shutil.copy2(sample / "ProjectSettings/ProjectVersion.txt", settings)
 
-    for name in ("Singleton.cs", "SOLocalData.cs", "SOSpellCatalog.cs", "SOPlayerWallet.cs"):
-        shutil.copy2(PACK / "assets" / name, runtime)
+    for source in (PACK / "assets").glob("*.cs"):
+        shutil.copy2(source, runtime)
+    (runtime / "TestVisibility.cs").write_text(
+        '[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Foundations.EditorTests")]\n', encoding="utf-8"
+    )
     old_formats = Path(__file__).with_name("fixtures") / "scriptableobjects"
     shutil.copy2(old_formats / "SOSpellCatalog.cs.meta", runtime)
     fixtures = fixture / "Assets/Fixtures"
     fixtures.mkdir()
-    for name in ("SpellCatalogV1.asset", "WalletV1.json"):
+    for name in ("SpellCatalogV1.asset", "WalletV1.json", "AudioPreferencesLegacy.json"):
         shutil.copy2(old_formats / name, fixtures)
     examples = {
         "AudioPreferencesManager": "references/unity-game-code-structure-design.md#singleton-managers",
@@ -45,10 +48,30 @@ def prepare(run):
     for name, section in examples.items():
         code, = re.findall(r"^```csharp\n(.*?)^```$", read_topic("code", section), re.MULTILINE | re.DOTALL)
         (runtime / f"{name}.cs").write_text(code, encoding="utf-8")
-    (runtime / "Foundations.asmdef").write_text(json.dumps({"name": "Foundations"}), encoding="utf-8")
+    runtime_assembly = {"name": "Foundations", "references": []}
     assembly = {"name": "Foundations.EditorTests", "references": ["Foundations"], "includePlatforms": ["Editor"], "optionalUnityReferences": ["TestAssemblies"]}
+    manifest = fixture / "Packages/manifest.json"
+    packages = json.loads(manifest.read_text(encoding="utf-8"))
+    tests = ["UnityFoundationTests.cs", "ScriptableObjectDataTests.cs", "SODataControllerTests.cs", "SOFileStorageTests.cs"]
+    if cloud:
+        packages["dependencies"]["com.unity.services.cloudsave"] = "3.4.2"
+        for target in (runtime_assembly, assembly):
+            target["references"].extend(["Unity.Services.CloudSave", "Unity.Services.Authentication", "Unity.Services.Core"])
+            target["versionDefines"] = [{"name": "com.unity.services.cloudsave", "expression": "3.4.2", "define": "SO_DATA_UNITY_CLOUD_SAVE"}]
+        shutil.copy2(PACK / "assets/Providers/UnityCloudSave/UnityCloudSaveKeyStore.cs", runtime)
+        tests.append("SOCloudProviderTests.cs")
+    if netcode:
+        packages["dependencies"]["com.unity.netcode.gameobjects"] = "2.14.0"
+        for target in (runtime_assembly, assembly):
+            target["references"].extend(["Unity.Netcode.Runtime", "Unity.Collections"])
+        assembly["references"].append("Unity.Networking.Transport")
+        for source in (PACK / "assets/Providers/UnityNetcode").glob("*.cs"):
+            shutil.copy2(source, runtime)
+        tests.append("SOUnityNetcodeTests.cs")
+    manifest.write_text(json.dumps(packages, indent=2), encoding="utf-8")
+    (runtime / "Foundations.asmdef").write_text(json.dumps(runtime_assembly), encoding="utf-8")
     (editor / "Foundations.EditorTests.asmdef").write_text(json.dumps(assembly), encoding="utf-8")
-    for name in ("UnityFoundationTests.cs", "ScriptableObjectDataTests.cs"):
+    for name in tests:
         shutil.copy2(Path(__file__).with_name("Editor") / name, editor)
     return fixture
 
@@ -56,4 +79,7 @@ def prepare(run):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run", type=Path, help="Fresh task Cache run")
-    print(prepare(parser.parse_args().run))
+    parser.add_argument("--cloud", action="store_true", help="Compile the Unity Cloud Save adapter and run its SDK contract cases.")
+    parser.add_argument("--netcode", action="store_true", help="Compile the NGO adapter and run a real localhost server/client pair.")
+    args = parser.parse_args()
+    print(prepare(args.run, args.cloud, args.netcode))

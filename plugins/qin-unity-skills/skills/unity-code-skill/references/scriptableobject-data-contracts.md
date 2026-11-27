@@ -2,7 +2,7 @@
 
 ## Design and review a data owner
 
-For a new or changed SO, identify the domain, authored defaults, runtime writer, readers and lifetime. For each field, trace one production consumer and decide whether it belongs in the local file, the online representation, both or neither. Use these ten checks when reviewing an existing game.
+For a new or changed SO, identify the domain, authored defaults, runtime writer, readers and lifetime. For each field, trace one production consumer and decide whether it belongs in the local file, the online representation, both or neither. For the [SODataController template](so-data-controller.md#choose-one-mode-per-domain), select one storage policy for the entire domain and bind each durable field in the keyed modes. Use these ten checks when reviewing an existing game.
 
 | Rule | Design | Acceptance |
 | --- | --- | --- |
@@ -31,4 +31,4 @@ The [wallet](../assets/SOPlayerWallet.cs) uses the [local file base](unity-lifec
 | Local wallet v2 | `version`, `coin`, `money`, `checksum` | Require both balances. Verify the compact writer layout and checksum before publishing the values. Unknown fields, unsupported versions and incompatible encodings leave the original available for recovery. |
 | Online full wallet | `version`, `coin`, `money` | `CaptureOnline()` returns the transport DTO. `ApplyOnline(json)` requires both balances and accepts explicit zero. A partial response leaves both values intact. A service using patches needs explicit field presence and a merge against the accepted revision. |
 
-The on-disk checksum detects accidental changes. The game's service adapter owns authentication, account matching, revision conflicts and transport. The fixture exercises conversion without contacting a service. The default `SOLocalData` serializer signs the concrete SO layout. A shipped subclass using that format needs a reader for its original representation before changing that layout. The example wallet's v1 format applies only to files produced by its v1 writer.
+The on-disk checksum detects accidental changes. The game's service adapter owns authentication, account matching, revision conflicts and transport. The fixture exercises conversion without contacting a service. The compatibility serializer signs the concrete SO layout inside the encrypted envelope. A shipped subclass using that format needs a reader for its original representation before changing that layout. The example wallet's v1 format applies only to files produced by its v1 writer.

@@ -71,6 +71,27 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
+    public void PreviousDefaultSerializerRestoresBeforeUpgradingTheFile()
+    {
+        Directory.CreateDirectory(_root);
+        const string fixture = "Assets/Fixtures/AudioPreferencesLegacy.json";
+        File.Copy(fixture, SavePath);
+        SOAudioPreferences data = ScriptableObject.CreateInstance<SOAudioPreferences>();
+        try
+        {
+            data.LoadLocalData();
+            Assert.AreEqual(0.625f, data.Volume);
+            CollectionAssert.AreEqual(File.ReadAllBytes(fixture), File.ReadAllBytes(SavePath));
+            data.SetVolume(0.5f);
+            data.SaveDataAtLocal();
+            StringAssert.StartsWith("SODATA/1\n", File.ReadAllText(SavePath));
+            data.LoadLocalData();
+            Assert.AreEqual(0.5f, data.Volume);
+        }
+        finally { Object.DestroyImmediate(data); }
+    }
+
+    [Test]
     public void LocalFileRoundTripsAndFailedReloadPreservesBothCopies()
     {
         SOAudioPreferences first = ScriptableObject.CreateInstance<SOAudioPreferences>();
@@ -84,7 +105,7 @@ public sealed partial class UnityFoundationTests
             next.LoadLocalData();
             Assert.AreEqual(0.25f, next.Volume);
             string valid = File.ReadAllText(SavePath);
-            string damaged = valid.Replace("0.25", "0.75");
+            string damaged = valid.Substring(0, valid.Length - 4);
             Assert.AreNotEqual(valid, damaged);
             File.WriteAllText(SavePath, damaged);
             Assert.Throws<InvalidDataException>(() => next.LoadLocalData());
@@ -113,7 +134,7 @@ public sealed partial class UnityFoundationTests
             data.LoadLocalData();
             data.SetVolume(0.5f);
             data.SaveDataAtLocal();
-            string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(File.ReadAllText(SavePath)));
+            string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(SOFileStorage.ReadSnapshot(SavePath)));
             using (BinaryWriter legacy = new BinaryWriter(File.Create(SavePath)))
             {
                 legacy.Write((byte)0); // Stream header, root ID, header ID and version.
@@ -131,7 +152,7 @@ public sealed partial class UnityFoundationTests
             data.LoadLocalData();
             Assert.AreEqual(0.5f, data.Volume);
             data.SaveDataAtLocal();
-            StringAssert.StartsWith("{", File.ReadAllText(SavePath));
+            StringAssert.StartsWith("SODATA/1\n", File.ReadAllText(SavePath));
             legacyFile[17] = 5;
             File.WriteAllBytes(SavePath, legacyFile);
             Assert.Throws<InvalidDataException>(() => data.LoadLocalData());
