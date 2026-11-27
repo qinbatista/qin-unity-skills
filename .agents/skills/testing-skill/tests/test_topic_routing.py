@@ -157,7 +157,9 @@ class InstalledRoutingTests(unittest.TestCase):
         self.assertTrue(body.startswith("public sealed class SOCurrencyData : SODataController\n{"))
         self.assertTrue(body.endswith("\n}"))
         self.assertIn(body, source)
-        for member in ("[SerializeField] private int coins;", "get => coins;", "private set => coins = value;",
+        for member in ('[SerializeField, FormerlySerializedAs("coins")] private int _coins;',
+                       "public override SODataMode? RequiredMode => SODataMode.DirectAccess;",
+                       "public int Coins { get => _coins; private set => _coins = value; }",
                        "public void CreditCoins(int amount)", "Coins = checked(Coins + amount);"):
             self.assertIn(member, body)
         for usage in ('wallet.OpenAsync("slot-a")', "wallet.CreditCoins(3)", "wallet.Coins"):

@@ -7,7 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Game Data/Storage Controller")]
 public partial class SODataController : ScriptableObject, ISerializationCallbackReceiver
 {
-    [SerializeField] private SODataMode _storageMode = SODataMode.None;
+    [SerializeField, SOStorageMode] private SODataMode _storageMode = SODataMode.None;
     [SerializeField, Tooltip("Stable domain ID within the profile. Empty uses the data object's type name.")]
     private string _storageId;
     [NonSerialized] private ScriptableObject _target;
@@ -20,12 +20,18 @@ public partial class SODataController : ScriptableObject, ISerializationCallback
     [NonSerialized] private bool _ready;
     [NonSerialized] private bool _closing;
 
-    public virtual SODataMode Mode => _storageMode;
+    public virtual SODataMode? RequiredMode => null;
+    public virtual SODataMode Mode => RequiredMode ?? _storageMode;
     public Exception StorageError { get; private set; }
     public event Action<string> DataChanged;
     public event Action<Exception> StorageFailed;
     private ScriptableObject Owner => ReferenceEquals(_target, null) ? this : _target;
     private bool AttachedPlain => !ReferenceEquals(Owner, this);
+
+    protected void RequireOpenStorage()
+    {
+        if (!SODataWriteHooks.IsBound(this)) throw new InvalidOperationException("Open the data profile before changing its value.");
+    }
 
     public string GetStorageScope(string profile)
     {
@@ -52,6 +58,7 @@ public partial class SODataController : ScriptableObject, ISerializationCallback
         cancellation.ThrowIfCancellationRequested();
         if (target == null) throw new ArgumentNullException(nameof(target));
         if (!ReferenceEquals(_target, null)) throw new InvalidOperationException("Close the current data owner first.");
+        if (target is SODataController domain && domain.RequiredMode is SODataMode required && Mode != required) throw new InvalidOperationException($"{domain.GetType().Name} requires {required}. The storage controller uses {Mode}.");
         if (Mode == SODataMode.None) return;
         SODataWriteHooks.Bind(target, OnFieldAssigned);
         _target = target;
@@ -217,3 +224,5 @@ public partial class SODataController : ScriptableObject, ISerializationCallback
         }
     }
 }
+
+public sealed class SOStorageModeAttribute : PropertyAttribute { }

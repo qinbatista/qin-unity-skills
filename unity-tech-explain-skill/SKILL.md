@@ -27,6 +27,8 @@ Start with the thing the user can see or change. When they name an SO or a game,
 
 Start with the member the user works with. In each Unity C# excerpt, put the actual `.cs` filename in a comment on the first line. Show the real declaring type, base class and braces. When an SO owns an operation, show its serialized backing field, the relevant property accessors with their actual visibility, and the method that changes the value. Use `// ...` to omit unrelated members.
 
+Show the exact mode or other setting that determines the outcome beside the member it governs. Say where the user can see it and whether the class fixes it or the Inspector selects it. Follow the receiving project's C# style and the [shared C# rules](../unity-code-skill/references/unity-csharp-rules.md#c-style), including a single line for a simple getter and setter.
+
 Give the consumer's ordinary call in one line when that shows how to use the SO. Follow the existing API, including its validation, side effects and save timing. Use test fixtures as evidence and identify them when the question concerns the test itself. If the caller's implementation matters, give it a separate block with its actual file, type, method and trigger. Link the sources and label illustrative code. For an Editor-only task, show the setting and action the user needs.
 
 ### Detailed explanation and steps

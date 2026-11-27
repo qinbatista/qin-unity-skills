@@ -4,38 +4,37 @@
 
 ## Brief explanation
 
-In this shared template, `SOCurrencyData` owns the balance. Gameplay reads `wallet.Coins` and calls `wallet.CreditCoins(3)` when a pickup succeeds. The SO checks the amount and changes its own private field.
+In this shared template, `wallet.Coins` reads the balance and `wallet.CreditCoins(3)` adds a pickup. The wallet class fixes its mode to `DirectAccess`. Its Inspector shows **Storage Mode → Direct Access** as read-only.
 
 ## Concrete code
 
-The serialized field keeps its existing name, `coins`. The getter is public and the setter is private, so other classes can read the balance and the wallet controls each credit. [SOCurrencyData.cs](https://github.com/qinbatista/qin-unity-skills/blob/master/unity-code-skill/assets/SOCurrencyData.cs)
+The getter is public and the setter is private. The field alias and key binding preserve existing assets and the saved `coins` record. [SOCurrencyData.cs](https://github.com/qinbatista/qin-unity-skills/blob/master/unity-code-skill/assets/SOCurrencyData.cs)
 
 ```csharp
 // SOCurrencyData.cs
 public sealed class SOCurrencyData : SODataController
 {
-    [SerializeField] private int coins;
+    [SerializeField, FormerlySerializedAs("coins")] private int _coins;
+    public override SODataMode? RequiredMode => SODataMode.DirectAccess;
+    public int Coins { get => _coins; private set => _coins = value; }
 
-    public int Coins
-    {
-        get => coins;
-        private set => coins = value;
-    }
+    protected override void DefineDataKeys(SODataFields fields) => fields.Bind(nameof(_coins), () => Coins, value => Coins = value, "coins");
 
     public void CreditCoins(int amount)
     {
         if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
+        RequireOpenStorage();
         Coins = checked(Coins + amount);
     }
 }
 ```
 
-Choose `DirectAccess` on the wallet asset. At profile entry the bootstrap opens its runtime copy with `await wallet.OpenAsync("slot-a")`. The pickup calls `wallet.CreditCoins(3)` and the UI reads `wallet.Coins`.
+At profile entry open the wallet's runtime copy with `await wallet.OpenAsync("slot-a")`. The pickup calls `wallet.CreditCoins(3)` and the UI reads `wallet.Coins`. Crediting a closed wallet throws before the balance changes.
 
 ## Detailed explanation and steps
 
 ```text
-Slot holds 37 → CreditCoins(3) → the setter writes coins = 40 → the local key is committed
+Slot holds 37 → CreditCoins(3) → the setter writes _coins = 40 → the local coins key is committed
 Restart → open the same slot and storage ID → wallet.Coins returns 40
 ```
 

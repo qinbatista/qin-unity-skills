@@ -101,7 +101,7 @@ public sealed class SOUnityNetcodeTests
         yield return Until(() => replica.ReadAsync(Scope, Key, Token).Result.Value == "25", "surviving peer");
         Assert.AreEqual(3, history.Count);
         Debug.Log($"SO netcode replay on UDP loopback port {port}: late join read {history[0].Value}, both clients received {changes[2].Value}, the late peer received {history[2].Value}, and the surviving replica read 25 after disconnect.");
-        yield return ProjectDomain<SOCurrencyData>(prefab, first, "{\"_storageMode\":4,\"coins\":37}", VerifyCurrency);
+        yield return ProjectDomain<SOOutfitData>(prefab, first, "{\"_storageMode\":4,\"hatId\":\"straw\"}", VerifyOutfit);
         yield return ProjectDomain<SOFighterPositionData>(prefab, first, "{\"_storageMode\":4}", VerifyOpponentPosition);
     }
 
@@ -134,27 +134,26 @@ public sealed class SOUnityNetcodeTests
         }
     }
 
-    private static IEnumerator VerifyCurrency(SOCurrencyData server, SOCurrencyData client, SOUnityNetcodeStore store)
+    private static IEnumerator VerifyOutfit(SOOutfitData server, SOOutfitData client, SOUnityNetcodeStore store)
     {
-        Assert.AreEqual(37, client.Coins);
+        Assert.AreEqual("straw", client.HatId);
         int notifications = 0;
-        client.DataChanged += key => { if (key == "coins") notifications++; };
-        server.CreditCoins(3);
+        client.DataChanged += key => { if (key == "hatId") notifications++; };
+        server.WearHat("felt");
         yield return ConfirmServerWrite(server);
-        yield return Until(() => client.Coins == 40, "currency SO push");
-        Assert.AreEqual(40, server.Coins);
+        yield return Until(() => client.HatId == "felt", "outfit SO push");
+        Assert.AreEqual("felt", server.HatId);
         Assert.AreEqual(1, notifications);
-        yield return ExpectDenied(client, () => client.CreditCoins(9));
-        Assert.AreEqual(40, client.Coins);
+        yield return ExpectDenied(client, () => client.WearHat("denim"));
+        Assert.AreEqual("felt", client.HatId);
         int beforeClose = notifications;
         client.CloseData();
-        server.CreditCoins(1);
+        server.WearHat("wool");
         yield return ConfirmServerWrite(server);
         string scope = server.GetStorageScope(Profile);
-        yield return Until(() => store.ReadAsync(scope, "coins", Token).Result.Value == "{\"value\":41}", "post-close push");
+        yield return Until(() => store.ReadAsync(scope, "hatId", Token).Result.Value == "{\"value\":\"wool\"}", "post-close push");
         Assert.AreEqual(beforeClose, notifications);
-        Assert.AreEqual(37, client.Coins);
-        Debug.Log("SO currency replay: server 37 + 3 = 40, client projected 40 on one push, closed SO stayed at its default 37 while the replica reached 41.");
+        Assert.AreEqual("straw", client.HatId);
     }
 
     private static IEnumerator VerifyOpponentPosition(SOFighterPositionData server, SOFighterPositionData opponentView,

@@ -126,7 +126,8 @@ class PublicSkillCatalogTests(unittest.TestCase):
                             for entry_path in entries
                         )
                         shared_entry = routed_entry or shared_reader or explanation
-                        standard_link = image_audit or review or image_replay or resolved in SHARED_GUIDES
+                        explanation_style = document == TECH_EXPLAIN and resolved == PROJECT / "unity-code-skill/references/unity-csharp-rules.md"
+                        standard_link = image_audit or review or image_replay or explanation_style or resolved in SHARED_GUIDES
                         self.assertTrue(shared_entry or standard_link or performance_handoff or package in resolved.parents)
                         self.assertTrue(resolved.is_file())
                         linked_files.add(resolved)

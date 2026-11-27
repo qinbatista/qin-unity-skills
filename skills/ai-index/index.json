@@ -27,14 +27,14 @@
           "file": "unity-code-skill/assets/SODataController.cs",
           "symbol": "SODataController.AttachAsync",
           "anchor": "public async Task AttachAsync(",
-          "summary": "Bind a storage policy to an existing runtime SO, load the scoped data and observe its ordinary field writes."
+          "summary": "Check the target's required mode before binding a matching storage policy, loading scoped data and observing field assignments."
         },
         {
           "id": "credit-currency",
           "file": "unity-code-skill/assets/SOCurrencyData.cs",
           "symbol": "SOCurrencyData.CreditCoins",
           "anchor": "public void CreditCoins(int amount)",
-          "summary": "Read through Coins and let the currency SO validate a credit and update its serialized balance through the private setter."
+          "summary": "After opening the fixed DirectAccess wallet, credit through its private setter and persist the original coins key."
         },
         {
           "id": "save-local-data",

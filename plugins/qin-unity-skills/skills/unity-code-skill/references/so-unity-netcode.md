@@ -9,15 +9,15 @@ Use a server-owned NetworkObject for one match data domain. Its [SOUnityNetcodeS
 
 ```csharp
 // state is a runtime clone in RealtimeOnline mode. networkPrefab is a registered NetworkObject.
-var instance = Instantiate(networkPrefab);
-var store = instance.GetComponent<SOUnityNetcodeStore>();
+NetworkObject instance = Instantiate(networkPrefab);
+SOUnityNetcodeStore store = instance.GetComponent<SOUnityNetcodeStore>();
 store.SetScopeBeforeSpawn(state.GetStorageScope(profile));
 instance.Spawn();
 await state.OpenAsync(profile, store);
 ```
 
 - On an observing client, obtain the store on the locally spawned replica of that object. Bind the client's runtime SO using the same `profile` and storage ID. A sibling `NetworkBehaviour.OnNetworkPostSpawn` can start this binding after every component on the prefab has spawned. Await `OpenAsync` before consuming the SO. The provider returns the current value or absence during subscription and then delivers changes on Unity's main thread.
-- Apply each validated gameplay change on the server. For the [currency example](../assets/SOCurrencyData.cs), `state.CreditCoins(3)` publishes the changed field. Await `state.FlushAsync()` at the acknowledgement boundary. A client attempting a raw write receives `UnauthorizedAccessException`. Send gameplay inputs through the receiving game's authenticated command path and validate sender, actor ownership and game rules on the server. Restrict the object's observers using the game's visibility policy when the state is private.
+- Apply each validated gameplay change on the server. For the [fighter example](../assets/Providers/UnityNetcode/SOFighterPositionData.cs), `state.SetPosition(worldPosition)` publishes the new position. Await `state.FlushAsync()` at the acknowledgement boundary. A client attempting a raw write receives `UnauthorizedAccessException`. Send gameplay inputs through the receiving game's authenticated command path and validate sender, actor ownership and game rules on the server. Restrict the object's observers using the game's visibility policy when the state is private.
 - Call `state.CloseData()` at session end or from the owning consumer's `OnNetworkDespawn`. Reopen the new replica after reconnect. Every observer of this particular object can read every replicated field in it. Keep domains with different visibility on different objects.
 
 ```text

@@ -7,6 +7,7 @@ Follow the shared [code-writing philosophy](https://github.com/qinbatista/qin-co
 ## C# style
 
 - Keep a clear statement on one physical line, including calls, logs, constructors and initializers. Wrap when readability, correctness or tooling requires it.
+- Keep a property with a plain read and assignment on one line, including accessor visibility. Give accessors with validation, branching or other work the lines their logic needs. Use the same style in code examples.
 - A single-statement `if` stays on one line without braces; use braces for multiple statements.
 - Use `if`/`else` for two outcomes; use `switch`/`case`, switch expressions, or guarded cases for three or more when they express the same behavior.
 - Inline a readable single-use value. Keep one coherent operation with its owner. Extract a method or type for a distinct responsibility, current reuse, or a real validation, transaction, lifecycle, compatibility or framework boundary. Call the real owner directly when the new method would only forward arguments or results.

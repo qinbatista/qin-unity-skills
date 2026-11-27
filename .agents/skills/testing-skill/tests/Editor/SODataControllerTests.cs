@@ -8,6 +8,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
 public sealed partial class UnityFoundationTests
@@ -32,25 +33,80 @@ public sealed partial class UnityFoundationTests
     [Test]
     public async Task NoneSharesTheRuntimeObjectAndRestartsFromAuthoredDefaults()
     {
-        var asset = ScriptableObject.CreateInstance<SOCurrencyData>();
+        SOOutfitData asset = ScriptableObject.CreateInstance<SOOutfitData>();
         var first = Object.Instantiate(asset);
         var second = Object.Instantiate(asset);
         try
         {
             Assert.AreEqual(SODataMode.None, first.Mode);
-            first.CreditCoins(37);
+            first.WearHat("straw");
             DelayedStore unused = new DelayedStore();
             await first.OpenAsync(null, unused);
-            first.CreditCoins(3);
+            first.WearHat("felt");
             first.SaveDataAtLocal();
-            Assert.AreEqual(40, first.Coins);
-            Assert.AreEqual(0, asset.Coins);
-            Assert.AreEqual(0, second.Coins);
+            Assert.AreEqual("felt", first.HatId);
+            Assert.AreEqual("", asset.HatId);
+            Assert.AreEqual("", second.HatId);
             Assert.AreEqual(0, unused.Reads);
             Assert.IsEmpty(unused.Writes);
             Assert.IsFalse(Directory.Exists(_root));
         }
         finally { Object.DestroyImmediate(first); Object.DestroyImmediate(second); Object.DestroyImmediate(asset); }
+    }
+
+    [Test]
+    public void InspectorLocksTheEffectiveCurrencyModeAndKeepsOrdinaryDomainsEditable()
+    {
+        SOCurrencyData wallet = Domain<SOCurrencyData>(SODataMode.None);
+        SOOutfitData outfit = Domain<SOOutfitData>(SODataMode.LocalFile);
+        try
+        {
+            SOStorageModeDrawer drawer = new SOStorageModeDrawer();
+            using (SerializedObject walletProperties = new SerializedObject(wallet))
+            using (SerializedObject outfitProperties = new SerializedObject(outfit))
+            using (SerializedObject both = new SerializedObject(new Object[] { wallet, outfit }))
+            {
+                EnumField fixedField = (EnumField)drawer.CreatePropertyGUI(walletProperties.FindProperty("_storageMode"));
+                Assert.AreEqual("Storage Mode", fixedField.label);
+                Assert.AreEqual(SODataMode.DirectAccess, fixedField.value);
+                Assert.IsFalse(fixedField.enabledSelf);
+                EnumField editableField = (EnumField)drawer.CreatePropertyGUI(outfitProperties.FindProperty("_storageMode"));
+                Assert.AreEqual(SODataMode.LocalFile, editableField.value);
+                Assert.IsTrue(editableField.enabledSelf);
+                EnumField mixed = (EnumField)drawer.CreatePropertyGUI(both.FindProperty("_storageMode"));
+                Assert.IsTrue(mixed.showMixedValue);
+                Assert.IsFalse(mixed.enabledSelf);
+            }
+        }
+        finally { Object.DestroyImmediate(wallet); Object.DestroyImmediate(outfit); }
+    }
+
+    [TestCase(SODataMode.None)]
+    [TestCase(SODataMode.LocalFile)]
+    [TestCase(SODataMode.DirectAccessOnline)]
+    [TestCase(SODataMode.RealtimeOnline)]
+    public async Task CurrencyRejectsConflictingPoliciesBeforeAnyBindingOrWrite(SODataMode mismatch)
+    {
+        SOCurrencyData wallet = Domain<SOCurrencyData>(mismatch);
+        SODataController other = Domain<SODataController>(mismatch);
+        SODataController local = Domain<SODataController>(SODataMode.DirectAccess);
+        try
+        {
+            Assert.AreEqual(SODataMode.DirectAccess, wallet.Mode);
+            Assert.Throws<InvalidOperationException>(() => wallet.CreditCoins(3));
+            await ExpectError<InvalidOperationException>(() => other.AttachAsync(wallet, "slot"));
+            await ExpectError<ArgumentException>(() => wallet.OpenAsync("slot", new DelayedStore()));
+            Assert.Throws<InvalidOperationException>(() => wallet.CreditCoins(3));
+            Assert.AreEqual(0, wallet.Coins);
+            Assert.IsFalse(Directory.Exists(_root));
+            await local.AttachAsync(wallet, "slot");
+            wallet.CreditCoins(3);
+            local.CloseData();
+            Assert.Throws<InvalidOperationException>(() => wallet.CreditCoins(2));
+            await wallet.OpenAsync("slot");
+            Assert.AreEqual(3, wallet.Coins);
+        }
+        finally { Object.DestroyImmediate(local); Object.DestroyImmediate(other); Object.DestroyImmediate(wallet); }
     }
 
     [Test]
@@ -78,9 +134,28 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
+    public void CurrencyAssetWithThePreviousSerializedFieldImportsItsAuthoredBalance()
+    {
+        string path = AssetDatabase.GenerateUniqueAssetPath("Assets/Fixtures/LegacyCurrency.asset");
+        AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<SOCurrencyData>(), path);
+        try
+        {
+            AssetDatabase.SaveAssets();
+            string yaml = File.ReadAllText(path);
+            StringAssert.Contains("  _coins: 0", yaml);
+            File.WriteAllText(path, yaml.Replace("  _coins: 0", "  coins: 11"));
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+            SOCurrencyData wallet = AssetDatabase.LoadAssetAtPath<SOCurrencyData>(path);
+            Assert.AreEqual(11, wallet.Coins);
+            Assert.AreEqual(SODataMode.DirectAccess, wallet.Mode);
+        }
+        finally { AssetDatabase.DeleteAsset(path); }
+    }
+
+    [Test]
     public async Task DirectAccessOrdinaryCreditWritesTheOriginalWalletKeyBeforeReturning()
     {
-        var first = Domain<SOCurrencyData>(SODataMode.DirectAccess, "wallet");
+        SOCurrencyData first = Domain<SOCurrencyData>(SODataMode.None, "wallet");
         var cold = Object.Instantiate(first);
         try
         {
@@ -219,43 +294,43 @@ public sealed partial class UnityFoundationTests
     [UnityTest]
     public IEnumerator OnlineWritesKeepTheLatestOptimisticEditAndIgnoreAnOldAccountReply()
     {
-        var data = Domain<SOCurrencyData>(SODataMode.DirectAccessOnline);
+        SOOutfitData data = Domain<SOOutfitData>(SODataMode.DirectAccessOnline);
         try
         {
             Task<ArgumentNullException> unbound = ExpectError<ArgumentNullException>(() => data.OpenAsync("A"));
             yield return AwaitStorage(unbound);
             DelayedStore first = new DelayedStore();
             yield return AwaitStorage(data.OpenAsync("A", first));
-            data.CreditCoins(3);
+            data.WearHat("straw");
             Task oldAck = data.FlushAsync();
             Assert.IsFalse(oldAck.IsCompleted);
-            Assert.AreEqual(3, data.Coins);
+            Assert.AreEqual("straw", data.HatId);
             data.CloseData();
             yield return AwaitStorage(ExpectError<OperationCanceledException>(() => oldAck));
             DelayedStore second = new DelayedStore();
             yield return AwaitStorage(data.OpenAsync("B", second));
             first.Accept(0, "a1");
-            Assert.AreEqual(0, data.Coins);
-            data.CreditCoins(5);
-            data.CreditCoins(2);
-            Assert.AreEqual(7, data.Coins);
+            Assert.AreEqual("", data.HatId);
+            data.WearHat("felt");
+            data.WearHat("wool");
+            Assert.AreEqual("wool", data.HatId);
             Task ack = data.FlushAsync();
             Assert.AreEqual(1, second.Writes.Count);
-            Assert.AreEqual("{\"value\":5}", second.Writes[0].Value);
+            Assert.AreEqual("{\"value\":\"felt\"}", second.Writes[0].Value);
             second.Accept(0, "b1");
             yield return AwaitCondition(() => second.Writes.Count == 2);
             Assert.AreEqual("b1", second.Writes[1].ExpectedRevision);
-            Assert.AreEqual("{\"value\":7}", second.Writes[1].Value);
-            Assert.AreEqual(7, data.Coins);
+            Assert.AreEqual("{\"value\":\"wool\"}", second.Writes[1].Value);
+            Assert.AreEqual("wool", data.HatId);
             second.Accept(1, "b2");
             yield return AwaitStorage(ack);
-            data.CreditCoins(10);
+            data.WearHat("denim");
             Task failed = data.FlushAsync();
             second.Writes[2].Reply.SetException(new IOException("Test provider disconnected."));
             yield return AwaitCondition(() => failed.IsCompleted);
             Assert.IsTrue(failed.IsFaulted);
             Assert.IsInstanceOf<IOException>(failed.Exception.GetBaseException());
-            Assert.AreEqual(7, data.Coins);
+            Assert.AreEqual("wool", data.HatId);
             Assert.IsFalse(Directory.Exists(_root));
         }
         finally { Object.DestroyImmediate(data); }

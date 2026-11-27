@@ -34,6 +34,7 @@ def prepare(run, cloud=False, netcode=False):
         shutil.copy2(source, runtime)
     for directory in ("WriteHooks", "CodeGen", "Compatibility"):
         shutil.copytree(PACK / "assets" / directory, runtime / directory)
+    shutil.copy2(PACK / "assets/Editor/SOStorageModeDrawer.cs", editor)
     (runtime / "TestVisibility.cs").write_text(
         '[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Foundations.EditorTests")]\n', encoding="utf-8"
     )

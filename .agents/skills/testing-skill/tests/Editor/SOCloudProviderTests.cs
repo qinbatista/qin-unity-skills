@@ -146,13 +146,13 @@ public sealed partial class UnityFoundationTests
     }
 
     [UnityTest]
-    public IEnumerator CloudSaveCurrencyCloneRestoresThroughTheGameplayEntry() => RunCloudCase(VerifyCloudCurrencyAsync());
+    public IEnumerator CloudSaveOutfitCloneRestoresThroughTheGameplayEntry() => RunCloudCase(VerifyCloudOutfitAsync());
 
-    private static async Task VerifyCloudCurrencyAsync()
+    private static async Task VerifyCloudOutfitAsync()
     {
         CloudPlayerFixture player = new CloudPlayerFixture();
-        SOCurrencyData asset = ScriptableObject.CreateInstance<SOCurrencyData>();
-        SOCurrencyData runtime = null;
+        SOOutfitData asset = ScriptableObject.CreateInstance<SOOutfitData>();
+        SOOutfitData runtime = null;
         try
         {
             SerializedObject serialized = new SerializedObject(asset);
@@ -160,21 +160,21 @@ public sealed partial class UnityFoundationTests
             serialized.ApplyModifiedPropertiesWithoutUndo();
             runtime = UnityEngine.Object.Instantiate(asset);
             await runtime.OpenAsync("slot-a", new UnityCloudSaveKeyStore(player, () => "alice"));
-            runtime.CreditCoins(37);
-            runtime.CreditCoins(3);
+            runtime.WearHat("straw");
+            runtime.WearHat("felt");
             await runtime.FlushAsync();
-            Assert.AreEqual(40, runtime.Coins);
-            Assert.AreEqual(0, asset.Coins);
-            CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(runtime.GetStorageScope("slot-a"), "coins") }, player.Batches.Last());
+            Assert.AreEqual("felt", runtime.HatId);
+            Assert.AreEqual("", asset.HatId);
+            CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(runtime.GetStorageScope("slot-a"), "hatId") }, player.Batches.Last());
             runtime.CloseData();
             UnityEngine.Object.DestroyImmediate(runtime);
 
             runtime = UnityEngine.Object.Instantiate(asset);
             await runtime.OpenAsync("slot-a", new UnityCloudSaveKeyStore(player, () => "alice"));
-            Assert.AreEqual(40, runtime.Coins);
+            Assert.AreEqual("felt", runtime.HatId);
             runtime.CloseData();
             await runtime.OpenAsync("slot-b", new UnityCloudSaveKeyStore(player, () => "alice"));
-            Assert.AreEqual(0, runtime.Coins);
+            Assert.AreEqual("", runtime.HatId);
         }
         finally
         {

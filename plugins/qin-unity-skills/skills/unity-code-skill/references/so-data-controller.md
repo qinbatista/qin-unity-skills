@@ -4,6 +4,8 @@
 
 Keep the game's data class, its fields, base class, methods and callers. Create **Game Data → Storage Controller** in the Inspector and give the controller one mode and a stable storage ID. The game's profile bootstrap attaches it to the runtime SO that gameplay already uses. Existing subclasses of [SODataController](../assets/SODataController.cs) can keep their own Inspector settings and call `OpenAsync` on their runtime clone.
 
+A domain with a required storage policy overrides `RequiredMode`. Its Inspector displays the effective mode read-only. A separate controller must match that mode to attach. Ordinary domains inherit the editable `None` default.
+
 | Mode | Example | When a value is saved and restored |
 | --- | --- | --- |
 | `None` (default) | Speed or attack tuning | Consumers share one runtime instance. A fresh clone starts from the authored asset. There is no storage or subscription. |
@@ -17,13 +19,14 @@ Split currency, equipment and tuning when their lifetime, durability or authorit
 ## Copy and call the template
 
 - Copy [the controller](../assets/SODataController.cs), its [LocalFile partial](../assets/SODataController.LocalFile.cs), [field discovery](../assets/SODataFields.cs), [key session](../assets/SOKeySession.cs), [checkpoints](../assets/SODataCheckpoints.cs), [store contracts](../assets/SODataStore.cs), [native key store](../assets/SOFileKeyStore.cs), [file writer](../assets/SOFileStorage.cs) and [envelope](../assets/SOFileEnvelope.cs) into one runtime assembly.
+- Copy the [storage mode drawer](../assets/Editor/SOStorageModeDrawer.cs) into an Editor-only assembly that references the controller.
 - Copy the complete [WriteHooks](../assets/WriteHooks/SOData.Runtime.asmdef) and [CodeGen](../assets/CodeGen/Unity.SOData.CodeGen.asmdef) directories with their asmdefs intact. Add `com.unity.nuget.mono-cecil` 1.11.6 in Package Manager and reference `SOData.Runtime` from the controller's asmdef. The Editor compiler instruments source under Assets, including default Assembly-CSharp, separate data assemblies and their callers. A package-owned source asmdef can opt in by referencing `SOData.Runtime`. The compile step generates the field hooks and closed codecs used by IL2CPP. Plain gameplay source needs no storage references.
 - Copy one optional service adapter if the game uses it. The local modes require no cloud account or SDK. Bind both authored assets in the bootstrap and make one runtime instance of each for the active profile. Run their storage operations on Unity's main thread.
 
-The packaged [SOCurrencyData](../assets/SOCurrencyData.cs) owns its balance. `Coins` has a public getter and a private setter backed by the existing serialized `coins` field. `CreditCoins` validates the amount and updates that property. Select `DirectAccess` and a stable storage ID on the wallet asset. The bootstrap opens its runtime instance and shares that instance with the pickup and UI.
+The packaged [SOCurrencyData](../assets/SOCurrencyData.cs) fixes `RequiredMode` to `DirectAccess` for offline currency. Give the asset a stable storage ID. The bootstrap opens its runtime instance and shares it with the pickup and UI. `CreditCoins` requires an open profile, validates the amount and updates the private setter. The field keeps its original asset data and the disk key `coins`. For a game whose existing wallet uses a different backend, retain that policy in the game's own class or migrate the existing balances before adopting the offline template.
 
 ```csharp
-var wallet = UnityEngine.Object.Instantiate(authoredWallet);
+SOCurrencyData wallet = UnityEngine.Object.Instantiate(authoredWallet);
 await wallet.OpenAsync("slot-a");  // Once at profile entry.
 wallet.CreditCoins(3);            // At pickup. UI reads wallet.Coins.
 ```

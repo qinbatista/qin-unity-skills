@@ -13,6 +13,8 @@ public static class SODataWriteHooks
         new ConditionalWeakTable<ScriptableObject, Action<string>>();
     private static int _bound;
 
+    public static bool IsBound(ScriptableObject target) => Writers.TryGetValue(target, out _);
+
     public static void Bind(ScriptableObject target, Action<string> writer)
     {
         Type type = target.GetType();
