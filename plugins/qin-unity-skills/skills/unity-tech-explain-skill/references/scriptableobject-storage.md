@@ -8,17 +8,34 @@ The wallet's `int money` field holds the player's coin count. A pickup changes t
 
 ## Concrete code
 
-The starting value is one line in the existing SO. [NativeWalletDomain.cs](https://github.com/qinbatista/qin-unity-skills/blob/025c192947faef58c8b8bdee5ac50faa5e336a6f/.agents/skills/testing-skill/tests/fixtures/scriptableobjects/NativeWalletDomain.cs#L15)
+The starting balance belongs to the `NativeWalletDomain` SO. [Wallet source](https://github.com/qinbatista/qin-unity-skills/blob/025c192947faef58c8b8bdee5ac50faa5e336a6f/.agents/skills/testing-skill/tests/fixtures/scriptableobjects/NativeWalletDomain.cs#L6)
 
 ```csharp
-public int money = 37;
+// NativeWalletDomain.cs
+public sealed class NativeWalletDomain : ScriptableObject
+{
+    public int money = 37;
+    // ...
+}
 ```
 
-Set the Storage Controller asset to `DirectAccess` in the Inspector. At startup, `session` is its runtime copy and `wallet` is the instance used in play. The two relevant lines from the player's replay are below. [NativeWalletProbe.Run](https://github.com/qinbatista/qin-unity-skills/blob/025c192947faef58c8b8bdee5ac50faa5e336a6f/.agents/skills/testing-skill/tests/fixtures/scriptableobjects/NativeWalletProbe.cs#L25)
+Set the Storage Controller asset to `DirectAccess` in the Inspector. In this excerpt from the replay, `session` opens the wallet's slot on each launch. The first launch simulates one pickup. [NativeWalletProbe.Run](https://github.com/qinbatista/qin-unity-skills/blob/025c192947faef58c8b8bdee5ac50faa5e336a6f/.agents/skills/testing-skill/tests/fixtures/scriptableobjects/NativeWalletProbe.cs#L11)
 
 ```csharp
-await session.AttachAsync(wallet, "native-wallet-replay"); // Once when opening the save slot.
-wallet.money += 3;                                        // When the player picks up three coins.
+// NativeWalletProbe.cs
+public static class NativeWalletProbe
+{
+    private static async void Run()
+    {
+        // ...
+        await session.AttachAsync(wallet, "native-wallet-replay");
+        if (!reopen)
+        {
+            wallet.money += 3;
+        }
+        // ...
+    }
+}
 ```
 
 ## Detailed explanation and steps

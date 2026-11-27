@@ -25,9 +25,9 @@ Start with the thing the user can see or change. For an SO, name its actual fiel
 
 ### Concrete code
 
-Make the user's starting point the first excerpt. A single field declaration can be the whole excerpt. Next put the necessary one-time setup and the ordinary gameplay call together in one short block when practical. Indicate when each runs. Keep only calls the reader needs for this action. Use the same names and values throughout. For an Editor-only task, show the equivalent setting and action.
+Start with the member the user works with. In each Unity C# excerpt, put the actual `.cs` filename in a comment on the first line. Show the real declaring type and its braces around the relevant members. For an SO, copy its class declaration including its base class, and put the field inside. Use `// ...` to omit unrelated members.
 
-Use the receiving project's actual code, class and caller when available. Link the exact file or line beside the excerpt with a short readable label. Label an illustrative example explicitly. Include a method body when the reader needs its contents to use or understand that method.
+Then show the necessary setup and gameplay call in execution order. When the caller lives in another file, give it a separate block with that file's name, type and enclosing method. Label an excerpt when shortening a method, retain the condition that triggers the action, and link the exact source beside the block. Identify illustrative code explicitly. For an Editor-only task, show the setting and action the user needs.
 
 ### Detailed explanation and steps
 

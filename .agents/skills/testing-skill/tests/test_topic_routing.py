@@ -146,6 +146,26 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertIn(f"]({link})", menu)
                 self.assertEqual(read_topic(domain, link), expected)
 
+    def test_wallet_walkthrough_shows_fields_and_calls_in_their_source_types(self):
+        section = read_topic("tech-explain", "references/scriptableobject-storage.md#concrete-code")
+        blocks = re.findall(r"^```csharp\n(.*?)\n```$", section, re.MULTILINE | re.DOTALL)
+        cases = [
+            ("NativeWalletDomain.cs", ["public int money = 37;"]),
+            ("NativeWalletProbe.cs", ["private static async void Run()", "wallet.money += 3;"]),
+        ]
+        fixtures = Path(__file__).parent / "fixtures" / "scriptableobjects"
+        self.assertEqual(len(blocks), len(cases))
+        for block, (filename, members) in zip(blocks, cases):
+            with self.subTest(filename=filename):
+                path = fixtures / filename
+                source = path.read_text(encoding="utf-8")
+                declaration = next(line for line in source.splitlines() if f"class {path.stem}" in line)
+                self.assertTrue(block.startswith(f"// {filename}\n{declaration}\n{{\n"))
+                self.assertTrue(block.endswith("\n}"))
+                for member in members:
+                    self.assertIn(member, source)
+                    self.assertIn(member, block)
+
     def test_performance_menu_opens_implementation_and_measurement_sections(self):
         menu = run_reader("performance")
         self.assertEqual(menu.returncode, 0, menu.stderr)
