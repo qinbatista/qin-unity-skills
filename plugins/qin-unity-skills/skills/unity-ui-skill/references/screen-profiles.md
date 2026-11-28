@@ -109,6 +109,8 @@ Freeze the receiving game's source, profile fixture and observer. Run each requi
 
 ### Verify the wide window of a portrait game
 
+For edge-docked controls, record the foreground clearance and the backing clearance separately. For a playable subject, compare its visible span with the available space between the same live controls on both displays. Verify the composition when entering gameplay and after the first interaction.
+
 Complete the upright pass and the wide pass independently. For the wide pass, include a clear tablet window such as iPad 4:3, the active unfolded landscape pane, a 16:9 reference and a short ultrawide window. For a YoFaAssets-linked game capture the 3840 × 2160 baseline and a smaller 16:9 window. Compare their proportional scale and anchor distances. For wide windows with system bars or camera apertures, replay the actual side or bottom exclusions. Include both Duo outer landscape turns when supported, then check the inner panel with its own geometry. In the same flow, change the window or active reservation and return to the original layout without losing the current page or gameplay state.
 
 | Region | Placement and acceptance in a wide window |

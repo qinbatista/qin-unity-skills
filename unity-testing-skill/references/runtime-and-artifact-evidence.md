@@ -6,6 +6,8 @@ On multi-display hardware, enumerate displays immediately before capture, select
 
 For physical XCTest interactions, wait for the game window to finish activation. An app-switcher thumbnail can contain readable game controls while XCTest already reports the app in the foreground. Compare the window bounds and display scale with the reviewed screen, then locate the visible control and anchor the touch to that window. Verify the expected page, modal or gameplay state after the touch. A sent event alone supplies no evidence that the player action reached its target.
 
+On a device layout regression, pair before and after frames of the same scene, display and orientation. Record foreground rail clearance separately from background coverage. For a projected play object, measure its painted diameter in two gameplay stages and record an off-center input with its visible result. Use the receiving game's declared composition to select thresholds.
+
 ## Verify the actual inputs and runner
 
 Record the source revision, Editor and package versions, scene and formal entry, fixture, platform and ABI, effective profile and observer. Bind a compiled observer or driver to the harness source that actually built it. Reopen serialized bindings or the real exported artifact before expensive replay. Reuse a warm environment only while its inputs still match. Sync changed allowed files, preserve unchanged identities and separate startup, import, test, rendering and evidence times.
