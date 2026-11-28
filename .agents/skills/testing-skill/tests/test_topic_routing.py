@@ -67,6 +67,19 @@ class InstalledRoutingTests(unittest.TestCase):
                 for link in links:
                     self.assertEqual(expected, read_topic(domain, (parent / link).as_posix()))
 
+    def test_storage_cost_review_is_reachable_from_code_and_performance(self):
+        anchor = "#audit-storage-cost-by-mode"
+        audit = read_topic("code", "references/so-data-controller.md" + anchor)
+        for mode in ("None", "LocalFile", "DirectAccess", "DirectAccessOnline", "RealtimeOnline"):
+            self.assertIn("| " + mode + " |", audit)
+        for domain, entry in (("code", "#choose-an-operation"), ("performance", "#choose-an-operation"),
+                              ("code", "references/global-skill-routing.md#optimize-by-cost")):
+            with self.subTest(domain=domain, entry=entry):
+                links = re.findall(r"\]\(([^)]+)\)", read_topic(domain, entry))
+                route, = [link for link in links if link.endswith(anchor)]
+                parent = Path(entry.partition("#")[0]).parent
+                self.assertEqual(audit, read_topic(domain, (parent / route).as_posix()))
+
     def test_image_cases_reach_the_installed_runner_from_their_owning_routes(self):
         anchor = "#replay-the-image-optimization-examples"
         section = read_topic("performance", "references/performance-cases.md" + anchor)

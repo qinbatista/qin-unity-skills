@@ -245,6 +245,64 @@ public sealed partial class UnityFoundationTests
     [UnityTest]
     public IEnumerator TwoAssignmentsKeepTheirOrderUntilTheSlotCloses() => RunCloudCase(VerifyPendingWritesAsync());
 
+    [UnityTest]
+    public IEnumerator CloudKeyBurstWaitsForReceiptsAndSkipsUnchangedValues() => RunCloudCase(VerifyCloudBurstAsync());
+
+    private static async Task VerifyCloudBurstAsync()
+    {
+        CloudPlayerFixture account = new CloudPlayerFixture();
+        UnityCloudSaveKeyStore channel = new UnityCloudSaveKeyStore(account, () => "fixture-player");
+        var data = Domain<SOStorageWorkloadData>(SODataMode.DirectAccessOnline, "workload");
+        TaskCompletionSource<bool> firstRead = new TaskCompletionSource<bool>();
+        TaskCompletionSource<bool> firstWrite = new TaskCompletionSource<bool>();
+        string scope = data.GetStorageScope("slot");
+        try
+        {
+            await channel.WriteAsync(scope, "value", "{\"value\":0}", null, CancellationToken.None);
+            List<string> reads = new List<string>();
+            account.AfterRead = key =>
+            {
+                reads.Add(key);
+                return firstRead.Task;
+            };
+            Task opening = data.OpenAsync("slot", channel);
+            Assert.IsFalse(opening.IsCompleted);
+            int readsBeforeReply = reads.Count;
+            firstRead.SetResult(true);
+            await opening;
+            CollectionAssert.AreEquivalent(new[] { UnityCloudSaveKeyStore.GetCloudKey(scope, "value"), UnityCloudSaveKeyStore.GetCloudKey(scope, "padding") }, reads);
+            account.AfterRead = null;
+
+            int start = account.Batches.Count;
+            account.Acknowledgement = firstWrite.Task;
+            for (int value = 1; value <= 128; value++) data.Value = value;
+            Task pending = data.FlushAsync();
+            Assert.IsFalse(pending.IsCompleted);
+            Assert.AreEqual(128, data.Value);
+            int submitted = account.Batches.Count - start;
+            Assert.AreEqual(1, submitted);
+            firstWrite.SetResult(true);
+            await pending;
+            int writes = account.Batches.Count - start;
+            SODataRecord latest = await channel.ReadAsync(scope, "value", CancellationToken.None);
+            for (int i = 0; i < 10000; i++) data.Value = 128;
+            await data.FlushAsync();
+            Assert.AreEqual(start + writes, account.Batches.Count);
+            Assert.AreEqual(latest.Revision, (await channel.ReadAsync(scope, "value", CancellationToken.None)).Revision);
+            Assert.AreEqual("{\"value\":128}", latest.Value);
+            await data.CloseAsync();
+            await data.OpenAsync("slot", channel);
+            Assert.AreEqual(128, data.Value);
+            TestContext.WriteLine($"SO cost DirectAccessOnline: openKeys={reads.Count} readsBeforeFirstReply={readsBeforeReply} changedAssignments=128 submittedBeforeFirstReply={submitted} totalSdkSaves={writes} cleanAssignments=10000 cleanSaves=0 reopened={data.Value}");
+        }
+        finally
+        {
+            firstRead.TrySetResult(true);
+            firstWrite.TrySetResult(true);
+            UnityEngine.Object.DestroyImmediate(data);
+        }
+    }
+
     private static async Task VerifyPendingWritesAsync()
     {
         var account = new CloudPlayerFixture();

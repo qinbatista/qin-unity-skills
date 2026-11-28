@@ -41,6 +41,7 @@ Use [Unity Performance](../../unity-performance-skill/SKILL.md#choose-an-operati
 | --- | --- |
 | Slow frame with unknown cause, cold start or growth on scene reentry | Use [Testing](../../unity-testing-skill/SKILL.md#choose-an-operation) for frame pacing and memory first. Use the observed CPU, GPU, loading or residency evidence to select one owner. |
 | Managed allocations, Job scheduling, recurring CPU work or unreleased leases | Use [Code](../SKILL.md#choose-an-operation) for the allocating operation, Job boundary or resource lifetime. Calibrate an allocation claim. |
+| Repeated SO instances, whole-file saves, queued cloud writes or match updates | [Audit storage cost by mode](so-data-controller.md#audit-storage-cost-by-mode). Count changed and unchanged assignments separately at the file, provider or remote consumer. |
 | Texture download size, GPU format, atlas residency or Crunch | Use [Assets](../../unity-assets-skill/SKILL.md#choose-an-operation) for the target format and actual consumer. Measure delivery bytes and residency separately. |
 | Shader cost, transparent overdraw, particles or concurrent effect load | Use [Effects](../../unity-effects-skill/SKILL.md#choose-an-operation) for the actual renderer and matched native load. |
 

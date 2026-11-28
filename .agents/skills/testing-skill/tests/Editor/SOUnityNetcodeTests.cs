@@ -167,7 +167,7 @@ public sealed class SOUnityNetcodeTests
     }
 
     private static IEnumerator VerifyOpponentPosition(SOFighterPositionData server, SOFighterPositionData opponentView,
-        SOUnityNetcodeStore _)
+        SOUnityNetcodeStore store)
     {
         Vector3 acceptedPosition = new Vector3(4.5f, 0, -2);
         Assert.AreEqual(Vector3.zero, opponentView.Position);
@@ -177,9 +177,26 @@ public sealed class SOUnityNetcodeTests
         yield return ConfirmServerWrite(server);
         yield return Until(() => opponentView.Position == acceptedPosition, "opponent's world position");
         Assert.AreEqual(1, pushes);
+        int start = pushes;
+        int receipts = 0;
+        server.DataChanged += key => { if (key == "position") receipts++; };
+        for (int i = 1; i <= 32; i++) server.Position = new Vector3(i, 0, 0);
+        acceptedPosition = new Vector3(32, 0, 0);
+        yield return ConfirmServerWrite(server);
+        yield return Until(() => opponentView.Position == acceptedPosition, "last position in one frame's burst");
+        int burstReceipts = receipts;
+        int burstPushes = pushes - start;
+        string scope = server.GetStorageScope(Profile);
+        string revision = store.ReadAsync(scope, Key, Token).Result.Revision;
+        for (int i = 0; i < 100; i++) server.Position = acceptedPosition;
+        yield return ConfirmServerWrite(server);
+        Assert.AreEqual(burstReceipts, receipts);
+        Assert.AreEqual(start + burstPushes, pushes);
+        Assert.AreEqual(revision, store.ReadAsync(scope, Key, Token).Result.Revision);
+        Debug.Log($"SO cost RealtimeOnline: changesInOneFrame=32 serverReceipts={burstReceipts} remotePositionUpdates={burstPushes} cleanAssignments=100 cleanReceipts={receipts - burstReceipts} finalX={opponentView.Position.x}");
         yield return ExpectDenied(opponentView, () => opponentView.Position = Vector3.one);
         Assert.AreEqual(acceptedPosition, opponentView.Position);
-        Debug.Log("SO opponent replay: the server accepted (4.5, 0, -2), the remote SO received that Vector3 in one push, and a client position override was rejected.");
+        Debug.Log("SO opponent replay: the remote SO received the initial position and the final burst position, and a client position override was rejected.");
     }
 
     private static IEnumerator ConfirmServerWrite(SODataController owner)

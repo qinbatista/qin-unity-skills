@@ -3,6 +3,7 @@
 [Unity Performance](../../../unity-performance-skill/SKILL.md) owns the [completion review](../../../unity-performance-skill/SKILL.md#review-every-unity-task) linked by every Unity domain and the pack task menu. Every runtime-impacting request uses this review to select and run cases, including costs the user omitted.
 
 - [Runtime code](../../../unity-performance-skill/references/runtime-code.md) owns the choices for frame work, GC, pooling and streamed content. Unity Code supplies the implementation-level lifetime rules.
+- [SO storage costs](../../../unity-code-skill/references/so-data-controller.md#audit-storage-cost-by-mode) covers shared instances, file contention, serialized cloud writes and replicated updates. Use the receiving game's current writer for its own measurements.
 - [Simulation and effects](../../../unity-performance-skill/references/simulation-and-effects.md) covers 2D actor scale, gameplay authority, collision requirements, Jobs, ECS and reusable visual effects.
 - [Measurement](../../../unity-performance-skill/references/measure-and-verify.md) pairs a behavior check with a matched workload. The receiving game owns its budgets and captures.
 

@@ -39,6 +39,7 @@ def prepare(run, cloud=False, netcode=False, clock=False):
     old_formats = Path(__file__).with_name("fixtures") / "scriptableobjects"
     shutil.copy2(old_formats / "SOSpellCatalog.cs.meta", runtime)
     shutil.copy2(old_formats / "NativeWalletDomain.cs", runtime)
+    shutil.copy2(old_formats / "SOStorageWorkloadData.cs", runtime)
     fixtures = fixture / "Assets/Fixtures"
     fixtures.mkdir()
     for name in ("SpellCatalogV1.asset", "WalletV1.json", "AudioPreferencesLegacy.json"):
@@ -57,7 +58,7 @@ def prepare(run, cloud=False, netcode=False, clock=False):
     packages["dependencies"]["com.unity.nuget.newtonsoft-json"] = "3.2.2"
     tests = [
         "UnityFoundationTests.cs", "ScriptableObjectDataTests.cs", "SODataControllerTests.cs",
-        "SOFileStorageTests.cs", "SOLocalSnapshotTests.cs",
+        "SOFileStorageTests.cs", "SOLocalSnapshotTests.cs", "SOStorageWorkloadTests.cs",
     ]
     if clock:
         tests.append("SOLocalFileClockTests.cs")

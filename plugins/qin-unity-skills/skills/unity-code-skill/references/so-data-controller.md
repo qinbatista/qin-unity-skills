@@ -58,6 +58,26 @@ An optional whole-file cloud backup subscribes to `SnapshotCommitted` once per d
 
 On macOS Unity 6000.6.7f1, the same 64 KiB JSON fixture and 128 successive coin assignments produced 128 file replacements (11,205,828 bytes) with the previous writer and one (87,561 bytes) with batching. Another 10,000 identical assignments and reads produced zero extra writes. Reopening returned 128 and preserved the other JSON data. [Reproduce the snapshot and timer tests](https://github.com/qinbatista/qin-unity-skills/blob/master/.agents/skills/testing-skill/SKILL.md#run-the-foundation-fixture)
 
+## Audit storage cost by mode
+
+Trace a gameplay assignment through the actual writer. Count cold opens, changed values, repeated equal values and acknowledgements separately. Check instance identity at the writer and reader. Sharing one open SO reuses its mode and subscriptions. Each deliberately cloned and opened SO has its own state and repeats its startup work.
+
+The following counts come from the 2.2.0 template in macOS Unity 6000.6.7f1. Timings are single desktop observations. Replay on the target device and storage. [Inputs and test runner](https://github.com/qinbatista/qin-unity-skills/blob/master/.agents/skills/testing-skill/SKILL.md#run-the-foundation-fixture)
+
+| Mode | Measured workload | What can become expensive |
+| --- | --- | --- |
+| None | One shared 64 KiB SO, 128 scalar changes, then 10,000 equal assignments. Opening serialized the SO once. The loop created zero SOs, serialized the SO zero times and wrote zero files. | The first access captures all authored defaults for reset. Repeatedly opening large instances repeats that work. |
+| LocalFile | 128 changes to a 64 KiB snapshot produced one 87,561-byte replacement. 10,000 equal assignments produced zero more. The real timer committed two dirty domains after 300.17 s and produced no file for a reverted domain. | A dirty save rebuilds the entire JSON on a worker. Opening reads it synchronously. Focus loss or synchronous close can wait for pending writes. Split independently changing data. |
+| DirectAccess | 128 changes produced 128 durable receipts before the setter returned, updating one record in 1.25 s total. 10,000 equal assignments added zero writes. Cold reopen returned 128. | Each change checks the old record and commits the key on the calling thread. Use a setter per critical offline transaction and measure calls per frame. |
+| DirectAccessOnline | Opening two fields made two sequential reads. With the first receipt held, 128 distinct assignments to an existing key submitted one save immediately and 127 after release. 10,000 equal assignments added zero saves. These are Unity Cloud Save SDK calls against a controlled service. | A slow provider builds a per-key queue while gameplay sees the latest value. Preserve currency transactions. For replaceable state, define which intermediate values the domain can discard. |
+| RealtimeOnline | A real Netcode 2.14.0 server assigned 32 positions in one frame. The remote SO received 32 updates over UDP loopback and finished at x=32. Repeating that position 100 times produced zero new confirmations. | Each open field adds a subscription. Multiple field updates can share a packet. Sample continuous movement at the match tick where gameplay needs only the latest state. Measure bytes on the target transport. |
+
+Persistent modes serialize a reassigned list or array to compare its contents. Reassigning the same 1,024-item inventory 128 times took 32 ms total and produced zero writes. The corresponding equal integer assignments took 0.003 ms. Assign a large collection at its mutation boundary. [Assignment implementation](../assets/script/SODataController/SODataController.cs)
+
+The two file modes share a process-wide write lock. One DirectAccess setter took 10 ms alone and 111 ms while a 2 MiB LocalFile snapshot was being replaced in another directory. Both values survived reopening. Include overlapping checkpoints and critical writes in device profiling. [File writer](../assets/script/SODataController/Modes/SOLocalFileMode.cs)
+
+A separate hosted Unity Cloud Save test wrote `5` on a dedicated player. An independent provider read returned `5`, 10,000 equal assignments preserved the service write lock, and a second Unity process reopened the same player and read `5`. Both test keys and the disposable account were removed. Use the controlled SDK workload above for queue counts and this signed-in replay for service persistence.
+
 ## Run the pickup walkthrough
 
 In the Unity Editor select **Tools → SODataController → Run Pickup Walkthrough**. The seven Console entries show the initial 37, the gameplay call, the outgoing payload, the pending reply, the duplicate assignment, the acknowledgement and a new SO reading 5. The demo uses the actual pickup component and a private simulated channel. Set breakpoints in the property, base, mode and channel using the [included steps and recorded output](../assets/script/SODataController/Usage.md). The [Editor command](../assets/script/SODataController/Examples/Pickups/Editor/SOPickupWalkthrough.cs) creates and removes its own temporary objects.
