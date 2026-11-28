@@ -48,6 +48,12 @@ Locate the accepted PNG or Sprite and verify its source dimensions, trim, visibl
 
 Use a centered flex row with equal-width slots and a maximum width for a fixed-proportion navigation plate. Wide windows can expose scene artwork beside the row. Change spacing or composition when available space changes and give localized captions their own width and baseline. Use nine-slice or tiling only for artwork with a reviewed, extensible center. Keep complete painted trims, icons, faces and progress rails proportional. Check actual paint, localized glyphs and native picking at the short, tall and wide profiles.
 
+### Protect the subject when the window changes shape
+
+Mark the essential painted landmarks on the original illustration, such as the top of a building, an actor's feet or the rim of an interactive object. Project their bounds through the actual image fit, crop, pivot and camera. Keep related animated overlays and shadows on that same projection. When cover cuts a landmark on a wider pane, fit the subject within the available playfield and extend the surrounding scenery using a suitable clean background. Keep a tool shelf with its controls at its authored proportions. Measure exposed scenery on each side when its parent spans the window.
+
+Check the rendered landmarks against the header, footer and overlaid labels in the same frame. A full-window background rectangle and contained buttons can both pass while the artwork is visibly cropped. Repeat this check after a live display transfer and on return to the original window.
+
 ## Obstructions and orientation
 
 Measure the real active display, window, safe area and available cutout or gesture bounds. Convert origin, axes and units through one existing layout owner. Treat safe-area insets and full viewport dimensions as different inputs. Compare each group's visible and hit bounds with relevant obstructions, keeping clear viewport-anchored corners or tool rows in their authored positions where the screen contract calls for them. Apply each inset once across nested parents. Recalculate from actual bounds after resize, rotation, display switch or inset change.

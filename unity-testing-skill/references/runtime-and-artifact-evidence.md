@@ -1,5 +1,9 @@
 # Runtime and artifact evidence
 
+## Capture the active display
+
+On multi-display hardware, enumerate displays immediately before capture, select the active panel explicitly and compare the image dimensions and orientation with the running game window. A default screenshot can come from the inactive primary display. Open the image and confirm the expected game scene is visible. Capture the same active flow on both sides of the transfer and after return. For layout repairs, verify the projected artwork and tool shelf as well as the actual input targets.
+
 ## Verify the actual inputs and runner
 
 Record the source revision, Editor and package versions, scene and formal entry, fixture, platform and ABI, effective profile and observer. Bind a compiled observer or driver to the harness source that actually built it. Reopen serialized bindings or the real exported artifact before expensive replay. Reuse a warm environment only while its inputs still match. Sync changed allowed files, preserve unchanged identities and separate startup, import, test, rendering and evidence times.
