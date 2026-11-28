@@ -53,6 +53,38 @@ public sealed partial class UnityFoundationTests
     [TestCase(SODataMode.None)]
     [TestCase(SODataMode.LocalFile)]
     [TestCase(SODataMode.DirectAccess)]
+    public async Task IdenticalScalarAssignmentsDoNotCommitOrNotify(SODataMode mode)
+    {
+        SOStorageWorkloadData data = Domain<SOStorageWorkloadData>(mode, "equal-value");
+        try
+        {
+            await data.OpenAsync("slot");
+            int changes = 0;
+            int snapshots = 0;
+            data.DataChanged += key => { if (key == "value") changes++; };
+            data.SnapshotCommitted += json => snapshots++;
+            data.Value = 5;
+            await data.FlushAsync();
+            Assert.AreEqual(1, changes);
+            Dictionary<string, byte[]> saved = Directory.Exists(_root)
+                ? Directory.GetFiles(_root, "*", SearchOption.AllDirectories).ToDictionary(path => path, File.ReadAllBytes)
+                : new Dictionary<string, byte[]>();
+            int committedSnapshots = snapshots;
+            for (int i = 0; i < 10000; i++) data.Value = 5;
+            await data.FlushAsync();
+            Assert.AreEqual(5, data.Value);
+            Assert.AreEqual(1, changes);
+            Assert.AreEqual(committedSnapshots, snapshots);
+            foreach (KeyValuePair<string, byte[]> file in saved)
+                CollectionAssert.AreEqual(file.Value, File.ReadAllBytes(file.Key));
+            TestContext.WriteLine($"SO equal {mode}: value=5 repeats=10000 extraChanges={changes - 1} extraSnapshots={snapshots - committedSnapshots}");
+        }
+        finally { Object.DestroyImmediate(data); }
+    }
+
+    [TestCase(SODataMode.None)]
+    [TestCase(SODataMode.LocalFile)]
+    [TestCase(SODataMode.DirectAccess)]
     public async Task SamePropertyRoutesToOneModeAndAnotherSlotIsIndependent(SODataMode mode)
     {
         var data = Domain<SOOutfitData>(mode, "clothes");

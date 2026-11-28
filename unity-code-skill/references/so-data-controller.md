@@ -48,6 +48,10 @@ Await `data.CloseAsync()` before switching account, slot or match. It flushes ch
 
 When two assets of the same type hold independent data in one slot, give each a distinct Inspector Storage Id. An empty ID uses the type name. Two writers for the same stored record can conflict at commit. A legacy default-slot snapshot uses its original file name as its identity.
 
+## Skip identical values
+
+Equal property assignments return before storage work or change notifications. The online mode also suppresses notifications for an identical incoming payload while accepting its new revision, so the next changed value uses the current write lock. A pending write still receives its original confirmation. Count that acknowledgement separately from extra events caused by repeated assignments. The foundation cases check equal integer assignments in all five modes, a held cloud acknowledgement and a same-payload update over real Netcode peers.
+
 ## Batch whole-file saves
 
 Only LocalFile uses the five-minute window. The first dirty SO starts one shared timer. Assignments replace pending field values in memory. Reverting all edits to the last committed values cancels pending work. At the checkpoint a worker serializes, encrypts and atomically replaces each dirty domain once. Edits arriving during a write stay pending. Idle domains perform no file reads, writes or uploads.

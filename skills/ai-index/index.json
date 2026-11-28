@@ -44,6 +44,13 @@
           "summary": "Send one field in write order and raise its change event after acknowledgement."
         },
         {
+          "id": "receive-online-property",
+          "file": "unity-code-skill/assets/script/SODataController/Modes/SODirectAccessOnlineMode.cs",
+          "symbol": "SODirectAccessOnlineMode.Receive",
+          "anchor": "protected void Receive(SOStoredField field, SODataRecord record, bool notify)",
+          "summary": "Accept the remote revision and notify gameplay only when the visible payload changes."
+        },
+        {
           "id": "run-pickup-walkthrough",
           "file": "unity-code-skill/assets/script/SODataController/Examples/Pickups/Editor/SOPickupWalkthrough.cs",
           "symbol": "SOPickupWalkthrough.Run",

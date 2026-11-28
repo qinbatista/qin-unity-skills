@@ -106,10 +106,11 @@ public sealed class SOUnityNetcodeTests
         Debug.Log($"SO netcode replay on UDP loopback port {port}: late join read {history[0].Value}, both clients received {changes[2].Value}, the late peer received {history[2].Value}, and the surviving replica read 25 after disconnect.");
         yield return ProjectDomain<SOOutfitData>(prefab, first, "{\"_storageMode\":4,\"hatId\":\"straw\"}", VerifyOutfit);
         yield return ProjectDomain<SOFighterPositionData>(prefab, first, "{\"_storageMode\":4}", VerifyOpponentPosition);
+        yield return ProjectDomain<SOStorageWorkloadData>(prefab, first, "{\"_storageMode\":4}", VerifyEqualScalar);
     }
 
     private static IEnumerator ProjectDomain<T>(GameObject prefab, NetworkManager client, string defaults,
-        Func<T, T, SOUnityNetcodeStore, IEnumerator> verify) where T : SODataController
+        Func<T, T, SOUnityNetcodeStore, SOUnityNetcodeStore, IEnumerator> verify) where T : SODataController
     {
         var serverState = ScriptableObject.CreateInstance<T>();
         JsonUtility.FromJsonOverwrite(defaults, serverState);
@@ -124,7 +125,7 @@ public sealed class SOUnityNetcodeTests
             yield return Until(() => client.SpawnManager.SpawnedObjects.ContainsKey(serverObject.NetworkObjectId), "domain spawn");
             var clientStore = client.SpawnManager.SpawnedObjects[serverObject.NetworkObjectId].GetComponent<SOUnityNetcodeStore>();
             clientState.OpenAsync(Profile, clientStore).GetAwaiter().GetResult();
-            yield return verify(serverState, clientState, clientStore);
+            yield return verify(serverState, clientState, serverStore, clientStore);
         }
         finally
         {
@@ -137,7 +138,7 @@ public sealed class SOUnityNetcodeTests
         }
     }
 
-    private static IEnumerator VerifyOutfit(SOOutfitData server, SOOutfitData client, SOUnityNetcodeStore store)
+    private static IEnumerator VerifyOutfit(SOOutfitData server, SOOutfitData client, SOUnityNetcodeStore authority, SOUnityNetcodeStore store)
     {
         Assert.AreEqual("straw", client.HatId);
         int notifications = 0;
@@ -155,6 +156,7 @@ public sealed class SOUnityNetcodeTests
         yield return ConfirmServerWrite(server);
         Assert.AreEqual(0, duplicateReceipts);
         Assert.AreEqual(revision, store.ReadAsync(scope, "hatId", Token).Result.Revision);
+        Assert.AreEqual(revision, authority.ReadAsync(scope, "hatId", Token).Result.Revision);
         yield return ExpectDenied(client, () => client.HatId = "denim");
         Assert.AreEqual("felt", client.HatId);
         int beforeClose = notifications;
@@ -167,7 +169,7 @@ public sealed class SOUnityNetcodeTests
     }
 
     private static IEnumerator VerifyOpponentPosition(SOFighterPositionData server, SOFighterPositionData opponentView,
-        SOUnityNetcodeStore store)
+        SOUnityNetcodeStore authority, SOUnityNetcodeStore store)
     {
         Vector3 acceptedPosition = new Vector3(4.5f, 0, -2);
         Assert.AreEqual(Vector3.zero, opponentView.Position);
@@ -193,10 +195,46 @@ public sealed class SOUnityNetcodeTests
         Assert.AreEqual(burstReceipts, receipts);
         Assert.AreEqual(start + burstPushes, pushes);
         Assert.AreEqual(revision, store.ReadAsync(scope, Key, Token).Result.Revision);
+        Assert.AreEqual(revision, authority.ReadAsync(scope, Key, Token).Result.Revision);
         Debug.Log($"SO cost RealtimeOnline: changesInOneFrame=32 serverReceipts={burstReceipts} remotePositionUpdates={burstPushes} cleanAssignments=100 cleanReceipts={receipts - burstReceipts} finalX={opponentView.Position.x}");
         yield return ExpectDenied(opponentView, () => opponentView.Position = Vector3.one);
         Assert.AreEqual(acceptedPosition, opponentView.Position);
         Debug.Log("SO opponent replay: the remote SO received the initial position and the final burst position, and a client position override was rejected.");
+    }
+
+    private static IEnumerator VerifyEqualScalar(SOStorageWorkloadData server, SOStorageWorkloadData client,
+        SOUnityNetcodeStore authority, SOUnityNetcodeStore replica)
+    {
+        int receipts = 0;
+        int pushes = 0;
+        server.DataChanged += key => receipts++;
+        client.DataChanged += key => pushes++;
+        server.Value = 5;
+        for (int i = 0; i < 10000; i++) server.Value = 5;
+        yield return ConfirmServerWrite(server);
+        yield return Until(() => client.Value == 5, "scalar push");
+        Assert.AreEqual(1, receipts);
+        Assert.AreEqual(1, pushes);
+        string scope = server.GetStorageScope(Profile);
+        SODataRecord accepted = authority.ReadAsync(scope, "value", Token).Result;
+        for (int i = 0; i < 10000; i++) server.Value = 5;
+        yield return ConfirmServerWrite(server);
+        Assert.AreEqual(accepted.Revision, authority.ReadAsync(scope, "value", Token).Result.Revision);
+        Assert.AreEqual(1, receipts);
+        Assert.AreEqual(1, pushes);
+
+        // The server can publish the same payload with a new revision outside this SO's setter.
+        SODataRecord duplicate = authority.WriteAsync(scope, "value", accepted.Value, accepted.Revision, Token).Result;
+        yield return Until(() => replica.ReadAsync(scope, "value", Token).Result?.Revision == duplicate.Revision, "equal scalar revision");
+        Assert.AreNotEqual(accepted.Revision, duplicate.Revision);
+        Assert.AreEqual(1, pushes, "An equal remote value must not notify gameplay again.");
+        Assert.AreEqual(1, receipts);
+        server.Value = 6;
+        yield return ConfirmServerWrite(server);
+        yield return Until(() => client.Value == 6, "change after equal revision");
+        Assert.AreEqual(2, receipts);
+        Assert.AreEqual(2, pushes);
+        Debug.Log("SO equal RealtimeOnline: value=5 repeatsPending=10000 repeatsConfirmed=10000 extraWrites=0 extraChanges=0 equalPayloadNewRevisionExtraChanges=0 nextValue=6 peers=realUDP");
     }
 
     private static IEnumerator ConfirmServerWrite(SODataController owner)

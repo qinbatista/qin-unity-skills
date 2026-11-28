@@ -100,6 +100,40 @@ public sealed partial class UnityFoundationTests
     [UnityTest]
     public IEnumerator CloudSaveChecksBothFirstWriterRacesAndUpdatesOnlyTheChangedKey() => RunCloudCase(VerifyCloudCreationAsync());
 
+    [UnityTest]
+    public IEnumerator EqualCloudScalarDoesNotResubmitOrNotify() => RunCloudCase(VerifyEqualCloudScalarAsync());
+
+    private static async Task VerifyEqualCloudScalarAsync()
+    {
+        CloudPlayerFixture account = new CloudPlayerFixture();
+        UnityCloudSaveKeyStore channel = new UnityCloudSaveKeyStore(account, () => "alice");
+        SOPickupData data = Domain<SOPickupData>(SODataMode.DirectAccessOnline, "equal-value");
+        TaskCompletionSource<bool> release = new TaskCompletionSource<bool>();
+        try
+        {
+            string scope = data.GetStorageScope("slot");
+            await channel.WriteAsync(scope, "value", "{\"value\":0}", null, CancellationToken.None);
+            await data.OpenAsync("slot", channel);
+            int changes = 0;
+            data.DataChanged += key => changes++;
+            int before = account.Batches.Count;
+            account.Acknowledgement = release.Task;
+            data.value = 5;
+            for (int i = 0; i < 10000; i++) data.value = 5;
+            Assert.AreEqual(0, changes);
+            Assert.AreEqual(before + 1, account.Batches.Count);
+            release.SetResult(true);
+            await data.FlushAsync();
+            Assert.AreEqual(1, changes);
+            for (int i = 0; i < 10000; i++) data.value = 5;
+            await data.FlushAsync();
+            Assert.AreEqual(1, changes);
+            Assert.AreEqual(before + 1, account.Batches.Count);
+            TestContext.WriteLine("SO equal DirectAccessOnline: value=5 repeatsPending=10000 repeatsConfirmed=10000 writes=1 confirmations=1 extraWrites=0 extraChanges=0 provider=controlledSDK");
+        }
+        finally { release.TrySetResult(true); UnityEngine.Object.DestroyImmediate(data); }
+    }
+
     private static async Task VerifyCloudCreationAsync()
     {
         CloudPlayerFixture player = new CloudPlayerFixture();

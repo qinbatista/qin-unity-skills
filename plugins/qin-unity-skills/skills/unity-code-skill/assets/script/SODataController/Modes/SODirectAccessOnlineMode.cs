@@ -76,7 +76,9 @@ internal class SODirectAccessOnlineMode : SOStorageMode
         entry.Accepted = record;
         entry.Received++;
         if (entry.Pending != 0) return;
-        field.Apply(record?.Value ?? field.Initial);
+        string wire = record?.Value ?? field.Initial;
+        if (field.Visible == wire) return;
+        field.Apply(wire);
         if (notify) Owner.Changed(field.Key);
     }
 
