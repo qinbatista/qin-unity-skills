@@ -127,8 +127,15 @@ class PublicSkillCatalogTests(unittest.TestCase):
                         )
                         shared_entry = routed_entry or shared_reader or explanation
                         explanation_style = document == TECH_EXPLAIN and resolved == PROJECT / "unity-code-skill/references/unity-csharp-rules.md"
+                        explained_source = (
+                            package == TECH_EXPLAIN.parent and resolved.suffix == ".cs"
+                            and (PROJECT / "unity-code-skill/assets") in resolved.parents
+                        )
+                        if explained_source:
+                            published = PROJECT / "plugins/qin-unity-skills/skills" / resolved.relative_to(PROJECT)
+                            self.assertEqual(resolved.read_bytes(), published.read_bytes())
                         standard_link = image_audit or review or image_replay or explanation_style or resolved in SHARED_GUIDES
-                        self.assertTrue(shared_entry or standard_link or performance_handoff or package in resolved.parents)
+                        self.assertTrue(shared_entry or standard_link or performance_handoff or explained_source or package in resolved.parents)
                         self.assertTrue(resolved.is_file())
                         linked_files.add(resolved)
             with self.subTest(package=package.name):

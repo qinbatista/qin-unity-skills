@@ -14,7 +14,7 @@ Inherit `SODataController` and choose one Inspector mode for the whole SO. Keep 
 
 ## Copy and call the template
 
-Copy [SODataController.cs](../assets/SODataController.cs) and the five files in [Modes](../assets/Modes). Add Unity's `com.unity.nuget.newtonsoft-json` package (tested with 3.2.2) and reference `Unity.Newtonsoft.Json` in the receiving assembly definition. Include only the optional channel your project uses.
+Copy [SODataController.cs](../assets/SODataController.cs) and the five `Modes` files linked in the table. Add Unity's `com.unity.nuget.newtonsoft-json` package (tested with 3.2.2) and reference `Unity.Newtonsoft.Json` in the receiving assembly definition. Include only the optional channel your project uses.
 
 Give each stored member a private serialized backing field and a C# property. The normal assignment calls the setter, which calls the selected mode. The base matches the property name to the backing field's key, trimming leading underscores and accepting the PascalCase property equivalent. For different names pass the explicit key to `Write`. Use `[SODataKey("old-key")]` to preserve a published key. Keep a renamed Unity backing field compatible with old authored assets using `FormerlySerializedAs`. Unity serializes the backing fields. Make the changes through their properties. To save a collection or nested record, assign the updated value back through the property.
 
