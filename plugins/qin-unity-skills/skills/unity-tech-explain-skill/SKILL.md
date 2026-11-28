@@ -24,6 +24,8 @@ Use the following three unnumbered headings in the user's language. The Chinese 
 
 Start with the thing the user can see or change. When they name an SO or a game, locate its actual domain class and public API. Explain what its value means and how gameplay reads or changes it. If only the shared template is available, identify it as a template. For an Editor workflow, start at the control or component they touch.
 
+For a server connection or a pushed value, [trace the game's current data owner](../unity-code-skill/references/so-data-controller.md#choose-the-owner-for-server-data). Show its existing caller and receive path. Use the SODataController example for a domain that has no value owner yet.
+
 For coins or account progress, follow the named game's actual writer and balance reader. A connected account wallet uses its persistent remote owner. In the shared SO template this is `DirectAccessOnline`; `DirectAccess` fits an explicitly offline wallet. When a server validates grants, show the server operation and the confirmed balance the client reads.
 
 ### Concrete code

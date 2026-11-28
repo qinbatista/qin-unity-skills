@@ -63,6 +63,10 @@ For checker changes, run its CLI on representative source and a tracked diff. Fo
 
 ## Run the foundation fixture
 
+For changes to server data guidance, run the [installed routing cases](tests/test_topic_routing.py) and follow the [ownership decision](../../../unity-code-skill/references/so-data-controller.md#choose-the-owner-for-server-data) on an endpoint-only change, an existing value receiving a server update, and a new value with only a connection in place. Check the selected writer, gameplay API and channel in each case.
+
+The [LocalFile replay](tests/Editor/SOLocalSnapshotTests.cs) applies 128 changes to one 64 KiB snapshot, compares committed bytes, repeats 10,000 clean assignments and reopens the file. It also exercises edits during a write, reversions and recovery after a failed checkpoint. Add `--clock` when preparing the fixture to run [the actual five-minute timer](tests/Editor/SOLocalFileClockTests.cs) with two dirty domains and one reverted domain. Filter on `LocalFileClockCommits` for that replay alone.
+
 The preparer copies the installable `script/SODataController/` tree into `Assets/script/SODataController/`, including both guarded provider sources. Filter on `PickupWalkthroughMenuReportsTheActualWriteAndReopen` to invoke the shipped Editor menu and compare its seven observed messages without networking packages. Enable `--cloud --netcode` on the preparer and omit the test filter to also cover both optional SDK channels. [Walkthrough test](tests/Editor/SODataControllerTests.cs)
 
 From the repository root, use the [fixture preparer](tests/prepare_foundation_tests.py) with a fresh allocated task Cache directory. Bind child temporary storage and UPM cache to that run. On macOS verify the [short native temp path](../../../unity-testing-skill/references/runtime-and-artifact-evidence.md#macos-batch-startup). Use `py -3` for Python 3 on Windows.

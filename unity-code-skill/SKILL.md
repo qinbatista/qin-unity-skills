@@ -1,6 +1,6 @@
 ---
 name: unity-code-skill
-description: Route mixed Unity requests and changes to this Skill pack. For C# use the code routes for gameplay architecture, lifecycle, Jobs, GC, serialization, local and cloud saves, SDKs and source checks, including ordinary C# outside Unity.
+description: Route mixed Unity requests and changes to this Skill pack. For C# use the code routes for gameplay architecture, lifecycle, Jobs, GC, serialization, server connections and data updates, local and cloud saves, SDKs and source checks, including ordinary C# outside Unity.
 ---
 
 # Unity Code
@@ -22,7 +22,8 @@ For linked gameplay use `explain game-code-logic`, or `explain yofa-plugin` for 
 | Fix or extend this Skill pack, including findings from a local test | [Submit a Skill change](references/contributing.md#submit-a-skill-change). |
 | Plan folders or an existing game's feature | [Existing-game architecture](references/unity-cli.md#existing-game-architecture), then [Controller, Manager and data ownership](references/unity-game-code-structure-design.md#ownership) for a code design. |
 | Design or audit ScriptableObject fields, shared state, keyed records or local and online schema changes | Follow the [ten data ownership and compatibility checks](references/scriptableobject-data-contracts.md#design-and-review-a-data-owner) and the [spell and wallet examples](references/scriptableobject-data-contracts.md#spell-catalog-and-player-wallet). |
-| Route a C# property setter to local storage, a persistent account or a realtime match | Choose a [storage mode](references/so-data-controller.md#choose-one-mode-per-domain), copy `assets/script/SODataController/` and [run the pickup walkthrough](references/so-data-controller.md#run-the-pickup-walkthrough). |
+| Connect or replace a server, change an endpoint, or handle a server data update | [Find the owner of the value](references/so-data-controller.md#choose-the-owner-for-server-data). Extend the game's existing owner, or use SODataController when the data has no owner. |
+| Route an SO property to storage, batch large JSON saves or replicate match state | Choose a [storage mode](references/so-data-controller.md#choose-one-mode-per-domain), review [whole-file checkpoints and measurements](references/so-data-controller.md#batch-whole-file-saves), or [run the pickup walkthrough](references/so-data-controller.md#run-the-pickup-walkthrough). |
 | Define a scene Singleton or maintain a legacy ScriptableObject save | Use the [Singleton definition and Manager example](references/unity-game-code-structure-design.md#singleton-managers) and the [local save base and data example](references/unity-lifecycle-and-serialization.md#scriptableobject-local-files). Both include portable C# source. |
 | Save ScriptableObject data for an offline-capable game with optional cloud sync | [Local-first ScriptableObject cloud saves](references/local-first-cloud-saves.md#implement-a-local-first-save) pairs the local JSON with a replaceable cloud adapter. |
 | Write or review C# | [Style and method boundaries](references/unity-csharp-rules.md#c-style) and the [source check](#c-source-checks). Call the real owner directly. |

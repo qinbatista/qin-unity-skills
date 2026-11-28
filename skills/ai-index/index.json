@@ -8,7 +8,7 @@
   "modules": [
     {
       "id": "unity-code",
-      "summary": "Pack task menu, portable Singleton and local ScriptableObject saves, C# checks, Jobs, resource lifetimes, SDK integration and the daily CLI launcher",
+      "summary": "Pack task menu, server data ownership, ScriptableObject storage, Singleton, C# checks, Jobs, resource lifetimes, SDK integration and the daily CLI launcher",
       "document": "skills/ai-index/modules/unity-code.md",
       "sources": [
         "unity-code-skill"
@@ -26,21 +26,21 @@
           "id": "open-so-storage",
           "file": "unity-code-skill/assets/script/SODataController/SODataController.cs",
           "symbol": "SODataController.OpenAsync",
-          "anchor": "public async Task OpenAsync(",
+          "anchor": "public async Task OpenAsync(string slot, ISODataKeyStore provider = null, CancellationToken cancellation = default)",
           "summary": "Open the selected mode on the same SO and load the slot before gameplay."
         },
         {
           "id": "write-so-property",
           "file": "unity-code-skill/assets/script/SODataController/SODataController.cs",
           "symbol": "SODataController.Write",
-          "anchor": "protected void Write<T>(",
+          "anchor": "protected void Write<T>(ref T field, T value, [CallerMemberName] string key = null)",
           "summary": "Route the property setter to the active mode."
         },
         {
           "id": "send-online-property",
           "file": "unity-code-skill/assets/script/SODataController/Modes/SODirectAccessOnlineMode.cs",
           "symbol": "SODirectAccessOnlineMode.SendAsync",
-          "anchor": "private async Task SendAsync(",
+          "anchor": "private async Task SendAsync(SOStoredField field, Entry entry, string wire, Task previous, Task start)",
           "summary": "Send one field in write order and raise its change event after acknowledgement."
         },
         {
@@ -54,21 +54,28 @@
           "id": "currency-property",
           "file": "unity-code-skill/assets/script/SODataController/Examples/SOCurrencyData.cs",
           "symbol": "SOCurrencyData.Coins",
-          "anchor": "public int Coins {",
+          "anchor": "public int Coins { get => Read(ref _coins); set => Write(ref _coins, value); }",
           "summary": "Read and assign the persistent coins field."
         },
         {
           "id": "save-local-data",
           "file": "unity-code-skill/assets/script/SODataController/Modes/SOLocalFileMode.cs",
           "symbol": "SOLocalFileMode.Save",
-          "anchor": "protected override void Save(",
-          "summary": "Commit the encrypted whole-domain snapshot."
+          "anchor": "protected override void Save(SOStoredField field, string wire)",
+          "summary": "Track the latest dirty field for the shared five-minute LocalFile checkpoint."
+        },
+        {
+          "id": "commit-local-snapshot",
+          "file": "unity-code-skill/assets/script/SODataController/Modes/SOLocalFileMode.cs",
+          "symbol": "SOLocalFileMode.FinishBatch",
+          "anchor": "private void FinishBatch(Batch batch)",
+          "summary": "Accept the atomic file revision, retain concurrent edits and notify an optional backup once."
         },
         {
           "id": "load-local-data",
           "file": "unity-code-skill/assets/script/SODataController/Modes/SOLocalFileMode.cs",
           "symbol": "SOLocalFileMode.OpenAsync",
-          "anchor": "internal override Task OpenAsync(",
+          "anchor": "internal override Task OpenAsync(CancellationToken token)",
           "summary": "Read current or earlier local data before the first property access."
         },
         {

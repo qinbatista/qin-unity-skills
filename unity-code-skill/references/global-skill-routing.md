@@ -12,9 +12,11 @@ Pick the result below, open its domain menu, then read the linked headings for t
 | --- | --- |
 | Explain how a Unity Skill, concept, code path or Editor workflow works and how to use it | [Unity Tech Explain](../../unity-tech-explain-skill/SKILL.md#write-the-answer) |
 | Implement, fix or review C#, gameplay ownership, Jobs, GC, SDKs or serialization | [Code](../SKILL.md) |
+| Connect a server, change a backend endpoint or apply server-sent gameplay values | [Choose the owner for server data](so-data-controller.md#choose-the-owner-for-server-data) |
 | Design ScriptableObject data, share values across Controllers or evolve a save schema | [SO contracts and old-format replay](scriptableobject-data-contracts.md#design-and-review-a-data-owner) |
 | Read or assign a property on an SO in one of five storage modes | [SODataController template and adapters](so-data-controller.md#choose-one-mode-per-domain) · [Run the pickup walkthrough](so-data-controller.md#run-the-pickup-walkthrough) |
-| Save progress locally and synchronize it to an optional cloud provider | [Local-first ScriptableObject cloud saves](local-first-cloud-saves.md#implement-a-local-first-save) |
+| Repeated whole-file writes or uploads after small gameplay edits | [Dirty LocalFile checkpoints, backup notifications and measured I/O](so-data-controller.md#batch-whole-file-saves) |
+| Back up an offline-first save to an optional cloud provider | [Choose the data owner](so-data-controller.md#choose-the-owner-for-server-data), then follow [local-first cloud saves](local-first-cloud-saves.md#implement-a-local-first-save) for that save's backup. |
 | Place or move assets, or inspect, import or compress an image, including 2D Sprites, 3D textures and UI art | [Assets](../../unity-assets-skill/SKILL.md) |
 | Right-size a world sprite at 1,000 PPU, extend terrain or a tree trunk, or resize a button or panel from one backing | [World sprites](../../unity-assets-skill/SKILL.md#choose-an-operation) · [UI artwork](../../unity-ui-skill/SKILL.md#choose-an-operation) · [Replay the image examples](../../unity-performance-skill/references/performance-cases.md#replay-the-image-optimization-examples) |
 | Build or repair a screen, UXML template, press feedback, localization, responsive layout or safe-area settings | [UI](../../unity-ui-skill/SKILL.md) |

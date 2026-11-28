@@ -1,5 +1,7 @@
 # Use SODataController in a Unity project
 
+Use this template for gameplay data that has no existing owner. When an existing wallet, inventory or replicated component already owns the value, apply server updates through its current API. An endpoint change belongs in the existing connection settings or adapter.
+
 Copy the Skill's `assets/script` folder into the receiving project's `Assets`. Its runtime entry is `Assets/script/SODataController/SODataController.cs`. Install `com.unity.nuget.newtonsoft-json` (tested with 3.2.2). If the project uses assembly definitions, the runtime assembly needs a reference to `Unity.Newtonsoft.Json`. When moving an existing game script, move its Unity `.meta` with it so existing asset references retain their GUID.
 
 ```text
@@ -43,6 +45,8 @@ To follow the calls live in VS Code, attach the debugger to the running Unity Ed
 </details>
 
 ## Call it from gameplay
+
+For a LocalFile domain, change the property and read it back immediately. All LocalFile instances share one five-minute checkpoint for dirty whole-file saves. To save earlier, await the SO's `FlushAsync()`. An existing file-backup adapter can subscribe once to `SnapshotCommitted` and use the supplied JSON directly. Identical assignments, reverted changes and idle checkpoints generate no backup event. [Snapshot lifecycle and measured file writes](../../../references/so-data-controller.md#batch-whole-file-saves)
 
 Create a **Game Data/Pickups** asset and assign it to the pickup component. Share that instance with the session owner. After sign-in the owner calls `await pickupData.OpenAsync(slot, channel)` once. Gameplay can then write `pickupData.value = 5` and read `pickupData.value`. Before changing slots await `pickupData.CloseAsync()`. A regular offline SO opens its default slot on first access. [Working pickup](Examples/Pickups/PickupController.cs) · [Account wallet](Examples/SOCurrencyData.cs)
 

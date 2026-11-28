@@ -53,7 +53,7 @@ public sealed partial class UnityFoundationTests
     [TestCase(SODataMode.None)]
     [TestCase(SODataMode.LocalFile)]
     [TestCase(SODataMode.DirectAccess)]
-    public void SamePropertyRoutesToOneModeAndAnotherSlotIsIndependent(SODataMode mode)
+    public async Task SamePropertyRoutesToOneModeAndAnotherSlotIsIndependent(SODataMode mode)
     {
         var data = Domain<SOOutfitData>(mode, "clothes");
         var cold = Object.Instantiate(data);
@@ -65,6 +65,8 @@ public sealed partial class UnityFoundationTests
             data.HatId = "miner";
             data.BootsId = "red";
             data.HatId = "miner";
+            if (mode == SODataMode.LocalFile) Assert.AreEqual(0, changed);
+            await data.FlushAsync();
             Assert.AreEqual(1, changed);
             Assert.AreEqual("miner", data.HatId);
             cold.OpenAsync("slot").GetAwaiter().GetResult();
@@ -104,18 +106,25 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
-    public void FailedLocalSnapshotKeepsTheLastFileAndBackingField()
+    public async Task FailedLocalSnapshotPreservesTheFileAndPendingValueUntilReload()
     {
         var first = Domain<SOOutfitData>(SODataMode.LocalFile, "clothes");
         var stale = Object.Instantiate(first);
         try
         {
             first.HatId = "miner";
+            await first.FlushAsync();
             Assert.AreEqual("miner", stale.HatId);
             first.BootsId = "work";
-            Assert.Throws<SODataConflictException>(() => stale.HatId = "racing");
+            await first.FlushAsync();
+            stale.HatId = "racing";
+            Exception failed = null;
+            stale.StorageFailed += error => failed = error;
+            try { await stale.CloseAsync(); Assert.Fail("A stale slot closed without reporting the conflict."); }
+            catch (SODataConflictException error) { Assert.AreSame(error, failed); }
+            Assert.AreEqual("racing", stale.HatId);
+            stale.CloseData(discardLocalChanges: true);
             Assert.AreEqual("miner", stale.HatId);
-            stale.CloseData();
             Assert.AreEqual("work", stale.BootsId);
         }
         finally { Object.DestroyImmediate(first); Object.DestroyImmediate(stale); }
@@ -133,10 +142,14 @@ public sealed partial class UnityFoundationTests
             first.drops = new[] { new NativeWalletDomain.Item { id = "ruby", count = 2 } };
             first.region = new Bounds(Vector3.one, new Vector3(4, 6, 8));
             first.Hat = "miner";
+            first.items[0] = new NativeWalletDomain.Item { id = "ore", count = 9 };
+            first.items = first.items;
             var before = Directory.GetFiles(Path.Combine(_root, "SOData", "keys"), "*.record").ToDictionary(path => path, File.ReadAllBytes);
+            for (int i = 0; i < 100; i++) first.money = 40;
             Assert.AreEqual(5, before.Count);
             Assert.AreEqual(40, next.money);
             Assert.AreEqual("ore", next.items[0].id);
+            Assert.AreEqual(9, next.items[0].count);
             Assert.AreEqual(2, next.drops[0].count);
             Assert.AreEqual(8f, next.region.size.z);
             Assert.AreEqual("miner", next.Hat);

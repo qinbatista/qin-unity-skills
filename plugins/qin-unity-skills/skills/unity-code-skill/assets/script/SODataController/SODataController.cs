@@ -29,6 +29,7 @@ public abstract class SODataController : ScriptableObject
     public virtual SODataMode? RequiredMode => null;
     public SODataMode Mode => RequiredMode ?? _storageMode;
     public event Action<string> DataChanged;
+    public event Action<string> SnapshotCommitted;
     public event Action<Exception> StorageFailed;
     public Exception StorageError { get; private set; }
 
@@ -100,7 +101,7 @@ public abstract class SODataController : ScriptableObject
         }
         catch
         {
-            if (_active == mode) CloseData();
+            if (_active == mode) CloseData(true);
             throw;
         }
     }
@@ -139,12 +140,30 @@ public abstract class SODataController : ScriptableObject
         if (mode == null) return;
         _closing = true;
         try { await mode.FlushAsync(); }
-        finally { if (_active == mode) CloseData(); }
+        catch
+        {
+            if (_active == mode)
+            {
+                if (mode is SOLocalFileMode) _closing = false;
+                else CloseData(true);
+            }
+            throw;
+        }
+        if (_active == mode) CloseData(true);
     }
 
-    public void CloseData()
+    public void CloseData() => CloseData(false);
+
+    public void CloseData(bool discardLocalChanges)
     {
         var mode = _active;
+        if (!discardLocalChanges && mode is SOLocalFileMode local)
+        {
+            _closing = true;
+            try { local.FlushBeforeClose(); }
+            finally { _closing = false; }
+            if (_active != mode) return;
+        }
         _active = null;
         _closing = _ready = false;
         try { mode?.Dispose(); }
@@ -167,12 +186,22 @@ public abstract class SODataController : ScriptableObject
     }
 
     // code-gate: semantic-boundary=Unity retires the active slot and subscriptions when it disables this SO.
-    protected virtual void OnDisable() => CloseData();
+    protected virtual void OnDisable()
+    {
+        try { CloseData(); }
+        catch (Exception error) { Debug.LogException(error); CloseData(true); }
+    }
     protected virtual void OnValidate() { if (RequiredMode.HasValue) _storageMode = RequiredMode.Value; }
 
     internal void Changed(string key)
     {
         try { DataChanged?.Invoke(key); }
+        catch (Exception error) { Debug.LogException(error); }
+    }
+
+    internal void NotifySnapshotCommitted(string json)
+    {
+        try { SnapshotCommitted?.Invoke(json); }
         catch (Exception error) { Debug.LogException(error); }
     }
 
@@ -182,6 +211,8 @@ public abstract class SODataController : ScriptableObject
         try { StorageFailed?.Invoke(error); }
         catch (Exception listenerError) { Debug.LogException(listenerError); }
     }
+
+    internal void ClearStorageError() => StorageError = null;
 }
 
 [AttributeUsage(AttributeTargets.Field)]
@@ -233,7 +264,7 @@ internal sealed class SOStoredField
         return result;
     }
 
-    internal static string Wrap(JToken value) => new JObject { ["value"] = value.DeepClone() }.ToString(Formatting.None);
+    internal static string Wrap(JToken value) => "{\"value\":" + value.ToString(Formatting.None) + "}";
     internal static JToken Unwrap(string wire)
     {
         var box = ParseObject(wire);
@@ -269,6 +300,7 @@ internal abstract class SOStorageMode : IDisposable
 
     internal virtual void Assign<T>(ref T current, T value, string key)
     {
+        if (Scalar<T>.CanCompare && EqualityComparer<T>.Default.Equals(current, value)) return;
         var field = Owner.FindField(key);
         string wire = JsonUtility.ToJson(new Box<T> { value = value });
         if (!wire.StartsWith("{\"value\":", StringComparison.Ordinal)) throw new InvalidDataException("Unsupported SO value: " + typeof(T));
@@ -282,6 +314,12 @@ internal abstract class SOStorageMode : IDisposable
             if (field.Visible == wire) field.Apply(previous);
             throw;
         }
+    }
+
+    // Reassigning a mutated collection must still compare its contents with the last wire value.
+    private static class Scalar<T>
+    {
+        internal static readonly bool CanCompare = typeof(T).IsPrimitive || typeof(T).IsEnum || typeof(T) == typeof(string);
     }
 
     protected virtual void Save(SOStoredField field, string wire) => throw new NotSupportedException();

@@ -47,6 +47,26 @@ class InstalledRoutingTests(unittest.TestCase):
                 self.assertIn("## Choose an operation", result.stdout)
                 self.assertNotIn("description:", result.stdout)
 
+    def test_server_data_entry_points_resolve_the_same_ownership_decision(self):
+        decision = "references/so-data-controller.md#choose-the-owner-for-server-data"
+        expected = read_topic("code", decision)
+        entry_points = (
+            ("code", "references/global-skill-routing.md#choose-by-task"),
+            ("code", "#choose-an-operation"),
+            ("code", "references/unity-service-integration.md#stable-boundary"),
+            ("code", "references/local-first-cloud-saves.md#implement-a-local-first-save"),
+            ("tech-explain", "#brief-explanation"),
+            ("tech-explain", "references/scriptableobject-storage.md#brief-explanation"),
+        )
+        for domain, address in entry_points:
+            with self.subTest(domain=domain, address=address):
+                section = read_topic(domain, address)
+                links = re.findall(r"\]\(([^)]+#choose-the-owner-for-server-data)\)", section)
+                self.assertTrue(links, "Missing server data decision in " + address)
+                parent = Path(address.partition("#")[0]).parent
+                for link in links:
+                    self.assertEqual(expected, read_topic(domain, (parent / link).as_posix()))
+
     def test_image_cases_reach_the_installed_runner_from_their_owning_routes(self):
         anchor = "#replay-the-image-optimization-examples"
         section = read_topic("performance", "references/performance-cases.md" + anchor)

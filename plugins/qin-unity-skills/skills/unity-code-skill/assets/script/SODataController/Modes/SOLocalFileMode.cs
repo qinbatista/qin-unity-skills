@@ -26,6 +26,25 @@ internal sealed class SOLocalFileMode : SOStorageMode
     private string _revision;
     private JObject _snapshot;
     private const string Format = "$sodata";
+    private static readonly HashSet<SOLocalFileMode> Pending = new HashSet<SOLocalFileMode>();
+    private static CancellationTokenSource _clock;
+    private static Task _checkpointLoop = Task.CompletedTask;
+    private readonly Dictionary<SOStoredField, string> _committed = new Dictionary<SOStoredField, string>();
+    private readonly HashSet<SOStoredField> _dirty = new HashSet<SOStoredField>();
+    private Batch _writing;
+
+    private sealed class Batch
+    {
+        internal readonly KeyValuePair<SOStoredField, string>[] Fields;
+        internal readonly Task<(string Revision, string Json)> Receipt;
+
+        internal Batch(SOLocalFileMode mode)
+        {
+            Fields = mode._dirty.Select(field => new KeyValuePair<SOStoredField, string>(field, field.Visible)).ToArray();
+            string revision = mode._revision;
+            Receipt = Task.Run(() => mode.Commit(Fields, revision));
+        }
+    }
 
     internal static string Root
     {
@@ -57,12 +76,17 @@ internal sealed class SOLocalFileMode : SOStorageMode
         _snapshot = text == null ? new JObject() : ReadSnapshot(text);
         foreach (var field in Owner.Fields)
         {
-            JToken value = _snapshot[field.Key] ?? _snapshot[field.Member.Name];
-            if (value == null)
-                foreach (FormerlySerializedAsAttribute alias in field.Member.GetCustomAttributes(typeof(FormerlySerializedAsAttribute), false))
-                    if ((value = _snapshot[alias.oldName]) != null) break;
-            if (value != null) field.Apply(SOStoredField.Wrap(value));
-            _snapshot[field.Key] = SOStoredField.Unwrap(field.Visible);
+            if (_snapshot.TryGetValue(field.Key, out var value)) field.Apply(SOStoredField.Wrap(value));
+            else
+            {
+                value = _snapshot[field.Member.Name];
+                if (value == null)
+                    foreach (FormerlySerializedAsAttribute alias in field.Member.GetCustomAttributes(typeof(FormerlySerializedAsAttribute), false))
+                        if ((value = _snapshot[alias.oldName]) != null) break;
+                if (value != null) field.Apply(SOStoredField.Wrap(value));
+                _snapshot[field.Key] = SOStoredField.Unwrap(field.Visible);
+            }
+            _committed.Add(field, field.Visible);
         }
         _snapshot[Format] = 1;
         return Task.CompletedTask;
@@ -92,11 +116,166 @@ internal sealed class SOLocalFileMode : SOStorageMode
 
     protected override void Save(SOStoredField field, string wire)
     {
-        var next = (JObject)_snapshot.DeepClone();
-        next[field.Key] = SOStoredField.Unwrap(wire);
-        _revision = SOFileStorage.WriteSnapshot(_path, next.ToString(Formatting.None), _revision);
-        _snapshot = next;
-        Owner.Changed(field.Key);
+        if (wire == _committed[field]) _dirty.Remove(field);
+        else _dirty.Add(field);
+        UpdateSchedule();
+    }
+
+    // Only one worker touches this JSON tree. Gameplay continues to edit the SO on the Unity thread.
+    private (string Revision, string Json) Commit(KeyValuePair<SOStoredField, string>[] fields, string revision)
+    {
+        JToken[] originals = new JToken[fields.Length];
+        int applied = 0;
+        try
+        {
+            foreach (var item in fields)
+            {
+                originals[applied] = _snapshot[item.Key.Key];
+                _snapshot[item.Key.Key] = SOStoredField.Unwrap(item.Value);
+                applied++;
+            }
+            string json = _snapshot.ToString(Formatting.None);
+            return (SOFileStorage.WriteSnapshot(_path, json, revision), json);
+        }
+        catch
+        {
+            for (int i = 0; i < applied; i++) _snapshot[fields[i].Key.Key] = originals[i];
+            throw;
+        }
+    }
+
+    private Batch StartBatch()
+    {
+        if (_writing == null && _dirty.Count > 0) _writing = new Batch(this);
+        return _writing;
+    }
+
+    private void FinishBatch(Batch batch)
+    {
+        if (_writing != batch) return;
+        string json;
+        try
+        {
+            var result = batch.Receipt.GetAwaiter().GetResult();
+            _revision = result.Revision;
+            json = result.Json;
+        }
+        catch (Exception error)
+        {
+            _writing = null;
+            if (error is SODataConflictException) Unschedule();
+            else UpdateSchedule();
+            Owner.Failed(error);
+            throw;
+        }
+        _writing = null;
+        foreach (var item in batch.Fields)
+        {
+            _committed[item.Key] = item.Value;
+            if (item.Key.Visible == item.Value) _dirty.Remove(item.Key);
+            else _dirty.Add(item.Key);
+        }
+        Owner.ClearStorageError();
+        UpdateSchedule();
+        StopClockIfIdle();
+        Owner.NotifySnapshotCommitted(json);
+        foreach (var item in batch.Fields) Owner.Changed(item.Key.Key);
+    }
+
+    private async Task FlushBatchAsync(Batch batch)
+    {
+        try { await batch.Receipt; }
+        finally { FinishBatch(batch); }
+    }
+
+    internal override async Task FlushAsync()
+    {
+        Batch batch;
+        while ((batch = StartBatch()) != null) await FlushBatchAsync(batch);
+    }
+
+    internal void FlushBeforeClose()
+    {
+        Batch batch;
+        while ((batch = StartBatch()) != null) FinishBatch(batch);
+    }
+
+    private void UpdateSchedule()
+    {
+        if (_dirty.Count == 0 && _writing == null)
+        {
+            // Repeated edits and reversions can share the rest of this window without timer churn.
+            Pending.Remove(this);
+            return;
+        }
+        if (Owner.StorageError is SODataConflictException) { Unschedule(); return; }
+        if (!Pending.Add(this) || !_checkpointLoop.IsCompleted) return;
+        _clock = new CancellationTokenSource();
+        Application.focusChanged += OnFocus;
+        Application.quitting += FlushPending;
+        _checkpointLoop = RunClockAsync(_clock.Token);
+    }
+
+    private static async Task RunClockAsync(CancellationToken token)
+    {
+        try
+        {
+            while (true)
+            {
+                await Task.Delay(TimeSpan.FromMinutes(5), token);
+                token.ThrowIfCancellationRequested();
+                if (Pending.Count == 0) { StopClockIfIdle(); return; }
+                foreach (var mode in Pending.ToArray())
+                {
+                    token.ThrowIfCancellationRequested();
+                    var batch = mode.StartBatch();
+                    if (batch == null) continue;
+                    try { await mode.FlushBatchAsync(batch); }
+                    catch (Exception) { /* FinishBatch reports the error and retains dirty values. */ }
+                }
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+    }
+
+    private static void OnFocus(bool focused) { if (!focused) FlushPending(); }
+
+    private static void FlushPending()
+    {
+        foreach (var mode in Pending.ToArray())
+            try { mode.FlushBeforeClose(); }
+            catch (Exception error) { Debug.LogException(error); }
+    }
+
+    private void Unschedule()
+    {
+        Pending.Remove(this);
+        StopClockIfIdle();
+    }
+
+    private static void StopClockIfIdle()
+    {
+        if (Pending.Count != 0 || _clock == null) return;
+        Application.focusChanged -= OnFocus;
+        Application.quitting -= FlushPending;
+        var clock = _clock;
+        _clock = null;
+        _checkpointLoop = Task.CompletedTask;
+        clock.Cancel();
+        clock.Dispose();
+    }
+
+    public override void Dispose()
+    {
+        // A submitted atomic replacement may already be on disk. Join it before the slot reopens.
+        if (_writing != null)
+        {
+            try { _writing.Receipt.GetAwaiter().GetResult(); }
+            catch (Exception error) { Owner.Failed(error); }
+            _writing = null;
+        }
+        _dirty.Clear();
+        Unschedule();
     }
 }
 

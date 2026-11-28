@@ -42,7 +42,7 @@ For an authored `.asset` change in Editor tooling, edit the existing asset with 
 
 ## ScriptableObject local files
 
-Use a private serialized backing field and a public property. The LocalFile mode restores the selected slot on first access and commits the complete domain when a property changes. A dedicated legacy file name keeps earlier default-slot saves readable. See the [storage template](so-data-controller.md#copy-and-call-the-template).
+Use a private serialized backing field and a public property. LocalFile restores the selected slot on open. A changed property marks the domain dirty for the next whole-file checkpoint. A dedicated legacy file name keeps earlier default-slot saves readable. [Snapshot lifecycle](so-data-controller.md#batch-whole-file-saves)
 
 ```csharp
 using UnityEngine;
@@ -56,7 +56,7 @@ public sealed class SOAudioPreferences : SODataController
 }
 ```
 
-The [Manager](unity-game-code-structure-design.md#singleton-managers) creates a runtime SO. Assigning `settings.Volume = 0.75f` commits the snapshot before the setter returns.
+The Manager creates one runtime SO. Assigning `settings.Volume = 0.75f` changes the shared volume immediately. The five-minute checkpoint or normal close writes the latest settings. [Manager example](unity-game-code-structure-design.md#singleton-managers)
 
 ## Parallel work
 

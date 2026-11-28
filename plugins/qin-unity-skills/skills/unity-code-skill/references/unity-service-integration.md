@@ -4,6 +4,8 @@ Use for Unity services, platform SDKs and provider initialization.
 
 ## Stable boundary
 
+For server connection changes and incoming gameplay data, [choose the owner for server data](so-data-controller.md#choose-the-owner-for-server-data) before wiring an SDK callback.
+
 - A neutral public contract can shield callers from optional or interchangeable SDKs. For a direct single-owner operation, use the [common method boundary rules](unity-csharp-rules.md#c-style).
 - Keep initialization explicit with observable states such as uninitialized, initializing, ready, and failed. Coalesce concurrent initialization, reject or queue calls according to the declared contract, and do not initialize the same SDK from multiple owners.
 - Forward each callback or operation once. Avoid duplicate event bridges, duplicate save calls, nested manager-to-manager forwarding, and hidden initialization in getters or unrelated methods.

@@ -14,7 +14,7 @@ sys.path.insert(0, str(PACK / "scripts"))
 from read_topic import read_topic
 
 
-def prepare(run, cloud=False, netcode=False):
+def prepare(run, cloud=False, netcode=False, clock=False):
     run = run.resolve(strict=True)
     if run.parent != PROJECT / "Cache" or not run.name.startswith("temp-"):
         raise ValueError("Use an allocated task directory under the project Cache.")
@@ -57,8 +57,10 @@ def prepare(run, cloud=False, netcode=False):
     packages["dependencies"]["com.unity.nuget.newtonsoft-json"] = "3.2.2"
     tests = [
         "UnityFoundationTests.cs", "ScriptableObjectDataTests.cs", "SODataControllerTests.cs",
-        "SOFileStorageTests.cs",
+        "SOFileStorageTests.cs", "SOLocalSnapshotTests.cs",
     ]
+    if clock:
+        tests.append("SOLocalFileClockTests.cs")
     if cloud:
         packages["dependencies"]["com.unity.services.cloudsave"] = "3.4.2"
         for target in (runtime_assembly, assembly):
@@ -85,5 +87,6 @@ if __name__ == "__main__":
     parser.add_argument("run", type=Path, help="Fresh task Cache run")
     parser.add_argument("--cloud", action="store_true", help="Compile the Unity Cloud Save adapter and run its SDK contract cases.")
     parser.add_argument("--netcode", action="store_true", help="Compile the NGO adapter and run a real localhost server/client pair.")
+    parser.add_argument("--clock", action="store_true", help="Also run the five-minute LocalFile wall-clock replay.")
     args = parser.parse_args()
-    print(prepare(args.run, args.cloud, args.netcode))
+    print(prepare(args.run, args.cloud, args.netcode, args.clock))

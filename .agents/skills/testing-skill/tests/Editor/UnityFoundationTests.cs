@@ -62,15 +62,16 @@ public sealed partial class UnityFoundationTests
         Assert.IsNull(duplicate.Settings);
         Assert.AreEqual(1f, first.Settings.Volume);
         first.Settings.Volume = 0.25f;
-        string firstSave = File.ReadAllText(SavePath);
+        Assert.IsFalse(File.Exists(SavePath));
         first.Settings.Volume = 0.75f;
-        Assert.AreNotEqual(firstSave, File.ReadAllText(SavePath));
+        Assert.IsFalse(File.Exists(SavePath));
         yield return null;
         Assert.IsTrue(duplicate == null);
         Assert.AreSame(first, AudioPreferencesManager.Instance);
         Object.Destroy(first.gameObject);
         yield return null;
         Assert.IsNull(AudioPreferencesManager.Instance);
+        Assert.IsTrue(File.Exists(SavePath));
         AudioPreferencesManager replacement = new GameObject("Replacement").AddComponent<AudioPreferencesManager>();
         Assert.AreSame(replacement, AudioPreferencesManager.Instance);
         Assert.AreEqual(0.75f, replacement.Settings.Volume);
