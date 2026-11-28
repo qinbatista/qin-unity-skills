@@ -30,11 +30,18 @@
           "summary": "Check the target's required mode before binding a matching storage policy, loading scoped data and observing field assignments."
         },
         {
+          "id": "enter-so-profile",
+          "file": "unity-code-skill/assets/SODataProfile.cs",
+          "symbol": "SODataProfile.EnterAsync",
+          "anchor": "public async Task EnterAsync(",
+          "summary": "Open gameplay's referenced data instances once per account or slot and let ordinary field assignments synchronize through each SO."
+        },
+        {
           "id": "credit-currency",
           "file": "unity-code-skill/assets/SOCurrencyData.cs",
           "symbol": "SOCurrencyData.CreditCoins",
           "anchor": "public void CreditCoins(int amount)",
-          "summary": "Open the fixed DirectAccessOnline account wallet, queue its coins key through the private setter and await the provider acknowledgement."
+          "summary": "Apply a validated credit in the fixed DirectAccessOnline wallet and queue its coins field for remote acknowledgement."
         },
         {
           "id": "save-local-data",

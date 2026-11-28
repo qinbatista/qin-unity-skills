@@ -16,6 +16,12 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Player = Unity.Services.CloudSave.Models.Data.Player;
 
+public sealed class FixtureCloudProfile : SODataProfile
+{
+    public ISODataKeyStore Store { get; set; }
+    protected override ISODataKeyStore CreateCloudStore() => Store;
+}
+
 public sealed partial class UnityFoundationTests
 {
     // Model the documented atomic Default Player Data batch, using the pinned SDK's request and response types.
@@ -24,6 +30,7 @@ public sealed partial class UnityFoundationTests
         private readonly Dictionary<string, Item> _items = new Dictionary<string, Item>();
         public readonly List<string[]> Batches = new List<string[]>();
         public Func<string, Task> AfterRead;
+        public Task Acknowledgement = Task.CompletedTask;
         public string DropAcknowledgementFor;
 
         public async Task<Dictionary<string, Item>> LoadAsync(ISet<string> keys, Player.LoadOptions options)
@@ -39,7 +46,7 @@ public sealed partial class UnityFoundationTests
             return result;
         }
 
-        public Task<Dictionary<string, string>> SaveAsync(IDictionary<string, SaveItem> items, Player.SaveOptions options)
+        public async Task<Dictionary<string, string>> SaveAsync(IDictionary<string, SaveItem> items, Player.SaveOptions options)
         {
             Assert.IsInstanceOf<Player.DefaultWriteAccessClassOptions>(options.AccessClassOptions);
             Dictionary<string, string> revisions = new Dictionary<string, string>();
@@ -60,7 +67,8 @@ public sealed partial class UnityFoundationTests
                 Batches.Add(items.Keys.ToArray());
             }
             if (DropAcknowledgementFor != null && items.ContainsKey(DropAcknowledgementFor)) throw new IOException("The server committed, then the connection closed.");
-            return Task.FromResult(revisions);
+            await Acknowledgement;
+            return revisions;
         }
 
         // These SDK result and exception constructors are private to the package.
@@ -143,6 +151,77 @@ public sealed partial class UnityFoundationTests
         await ExpectCloudFailure<SODataConflictException>(first.WriteAsync("wallet", "coins", "99", winner.Revision, token));
         await ExpectCloudFailure<SODataConflictException>(first.WriteAsync("wallet", "coins", "99", null, token));
         Assert.AreEqual("42", (await first.ReadAsync("wallet", "coins", token)).Value);
+    }
+
+    [UnityTest]
+    public IEnumerator PickupSetsFiveAndTheProfileOwnsTheCloudWriteAndColdRead() => RunCloudCase(VerifyPickupProfileAsync());
+
+    private static async Task VerifyPickupProfileAsync()
+    {
+        CloudPlayerFixture account = new CloudPlayerFixture();
+        UnityCloudSaveKeyStore cloud = new UnityCloudSaveKeyStore(account, () => "alice");
+        SOPickupData data = Domain<SOPickupData>(SODataMode.DirectAccessOnline, "pickups");
+        SOPickupData cold = UnityEngine.Object.Instantiate(data);
+        FixtureCloudProfile profile = StorageProfile<FixtureCloudProfile>(data);
+        profile.Store = cloud;
+        SODataProfile restarted = StorageProfile<SOUnityCloudSaveProfile>(cold);
+        GameObject pickupObject = new GameObject("Pickup");
+        TaskCompletionSource<bool> reply = new TaskCompletionSource<bool>();
+        string assetPath = AssetDatabase.GenerateUniqueAssetPath("Assets/Fixtures/Pickups.asset");
+        try
+        {
+            AssetDatabase.CreateAsset(data, assetPath);
+            AssetDatabase.SaveAssetIfDirty(data);
+            byte[] authored = File.ReadAllBytes(assetPath);
+            PickupController pickup = pickupObject.AddComponent<PickupController>();
+            SerializedObject binding = new SerializedObject(pickup);
+            binding.FindProperty("_pickupData").objectReferenceValue = data;
+            binding.ApplyModifiedPropertiesWithoutUndo();
+            const string scope = "slot-a/pickups";
+            await cloud.WriteAsync(scope, "value", "{\"value\":37}", null, CancellationToken.None);
+            await profile.EnterAsync("slot-a");
+            Assert.AreEqual(37, data.value);
+
+            int writesBeforePickup = account.Batches.Count;
+            List<string> confirmed = new List<string>();
+            data.DataChanged += confirmed.Add;
+            account.Acknowledgement = reply.Task;
+            pickup.OnPickup();
+            Assert.AreEqual(5, data.value);
+            Assert.AreEqual(writesBeforePickup + 1, account.Batches.Count);
+            CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(scope, "value") }, account.Batches.Last());
+            Assert.AreEqual("{\"value\":5}", (await cloud.ReadAsync(scope, "value", CancellationToken.None)).Value);
+            Assert.IsEmpty(confirmed);
+
+            Task exit = profile.LeaveAsync();
+            Assert.IsFalse(exit.IsCompleted);
+            Assert.Throws<InvalidOperationException>(() => data.value = 9);
+            Assert.AreEqual(5, data.value);
+            reply.SetResult(true);
+            await exit;
+            CollectionAssert.AreEqual(new[] { "value" }, confirmed);
+            Assert.AreEqual(0, data.value);
+            EditorUtility.SetDirty(data);
+            AssetDatabase.SaveAssetIfDirty(data);
+            CollectionAssert.AreEqual(authored, File.ReadAllBytes(assetPath));
+            await restarted.EnterAsync("slot-a", new UnityCloudSaveKeyStore(account, () => "alice"));
+            Assert.AreEqual(5, cold.value);
+            await restarted.LeaveAsync();
+            await restarted.EnterAsync("slot-b", cloud);
+            Assert.AreEqual(0, cold.value);
+            await restarted.LeaveAsync();
+            Assert.AreEqual(writesBeforePickup + 1, account.Batches.Count);
+        }
+        finally
+        {
+            reply.TrySetResult(true);
+            UnityEngine.Object.DestroyImmediate(pickupObject);
+            UnityEngine.Object.DestroyImmediate(profile);
+            UnityEngine.Object.DestroyImmediate(restarted);
+            if (AssetDatabase.Contains(data)) AssetDatabase.DeleteAsset(assetPath);
+            else UnityEngine.Object.DestroyImmediate(data);
+            UnityEngine.Object.DestroyImmediate(cold);
+        }
     }
 
     [UnityTest]

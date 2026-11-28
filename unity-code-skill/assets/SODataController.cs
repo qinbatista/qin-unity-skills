@@ -161,6 +161,22 @@ public partial class SODataController : ScriptableObject, ISerializationCallback
         if (_keys != null) await _keys.AwaitWrites();
     }
 
+    // Profile exit keeps the provider alive until every submitted field write has a receipt.
+    public async Task CloseAsync()
+    {
+        SOKeySession session = _keys;
+        if (!_ready || session == null) { CloseData(); return; }
+        try
+        {
+            CheckForChanges(false);
+            await session.AwaitWrites(seal: true);
+        }
+        finally
+        {
+            if (ReferenceEquals(_keys, session)) CloseData();
+        }
+    }
+
     internal void CheckForChanges(bool indirectOnly)
     {
         if (!_ready) return;

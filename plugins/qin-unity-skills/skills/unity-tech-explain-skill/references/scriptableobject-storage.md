@@ -29,13 +29,13 @@ public sealed class SOCurrencyData : SODataController
 }
 ```
 
-After sign-in, open the wallet's runtime copy with `await wallet.OpenAsync("slot-a", new UnityCloudSaveKeyStore())`. The pickup calls `wallet.CreditCoins(3)`, which queues a cloud write immediately. After `await wallet.FlushAsync()` succeeds, the UI can present `wallet.Coins` as confirmed. [Unity Cloud Save setup](https://github.com/qinbatista/qin-unity-skills/blob/master/unity-code-skill/references/so-unity-cloud-save.md)
+The pickup calls `wallet.CreditCoins(3)`. That method updates `wallet.Coins` and queues the remote field write. A UI that displays a confirmed balance listens to the SO's `DataChanged` event. The account flow enters the storage profile once after sign-in. [Unity Cloud Save setup](https://github.com/qinbatista/qin-unity-skills/blob/master/unity-code-skill/references/so-unity-cloud-save.md)
 
 ## Detailed explanation and steps
 
 ```text
 Cloud balance 37 → CreditCoins(3) → memory shows 40 → remote write pending
-  ├─ FlushAsync succeeds → cloud confirms 40 → reopen the same account and slot → 40
+  ├─ Cloud confirms → DataChanged("coins") → reopen the same account and slot → 40
   └─ acknowledgement is lost → reopen and read the service before retrying the pickup
 ```
 

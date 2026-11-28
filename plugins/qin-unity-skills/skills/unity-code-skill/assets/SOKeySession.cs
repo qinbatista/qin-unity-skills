@@ -26,6 +26,7 @@ internal sealed class SOKeySession : IDisposable
     private readonly List<IDisposable> _subscriptions = new List<IDisposable>();
     private bool _closed;
     private bool _ready;
+    private bool _sealed;
     private int _applying;
 
     internal bool WritesThrough => _store is ISOWriteThroughStore;
@@ -102,6 +103,11 @@ internal sealed class SOKeySession : IDisposable
         }
         string value = field.Capture();
         if (value == writes.Visible) return;
+        if (_sealed)
+        {
+            Project(field, writes.Visible);
+            throw new InvalidOperationException("The data profile is closing.");
+        }
         writes.Visible = value;
         var result = Submit(field, value, CancellationToken.None);
         if (result.IsCompleted) ThrowError(result.GetAwaiter().GetResult());
@@ -185,6 +191,7 @@ internal sealed class SOKeySession : IDisposable
             ThrowError(await writes.Tail);
             operation.Token.ThrowIfCancellationRequested();
             ThrowError(writes.Error);
+            if (_sealed) throw new InvalidOperationException("The data profile is closing.");
             string previous = field.Capture();
             string next;
             _applying++;
@@ -208,8 +215,9 @@ internal sealed class SOKeySession : IDisposable
         }
     }
 
-    internal async Task AwaitWrites()
+    internal async Task AwaitWrites(bool seal = false)
     {
+        if (seal) _sealed = true;
         List<Task<Exception>> pending = new List<Task<Exception>>();
         foreach (var writes in _writes.Values) pending.Add(writes.Tail);
         Task<Exception[]> receipts = Task.WhenAll(pending);

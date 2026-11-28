@@ -30,6 +30,53 @@ public sealed partial class UnityFoundationTests
         throw new AssertionException("Expected " + typeof(T).Name);
     }
 
+    private static T StorageProfile<T>(params SODataController[] domains) where T : SODataProfile
+    {
+        T profile = ScriptableObject.CreateInstance<T>();
+        using SerializedObject inspector = new SerializedObject(profile);
+        SerializedProperty references = inspector.FindProperty("_domains");
+        references.arraySize = domains.Length;
+        for (int index = 0; index < domains.Length; index++) references.GetArrayElementAtIndex(index).objectReferenceValue = domains[index];
+        inspector.ApplyModifiedPropertiesWithoutUndo();
+        return profile;
+    }
+
+    [Test]
+    public async Task ProfileRollsBackAnIncompleteOpenAndPreservesTheExistingOwner()
+    {
+        SOOutfitData first = Domain<SOOutfitData>(SODataMode.LocalFile, "first");
+        SOOutfitData occupied = Domain<SOOutfitData>(SODataMode.DirectAccess, "occupied");
+        SOOutfitData attached = ScriptableObject.CreateInstance<SOOutfitData>();
+        SODataProfile profile = StorageProfile<SODataProfile>(first, occupied);
+        try
+        {
+            await occupied.OpenAsync("other");
+            await ExpectError<InvalidOperationException>(() => profile.EnterAsync("slot"));
+            Assert.IsFalse(SODataWriteHooks.IsBound(first));
+            Assert.IsTrue(SODataWriteHooks.IsBound(occupied));
+            occupied.WearHat("other-hat");
+            occupied.CloseData();
+
+            await occupied.AttachAsync(attached, "external");
+            await ExpectError<InvalidOperationException>(() => profile.EnterAsync("slot"));
+            Assert.IsTrue(SODataWriteHooks.IsBound(attached));
+            occupied.CloseData();
+
+            await profile.EnterAsync("slot");
+            first.WearHat("slot-hat");
+            Assert.AreEqual("", occupied.HatId);
+            occupied.WearBoots("slot-boots");
+            await profile.LeaveAsync();
+            await profile.EnterAsync("slot");
+            Assert.AreEqual("slot-hat", first.HatId);
+            Assert.AreEqual("slot-boots", occupied.BootsId);
+            await profile.LeaveAsync();
+            await occupied.OpenAsync("other");
+            Assert.AreEqual("other-hat", occupied.HatId);
+        }
+        finally { Object.DestroyImmediate(profile); Object.DestroyImmediate(first); Object.DestroyImmediate(occupied); Object.DestroyImmediate(attached); }
+    }
+
     [Test]
     public async Task NoneSharesTheRuntimeObjectAndRestartsFromAuthoredDefaults()
     {

@@ -162,8 +162,20 @@ class InstalledRoutingTests(unittest.TestCase):
                        "public int Coins { get => _coins; private set => _coins = value; }",
                        "public void CreditCoins(int amount)", "Coins = checked(Coins + amount);"):
             self.assertIn(member, body)
-        for usage in ('wallet.OpenAsync("slot-a", new UnityCloudSaveKeyStore())', "wallet.CreditCoins(3)", "wallet.FlushAsync()", "wallet.Coins"):
+        for usage in ("wallet.CreditCoins(3)", "wallet.Coins", "DataChanged"):
             self.assertIn(usage, section)
+
+    def test_plain_field_walkthrough_shows_the_entire_shipping_pickup_caller(self):
+        guide = read_topic("tech-explain", "references/direct-field-assignment.md#concrete-code")
+        blocks = re.findall(r"^```csharp\n(.*?)\n```$", guide, re.MULTILINE | re.DOTALL)
+        self.assertEqual(len(blocks), 2)
+        for block, name in zip(blocks, ("SOPickupData.cs", "PickupController.cs")):
+            filename, body = block.split("\n", 1)
+            self.assertEqual(filename, f"// {name}")
+            source = (PACK / "unity-code-skill/assets/Examples/Pickups" / name).read_text(encoding="utf-8")
+            self.assertEqual(body, source[source.index("public sealed class"):].strip())
+        self.assertIn("public void OnPickup() => _pickupData.value = 5;", blocks[1])
+        self.assertNotRegex(blocks[1], r"OpenAsync|FlushAsync|EnterAsync|CloudSave|\bawait\b")
 
     def test_performance_menu_opens_implementation_and_measurement_sections(self):
         menu = run_reader("performance")

@@ -12,6 +12,7 @@ Use this Skill for the explanation part of a Unity request. Honor the user's lan
 ## Choose an operation
 
 - [Write the answer](#write-the-answer) from the perspective of the person using the feature.
+- [Show a direct SO field assignment](references/direct-field-assignment.md) for an ordinary gameplay write, its payload and a fresh read.
 - [Read the wallet example](references/scriptableobject-storage.md) for a field, a gameplay action and a cold restart.
 - [Review affected runtime costs](../unity-performance-skill/SKILL.md#review-every-unity-task) or [share a change](../unity-code-skill/references/contributing.md#submit-a-skill-change).
 
@@ -31,7 +32,7 @@ Start with the member the user works with. In each Unity C# excerpt, put the act
 
 Show the exact mode or other setting that determines the outcome beside the member it governs. Say where the user can see it and whether the class fixes it or the Inspector selects it. Follow the receiving project's C# style and the [shared C# rules](../unity-code-skill/references/unity-csharp-rules.md#c-style), including a single line for a simple getter and setter.
 
-Give the consumer's ordinary call in one line when that shows how to use the SO. Follow the existing API, including its validation, side effects and save timing. Use test fixtures as evidence and identify them when the question concerns the test itself. If the caller's implementation matters, give it a separate block with its actual file, type, method and trigger. Link the sources and label illustrative code. For an Editor-only task, show the setting and action the user needs.
+Give the consumer's ordinary action in one line. For a public SO field, show the literal assignment in the gameplay method. For an SO-owned operation, show its public call. Keep provider construction, slot entry and acknowledgement with their actual lifecycle owner. If needed, give the login prerequisite in a sentence outside the gameplay excerpt. Use the field's real key and the new value for the payload. Link the sources and label illustrative code. For an Editor-only task, show the setting and action the user needs.
 
 ### Detailed explanation and steps
 

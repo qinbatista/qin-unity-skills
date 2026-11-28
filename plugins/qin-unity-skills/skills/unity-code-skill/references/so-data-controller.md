@@ -2,7 +2,7 @@
 
 ## Choose one mode per domain
 
-Keep the game's data class, its fields, base class, methods and callers. Create **Game Data → Storage Controller** in the Inspector and give the controller one mode and a stable storage ID. The game's profile bootstrap attaches it to the runtime SO that gameplay already uses. Existing subclasses of [SODataController](../assets/SODataController.cs) can keep their own Inspector settings and call `OpenAsync` on their runtime clone.
+For an [SODataController](../assets/SODataController.cs) subclass, keep its fields, methods and normal gameplay assignments. Under **Game Data → Storage Profile**, create **Unity Cloud Save** for UGS or **Local or Custom** for another backend. Drag the same SO references used by gameplay into its Domains list. Each domain retains its own mode and stable storage ID. A game-owned SO with another base can use a separate **Game Data → Storage Controller** and the existing `AttachAsync` API.
 
 A domain with a required storage policy overrides `RequiredMode`. Its Inspector displays the effective mode read-only. A separate controller must match that mode to attach. Ordinary domains inherit the editable `None` default.
 
@@ -11,7 +11,7 @@ A domain with a required storage policy overrides `RequiredMode`. Its Inspector 
 | `None` (default) | Speed or attack tuning | Consumers share one runtime instance. A fresh clone starts from the authored asset. There is no storage or subscription. |
 | `LocalFile` | Outfit | A managed field assignment writes one encrypted whole-domain snapshot. Opening the same profile restores the outfit together. |
 | `DirectAccess` | Offline currency or completed levels | A managed assignment to a field writes just that key. The built-in native store flushes and conditionally replaces the record before the assignment returns. Reopening loads accepted values. |
-| `DirectAccessOnline` | Account currency and signed-in progress | Assigning a field queues that key immediately. Gameplay sees the new local value while the request is pending. Await `FlushAsync` on the controller before confirming success. A fresh open reads the cloud. [Unity Cloud Save adapter](so-unity-cloud-save.md) |
+| `DirectAccessOnline` | Account currency and signed-in progress | Assigning a field queues that key immediately. The SO publishes `DataChanged` on confirmation. Re-entering the account and slot reads the remote record. [Unity Cloud Save adapter](so-unity-cloud-save.md) |
 | `RealtimeOnline` | Actors in a match | The authority publishes a changed key. Subscribed clients receive the initial state and subsequent updates. A late join reads the current match. [Unity Netcode adapter](so-unity-netcode.md) |
 
 Split currency, equipment and tuning when their lifetime, durability or authority differs. Group values that must change atomically in one small serializable record and assign the complete record. Give independent assets of the same type different stable IDs. Back up realtime match state separately if it must survive server restart.
@@ -21,18 +21,23 @@ Split currency, equipment and tuning when their lifetime, durability or authorit
 - Copy [the controller](../assets/SODataController.cs), its [LocalFile partial](../assets/SODataController.LocalFile.cs), [field discovery](../assets/SODataFields.cs), [key session](../assets/SOKeySession.cs), [checkpoints](../assets/SODataCheckpoints.cs), [store contracts](../assets/SODataStore.cs), [native key store](../assets/SOFileKeyStore.cs), [file writer](../assets/SOFileStorage.cs) and [envelope](../assets/SOFileEnvelope.cs) into one runtime assembly.
 - Copy the [storage mode drawer](../assets/Editor/SOStorageModeDrawer.cs) into an Editor-only assembly that references the controller.
 - Copy the complete [WriteHooks](../assets/WriteHooks/SOData.Runtime.asmdef) and [CodeGen](../assets/CodeGen/Unity.SOData.CodeGen.asmdef) directories with their asmdefs intact. Add `com.unity.nuget.mono-cecil` 1.11.6 in Package Manager and reference `SOData.Runtime` from the controller's asmdef. The Editor compiler instruments source under Assets, including default Assembly-CSharp, separate data assemblies and their callers. A package-owned source asmdef can opt in by referencing `SOData.Runtime`. The compile step generates the field hooks and closed codecs used by IL2CPP. Plain gameplay source needs no storage references.
-- Copy one optional service adapter if the game uses it. The local modes require no cloud account or SDK. Bind both authored assets in the bootstrap and make one runtime instance of each for the active profile. Run their storage operations on Unity's main thread.
+- Copy the [storage profile](../assets/SODataProfile.cs) beside the controller and the optional service adapter that the game uses. Run storage operations on Unity's main thread.
 
-The packaged [SOCurrencyData](../assets/SOCurrencyData.cs) fixes `RequiredMode` to `DirectAccessOnline`. Give it a stable storage ID and open its runtime clone with a persistent provider after account sign-in. This pickup example uses player-writable [Unity Cloud Save](so-unity-cloud-save.md). Server-issued or purchased currency belongs to the game's validated grant or spend operation. Display the balance returned by that ledger.
+After authentication, the account owner retains the profile and awaits `profile.EnterAsync(slot)` before enabling gameplay. The profile opens the referenced data instances in place. The [Unity Cloud Save profile](../assets/Providers/UnityCloudSave/SOUnityCloudSaveProfile.cs) creates its adapter on the first online domain. Custom providers can be passed once for a profile. For match data pass the active realtime provider. Before signing out, switching slots or unloading those assets, stop gameplay and await `profile.LeaveAsync()`. The profile waits for pending writes and restores the original fields. A failed receipt reaches the lifecycle caller. A forced app termination can interrupt a pending network write.
 
 ```csharp
-SOCurrencyData wallet = UnityEngine.Object.Instantiate(authoredWallet);
-await wallet.OpenAsync("slot-a", new UnityCloudSaveKeyStore());
-wallet.CreditCoins(3);       // Updates the SO and queues the remote coins key.
-await wallet.FlushAsync();   // The provider has confirmed the write on successful return.
+// PickupController.cs
+public sealed class PickupController : MonoBehaviour
+{
+    [SerializeField] private SOPickupData _pickupData;
+
+    public void OnPickup() => _pickupData.value = 5;
+}
 ```
 
-For an existing SO that derives directly from `ScriptableObject`, instantiate a separate controller policy and call `await storage.AttachAsync(wallet, "slot-a")` at profile entry. Keep that SO's own methods, setters or public fields. [SOOutfitData](../assets/SOOutfitData.cs) likewise keeps ordinary `WearHat` and `WearBoots` methods. When leaving a profile, close the controller to detach and restore the clone's pre-open defaults, then destroy the owned runtime clones. For an online controller first await `FlushAsync` if pending changes must be acknowledged.
+The [pickup SO](../assets/Examples/Pickups/SOPickupData.cs) fixes its mode to DirectAccessOnline. Its [complete caller](../assets/Examples/Pickups/PickupController.cs) only assigns the field. The [currency SO](../assets/SOCurrencyData.cs) exposes `wallet.CreditCoins(3)` and owns the validation and addition. Server-issued currency uses the game's validated grant operation.
+
+For an SO deriving directly from `ScriptableObject`, attach a separate controller with `await storage.AttachAsync(target, slot)` at profile entry. At orderly exit use `await storage.CloseAsync()` before destroying the owned runtime clones. The immediate `CloseData()` remains available for forced teardown.
 
 The remote `coins` record is scoped to its provider, account, environment, slot and storage ID. Local balances created by the 1.8 offline template stay on disk. Bringing those balances to an account requires an explicit game-owned migration that reconciles any existing server balance.
 

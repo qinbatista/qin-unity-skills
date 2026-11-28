@@ -34,6 +34,7 @@ def prepare(run, cloud=False, netcode=False):
         shutil.copy2(source, runtime)
     for directory in ("WriteHooks", "CodeGen", "Compatibility"):
         shutil.copytree(PACK / "assets" / directory, runtime / directory)
+    shutil.copytree(PACK / "assets/Examples/Pickups", runtime / "Pickups")
     shutil.copy2(PACK / "assets/Editor/SOStorageModeDrawer.cs", editor)
     (runtime / "TestVisibility.cs").write_text(
         '[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Foundations.EditorTests")]\n', encoding="utf-8"
@@ -75,7 +76,8 @@ def prepare(run, cloud=False, netcode=False):
         for target in (runtime_assembly, assembly):
             target["references"].extend(["Unity.Services.CloudSave", "Unity.Services.Authentication", "Unity.Services.Core"])
             target["versionDefines"] = [{"name": "com.unity.services.cloudsave", "expression": "3.4.2", "define": "SO_DATA_UNITY_CLOUD_SAVE"}]
-        shutil.copy2(PACK / "assets/Providers/UnityCloudSave/UnityCloudSaveKeyStore.cs", runtime)
+        for source in (PACK / "assets/Providers/UnityCloudSave").glob("*.cs"):
+            shutil.copy2(source, runtime)
         tests.append("SOCloudProviderTests.cs")
     if netcode:
         packages["dependencies"]["com.unity.netcode.gameobjects"] = "2.14.0"

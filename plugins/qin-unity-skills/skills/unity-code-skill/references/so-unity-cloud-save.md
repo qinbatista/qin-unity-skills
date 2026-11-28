@@ -5,17 +5,11 @@ The optional [UnityCloudSaveKeyStore](../assets/Providers/UnityCloudSave/UnityCl
 ## Connect a game
 
 - Link the receiving project to its own Unity Project ID in Project Settings, select its UGS environment at initialization, enable Cloud Save and sign in through the game's Authentication provider. The template contains no project ID or credentials. Linked accounts can restore on another device with the same Unity Player ID and environment. [Unity setup](https://docs.unity.com/en-us/cloud-save/get-started)
-- Install `com.unity.services.cloudsave` 3.4.2. Copy the optional provider into the runtime assembly that sees the controller. Reference `Unity.Services.CloudSave`, `Unity.Services.Authentication` and `Unity.Services.Core` and add the scripting define `SO_DATA_UNITY_CLOUD_SAVE` to that assembly. An asmdef version define for package `com.unity.services.cloudsave` with expression `3.4.2` can supply it automatically. Other modes only need their selected providers.
-- The [currency template](../assets/SOCurrencyData.cs) fixes **Storage Mode** to **Direct Access Online**. Assign a stable **Storage Id**. After sign-in, open a runtime clone and await the controller's flush before displaying a confirmed pickup. A game with multiple Unity Services instances can pass the matching player-data service and a function that returns its currently authorized player ID to the second constructor.
+- Install `com.unity.services.cloudsave` 3.4.2. Copy both files from [the Unity provider directory](../assets/Providers/UnityCloudSave/SOUnityCloudSaveProfile.cs) into an assembly that sees the storage controller and profile. Reference `Unity.Services.CloudSave`, `Unity.Services.Authentication` and `Unity.Services.Core` and add the scripting define `SO_DATA_UNITY_CLOUD_SAVE` to that assembly. An asmdef version define for package `com.unity.services.cloudsave` with expression `3.4.2` can supply it automatically. Create the profile under **Game Data → Storage Profile → Unity Cloud Save**.
+- Assign a stable **Storage Id** to each online data asset and put it in the profile's Domains list. Pass the same asset to gameplay. After sign-in the account flow awaits `profile.EnterAsync(slot)` before enabling input. The profile constructs the Unity adapter here. For a custom cloud service pass its provider to `EnterAsync` once.
+- A [pickup](../assets/Examples/Pickups/PickupController.cs) assigns `_pickupData.value = 5;`. A wallet pickup calls `wallet.CreditCoins(3);`. The SO submits the changed field immediately and publishes its confirmation. The account flow awaits `profile.LeaveAsync()` before releasing the signed-in session.
 
-```csharp
-SOCurrencyData wallet = UnityEngine.Object.Instantiate(currencyDefaults);
-await wallet.OpenAsync("slot-a", new UnityCloudSaveKeyStore(), cancellation);
-wallet.CreditCoins(3);
-await wallet.FlushAsync();
-```
-
-Close the instance with `wallet.CloseData()` and destroy the clone when leaving that profile. On restart, open a fresh clone with the same player, environment, slot and Storage Id. The controller reads the committed fields. `UnityCloudSaveKeyStore.GetCloudKey(wallet.GetStorageScope("slot-a"), "coins")` returns the exact Dashboard key.
+On restart, entering the same account, environment and slot restores committed values. `UnityCloudSaveKeyStore.GetCloudKey(wallet.GetStorageScope("slot-a"), "coins")` returns the wallet's exact Dashboard key.
 
 ## Write and recover
 
