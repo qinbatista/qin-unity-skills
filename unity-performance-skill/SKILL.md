@@ -23,7 +23,7 @@ Use the [completion review](#review-every-unity-task) for every Unity request. F
 
 | When reviewing | Read |
 | --- | --- |
-| SO startup, file stalls, cloud receipt queues or bursts of replicated fields | [Storage costs and measured workloads for all five modes](../unity-code-skill/references/so-data-controller.md#audit-storage-cost-by-mode). |
+| SO startup, file stalls, cloud receipt queues or bursts of replicated fields | [Storage costs and measured workloads for all six modes](../unity-code-skill/references/so-data-controller.md#audit-storage-cost-by-mode). |
 | An `Update` loop scans every actor, or managed allocations recur | [Frame work and managed allocations](references/runtime-code.md#frame-work-and-managed-allocations) |
 | Frequent spawns, destruction, or a pool that keeps growing | [Spawn and retire](references/runtime-code.md#spawn-and-retire) |
 | Loading stalls, Addressables instantiation, or memory left after scene exit | [Load and release content](references/runtime-code.md#load-and-release-content) |

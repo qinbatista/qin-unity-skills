@@ -14,7 +14,7 @@ sys.path.insert(0, str(PACK / "scripts"))
 from read_topic import read_topic
 
 
-def prepare(run, cloud=False, netcode=False, clock=False):
+def prepare(run, cloud=False, netcode=False, clock=False, pack=PACK):
     run = run.resolve(strict=True)
     if run.parent != PROJECT / "Cache" or not run.name.startswith("temp-"):
         raise ValueError("Use an allocated task directory under the project Cache.")
@@ -30,9 +30,9 @@ def prepare(run, cloud=False, netcode=False, clock=False):
     settings.mkdir()
     shutil.copy2(sample / "ProjectSettings/ProjectVersion.txt", settings)
 
-    for source in (PACK / "assets").glob("*.cs"):
+    for source in (pack / "assets").glob("*.cs"):
         shutil.copy2(source, runtime)
-    shutil.copytree(PACK / "assets/script/SODataController", runtime / "SODataController")
+    shutil.copytree(pack / "assets/script/SODataController", runtime / "SODataController")
     (runtime / "TestVisibility.cs").write_text(
         '[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Foundations.EditorTests")]\n', encoding="utf-8"
     )
@@ -93,5 +93,6 @@ if __name__ == "__main__":
     parser.add_argument("--cloud", action="store_true", help="Compile the Unity Cloud Save adapter and run its SDK contract cases.")
     parser.add_argument("--netcode", action="store_true", help="Compile the NGO adapter and run a real localhost server/client pair.")
     parser.add_argument("--clock", action="store_true", help="Also run the five-minute LocalFile wall-clock replay.")
+    parser.add_argument("--pack", type=Path, default=PACK, help="Unity Code Skill directory; pass the installed Skill for a clean consumer replay.")
     args = parser.parse_args()
-    print(prepare(args.run, args.cloud, args.netcode, args.clock))
+    print(prepare(args.run, args.cloud, args.netcode, args.clock, args.pack.resolve(strict=True)))

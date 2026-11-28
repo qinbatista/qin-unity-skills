@@ -282,9 +282,33 @@
       "summary": "Scoped native Unity test, build, device and provider evidence",
       "document": "skills/ai-index/modules/unity-testing.md",
       "sources": [
-        "unity-testing-skill"
+        "unity-testing-skill",
+        ".agents/skills/testing-skill"
       ],
-      "dependencies": []
+      "dependencies": [],
+      "code_targets": [
+        {
+          "id": "prepare-so-device",
+          "file": ".agents/skills/testing-skill/tests/prepare_so_device_probe.py",
+          "symbol": "prepare",
+          "anchor": "def prepare(run, pack, settings):",
+          "summary": "Copy the installed SO template into an isolated external iOS probe and verify source bytes."
+        },
+        {
+          "id": "run-so-device",
+          "file": ".agents/skills/testing-skill/tests/fixtures/scriptableobjects/SODeviceProbe.cs",
+          "symbol": "SODeviceProbe.Run",
+          "anchor": "private static async void Run()",
+          "summary": "Run all six SO modes across two Player launches, verify real providers and clean the disposable remote player."
+        },
+        {
+          "id": "build-so-device",
+          "file": ".agents/skills/testing-skill/tests/Editor/SODeviceProbeBuilder.cs",
+          "symbol": "SODeviceProbeBuilder.Build",
+          "anchor": "public static void Build()",
+          "summary": "Export the independent iOS fixture with IL2CPP High stripping and private signing selectors."
+        }
+      ]
     },
     {
       "id": "unity-performance",
