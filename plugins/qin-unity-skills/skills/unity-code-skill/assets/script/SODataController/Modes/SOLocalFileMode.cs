@@ -410,8 +410,48 @@ internal static class SOFileEnvelope
 
 static class SOFileStorage
 {
-    private static readonly object WriterGate = new object();
     private static readonly byte[] KeyCreatedMarker = { 1 };
+
+    // The device key and atomic staging file belong to one .sodata directory.
+    internal sealed class DirectoryWriter : IDisposable
+    {
+        private static readonly Dictionary<string, DirectoryWriter> Active = new Dictionary<string, DirectoryWriter>(StringComparer.OrdinalIgnoreCase);
+        private readonly string _metadata;
+        private int _users;
+
+        private DirectoryWriter(string metadata) => _metadata = metadata;
+
+        internal static DirectoryWriter Enter(string metadata)
+        {
+            DirectoryWriter writer;
+            lock (Active)
+            {
+                if (!Active.TryGetValue(metadata, out writer))
+                {
+                    writer = new DirectoryWriter(metadata);
+                    Active.Add(metadata, writer);
+                }
+                writer._users++;
+            }
+            try { Monitor.Enter(writer); }
+            catch { writer.ReleaseReference(); throw; }
+            return writer;
+        }
+
+        public void Dispose()
+        {
+            Monitor.Exit(this);
+            ReleaseReference();
+        }
+
+        private void ReleaseReference()
+        {
+            lock (Active)
+            {
+                if (--_users == 0) Active.Remove(_metadata);
+            }
+        }
+    }
 
     public static string ReadSnapshot(string path) => ReadSnapshot(path, out string revision);
     public static string ReadSnapshot(string path, out string revision) => Read(path, true, out revision);
@@ -438,25 +478,23 @@ static class SOFileStorage
         if (payload == null) throw new ArgumentNullException(nameof(payload));
         string directory = GetDirectory(path);
         string metadata = Path.Combine(directory, ".sodata");
-        lock (WriterGate)
-        {
-            cancellation.ThrowIfCancellationRequested();
-            EnsureDirectory(metadata);
-            using IDisposable writer = AcquireWriter(metadata, cancellation);
-            byte[] previous = ReadIfPresent(path);
-            string previousRevision = previous == null ? null : SOFileEnvelope.Revision(previous);
-            if (compareRevision && previousRevision != expectedRevision) throw new SODataConflictException("The saved SO data changed. Reload before retrying.");
-            bool encrypted = previous != null && SOFileEnvelope.HasEnvelope(previous);
-            if (previous != null && !encrypted && !allowLegacy) throw new InvalidDataException("Invalid native SO key record.");
-            byte[] key = ReadDeviceKey(directory, !encrypted);
-            string fileName = Path.GetFileName(path);
-            // A replaced key must not silently re-encrypt previously acknowledged data.
-            if (encrypted && compareRevision) SOFileEnvelope.Decode(fileName, previous, key);
-            byte[] encoded = SOFileEnvelope.Encode(fileName, payload, key);
-            cancellation.ThrowIfCancellationRequested();
-            WriteAtomic(metadata, path, encoded, previous != null);
-            return SOFileEnvelope.Revision(encoded);
-        }
+        using DirectoryWriter scope = DirectoryWriter.Enter(metadata);
+        cancellation.ThrowIfCancellationRequested();
+        EnsureDirectory(metadata);
+        using IDisposable writer = AcquireWriter(metadata, cancellation);
+        byte[] previous = ReadIfPresent(path);
+        string previousRevision = previous == null ? null : SOFileEnvelope.Revision(previous);
+        if (compareRevision && previousRevision != expectedRevision) throw new SODataConflictException("The saved SO data changed. Reload before retrying.");
+        bool encrypted = previous != null && SOFileEnvelope.HasEnvelope(previous);
+        if (previous != null && !encrypted && !allowLegacy) throw new InvalidDataException("Invalid native SO key record.");
+        byte[] key = ReadDeviceKey(directory, !encrypted);
+        string fileName = Path.GetFileName(path);
+        // A replaced key must not silently re-encrypt previously acknowledged data.
+        if (encrypted && compareRevision) SOFileEnvelope.Decode(fileName, previous, key);
+        byte[] encoded = SOFileEnvelope.Encode(fileName, payload, key);
+        cancellation.ThrowIfCancellationRequested();
+        WriteAtomic(metadata, path, encoded, previous != null);
+        return SOFileEnvelope.Revision(encoded);
     }
 
     public static void RequireNativePlatform()

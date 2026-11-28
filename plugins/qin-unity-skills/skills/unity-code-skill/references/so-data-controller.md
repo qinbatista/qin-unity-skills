@@ -74,7 +74,14 @@ The following counts come from the 2.2.0 template in macOS Unity 6000.6.7f1. Tim
 
 Persistent modes serialize a reassigned list or array to compare its contents. Reassigning the same 1,024-item inventory 128 times took 32 ms total and produced zero writes. The corresponding equal integer assignments took 0.003 ms. Assign a large collection at its mutation boundary. [Assignment implementation](../assets/script/SODataController/SODataController.cs)
 
-The two file modes share a process-wide write lock. One DirectAccess setter took 10 ms alone and 111 ms while a 2 MiB LocalFile snapshot was being replaced in another directory. Both values survived reopening. Include overlapping checkpoints and critical writes in device profiling. [File writer](../assets/script/SODataController/Modes/SOLocalFileMode.cs)
+Native commits serialize per storage directory. Writers in the same directory share the device key, staging file and native process lock. A DirectAccess key in the normal `keys/` directory can commit while LocalFile replaces a snapshot under `profiles/`. The short registry lock covers lookup and removal only. Its entries expire when the last holder or waiter leaves. [File writer](../assets/script/SODataController/Modes/SOLocalFileMode.cs)
+
+The same 2 MiB snapshot and foreground integer setter ran in three fresh macOS Unity 6000.6.7f1 processes per version. All six runs started the key write before snapshot replacement, then reopened key `3`, snapshot value `5` and all 2 MiB of padding. The table measures the foreground setter in milliseconds. Disk bandwidth and flush latency still depend on the device. [Replay the overlap and same-directory tests](https://github.com/qinbatista/qin-unity-skills/blob/master/.agents/skills/testing-skill/SKILL.md#run-the-foundation-fixture)
+
+| Writer | Key alone, median | Key during checkpoint, three runs | Median during checkpoint |
+| --- | ---: | --- | ---: |
+| 2.2.1, process-wide lock | 12.05 | 104.14, 103.88, 115.17 | 104.14 |
+| 2.2.2, directory lock | 11.84 | 14.35, 17.07, 15.39 | 15.39 |
 
 A separate hosted Unity Cloud Save test wrote `5` on a dedicated player. An independent provider read returned `5`, 10,000 equal assignments preserved the service write lock, and a second Unity process reopened the same player and read `5`. Both test keys and the disposable account were removed. Use the controlled SDK workload above for queue counts and this signed-in replay for service persistence.
 

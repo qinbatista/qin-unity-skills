@@ -101,6 +101,32 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
+    public async Task HeldSnapshotDirectoryAllowsAnotherDirectoryToCommit()
+    {
+        string snapshot = Path.Combine(_root, "profiles", "snapshot");
+        string key = Path.Combine(_root, "keys", "coins.record");
+        Task<string> snapshotWrite;
+        using ManualResetEventSlim started = new ManualResetEventSlim();
+        using (SOFileStorage.DirectoryWriter.Enter(Path.Combine(_root, "profiles", ".sodata")))
+        {
+            snapshotWrite = Task.Run(() =>
+            {
+                started.Set();
+                return SOFileStorage.WriteSnapshot(snapshot, "{\"value\":5}", null);
+            });
+            Assert.IsTrue(started.Wait(TimeSpan.FromSeconds(5)), "The worker started the competing write.");
+            Task<string> keyWrite = Task.Run(() => SOFileStorage.Commit(key, "3", null, true, false, CancellationToken.None));
+            Assert.IsTrue(keyWrite.Wait(TimeSpan.FromSeconds(5)), "A different storage directory must commit while the snapshot is held.");
+            Assert.AreEqual("3", SOFileStorage.Read(key, false, out string revision));
+            Assert.AreEqual(keyWrite.Result, revision);
+            Assert.IsFalse(snapshotWrite.IsCompleted);
+        }
+        string snapshotRevision = await snapshotWrite;
+        Assert.AreEqual("{\"value\":5}", SOFileStorage.ReadSnapshot(snapshot, out string reopened));
+        Assert.AreEqual(snapshotRevision, reopened);
+    }
+
+    [Test]
     public void AnInterruptedNativeWriteKeepsTheLastAcknowledgedValue()
     {
         string path = Path.Combine(_root, "coins.record");
