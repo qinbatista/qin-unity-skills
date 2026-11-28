@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "qin-unity-skills",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Unity code, technical explanations, asset import, UI, animation, effects, testing and test builds, with a performance review for runtime costs and simulation choices.",
   "repository": "https://github.com/qinbatista/qin-unity-skills",
   "author": { "name": "Qin" },

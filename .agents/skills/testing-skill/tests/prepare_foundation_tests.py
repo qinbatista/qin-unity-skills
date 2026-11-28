@@ -20,7 +20,7 @@ def prepare(run, cloud=False, netcode=False):
         raise ValueError("Use an allocated task directory under the project Cache.")
     fixture = run / "foundations"
     fixture.mkdir()
-    runtime = fixture / "Assets/Foundations"
+    runtime = fixture / "Assets/script"
     editor = fixture / "Assets/Editor"
     runtime.mkdir(parents=True)
     editor.mkdir()
@@ -32,8 +32,7 @@ def prepare(run, cloud=False, netcode=False):
 
     for source in (PACK / "assets").glob("*.cs"):
         shutil.copy2(source, runtime)
-    shutil.copytree(PACK / "assets/Modes", runtime / "Modes")
-    shutil.copytree(PACK / "assets/Examples", runtime / "Examples")
+    shutil.copytree(PACK / "assets/script/SODataController", runtime / "SODataController")
     (runtime / "TestVisibility.cs").write_text(
         '[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Foundations.EditorTests")]\n', encoding="utf-8"
     )
@@ -65,16 +64,13 @@ def prepare(run, cloud=False, netcode=False):
         for target in (runtime_assembly, assembly):
             target["references"].extend(["Unity.Services.CloudSave", "Unity.Services.Authentication", "Unity.Services.Core"])
             target["versionDefines"] = [{"name": "com.unity.services.cloudsave", "expression": "3.4.2", "define": "SO_DATA_UNITY_CLOUD_SAVE"}]
-        for source in (PACK / "assets/Providers/UnityCloudSave").glob("*.cs"):
-            shutil.copy2(source, runtime)
         tests.append("SOCloudProviderTests.cs")
     if netcode:
         packages["dependencies"]["com.unity.netcode.gameobjects"] = "2.14.0"
         for target in (runtime_assembly, assembly):
             target["references"].extend(["Unity.Netcode.Runtime", "Unity.Collections"])
+            target.setdefault("versionDefines", []).append({"name": "com.unity.netcode.gameobjects", "expression": "2.14.0", "define": "SO_DATA_UNITY_NETCODE"})
         assembly["references"].append("Unity.Networking.Transport")
-        for source in (PACK / "assets/Providers/UnityNetcode").glob("*.cs"):
-            shutil.copy2(source, runtime)
         tests.append("SOUnityNetcodeTests.cs")
     manifest.write_text(json.dumps(packages, indent=2), encoding="utf-8")
     (runtime / "Foundations.asmdef").write_text(json.dumps(runtime_assembly), encoding="utf-8")

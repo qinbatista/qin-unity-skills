@@ -56,7 +56,7 @@ The [Job State Batches sample](examples/job-state-batches/README.md) contains fi
 
 For a reusable gameplay foundation, the [Singleton Manager](unity-code-skill/references/unity-game-code-structure-design.md#singleton-managers) owns one runtime [ScriptableObject with a local save file](unity-code-skill/references/unity-lifecycle-and-serialization.md#scriptableobject-local-files). Both references include the C# base and a working consumer.
 
-The [SODataController template](unity-code-skill/references/so-data-controller.md) routes ordinary C# property assignments to one of five storage modes. A domain inherits the controller and uses one private serialized backing field per property. The [pickup](unity-code-skill/assets/Examples/Pickups/PickupController.cs) assigns `value = 5`. Unity Cloud Save and Netcode each provide one optional channel.
+The [SODataController template](unity-code-skill/references/so-data-controller.md) ships as `script/SODataController/` with five storage modes and one optional wrapper per service under `Proviers/`. Copy the Skill's `assets/script` into the receiving project's `Assets` as described in the [setup and runnable walkthrough](unity-code-skill/assets/script/SODataController/Usage.md). The [pickup](unity-code-skill/assets/script/SODataController/Examples/Pickups/PickupController.cs) assigns `value = 5`. Its Editor demo shows the request, acknowledgement and restored value in execution order.
 
 | Skill | What to inspect |
 | --- | --- |

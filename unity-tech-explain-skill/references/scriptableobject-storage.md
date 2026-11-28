@@ -16,7 +16,7 @@ public sealed class SOCurrencyData : SODataController
 }
 ```
 
-After opening the account slot, the pickup assigns `wallet.Coins += 3` and the display reads `wallet.Coins`. The serialized field preserves the existing asset value and storage key `coins`. The SO raises `DataChanged` on acknowledgement. [Wallet source](../../unity-code-skill/assets/SOCurrencyData.cs)
+After opening the account slot, the pickup assigns `wallet.Coins += 3` and the display reads `wallet.Coins`. The serialized field preserves the existing asset value and storage key `coins`. The SO raises `DataChanged` on acknowledgement. [Wallet source](../../unity-code-skill/assets/script/SODataController/Examples/SOCurrencyData.cs)
 
 ## Detailed explanation and steps
 

@@ -24,35 +24,49 @@
         },
         {
           "id": "open-so-storage",
-          "file": "unity-code-skill/assets/SODataController.cs",
+          "file": "unity-code-skill/assets/script/SODataController/SODataController.cs",
           "symbol": "SODataController.OpenAsync",
           "anchor": "public async Task OpenAsync(",
           "summary": "Open the selected mode on the same SO and load the slot before gameplay."
         },
         {
           "id": "write-so-property",
-          "file": "unity-code-skill/assets/SODataController.cs",
+          "file": "unity-code-skill/assets/script/SODataController/SODataController.cs",
           "symbol": "SODataController.Write",
           "anchor": "protected void Write<T>(",
           "summary": "Route the property setter to the active mode."
         },
         {
+          "id": "send-online-property",
+          "file": "unity-code-skill/assets/script/SODataController/Modes/SODirectAccessOnlineMode.cs",
+          "symbol": "SODirectAccessOnlineMode.SendAsync",
+          "anchor": "private async Task SendAsync(",
+          "summary": "Send one field in write order and raise its change event after acknowledgement."
+        },
+        {
+          "id": "run-pickup-walkthrough",
+          "file": "unity-code-skill/assets/script/SODataController/Examples/Pickups/Editor/SOPickupWalkthrough.cs",
+          "symbol": "SOPickupWalkthrough.Run",
+          "anchor": "private static async void Run()",
+          "summary": "Run the Editor menu to observe pickup assignment, a delayed reply, duplicate suppression and a fresh read."
+        },
+        {
           "id": "currency-property",
-          "file": "unity-code-skill/assets/SOCurrencyData.cs",
+          "file": "unity-code-skill/assets/script/SODataController/Examples/SOCurrencyData.cs",
           "symbol": "SOCurrencyData.Coins",
           "anchor": "public int Coins {",
           "summary": "Read and assign the persistent coins field."
         },
         {
           "id": "save-local-data",
-          "file": "unity-code-skill/assets/Modes/SOLocalFileMode.cs",
+          "file": "unity-code-skill/assets/script/SODataController/Modes/SOLocalFileMode.cs",
           "symbol": "SOLocalFileMode.Save",
           "anchor": "protected override void Save(",
           "summary": "Commit the encrypted whole-domain snapshot."
         },
         {
           "id": "load-local-data",
-          "file": "unity-code-skill/assets/Modes/SOLocalFileMode.cs",
+          "file": "unity-code-skill/assets/script/SODataController/Modes/SOLocalFileMode.cs",
           "symbol": "SOLocalFileMode.OpenAsync",
           "anchor": "internal override Task OpenAsync(",
           "summary": "Read current or earlier local data before the first property access."

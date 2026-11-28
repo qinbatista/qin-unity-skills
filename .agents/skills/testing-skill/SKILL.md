@@ -63,6 +63,8 @@ For checker changes, run its CLI on representative source and a tracked diff. Fo
 
 ## Run the foundation fixture
 
+The preparer copies the installable `script/SODataController/` tree into `Assets/script/SODataController/`, including both guarded provider sources. Filter on `PickupWalkthroughMenuReportsTheActualWriteAndReopen` to invoke the shipped Editor menu and compare its seven observed messages without networking packages. Enable `--cloud --netcode` on the preparer and omit the test filter to also cover both optional SDK channels. [Walkthrough test](tests/Editor/SODataControllerTests.cs)
+
 From the repository root, use the [fixture preparer](tests/prepare_foundation_tests.py) with a fresh allocated task Cache directory. Bind child temporary storage and UPM cache to that run. On macOS verify the [short native temp path](../../../unity-testing-skill/references/runtime-and-artifact-evidence.md#macos-batch-startup). Use `py -3` for Python 3 on Windows.
 
 ```text

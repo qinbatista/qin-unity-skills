@@ -1,3 +1,4 @@
+#if SO_DATA_UNITY_NETCODE
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,7 +9,7 @@ using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
-// Optional NGO adapter. Copy this directory only into a receiver with Netcode for GameObjects.
+// Enable SO_DATA_UNITY_NETCODE in the assembly that owns the Netcode for GameObjects adapter.
 [RequireComponent(typeof(NetworkObject))]
 public sealed class SOUnityNetcodeStore : NetworkBehaviour, ISOMatchSessionStore
 {
@@ -204,3 +205,4 @@ public sealed class SOUnityNetcodeStore : NetworkBehaviour, ISOMatchSessionStore
         }
     }
 }
+#endif

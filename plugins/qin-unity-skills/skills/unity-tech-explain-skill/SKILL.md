@@ -12,7 +12,7 @@ Use this Skill for the explanation part of a Unity request. Honor the user's lan
 ## Choose an operation
 
 - [Write the answer](#write-the-answer) from the perspective of the person using the feature.
-- [Show a direct SO property assignment](references/direct-field-assignment.md) for an ordinary gameplay write, its payload and a fresh read.
+- [Run and explain a direct SO property assignment](references/direct-field-assignment.md) from the gameplay line through the channel receipt to a fresh read.
 - [Read the wallet example](references/scriptableobject-storage.md) for a field, a gameplay action and a cold restart.
 - [Review affected runtime costs](../unity-performance-skill/SKILL.md#review-every-unity-task) or [share a change](../unity-code-skill/references/contributing.md#submit-a-skill-change).
 
@@ -39,3 +39,5 @@ Give the consumer's ordinary action in one line. For a stored property, show the
 Follow the user's action to the observable result. A single text line with arrows can show a value changing or returning after restart. Use branches only if the question needs different outcomes. When asked how the supporting files work together, show usage first, then follow that same action and explain what each relevant file does. Stop once the reader can perform the action and tell whether it worked.
 
 For an online save, distinguish the in-memory value from remote acknowledgement. Follow one confirmed write back to a fresh read for the same account.
+
+When a user asks for a demonstration, execute the available example. Show each step in execution order with its real file, method and observed value. For SODataController, use the shipped pickup walkthrough and identify the channel used. Keep the gameplay call and the optional Editor demo in their own files.

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,11 +7,42 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
 public sealed partial class UnityFoundationTests
 {
+    [UnityTest]
+    public IEnumerator PickupWalkthroughMenuReportsTheActualWriteAndReopen()
+    {
+        List<string> trace = new List<string>();
+        void Capture(string message, string stack, LogType type)
+        {
+            if (message.StartsWith("[SO pickup] ", StringComparison.Ordinal)) trace.Add(message);
+        }
+
+        Application.logMessageReceived += Capture;
+        try
+        {
+            Assert.IsTrue(EditorApplication.ExecuteMenuItem("Tools/SODataController/Run Pickup Walkthrough"));
+            double deadline = EditorApplication.timeSinceStartup + 10;
+            while (trace.Count < 7 && EditorApplication.timeSinceStartup < deadline) yield return null;
+            CollectionAssert.AreEqual(new[]
+            {
+                "[SO pickup] 1. Opened DirectAccessOnline, value=37",
+                "[SO pickup] 2. Calling PickupController.OnPickup(), which assigns _pickupData.value = 5",
+                "[SO pickup] 3. Channel received scope=demo/SOPickupData, key=value, payload={\"value\":5}, revision=1",
+                "[SO pickup] 4. Getter reads 5, confirmations=0",
+                "[SO pickup] 5. Assigned 5 again, writes=1, close pending=True",
+                "[SO pickup] 6. DataChanged(value), confirmed value=5",
+                "[SO pickup] 7. Fresh SO opened the same slot, value=5"
+            }, trace);
+        }
+        finally { Application.logMessageReceived -= Capture; }
+    }
+
     private static T Domain<T>(SODataMode mode, string id) where T : SODataController
     {
         var data = ScriptableObject.CreateInstance<T>();

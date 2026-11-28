@@ -149,7 +149,7 @@ class InstalledRoutingTests(unittest.TestCase):
     def test_wallet_walkthrough_starts_with_the_currency_sos_own_api(self):
         section = read_topic("tech-explain", "references/scriptableobject-storage.md#concrete-code")
         blocks = re.findall(r"^```csharp\n(.*?)\n```$", section, re.MULTILINE | re.DOTALL)
-        path = PACK / "unity-code-skill" / "assets" / "SOCurrencyData.cs"
+        path = PACK / "unity-code-skill/assets/script/SODataController/Examples/SOCurrencyData.cs"
         source = path.read_text(encoding="utf-8")
         self.assertTrue(blocks)
         filename, body = blocks[0].split("\n", 1)
@@ -171,7 +171,7 @@ class InstalledRoutingTests(unittest.TestCase):
         for block, name in zip(blocks, ("SOPickupData.cs", "PickupController.cs")):
             filename, body = block.split("\n", 1)
             self.assertEqual(filename, f"// {name}")
-            source = (PACK / "unity-code-skill/assets/Examples/Pickups" / name).read_text(encoding="utf-8")
+            source = (PACK / "unity-code-skill/assets/script/SODataController/Examples/Pickups" / name).read_text(encoding="utf-8")
             self.assertEqual(body, source[source.index("public sealed class"):].strip())
         self.assertIn("public int value { get => Read(ref _value); set => Write(ref _value, value); }", blocks[0])
         self.assertIn("public void OnPickup() => _pickupData.value = 5;", blocks[1])

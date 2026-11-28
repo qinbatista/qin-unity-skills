@@ -6,15 +6,15 @@ Inherit `SODataController` and choose one Inspector mode for the whole SO. Keep 
 
 | Mode | What a property assignment does | Source |
 | --- | --- | --- |
-| None (default) | Changes the shared runtime instance in memory. | [Memory](../assets/Modes/SONoneMode.cs) |
-| LocalFile | Commits the whole domain in one encrypted snapshot. | [Snapshot](../assets/Modes/SOLocalFileMode.cs) |
-| DirectAccess | Commits only the changed key to its own encrypted native record before the setter returns. | [Offline keys](../assets/Modes/SODirectAccessMode.cs) |
-| DirectAccessOnline | Changes the local view and queues a conditional write for this field on the signed-in account. | [Cloud mode](../assets/Modes/SODirectAccessOnlineMode.cs) |
-| RealtimeOnline | Publishes an authorized field change and applies ordered remote updates to the local backing field. | [Live mode](../assets/Modes/SORealtimeOnlineMode.cs) |
+| None (default) | Changes the shared runtime instance in memory. | [Memory](../assets/script/SODataController/Modes/SONoneMode.cs) |
+| LocalFile | Commits the whole domain in one encrypted snapshot. | [Snapshot](../assets/script/SODataController/Modes/SOLocalFileMode.cs) |
+| DirectAccess | Commits only the changed key to its own encrypted native record before the setter returns. | [Offline keys](../assets/script/SODataController/Modes/SODirectAccessMode.cs) |
+| DirectAccessOnline | Changes the local view and queues a conditional write for this field on the signed-in account. | [Cloud mode](../assets/script/SODataController/Modes/SODirectAccessOnlineMode.cs) |
+| RealtimeOnline | Publishes an authorized field change and applies ordered remote updates to the local backing field. | [Live mode](../assets/script/SODataController/Modes/SORealtimeOnlineMode.cs) |
 
 ## Copy and call the template
 
-Copy [SODataController.cs](../assets/SODataController.cs) and the five `Modes` files linked in the table. Add Unity's `com.unity.nuget.newtonsoft-json` package (tested with 3.2.2) and reference `Unity.Newtonsoft.Json` in the receiving assembly definition. Include only the optional channel your project uses.
+Copy the installed Skill's `assets/script` into Unity's `Assets`. The base, five `Modes` and optional `Proviers/` channels live together under `script/SODataController/`. Add `com.unity.nuget.newtonsoft-json` (tested with 3.2.2). Enable the SDK define for each channel the receiver uses. [Copy instructions and breakpoints](../assets/script/SODataController/Usage.md) · [Controller](../assets/script/SODataController/SODataController.cs)
 
 Give each stored member a private serialized backing field and a C# property. The normal assignment calls the setter, which calls the selected mode. The base matches the property name to the backing field's key, trimming leading underscores and accepting the PascalCase property equivalent. For different names pass the explicit key to `Write`. Use `[SODataKey("old-key")]` to preserve a published key. Keep a renamed Unity backing field compatible with old authored assets using `FormerlySerializedAs`. Unity serializes the backing fields. Make the changes through their properties. To save a collection or nested record, assign the updated value back through the property.
 
@@ -29,6 +29,10 @@ public sealed class SOPickupData : SODataController
 ```
 
 Ordinary gameplay uses `pickupData.value = 5;` and `int current = pickupData.value;`. The default offline slot opens on first access. For a named slot, call `await data.OpenAsync(slot)` before gameplay. After authentication or network spawn open an online SO once with `await data.OpenAsync(slot, channel)`. Use the same instance for its writers and readers. Await `data.CloseAsync()` before switching account, slot or match. It waits for pending acknowledgements and restores the authored defaults. `CloseData()` immediately detaches a retiring instance.
+
+## Run the pickup walkthrough
+
+In the Unity Editor select **Tools → SODataController → Run Pickup Walkthrough**. The seven Console entries show the initial 37, the gameplay call, the outgoing payload, the pending reply, the duplicate assignment, the acknowledgement and a new SO reading 5. The demo uses the actual pickup component and a private simulated channel. Set breakpoints in the property, base, mode and channel using the [included steps and recorded output](../assets/script/SODataController/Usage.md). The [Editor command](../assets/script/SODataController/Examples/Pickups/Editor/SOPickupWalkthrough.cs) creates and removes its own temporary objects.
 
 ## Persistence and channels
 
