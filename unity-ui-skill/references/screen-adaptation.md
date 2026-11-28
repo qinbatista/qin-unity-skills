@@ -42,6 +42,8 @@ Drive these choices from the measured pane in panel units. A hinge can leave a n
 
 In a native replay, visit the smallest and largest supported panes and both sides of each changed breakpoint. Record effective type, target size, content width and clearance in the relevant units. Check a long label and the last reachable control. Repeat the resize with a modal open or a list scrolled, then restore the original pane. Compare the visible item, current action, focus and settled geometry. A raster-only replay can verify composition and picking. Physical target size needs the receiving surface's verified density.
 
+For a foldable full-window layout, cold-launch the signed game while the inner display is already open and in landscape. Record the foreground game window in points, its scale and the lit display raster. Inspect both side edges for system letterboxing. Repeat by unfolding a running game and compare both entry paths. An Editor viewport can have the right dimensions even when the OS gives the installed app a smaller window.
+
 ## UI Toolkit artwork and navigation
 
 Locate the accepted PNG or Sprite and verify its source dimensions, trim, visible bounds and import settings. In UXML, give the hit target, backdrop, button faces, icons and caption separate elements. Apply USS `background-size: contain` to complete artwork and fit a single multiplier to its painted bounds. An artwork asset can retain transparent padding outside its visible bounds. Use proportional cover for full-screen scene backgrounds.

@@ -15,3 +15,5 @@ For cross-iPhone testing, [measure controls in UIKit points and retain a page th
 ## Foreground and gameplay geometry
 
 The [screen adaptation reference](../../../unity-ui-skill/references/screen-adaptation.md#protect-the-subject-when-the-window-changes-shape) covers the resolved navigation skin, its painted clearance, usable playfield measurements and camera-aligned input on an unfolded display.
+
+The screen-adaptation procedure also checks the native foreground window on an unfolded cold launch and a live display transfer before evaluating the layout.

@@ -32,6 +32,8 @@ Use the game's selected profile and approved defaults for packages and isolated 
 
 Before delivery, read back the exact APK, AAB, IPA or other target artifact and its effective manifest or `Info.plist` where applicable. Verify names and authored icon bindings, then read installed identity when the test uses an installation. Record evidence from the exact artifact. Keep device or simulator twins, native store outcomes, test providers and built-but-unrun artifacts individually attributable. Use the actual startup, an applicable navigation round trip and the requested playable path when the receiving release requires a smoke test.
 
+When a foldable display is affected, verify an ordinary cold launch on the already-open display and a display transfer in the same running process. Compare the visible application window with the active pane before checking painted bounds or touch coordinates. Record any compatibility window or letterboxing as a separate native result.
+
 ## Observe the native runtime
 
 - Watch startup and the changed flow for frame and process continuity. Inspect bounded logs and distinguish managed exceptions, native crashes, OS termination, hangs and expected shutdown. Keep the first actionable diagnostic and rerun the real trigger after repair.
