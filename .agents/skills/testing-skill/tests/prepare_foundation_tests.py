@@ -32,25 +32,14 @@ def prepare(run, cloud=False, netcode=False):
 
     for source in (PACK / "assets").glob("*.cs"):
         shutil.copy2(source, runtime)
-    for directory in ("WriteHooks", "CodeGen", "Compatibility"):
-        shutil.copytree(PACK / "assets" / directory, runtime / directory)
-    shutil.copytree(PACK / "assets/Examples/Pickups", runtime / "Pickups")
-    shutil.copy2(PACK / "assets/Editor/SOStorageModeDrawer.cs", editor)
+    shutil.copytree(PACK / "assets/Modes", runtime / "Modes")
+    shutil.copytree(PACK / "assets/Examples", runtime / "Examples")
     (runtime / "TestVisibility.cs").write_text(
         '[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Foundations.EditorTests")]\n', encoding="utf-8"
     )
     old_formats = Path(__file__).with_name("fixtures") / "scriptableobjects"
     shutil.copy2(old_formats / "SOSpellCatalog.cs.meta", runtime)
-    plain = fixture / "Assets/Game/PlainDomain"
-    plain.mkdir(parents=True)
-    shutil.copy2(old_formats / "PlainMoney.cs", plain)
-    (plain / "PlainDomain.asmdef").write_text('{"name": "PlainDomain"}', encoding="utf-8")
-    caller = fixture / "Assets/Game/PlainCaller"
-    caller.mkdir()
-    shutil.copy2(old_formats / "SODataNoEngineCaller.cs", caller)
-    (caller / "PlainCaller.asmdef").write_text(
-        '{"name": "PlainCaller", "references": ["PlainDomain"], "noEngineReferences": true}', encoding="utf-8"
-    )
+    shutil.copy2(old_formats / "NativeWalletDomain.cs", runtime)
     fixtures = fixture / "Assets/Fixtures"
     fixtures.mkdir()
     for name in ("SpellCatalogV1.asset", "WalletV1.json", "AudioPreferencesLegacy.json"):
@@ -62,14 +51,14 @@ def prepare(run, cloud=False, netcode=False):
     for name, section in examples.items():
         code, = re.findall(r"^```csharp\n(.*?)^```$", read_topic("code", section), re.MULTILINE | re.DOTALL)
         (runtime / f"{name}.cs").write_text(code, encoding="utf-8")
-    runtime_assembly = {"name": "Foundations", "references": ["SOData.Runtime"]}
-    assembly = {"name": "Foundations.EditorTests", "references": ["Foundations", "PlainDomain", "PlainCaller", "SOData.Runtime"], "includePlatforms": ["Editor"], "optionalUnityReferences": ["TestAssemblies"]}
+    runtime_assembly = {"name": "Foundations", "references": ["Unity.Newtonsoft.Json"]}
+    assembly = {"name": "Foundations.EditorTests", "references": ["Foundations", "Unity.Newtonsoft.Json"], "includePlatforms": ["Editor"], "optionalUnityReferences": ["TestAssemblies"]}
     manifest = fixture / "Packages/manifest.json"
     packages = json.loads(manifest.read_text(encoding="utf-8"))
-    packages["dependencies"]["com.unity.nuget.mono-cecil"] = "1.11.6"
+    packages["dependencies"]["com.unity.nuget.newtonsoft-json"] = "3.2.2"
     tests = [
         "UnityFoundationTests.cs", "ScriptableObjectDataTests.cs", "SODataControllerTests.cs",
-        "SOFileStorageTests.cs", "SOCheckpointTests.cs", "SOAutoFieldsTests.cs", "SODataCodeGenTests.cs",
+        "SOFileStorageTests.cs",
     ]
     if cloud:
         packages["dependencies"]["com.unity.services.cloudsave"] = "3.4.2"

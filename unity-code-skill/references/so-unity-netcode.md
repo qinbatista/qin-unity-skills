@@ -17,7 +17,7 @@ await state.OpenAsync(profile, store);
 ```
 
 - On an observing client, obtain the store on the locally spawned replica of that object. Bind the client's runtime SO using the same `profile` and storage ID. A sibling `NetworkBehaviour.OnNetworkPostSpawn` can start this binding after every component on the prefab has spawned. Await `OpenAsync` before consuming the SO. The provider returns the current value or absence during subscription and then delivers changes on Unity's main thread.
-- Apply each validated gameplay change on the server. For the [fighter example](../assets/Providers/UnityNetcode/SOFighterPositionData.cs), `state.SetPosition(worldPosition)` publishes the new position. Await `state.FlushAsync()` at the acknowledgement boundary. A client attempting a raw write receives `UnauthorizedAccessException`. Send gameplay inputs through the receiving game's authenticated command path and validate sender, actor ownership and game rules on the server. Restrict the object's observers using the game's visibility policy when the state is private.
+- Apply each validated gameplay change on the server. For the [fighter example](../assets/Examples/Fighters/SOFighterPositionData.cs), `state.Position = worldPosition` publishes the new position. Await `state.FlushAsync()` at the acknowledgement boundary. A client attempting a raw write receives `UnauthorizedAccessException`. Send gameplay inputs through the receiving game's authenticated command path and validate sender, actor ownership and game rules on the server. Restrict the object's observers using the game's visibility policy when the state is private.
 - Call `state.CloseData()` at session end or from the owning consumer's `OnNetworkDespawn`. Reopen the new replica after reconnect. Every observer of this particular object can read every replicated field in it. Keep domains with different visibility on different objects.
 
 ```text
@@ -28,7 +28,7 @@ Server accepts command → SO commits one key → server NetworkList changes
 
 ## Fields and simulation
 
-The [fighter position example](../assets/Providers/UnityNetcode/SOFighterPositionData.cs) contains one serialized `Vector3`. Create one runtime instance per observed fighter; include both the match ID and the server-assigned actor ID in the profile. After the server accepts a move, call `fighter.SetPosition(new Vector3(4.5f, 0, -2))`. The opponent's client receives the new `fighter.Position` and its `DataChanged` event for `position`. A local marker can read the SO in that callback.
+The [fighter position example](../assets/Examples/Fighters/SOFighterPositionData.cs) contains one serialized `Vector3`. Create one runtime instance per observed fighter; include both the match ID and the server-assigned actor ID in the profile. After the server accepts a move, assign `fighter.Position = new Vector3(4.5f, 0, -2)`. The opponent's client receives the new `fighter.Position` and its `DataChanged` event for `position`. A local marker can read the SO in that callback.
 
 The adapter admits 64 keys per object. UTF-8 capacity is 61 bytes per key and 509 bytes per serialized value or scope. The server checks the last revision on every write. NGO sends changes on network ticks and the SO accepts pushed values without a per-frame poll. A successful server write acknowledges the server's memory update. Each connection has its own delivery and latency.
 

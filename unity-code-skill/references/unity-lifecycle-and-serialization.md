@@ -42,38 +42,21 @@ For an authored `.asset` change in Editor tooling, edit the existing asset with 
 
 ## ScriptableObject local files
 
-For new domains choose a [SODataController storage mode](so-data-controller.md#choose-one-mode-per-domain). Existing subclasses can keep [SOLocalData](../assets/SOLocalData.cs), which selects LocalFile and preserves their old file name and Play startup. Copy the shared controller files with the compatibility base. Use the following legacy consumer when replaying previous assets and the [local-first cloud save contract](local-first-cloud-saves.md#implement-a-local-first-save) for optional backup.
+Use a private serialized backing field and a public property. The LocalFile mode restores the selected slot on first access and commits the complete domain when a property changes. A dedicated legacy file name keeps earlier default-slot saves readable. See the [storage template](so-data-controller.md#copy-and-call-the-template).
 
 ```csharp
 using UnityEngine;
 
-public sealed class SOAudioPreferences : SOLocalData
+public sealed class SOAudioPreferences : SODataController
 {
-    [SerializeField] private float _volume;
-    public float Volume => _volume;
-
-    public override void SetPathName() => FileName = "audio-preferences.json";
-    public override void InitialValue() => _volume = 1f;
-
-    public void SetVolume(float volume)
-    {
-        float next = Mathf.Clamp01(volume);
-        if (_volume == next) return;
-        _volume = next;
-        RequestAutoSave();
-    }
+    [SerializeField] private float _volume = 1f;
+    public override SODataMode? RequiredMode => SODataMode.LocalFile;
+    protected override string LegacyFileName => "audio-preferences.json";
+    public float Volume { get => Read(ref _volume); set => Write(ref _volume, Mathf.Clamp01(value)); }
 }
 ```
 
-The [Manager example](unity-game-code-structure-design.md#singleton-managers) creates this object once. In Play, `OnEnable` loads an existing file or calls `InitialValue()` and saves the first-use defaults. Keep `SetPathName()` a managed name assignment because `OnAfterDeserialize` can run on Unity's serialization thread. In Edit mode, loading or importing an asset leaves the player file alone. Editor code can call `LoadLocalData()` explicitly. For isolated Editor tests, set `AI_MANAGER_PERSISTENCE_ROOT` to an absolute task directory before creating the object.
-
-`RequestAutoSave()` writes on an admitted change using unscaled time. Changes during the cooldown stay in memory until the next save. Call `SaveDataAtLocal()` at a required checkpoint, including the game's pause/suspend boundary when appropriate. `SaveWhenOwnerDestroyed()` flushes the last value during Play teardown. A save writes a sibling temporary file and replaces the committed file after serialization succeeds.
-
-The serializer checks the compact or formatted JSON with the subclass's existing SHA-256 contract. The file writer reads both legacy encodings and writes the current [encrypted envelope](so-data-controller.md#disk-and-provider-contracts). A stored revision guards each replacement against another writer.
-
-Only an absent file initializes defaults automatically. A failed read or checksum mismatch leaves the file in place, restores the previous serialized values and blocks writes for that object. Retry `LoadLocalData()` after repair, or call `Clean()` when the caller explicitly wants to reset and persist defaults. Verify a first launch, a fresh instance reading a changed value, and a damaged file surviving a failed reload and teardown.
-
-For a versioned DTO, emit `LocalChecksum` in the field covered by the paired decoder. The base serializes once with an empty checksum, signs those bytes and serializes again for the committed file. The [wallet example](scriptableobject-data-contracts.md#spell-catalog-and-player-wallet) verifies the original version before applying a migration.
+The [Manager](unity-game-code-structure-design.md#singleton-managers) creates a runtime SO. Assigning `settings.Volume = 0.75f` commits the snapshot before the setter returns.
 
 ## Parallel work
 

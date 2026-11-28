@@ -12,7 +12,7 @@ Use this Skill for the explanation part of a Unity request. Honor the user's lan
 ## Choose an operation
 
 - [Write the answer](#write-the-answer) from the perspective of the person using the feature.
-- [Show a direct SO field assignment](references/direct-field-assignment.md) for an ordinary gameplay write, its payload and a fresh read.
+- [Show a direct SO property assignment](references/direct-field-assignment.md) for an ordinary gameplay write, its payload and a fresh read.
 - [Read the wallet example](references/scriptableobject-storage.md) for a field, a gameplay action and a cold restart.
 - [Review affected runtime costs](../unity-performance-skill/SKILL.md#review-every-unity-task) or [share a change](../unity-code-skill/references/contributing.md#submit-a-skill-change).
 
@@ -28,11 +28,11 @@ For coins or account progress, follow the named game's actual writer and balance
 
 ### Concrete code
 
-Start with the member the user works with. In each Unity C# excerpt, put the actual `.cs` filename in a comment on the first line. Show the real declaring type, base class and braces. When an SO owns an operation, show its serialized backing field, the relevant property accessors with their actual visibility, and the method that changes the value. Use `// ...` to omit unrelated members.
+Start with the member the user works with. In each Unity C# excerpt, put the actual `.cs` filename in a comment on the first line. Show the real declaring type, base class and braces. For an SO property, show the serialized backing field, the complete getter and setter and the helper the setter calls. Use `// ...` to omit unrelated members.
 
 Show the exact mode or other setting that determines the outcome beside the member it governs. Say where the user can see it and whether the class fixes it or the Inspector selects it. Follow the receiving project's C# style and the [shared C# rules](../unity-code-skill/references/unity-csharp-rules.md#c-style), including a single line for a simple getter and setter.
 
-Give the consumer's ordinary action in one line. For a public SO field, show the literal assignment in the gameplay method. For an SO-owned operation, show its public call. Keep provider construction, slot entry and acknowledgement with their actual lifecycle owner. If needed, give the login prerequisite in a sentence outside the gameplay excerpt. Use the field's real key and the new value for the payload. Link the sources and label illustrative code. For an Editor-only task, show the setting and action the user needs.
+Give the consumer's ordinary action in one line. For a stored property, show the literal gameplay assignment, follow it into its setter and name the selected mode and channel. For an SO-owned operation, show its public call. Keep provider construction, slot entry and acknowledgement with their actual lifecycle owner. If needed, give the login prerequisite in a sentence outside the gameplay excerpt. Use the field's real key and the new value for the payload. Link the sources and label illustrative code. For an Editor-only task, show the setting and action the user needs.
 
 ### Detailed explanation and steps
 

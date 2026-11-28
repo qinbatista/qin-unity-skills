@@ -16,12 +16,6 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Player = Unity.Services.CloudSave.Models.Data.Player;
 
-public sealed class FixtureCloudProfile : SODataProfile
-{
-    public ISODataKeyStore Store { get; set; }
-    protected override ISODataKeyStore CreateCloudStore() => Store;
-}
-
 public sealed partial class UnityFoundationTests
 {
     // Model the documented atomic Default Player Data batch, using the pinned SDK's request and response types.
@@ -154,7 +148,7 @@ public sealed partial class UnityFoundationTests
     }
 
     [UnityTest]
-    public IEnumerator PickupSetsFiveAndTheProfileOwnsTheCloudWriteAndColdRead() => RunCloudCase(VerifyPickupProfileAsync());
+    public IEnumerator PickupPropertySendsOneCloudWriteAndColdReadsFive() => RunCloudCase(VerifyPickupProfileAsync());
 
     private static async Task VerifyPickupProfileAsync()
     {
@@ -162,9 +156,6 @@ public sealed partial class UnityFoundationTests
         UnityCloudSaveKeyStore cloud = new UnityCloudSaveKeyStore(account, () => "alice");
         SOPickupData data = Domain<SOPickupData>(SODataMode.DirectAccessOnline, "pickups");
         SOPickupData cold = UnityEngine.Object.Instantiate(data);
-        FixtureCloudProfile profile = StorageProfile<FixtureCloudProfile>(data);
-        profile.Store = cloud;
-        SODataProfile restarted = StorageProfile<SOUnityCloudSaveProfile>(cold);
         GameObject pickupObject = new GameObject("Pickup");
         TaskCompletionSource<bool> reply = new TaskCompletionSource<bool>();
         string assetPath = AssetDatabase.GenerateUniqueAssetPath("Assets/Fixtures/Pickups.asset");
@@ -179,7 +170,7 @@ public sealed partial class UnityFoundationTests
             binding.ApplyModifiedPropertiesWithoutUndo();
             const string scope = "slot-a/pickups";
             await cloud.WriteAsync(scope, "value", "{\"value\":37}", null, CancellationToken.None);
-            await profile.EnterAsync("slot-a");
+            await data.OpenAsync("slot-a", cloud);
             Assert.AreEqual(37, data.value);
 
             int writesBeforePickup = account.Batches.Count;
@@ -188,40 +179,101 @@ public sealed partial class UnityFoundationTests
             account.Acknowledgement = reply.Task;
             pickup.OnPickup();
             Assert.AreEqual(5, data.value);
+            pickup.OnPickup(); // Reassigning the same value leaves the existing receipt in flight.
             Assert.AreEqual(writesBeforePickup + 1, account.Batches.Count);
             CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(scope, "value") }, account.Batches.Last());
             Assert.AreEqual("{\"value\":5}", (await cloud.ReadAsync(scope, "value", CancellationToken.None)).Value);
             Assert.IsEmpty(confirmed);
 
-            Task exit = profile.LeaveAsync();
+            Task exit = data.CloseAsync();
             Assert.IsFalse(exit.IsCompleted);
             Assert.Throws<InvalidOperationException>(() => data.value = 9);
             Assert.AreEqual(5, data.value);
             reply.SetResult(true);
             await exit;
             CollectionAssert.AreEqual(new[] { "value" }, confirmed);
-            Assert.AreEqual(0, data.value);
+            Assert.Throws<InvalidOperationException>(() => { var closed = data.value; });
             EditorUtility.SetDirty(data);
             AssetDatabase.SaveAssetIfDirty(data);
             CollectionAssert.AreEqual(authored, File.ReadAllBytes(assetPath));
-            await restarted.EnterAsync("slot-a", new UnityCloudSaveKeyStore(account, () => "alice"));
+            await cold.OpenAsync("slot-a", new UnityCloudSaveKeyStore(account, () => "alice"));
             Assert.AreEqual(5, cold.value);
-            await restarted.LeaveAsync();
-            await restarted.EnterAsync("slot-b", cloud);
+            await cold.CloseAsync();
+            await cold.OpenAsync("slot-b", cloud);
             Assert.AreEqual(0, cold.value);
-            await restarted.LeaveAsync();
+            await cold.CloseAsync();
             Assert.AreEqual(writesBeforePickup + 1, account.Batches.Count);
         }
         finally
         {
             reply.TrySetResult(true);
             UnityEngine.Object.DestroyImmediate(pickupObject);
-            UnityEngine.Object.DestroyImmediate(profile);
-            UnityEngine.Object.DestroyImmediate(restarted);
             if (AssetDatabase.Contains(data)) AssetDatabase.DeleteAsset(assetPath);
             else UnityEngine.Object.DestroyImmediate(data);
             UnityEngine.Object.DestroyImmediate(cold);
         }
+    }
+
+    [UnityTest]
+    public IEnumerator OriginalAuthoredFieldOpensThroughItsProperty() => RunCloudCase(VerifyOriginalFieldAsync());
+
+    private static async Task VerifyOriginalFieldAsync()
+    {
+        string path = AssetDatabase.GenerateUniqueAssetPath("Assets/Fixtures/OriginalPickup.asset");
+        var data = ScriptableObject.CreateInstance<SOPickupData>();
+        var account = new CloudPlayerFixture();
+        try
+        {
+            AssetDatabase.CreateAsset(data, path);
+            var serialized = new SerializedObject(data);
+            serialized.FindProperty("_value").intValue = 37;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            AssetDatabase.SaveAssetIfDirty(data);
+            string text = File.ReadAllText(path);
+            StringAssert.Contains("  _value: 37", text);
+            File.WriteAllText(path, text.Replace("  _value: 37", "  value: 37"));
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+            data = AssetDatabase.LoadAssetAtPath<SOPickupData>(path);
+            await data.OpenAsync("original", new UnityCloudSaveKeyStore(account, () => "alice"));
+            Assert.AreEqual(37, data.value);
+            Assert.AreEqual(0, account.Batches.Count);
+            await data.CloseAsync();
+        }
+        finally { AssetDatabase.DeleteAsset(path); }
+    }
+
+    [UnityTest]
+    public IEnumerator TwoAssignmentsKeepTheirOrderUntilTheSlotCloses() => RunCloudCase(VerifyPendingWritesAsync());
+
+    private static async Task VerifyPendingWritesAsync()
+    {
+        var account = new CloudPlayerFixture();
+        var channel = new UnityCloudSaveKeyStore(account, () => "alice");
+        var data = Domain<SOPickupData>(SODataMode.DirectAccessOnline, "pickups");
+        var release = new TaskCompletionSource<bool>();
+        const string scope = "queue/pickups";
+        try
+        {
+            await channel.WriteAsync(scope, "value", "{\"value\":1}", null, CancellationToken.None);
+            await data.OpenAsync("queue", channel);
+            var confirmed = new List<int>();
+            data.DataChanged += key => confirmed.Add(data.value);
+            int before = account.Batches.Count;
+            account.Acknowledgement = release.Task;
+            data.value = 5;
+            data.value = 8;
+            Assert.AreEqual(8, data.value);
+            Assert.AreEqual(before + 1, account.Batches.Count);
+            Task close = data.CloseAsync();
+            Assert.IsFalse(close.IsCompleted);
+            release.SetResult(true);
+            await close;
+            Assert.AreEqual(before + 2, account.Batches.Count);
+            CollectionAssert.AreEqual(new[] { 8 }, confirmed);
+            await data.OpenAsync("queue", channel);
+            Assert.AreEqual(8, data.value);
+        }
+        finally { release.TrySetResult(true); UnityEngine.Object.DestroyImmediate(data); }
     }
 
     [UnityTest]
@@ -236,10 +288,8 @@ public sealed partial class UnityFoundationTests
         SOCurrencyData cold = UnityEngine.Object.Instantiate(first);
         const string scope = "profile%2F1/wallet";
         CancellationToken token = CancellationToken.None;
-        SOFileKeyStore previousLocal = new SOFileKeyStore(Path.Combine(_root, "SOData", "keys"));
         try
         {
-            SODataRecord local = await previousLocal.WriteAsync(scope, "coins", "{\"value\":81}", null, token);
             await first.OpenAsync("profile/1", firstDevice);
             Assert.AreEqual(0, first.Coins);
             Assert.IsNull(await firstDevice.ReadAsync(scope, "coins", token));
@@ -248,30 +298,29 @@ public sealed partial class UnityFoundationTests
             await firstDevice.WriteAsync(scope, "coins", "{\"value\":37}", null, token);
             await first.OpenAsync("profile/1", firstDevice);
             Assert.AreEqual(37, first.Coins);
-            first.CreditCoins(3);
+            first.Coins += 3;
             await first.FlushAsync();
             CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(scope, "coins") }, player.Batches.Last());
             Assert.AreEqual("{\"value\":40}", (await secondDevice.ReadAsync(scope, "coins", token)).Value);
             int writes = player.Batches.Count;
-            Assert.Throws<ArgumentOutOfRangeException>(() => first.CreditCoins(0));
-            Assert.Throws<OverflowException>(() => first.CreditCoins(int.MaxValue));
+            Assert.Throws<OverflowException>(() => first.Coins = checked(first.Coins + int.MaxValue));
             Assert.AreEqual(writes, player.Batches.Count);
 
             await cold.OpenAsync("profile/1", secondDevice);
             Assert.AreEqual(40, cold.Coins);
-            first.CreditCoins(2);
+            first.Coins += 2;
             await first.FlushAsync();
-            await ExpectCloudFailure<SODataConflictException>(cold.CreditCoinsAsync(10));
+            Assert.Throws<SODataConflictException>(() => cold.Coins += 10);
             Assert.AreEqual(40, cold.Coins);
             cold.CloseData();
             await cold.OpenAsync("profile/1", secondDevice);
             Assert.AreEqual(42, cold.Coins);
-            await cold.CreditCoinsAsync(1);
-            await ExpectError<OperationCanceledException>(() => cold.CreditCoinsAsync(5, new CancellationToken(true)));
+            cold.Coins += 1;
+            await cold.FlushAsync();
             Assert.AreEqual(43, cold.Coins);
 
             player.DropAcknowledgementFor = UnityCloudSaveKeyStore.GetCloudKey(scope, "coins");
-            await ExpectCloudFailure<IOException>(cold.CreditCoinsAsync(1));
+            Assert.Throws<IOException>(() => cold.Coins += 1);
             Assert.AreEqual(43, cold.Coins);
             cold.CloseData();
             player.DropAcknowledgementFor = null;
@@ -280,7 +329,6 @@ public sealed partial class UnityFoundationTests
             cold.CloseData();
             await cold.OpenAsync("profile%2F1", secondDevice);
             Assert.AreEqual(0, cold.Coins);
-            Assert.AreEqual(local.Revision, (await previousLocal.ReadAsync(scope, "coins", token)).Revision);
         }
         finally { UnityEngine.Object.DestroyImmediate(first); UnityEngine.Object.DestroyImmediate(cold); }
     }
@@ -300,11 +348,11 @@ public sealed partial class UnityFoundationTests
             serialized.ApplyModifiedPropertiesWithoutUndo();
             runtime = UnityEngine.Object.Instantiate(asset);
             await runtime.OpenAsync("slot-a", new UnityCloudSaveKeyStore(player, () => "alice"));
-            runtime.WearHat("straw");
-            runtime.WearHat("felt");
+            runtime.HatId = "straw";
+            runtime.HatId = "felt";
             await runtime.FlushAsync();
             Assert.AreEqual("felt", runtime.HatId);
-            Assert.AreEqual("", asset.HatId);
+            Assert.Throws<InvalidOperationException>(() => { var unopened = asset.HatId; });
             CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(runtime.GetStorageScope("slot-a"), "hatId") }, player.Batches.Last());
             runtime.CloseData();
             UnityEngine.Object.DestroyImmediate(runtime);

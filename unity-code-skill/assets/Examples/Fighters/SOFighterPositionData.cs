@@ -4,7 +4,6 @@ using UnityEngine;
 public sealed class SOFighterPositionData : SODataController
 {
     [SerializeField] private Vector3 position;
-    public Vector3 Position => position;
-
-    public void SetPosition(Vector3 worldPosition) => position = worldPosition;
+    public override SODataMode? RequiredMode => SODataMode.RealtimeOnline;
+    public Vector3 Position { get => Read(ref position); set => Write(ref position, value); }
 }

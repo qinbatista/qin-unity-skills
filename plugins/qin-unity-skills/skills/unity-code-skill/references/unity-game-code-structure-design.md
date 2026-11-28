@@ -22,7 +22,7 @@ Reuse the receiving game's existing `Singleton<T>` when present. For a game with
 
 Call `base.Awake()` before acquiring resources. A duplicate can finish running `Awake` before Unity destroys it, so check `Instance != this` before starting work that belongs to the registered owner. Release only the resources this component acquired and call `base.OnDestroy()` even if release fails. Other components can read `Instance` after registration, usually in `Start`. The public setter supports existing fixture bindings. Gameplay code leaves registration to the base.
 
-This Manager creates and retires one runtime [settings object](unity-lifecycle-and-serialization.md#scriptableobject-local-files). At composition time, bind its `Settings` instance to each consumer. A consumer changes volume through its bound SO's `SetVolume(value)`.
+This Manager creates and retires one runtime [settings object](unity-lifecycle-and-serialization.md#scriptableobject-local-files). At composition time, bind its `Settings` instance to each consumer. A consumer changes volume through its bound SO's `Volume` property.
 
 ```csharp
 using UnityEngine;
@@ -43,7 +43,7 @@ public sealed class AudioPreferencesManager : Singleton<AudioPreferencesManager>
     {
         try
         {
-            if (_settings != null) _settings.SaveWhenOwnerDestroyed();
+            if (_settings != null) _settings.CloseData();
         }
         finally
         {

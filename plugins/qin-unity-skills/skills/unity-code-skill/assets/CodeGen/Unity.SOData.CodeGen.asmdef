@@ -1,8 +1,0 @@
-{
-  "name": "Unity.SOData.CodeGen",
-  "includePlatforms": ["Editor"],
-  "references": [],
-  "overrideReferences": true,
-  "precompiledReferences": ["Mono.Cecil.dll", "Mono.Cecil.Rocks.dll"],
-  "autoReferenced": false
-}

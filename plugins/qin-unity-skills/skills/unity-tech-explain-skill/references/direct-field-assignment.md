@@ -1,8 +1,8 @@
-# Direct ScriptableObject field assignment
+# ScriptableObject property assignment
 
 ## Brief explanation
 
-The shared pickup template has a public integer called `value`. Drag the same pickup data asset onto the pickup component and into the storage profile's Domains list. Once the signed-in slot is ready, assigning five immediately changes the visible number and queues that field for Unity Cloud Save.
+The pickup component uses the same SO instance opened by the account flow. Assigning five enters the C# property setter on that SO.
 
 ## Concrete code
 
@@ -10,8 +10,9 @@ The shared pickup template has a public integer called `value`. Drag the same pi
 // SOPickupData.cs
 public sealed class SOPickupData : SODataController
 {
+    [SerializeField, FormerlySerializedAs("value")] private int _value;
     public override SODataMode? RequiredMode => SODataMode.DirectAccessOnline;
-    public int value;
+    public int value { get => Read(ref _value); set => Write(ref _value, value); }
 }
 ```
 
@@ -25,14 +26,14 @@ public sealed class PickupController : MonoBehaviour
 }
 ```
 
-The account flow passes the selected slot to the profile once after sign-in. The controller shown above is the entire gameplay caller. [Pickup source files](https://github.com/qinbatista/qin-unity-skills/tree/master/unity-code-skill/assets/Examples/Pickups) · [Storage profile](https://github.com/qinbatista/qin-unity-skills/blob/master/unity-code-skill/assets/SODataProfile.cs)
+The account owner awaits `pickupData.OpenAsync(slot, channel)` once after sign-in. Source for the [SO property](../../unity-code-skill/assets/Examples/Pickups/SOPickupData.cs) and the [pickup component](../../unity-code-skill/assets/Examples/Pickups/PickupController.cs).
 
 ## Detailed explanation and steps
 
 ```text
-OnPickup → value = 5 → SODataController observes "value"
-  → Cloud Save receives {"value":5} for the field key and its previous write lock
-  → service confirms → re-enter the same account and slot → value reads 5
+PickupController.OnPickup → value = 5 → SOPickupData.value setter → SODataController.Write
+  → DirectAccessOnline → Cloud Save receives {"value":5} → acknowledgement
+  → fresh SO opens the same account and slot → value reads 5
 ```
 
-For an existing record the SDK request contains one item. The SO reports confirmation through DataChanged and errors through StorageFailed. On an orderly slot exit the profile waits for outstanding replies. [Unity Cloud Save adapter](https://github.com/qinbatista/qin-unity-skills/blob/master/unity-code-skill/assets/Providers/UnityCloudSave/UnityCloudSaveKeyStore.cs)
+A breakpoint in the property setter shows the assigned integer. The provider receives only this field. [Mode](../../unity-code-skill/assets/Modes/SODirectAccessOnlineMode.cs) · [Unity channel](../../unity-code-skill/assets/Providers/UnityCloudSave/UnityCloudSaveKeyStore.cs)

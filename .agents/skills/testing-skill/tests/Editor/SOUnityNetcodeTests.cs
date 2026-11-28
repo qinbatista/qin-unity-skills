@@ -142,21 +142,21 @@ public sealed class SOUnityNetcodeTests
         Assert.AreEqual("straw", client.HatId);
         int notifications = 0;
         client.DataChanged += key => { if (key == "hatId") notifications++; };
-        server.WearHat("felt");
+        server.HatId = "felt";
         yield return ConfirmServerWrite(server);
         yield return Until(() => client.HatId == "felt", "outfit SO push");
         Assert.AreEqual("felt", server.HatId);
         Assert.AreEqual(1, notifications);
-        yield return ExpectDenied(client, () => client.WearHat("denim"));
+        yield return ExpectDenied(client, () => client.HatId = "denim");
         Assert.AreEqual("felt", client.HatId);
         int beforeClose = notifications;
         client.CloseData();
-        server.WearHat("wool");
+        server.HatId = "wool";
         yield return ConfirmServerWrite(server);
         string scope = server.GetStorageScope(Profile);
         yield return Until(() => store.ReadAsync(scope, "hatId", Token).Result.Value == "{\"value\":\"wool\"}", "post-close push");
         Assert.AreEqual(beforeClose, notifications);
-        Assert.AreEqual("straw", client.HatId);
+        Assert.Throws<InvalidOperationException>(() => { var closed = client.HatId; });
     }
 
     private static IEnumerator VerifyOpponentPosition(SOFighterPositionData server, SOFighterPositionData opponentView,
@@ -166,11 +166,11 @@ public sealed class SOUnityNetcodeTests
         Assert.AreEqual(Vector3.zero, opponentView.Position);
         int pushes = 0;
         opponentView.DataChanged += key => { if (key == "position") pushes++; };
-        server.SetPosition(acceptedPosition);
+        server.Position = acceptedPosition;
         yield return ConfirmServerWrite(server);
         yield return Until(() => opponentView.Position == acceptedPosition, "opponent's world position");
         Assert.AreEqual(1, pushes);
-        yield return ExpectDenied(opponentView, () => opponentView.SetPosition(Vector3.one));
+        yield return ExpectDenied(opponentView, () => opponentView.Position = Vector3.one);
         Assert.AreEqual(acceptedPosition, opponentView.Position);
         Debug.Log("SO opponent replay: the server accepted (4.5, 0, -2), the remote SO received that Vector3 in one push, and a client position override was rejected.");
     }

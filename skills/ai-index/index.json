@@ -25,37 +25,37 @@
         {
           "id": "open-so-storage",
           "file": "unity-code-skill/assets/SODataController.cs",
-          "symbol": "SODataController.AttachAsync",
-          "anchor": "public async Task AttachAsync(",
-          "summary": "Check the target's required mode before binding a matching storage policy, loading scoped data and observing field assignments."
+          "symbol": "SODataController.OpenAsync",
+          "anchor": "public async Task OpenAsync(",
+          "summary": "Open the selected mode on the same SO and load the slot before gameplay."
         },
         {
-          "id": "enter-so-profile",
-          "file": "unity-code-skill/assets/SODataProfile.cs",
-          "symbol": "SODataProfile.EnterAsync",
-          "anchor": "public async Task EnterAsync(",
-          "summary": "Open gameplay's referenced data instances once per account or slot and let ordinary field assignments synchronize through each SO."
+          "id": "write-so-property",
+          "file": "unity-code-skill/assets/SODataController.cs",
+          "symbol": "SODataController.Write",
+          "anchor": "protected void Write<T>(",
+          "summary": "Route the property setter to the active mode."
         },
         {
-          "id": "credit-currency",
+          "id": "currency-property",
           "file": "unity-code-skill/assets/SOCurrencyData.cs",
-          "symbol": "SOCurrencyData.CreditCoins",
-          "anchor": "public void CreditCoins(int amount)",
-          "summary": "Apply a validated credit in the fixed DirectAccessOnline wallet and queue its coins field for remote acknowledgement."
+          "symbol": "SOCurrencyData.Coins",
+          "anchor": "public int Coins {",
+          "summary": "Read and assign the persistent coins field."
         },
         {
           "id": "save-local-data",
-          "file": "unity-code-skill/assets/SODataController.LocalFile.cs",
-          "symbol": "SODataController.SaveDataAtLocal",
-          "anchor": "public void SaveDataAtLocal()",
-          "summary": "Encrypt and conditionally replace the bound domain snapshot after it passes its serialization contract."
+          "file": "unity-code-skill/assets/Modes/SOLocalFileMode.cs",
+          "symbol": "SOLocalFileMode.Save",
+          "anchor": "protected override void Save(",
+          "summary": "Commit the encrypted whole-domain snapshot."
         },
         {
           "id": "load-local-data",
-          "file": "unity-code-skill/assets/SODataController.LocalFile.cs",
-          "symbol": "SODataController.LoadLocalData",
-          "anchor": "public void LoadLocalData()",
-          "summary": "Restore current JSON or the original legacy string, initialize a missing file and protect a rejected save."
+          "file": "unity-code-skill/assets/Modes/SOLocalFileMode.cs",
+          "symbol": "SOLocalFileMode.OpenAsync",
+          "anchor": "internal override Task OpenAsync(",
+          "summary": "Read current or earlier local data before the first property access."
         },
         {
           "id": "read-installed-topic",
@@ -98,7 +98,10 @@
       "id": "unity-assets",
       "summary": "Asset placement, GUID-preserving moves, world scale, import caps, tiled ground and adjustable trunks",
       "document": "skills/ai-index/modules/unity-assets.md",
-      "sources": ["unity-assets-skill", "examples/image-optimization"],
+      "sources": [
+        "unity-assets-skill",
+        "examples/image-optimization"
+      ],
       "dependencies": [],
       "code_targets": [
         {
@@ -114,7 +117,9 @@
       "id": "unity-ui",
       "summary": "UI Toolkit template reuse, press feedback, sliced or tiled controls, localization, bounded responsive layouts, Duo outer and inner displays, fold panes and Canvas parity",
       "document": "skills/ai-index/modules/unity-ui.md",
-      "sources": ["unity-ui-skill"],
+      "sources": [
+        "unity-ui-skill"
+      ],
       "dependencies": []
     },
     {
@@ -144,8 +149,19 @@
       "id": "unity-effects",
       "summary": "Single-graph particle authoring and three-receiver comparison, Unity shaders, 34 water composer profiles, 37 native subjects, parameter limits and an offline comparison gallery, gameplay camera adapters, animated materials and native replay",
       "document": "skills/ai-index/modules/unity-effects.md",
-      "sources": ["unity-effects-skill", "examples/fluid-mixer", "examples/flow-sky-2d", "examples/particle-graphs", "examples/sprite-lit-tint"],
-      "dependencies": [{"module": "unity-code", "reason": "The fluid replay uses the installed Unity CLI launcher for both blank receivers."}],
+      "sources": [
+        "unity-effects-skill",
+        "examples/fluid-mixer",
+        "examples/flow-sky-2d",
+        "examples/particle-graphs",
+        "examples/sprite-lit-tint"
+      ],
+      "dependencies": [
+        {
+          "module": "unity-code",
+          "reason": "The fluid replay uses the installed Unity CLI launcher for both blank receivers."
+        }
+      ],
       "code_targets": [
         {
           "id": "author-particle-graph",
@@ -223,35 +239,65 @@
       "id": "unity-testing",
       "summary": "Scoped native Unity test, build, device and provider evidence",
       "document": "skills/ai-index/modules/unity-testing.md",
-      "sources": ["unity-testing-skill"],
+      "sources": [
+        "unity-testing-skill"
+      ],
       "dependencies": []
     },
     {
       "id": "unity-performance",
       "summary": "Completion review for every Unity task, C# hot paths and content lifetime, 2D simulation and rendering choices, executable optimization casebook, and matched performance verification",
       "document": "skills/ai-index/modules/unity-performance.md",
-      "sources": ["unity-performance-skill", "examples/performance-cases"],
+      "sources": [
+        "unity-performance-skill",
+        "examples/performance-cases"
+      ],
       "dependencies": [
-        {"module": "unity-code", "reason": "Reuses the existing callback, managed allocation and resource ownership procedures."},
-        {"module": "unity-effects", "reason": "Checks native effect behavior and the affected renderer."},
-        {"module": "unity-testing", "reason": "Binds comparisons to the actual workload and target."}
+        {
+          "module": "unity-code",
+          "reason": "Reuses the existing callback, managed allocation and resource ownership procedures."
+        },
+        {
+          "module": "unity-effects",
+          "reason": "Checks native effect behavior and the affected renderer."
+        },
+        {
+          "module": "unity-testing",
+          "reason": "Binds comparisons to the actual workload and target."
+        }
       ]
     },
     {
       "id": "unity-tech-explain",
       "summary": "Unity explanations from the user-owned field or Inspector control through setup, gameplay action and observable result",
       "document": "skills/ai-index/modules/unity-tech-explain.md",
-      "sources": ["unity-tech-explain-skill"],
+      "sources": [
+        "unity-tech-explain-skill"
+      ],
       "dependencies": [
-        {"module": "unity-code", "reason": "Owns the installed task menu, the section reader and the wallet implementation used by the walkthrough."},
-        {"module": "catalog", "reason": "Ships and checks explanation routing from every public domain."}
+        {
+          "module": "unity-code",
+          "reason": "Owns the installed task menu, the section reader and the wallet implementation used by the walkthrough."
+        },
+        {
+          "module": "catalog",
+          "reason": "Ships and checks explanation routing from every public domain."
+        }
       ]
     },
     {
       "id": "catalog",
       "summary": "Public task and domain routing, extension ownership, plugin distribution, YoFaAssets comparison and repository tests",
       "document": "skills/ai-index/modules/catalog.md",
-      "sources": ["README.md", "docs", "examples/charge-pulse", "examples/job-state-batches", ".agents/skills/testing-skill", "plugins/qin-unity-skills", ".github/workflows/publish-plugin.yml"],
+      "sources": [
+        "README.md",
+        "docs",
+        "examples/charge-pulse",
+        "examples/job-state-batches",
+        ".agents/skills/testing-skill",
+        "plugins/qin-unity-skills",
+        ".github/workflows/publish-plugin.yml"
+      ],
       "dependencies": [],
       "code_targets": [
         {
@@ -281,7 +327,13 @@
           "symbol": "ResponsiveLayoutCases.Review",
           "anchor": "static IEnumerator Review(string name, Action<VisualElement, LayoutText> bind, Func<VisualElement, LayoutProfile, LayoutText, RenderTexture, IEnumerator> check)",
           "summary": "Mount one Toolkit tree in Unity Play Mode and replay every fixture locale against orientation and safe-area profiles.",
-          "related": [{"module": "catalog", "target": "refresh-layout-text", "reason": "Changes locale on the mounted labels and buttons without replacing the view."}]
+          "related": [
+            {
+              "module": "catalog",
+              "target": "refresh-layout-text",
+              "reason": "Changes locale on the mounted labels and buttons without replacing the view."
+            }
+          ]
         },
         {
           "id": "refresh-layout-text",

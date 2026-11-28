@@ -159,13 +159,12 @@ class InstalledRoutingTests(unittest.TestCase):
         self.assertIn(body, source)
         for member in ('[SerializeField, FormerlySerializedAs("coins")] private int _coins;',
                        "public override SODataMode? RequiredMode => SODataMode.DirectAccessOnline;",
-                       "public int Coins { get => _coins; private set => _coins = value; }",
-                       "public void CreditCoins(int amount)", "Coins = checked(Coins + amount);"):
+                       "public int Coins { get => Read(ref _coins); set => Write(ref _coins, value); }"):
             self.assertIn(member, body)
-        for usage in ("wallet.CreditCoins(3)", "wallet.Coins", "DataChanged"):
+        for usage in ("wallet.Coins += 3", "wallet.Coins", "DataChanged"):
             self.assertIn(usage, section)
 
-    def test_plain_field_walkthrough_shows_the_entire_shipping_pickup_caller(self):
+    def test_property_walkthrough_shows_the_shipping_setter_and_pickup_caller(self):
         guide = read_topic("tech-explain", "references/direct-field-assignment.md#concrete-code")
         blocks = re.findall(r"^```csharp\n(.*?)\n```$", guide, re.MULTILINE | re.DOTALL)
         self.assertEqual(len(blocks), 2)
@@ -174,6 +173,7 @@ class InstalledRoutingTests(unittest.TestCase):
             self.assertEqual(filename, f"// {name}")
             source = (PACK / "unity-code-skill/assets/Examples/Pickups" / name).read_text(encoding="utf-8")
             self.assertEqual(body, source[source.index("public sealed class"):].strip())
+        self.assertIn("public int value { get => Read(ref _value); set => Write(ref _value, value); }", blocks[0])
         self.assertIn("public void OnPickup() => _pickupData.value = 5;", blocks[1])
         self.assertNotRegex(blocks[1], r"OpenAsync|FlushAsync|EnterAsync|CloudSave|\bawait\b")
 

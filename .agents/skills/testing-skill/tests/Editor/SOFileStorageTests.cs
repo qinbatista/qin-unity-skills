@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -87,66 +85,36 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
-    public async Task DirectAccessChangesOnlyOneKeyAndReopensTheAcknowledgedValue()
+    public async Task ConcurrentFileCommitsWithOneRevisionHaveOnlyOneWinner()
     {
-        SOFileKeyStore store = new SOFileKeyStore(_root);
-        Assert.IsNull(await store.ReadAsync("wallet", "coins", CancellationToken.None));
-        SODataRecord old = await store.WriteAsync("wallet", "coins", "37", null, CancellationToken.None);
-        await store.WriteAsync("wallet", "level", "9", null, CancellationToken.None);
-        await store.WriteAsync("equipment", "coins", "pinned", null, CancellationToken.None);
-        Dictionary<string, byte[]> before = Directory.GetFiles(_root, "*.record").ToDictionary(path => path, File.ReadAllBytes);
-        Assert.AreEqual(3, before.Count);
-        SODataRecord committed = await store.WriteAsync("wallet", "coins", "40", old.Revision, CancellationToken.None);
-        Assert.AreEqual(1, before.Count(pair => !pair.Value.SequenceEqual(File.ReadAllBytes(pair.Key))));
-        SOFileKeyStore reopened = new SOFileKeyStore(_root);
-        SODataRecord coins = await reopened.ReadAsync("wallet", "coins", CancellationToken.None);
-        Assert.AreEqual("40", coins.Value);
-        Assert.AreEqual(committed.Revision, coins.Revision);
-        Assert.AreEqual("9", (await reopened.ReadAsync("wallet", "level", CancellationToken.None)).Value);
-        Assert.AreEqual("pinned", (await reopened.ReadAsync("equipment", "coins", CancellationToken.None)).Value);
-        Assert.Throws<SODataConflictException>(() => store.WriteAsync("wallet", "coins", "3", null, CancellationToken.None).GetAwaiter().GetResult());
-        Assert.Throws<SODataConflictException>(() => store.WriteAsync("wallet", "coins", "3", old.Revision, CancellationToken.None).GetAwaiter().GetResult());
-        using CancellationTokenSource cancelled = new CancellationTokenSource();
-        cancelled.Cancel();
-        Assert.Catch<OperationCanceledException>(() => store.WriteAsync("wallet", "coins", "3", committed.Revision, cancelled.Token).GetAwaiter().GetResult());
-        Assert.AreEqual("40", (await reopened.ReadAsync("wallet", "coins", CancellationToken.None)).Value);
-    }
-
-    [Test]
-    public async Task TwoWritersWithOneRevisionCanOnlyAcknowledgeOneChange()
-    {
-        SOFileKeyStore first = new SOFileKeyStore(_root);
-        SOFileKeyStore second = new SOFileKeyStore(_root);
-        SODataRecord initial = await first.WriteAsync("wallet", "coins", "37", null, CancellationToken.None);
-        Task<SODataRecord> left = first.WriteAsync("wallet", "coins", "40", initial.Revision, CancellationToken.None);
-        Task<SODataRecord> right = second.WriteAsync("wallet", "coins", "44", initial.Revision, CancellationToken.None);
+        string path = Path.Combine(_root, "coins.record");
+        string previous = SOFileStorage.Commit(path, "37", null, true, false, CancellationToken.None);
+        Task<string> left = Task.Run(() => SOFileStorage.Commit(path, "40", previous, true, false, CancellationToken.None));
+        Task<string> right = Task.Run(() => SOFileStorage.Commit(path, "44", previous, true, false, CancellationToken.None));
         try { await Task.WhenAll(left, right); }
         catch (SODataConflictException) { }
         Assert.AreNotEqual(left.IsFaulted, right.IsFaulted);
-        Task<SODataRecord> loser = left.IsFaulted ? left : right;
-        Assert.IsInstanceOf<SODataConflictException>(loser.Exception.GetBaseException());
-        SODataRecord winner = left.IsFaulted ? right.Result : left.Result;
-        SODataRecord reloaded = await second.ReadAsync("wallet", "coins", CancellationToken.None);
-        Assert.AreEqual(winner.Revision, reloaded.Revision);
-        Assert.AreEqual(winner.Value, reloaded.Value);
+        Assert.IsInstanceOf<SODataConflictException>((left.IsFaulted ? left : right).Exception.GetBaseException());
+        string latest = SOFileStorage.Read(path, false, out string revision);
+        Assert.AreEqual(left.IsFaulted ? "44" : "40", latest);
+        Assert.AreEqual((left.IsFaulted ? right : left).Result, revision);
     }
 
     [Test]
-    public async Task InterruptedStagingAndFailedCommitKeepTheLastKey()
+    public void AnInterruptedNativeWriteKeepsTheLastAcknowledgedValue()
     {
-        SOFileKeyStore store = new SOFileKeyStore(_root);
-        SODataRecord initial = await store.WriteAsync("wallet", "coins", "37", null, CancellationToken.None);
+        string path = Path.Combine(_root, "coins.record");
+        string revision = SOFileStorage.Commit(path, "37", null, true, false, CancellationToken.None);
         string pending = Path.Combine(_root, ".sodata", "pending");
-        File.WriteAllText(pending, "half a write");
-        Assert.AreEqual("37", (await store.ReadAsync("wallet", "coins", CancellationToken.None)).Value);
-        SODataRecord committed = await store.WriteAsync("wallet", "coins", "40", initial.Revision, CancellationToken.None);
-        Assert.IsFalse(File.Exists(pending));
-        // An unwritable staging name must fail before replacing the acknowledged record.
+        File.WriteAllText(pending, "partial");
+        Assert.AreEqual("37", SOFileStorage.Read(path, false, out _));
+        File.Delete(pending);
         Directory.CreateDirectory(pending);
-        Exception failure = Assert.Catch(() => store.WriteAsync("wallet", "coins", "44", committed.Revision, CancellationToken.None).GetAwaiter().GetResult());
-        Assert.IsTrue(failure is IOException || failure is UnauthorizedAccessException, failure.ToString());
-        Assert.AreEqual("40", (await store.ReadAsync("wallet", "coins", CancellationToken.None)).Value);
+        Assert.Catch<Exception>(() => SOFileStorage.Commit(path, "40", revision, true, false, CancellationToken.None));
+        Assert.AreEqual("37", SOFileStorage.Read(path, false, out string retained));
+        Assert.AreEqual(revision, retained);
         Directory.Delete(pending);
-        Assert.AreEqual("44", (await store.WriteAsync("wallet", "coins", "44", committed.Revision, CancellationToken.None)).Value);
+        SOFileStorage.Commit(path, "40", retained, true, false, CancellationToken.None);
+        Assert.AreEqual("40", SOFileStorage.Read(path, false, out _));
     }
 }

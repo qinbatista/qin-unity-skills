@@ -1,245 +1,290 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using UnityEngine.Serialization;
 
-[CreateAssetMenu(menuName = "Game Data/Storage Controller")]
-public partial class SODataController : ScriptableObject, ISerializationCallbackReceiver
+public enum SODataMode { None, LocalFile, DirectAccess, DirectAccessOnline, RealtimeOnline }
+
+public abstract class SODataController : ScriptableObject
 {
-    [SerializeField, SOStorageMode] private SODataMode _storageMode = SODataMode.None;
-    [SerializeField, Tooltip("Stable domain ID within the profile. Empty uses the data object's type name.")]
+    [SerializeField] private SODataMode _storageMode;
+    [SerializeField, Tooltip("Stable domain ID within a slot. Empty uses this SO's type name.")]
     private string _storageId;
-    [NonSerialized] private ScriptableObject _target;
-    [NonSerialized] private SOKeySession _keys;
-    [NonSerialized] private string _scopedDirectory;
-    [NonSerialized] private string _snapshotDefaults;
-    [NonSerialized] private string _snapshotAccepted;
-    [NonSerialized] private string _originalFileName;
-    [NonSerialized] private int _muting;
+    [SerializeField, HideInInspector] private string _fileName; // Published scoped snapshot name.
+    [NonSerialized] private readonly Dictionary<string, SOStoredField> _fields = new Dictionary<string, SOStoredField>();
+    [NonSerialized] private SOStorageMode _active;
     [NonSerialized] private bool _ready;
     [NonSerialized] private bool _closing;
+    [NonSerialized] private int _epoch;
+    private static int _playEpoch;
+    private string _defaults;
 
     public virtual SODataMode? RequiredMode => null;
-    public virtual SODataMode Mode => RequiredMode ?? _storageMode;
-    public Exception StorageError { get; private set; }
+    public SODataMode Mode => RequiredMode ?? _storageMode;
     public event Action<string> DataChanged;
     public event Action<Exception> StorageFailed;
-    private ScriptableObject Owner => ReferenceEquals(_target, null) ? this : _target;
-    private bool AttachedPlain => !ReferenceEquals(Owner, this);
+    public Exception StorageError { get; private set; }
 
-    protected void RequireOpenStorage()
+    // Existing unscoped LocalFile domains can import their original file in the default slot.
+    protected virtual string LegacyFileName => null;
+    internal string PreviousFileName => LegacyFileName;
+    internal string SnapshotFileName => LegacyFileName ?? (string.IsNullOrEmpty(_fileName) ? GetType().Name : _fileName);
+    internal IEnumerable<SOStoredField> Fields => _fields.Values;
+
+    protected T Read<T>(ref T field)
     {
-        if (!SODataWriteHooks.IsBound(this)) throw new InvalidOperationException("Open the data profile before changing its value.");
+        EnsureReady();
+        return field;
     }
 
-    public string GetStorageScope(string profile)
+    protected void Write<T>(ref T field, T value, [CallerMemberName] string key = null)
     {
-        if (string.IsNullOrWhiteSpace(profile)) throw new ArgumentException("A profile or match ID is required.", nameof(profile));
-        string domain = string.IsNullOrEmpty(_storageId) ? Owner.GetType().Name : _storageId;
-        return Uri.EscapeDataString(profile) + "/" + Uri.EscapeDataString(domain);
+        EnsureReady();
+        if (_closing) throw new InvalidOperationException("The SO is closing.");
+        _active.Assign(ref field, value, key);
     }
 
-    // Optional pre-existing key aliases and custom codecs from 1.6. New domains need no overrides.
-    protected virtual void DefineDataKeys(SODataFields fields) { }
-    public virtual void OnEnable() { }
-    // code-gate: semantic-boundary=Unity disable retires the active profile and its subscriptions.
-    protected virtual void OnDisable() => CloseData();
-    public virtual void OnBeforeSerialize() { }
-    public virtual void OnAfterDeserialize() { }
-
-    public Task OpenAsync(string profile, ISODataKeyStore provider = null, CancellationToken cancellation = default) =>
-        AttachAsync(this, profile, provider, cancellation);
-
-    // Bind the same runtime object that gameplay already reads and writes, including a plain ScriptableObject.
-    public async Task AttachAsync(ScriptableObject target, string profile, ISODataKeyStore provider = null,
-        CancellationToken cancellation = default)
+    public string GetStorageScope(string slot)
     {
+        if (string.IsNullOrWhiteSpace(slot)) throw new ArgumentException("A slot is required.", nameof(slot));
+        string domain = string.IsNullOrEmpty(_storageId) ? GetType().Name : _storageId;
+        return Uri.EscapeDataString(slot) + "/" + Uri.EscapeDataString(domain);
+    }
+
+    private void EnsureReady()
+    {
+        CheckPlaySession();
+        if (_active == null)
+        {
+            if (Mode == SODataMode.DirectAccessOnline || Mode == SODataMode.RealtimeOnline)
+                throw new InvalidOperationException("Open the signed-in slot or spawned match before accessing its data.");
+            OpenAsync("default").GetAwaiter().GetResult();
+        }
+        if (!_ready) throw new InvalidOperationException("The SO is opening.");
+    }
+
+    public async Task OpenAsync(string slot, ISODataKeyStore provider = null, CancellationToken cancellation = default)
+    {
+        CheckPlaySession();
+        if (_active != null) throw new InvalidOperationException("Close the current SO slot before opening another.");
         cancellation.ThrowIfCancellationRequested();
-        if (target == null) throw new ArgumentNullException(nameof(target));
-        if (!ReferenceEquals(_target, null)) throw new InvalidOperationException("Close the current data owner first.");
-        if (target is SODataController domain && domain.RequiredMode is SODataMode required && Mode != required) throw new InvalidOperationException($"{domain.GetType().Name} requires {required}. The storage controller uses {Mode}.");
-        if (Mode == SODataMode.None) return;
-        SODataWriteHooks.Bind(target, OnFieldAssigned);
-        _target = target;
-        _originalFileName = _fileName;
+        string scope = GetStorageScope(slot);
+        SOStorageMode mode;
+        switch (Mode)
+        {
+            case SODataMode.None: mode = new SONoneMode(this); break;
+            case SODataMode.LocalFile: mode = new SOLocalFileMode(this, scope, slot); break;
+            case SODataMode.DirectAccess: mode = new SODirectAccessMode(this, scope); break;
+            case SODataMode.DirectAccessOnline: mode = new SODirectAccessOnlineMode(this, scope, provider); break;
+            case SODataMode.RealtimeOnline: mode = new SORealtimeOnlineMode(this, scope, provider); break;
+            default: throw new ArgumentOutOfRangeException(nameof(Mode));
+        }
+        if (provider != null && Mode <= SODataMode.DirectAccess)
+            throw new ArgumentException("Only online modes take a channel.", nameof(provider));
+        _active = mode;
         StorageError = null;
-        SOKeySession opening = null;
         try
         {
-            string scope = GetStorageScope(profile);
-            if (Mode == SODataMode.LocalFile)
-            {
-                _snapshotDefaults = JsonUtility.ToJson(target);
-                _scopedDirectory = Path.Combine(PersistenceRoot, "SOData", "profiles", GetSHA256(scope));
-                LoadLocalData();
-            }
-            else
-            {
-                var store = SelectKeyStore(provider);
-                SODataFields fields = new SODataFields();
-                if (target is SODataController previous) previous.DefineDataKeys(fields);
-                fields.Discover(target);
-                opening = new SOKeySession(store, scope, fields, NotifyChange, ReportError);
-                _keys = opening;
-                await opening.OpenAsync(Mode == SODataMode.RealtimeOnline ? (ISORealtimeDataStore)store : null, cancellation);
-                if (!ReferenceEquals(_keys, opening)) throw new OperationCanceledException("The data owner has changed.");
-            }
+            _defaults = JsonUtility.ToJson(this);
+            if (Mode != SODataMode.None) DiscoverFields();
+            await mode.OpenAsync(cancellation);
+            if (_active != mode) throw new OperationCanceledException("This slot has closed.");
             _ready = true;
-            SODataCheckpoints.Track(this, SODataFields.HasIndirectFields(target.GetType()));
         }
         catch
         {
-            if (ReferenceEquals(_target, target) && (opening == null || ReferenceEquals(_keys, opening))) CloseData();
+            if (_active == mode) CloseData();
             throw;
         }
     }
 
-    private ISODataKeyStore SelectKeyStore(ISODataKeyStore provider)
+    private void DiscoverFields()
     {
-        switch (Mode)
+        var defaults = SOStoredField.ParseObject(_defaults);
+        for (Type type = GetType(); type != typeof(SODataController); type = type.BaseType)
         {
-            case SODataMode.DirectAccess:
-                if (provider == null) return new SOFileKeyStore(Path.Combine(PersistenceRoot, "SOData", "keys"));
-                if (provider is ISOLocalDataStore) return provider;
-                throw new ArgumentException("DirectAccess requires a local transaction store.", nameof(provider));
-            case SODataMode.DirectAccessOnline:
-                if (provider is ISOLocalDataStore || provider is ISOMatchSessionStore) throw new ArgumentException("DirectAccessOnline requires a persistent remote key store.", nameof(provider));
-                return provider ?? throw new ArgumentNullException(nameof(provider));
-            case SODataMode.RealtimeOnline:
-                if (provider is ISORealtimeDataStore) return provider;
-                throw new ArgumentException("A realtime provider is required.", nameof(provider));
-            default:
-                throw new ArgumentOutOfRangeException(nameof(Mode));
+            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+            {
+                if (field.IsNotSerialized || field.IsInitOnly || (!field.IsPublic && !field.IsDefined(typeof(SerializeField)) && !field.IsDefined(typeof(SerializeReference)))) continue;
+                if (!defaults.TryGetValue(field.Name, out var value)) throw new InvalidDataException("Unity cannot serialize " + field.Name);
+                var key = field.GetCustomAttribute<SODataKeyAttribute>()?.Key ?? field.Name.TrimStart('_');
+                if (string.IsNullOrEmpty(key) || key == "$sodata" || _fields.ContainsKey(key))
+                    throw new InvalidDataException("Duplicate or empty SO field key: " + field.Name);
+                SOStoredField.CheckType(field, new HashSet<Type>());
+                _fields.Add(key, new SOStoredField(this, field, key, value));
+            }
         }
     }
 
-    private void OnFieldAssigned(string fieldName)
+    internal SOStoredField FindField(string key)
     {
-        if (_muting > 0) return;
-        if (_keys != null) { _keys.Assigned(fieldName); return; }
-        if (_ready) CommitSnapshotChange(fieldName);
+        if (_fields.TryGetValue(key, out var field)) return field;
+        string camel = char.ToLowerInvariant(key[0]) + key.Substring(1);
+        if (_fields.TryGetValue(camel, out field)) return field;
+        throw new InvalidOperationException("No serialized SO field for property " + key + ". Pass its storage key to Write.");
     }
 
-    private void CommitSnapshotChange(string fieldName)
-    {
-        string current = JsonUtility.ToJson(Owner);
-        if (current == _snapshotAccepted) return;
-        try { SaveDataAtLocal(); }
-        catch (Exception error)
-        {
-            RestoreOwner(_snapshotAccepted);
-            ReportError(error);
-            throw;
-        }
-        NotifyChange(fieldName);
-    }
+    public Task FlushAsync() => _active?.FlushAsync() ?? Task.CompletedTask;
 
-    // Compatibility boundary for an explicitly staged and acknowledged 1.6 mutation.
-    public Task CommitChangeAsync(string key, Action change, CancellationToken cancellation = default)
-    {
-        if (change == null) throw new ArgumentNullException(nameof(change));
-        cancellation.ThrowIfCancellationRequested();
-        if (Mode == SODataMode.None) { change(); NotifyChange(key); return Task.CompletedTask; }
-        if (!_ready) throw new InvalidOperationException("Open the data owner before committing.");
-        if (_keys != null) return _keys.ChangeAsync(key, change, cancellation);
-        string previous = JsonUtility.ToJson(Owner);
-        _muting++;
-        try { change(); }
-        catch { RestoreOwner(previous); throw; }
-        finally { _muting--; }
-        CommitSnapshotChange(key);
-        return Task.CompletedTask;
-    }
-
-    // Detect indirect edits (for example List.Add) and await provider writes accepted before this checkpoint.
-    public async Task FlushAsync()
-    {
-        if (Mode == SODataMode.None) return;
-        if (!_ready) throw new InvalidOperationException("Open the data owner before flushing.");
-        CheckForChanges(false);
-        if (_keys != null) await _keys.AwaitWrites();
-    }
-
-    // Profile exit keeps the provider alive until every submitted field write has a receipt.
     public async Task CloseAsync()
     {
-        SOKeySession session = _keys;
-        if (!_ready || session == null) { CloseData(); return; }
-        try
-        {
-            CheckForChanges(false);
-            await session.AwaitWrites(seal: true);
-        }
+        var mode = _active;
+        if (mode == null) return;
+        _closing = true;
+        try { await mode.FlushAsync(); }
+        finally { if (_active == mode) CloseData(); }
+    }
+
+    public void CloseData()
+    {
+        var mode = _active;
+        _active = null;
+        _closing = _ready = false;
+        try { mode?.Dispose(); }
         finally
         {
-            if (ReferenceEquals(_keys, session)) CloseData();
+            if (_defaults != null) JsonUtility.FromJsonOverwrite(_defaults, this);
+            _fields.Clear();
+            _defaults = null;
         }
     }
 
-    internal void CheckForChanges(bool indirectOnly)
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void StartPlaySession() => _playEpoch++;
+
+    private void CheckPlaySession()
     {
-        if (!_ready) return;
-        if (_target == null) { CloseData(); return; }
-        if (_keys != null) _keys.CheckFields(indirectOnly);
-        else if (!indirectOnly || StorageError == null) CommitSnapshotChange(null);
+        if (_epoch == _playEpoch) return;
+        _epoch = _playEpoch;
+        CloseData();
     }
 
-    private void RestoreOwner(string json)
-    {
-        if (json == null || Owner == null) return;
-        _muting++;
-        try { JsonUtility.FromJsonOverwrite(json, Owner); }
-        finally { _muting--; }
-    }
+    // code-gate: semantic-boundary=Unity retires the active slot and subscriptions when it disables this SO.
+    protected virtual void OnDisable() => CloseData();
+    protected virtual void OnValidate() { if (RequiredMode.HasValue) _storageMode = RequiredMode.Value; }
 
-    private void NotifyChange(string key)
+    internal void Changed(string key)
     {
         try { DataChanged?.Invoke(key); }
         catch (Exception error) { Debug.LogException(error); }
     }
 
-    private void ReportError(Exception error)
+    internal void Failed(Exception error)
     {
         StorageError = error;
         try { StorageFailed?.Invoke(error); }
-        catch (Exception observerError) { Debug.LogException(observerError); }
-    }
-
-    public void CloseData()
-    {
-        if (_closing || ReferenceEquals(_target, null)) return;
-        _closing = true;
-        try
-        {
-            if (_ready && _target != null && StorageError == null && (_scopedDirectory != null || _keys.WritesThrough))
-                CheckForChanges(false);
-        }
-        finally
-        {
-            _ready = false;
-            SODataCheckpoints.Forget(this);
-            SODataWriteHooks.Unbind(_target, OnFieldAssigned);
-            var session = _keys;
-            _keys = null;
-            try
-            {
-                if (session != null) session.Dispose();
-                else if (_scopedDirectory != null) RestoreOwner(_snapshotDefaults);
-            }
-            finally
-            {
-                _target = null;
-                _scopedDirectory = null;
-                _snapshotDefaults = null;
-                _snapshotAccepted = null;
-                _snapshotRevision = null;
-                _snapshotTypesChecked = false;
-                _fileName = _originalFileName;
-                _closing = false;
-            }
-        }
+        catch (Exception listenerError) { Debug.LogException(listenerError); }
     }
 }
 
-public sealed class SOStorageModeAttribute : PropertyAttribute { }
+[AttributeUsage(AttributeTargets.Field)]
+public sealed class SODataKeyAttribute : Attribute
+{
+    public string Key { get; }
+    public SODataKeyAttribute(string key) => Key = key;
+}
+
+internal sealed class SOStoredField
+{
+    private readonly SODataController _owner;
+    private readonly string _prefix;
+    internal readonly FieldInfo Member;
+    internal readonly string Key;
+    internal readonly string Initial;
+    internal string Visible { get; private set; }
+
+    internal SOStoredField(SODataController owner, FieldInfo member, string key, JToken initial)
+    {
+        _owner = owner;
+        Member = member;
+        Key = key;
+        _prefix = "{" + JsonConvert.ToString(member.Name) + ":";
+        Initial = Visible = Wrap(initial);
+    }
+
+    internal void MarkAssigned(string wire) => Visible = wire;
+
+    internal static void CheckType(FieldInfo member, HashSet<Type> visited)
+    {
+        Type type = member.FieldType;
+        if (type.IsArray) type = type.GetElementType();
+        else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)) type = type.GetGenericArguments()[0];
+        if (member.IsDefined(typeof(SerializeReference)) || typeof(UnityEngine.Object).IsAssignableFrom(type))
+            throw new InvalidDataException("Persist concrete value data or a stable ID for " + member.Name);
+        if (type.IsPrimitive || type.IsEnum || type == typeof(string) || !visited.Add(type)) return;
+        foreach (var child in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            if (!child.IsNotSerialized && !child.IsInitOnly && (child.IsPublic || child.IsDefined(typeof(SerializeField)) || child.IsDefined(typeof(SerializeReference))))
+                CheckType(child, visited);
+    }
+
+    internal static JObject ParseObject(string json)
+    {
+        using var input = new StringReader(json);
+        using var reader = new JsonTextReader(input) { DateParseHandling = DateParseHandling.None };
+        var result = JObject.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
+        if (reader.Read()) throw new InvalidDataException("Unexpected data after the SO record.");
+        return result;
+    }
+
+    internal static string Wrap(JToken value) => new JObject { ["value"] = value.DeepClone() }.ToString(Formatting.None);
+    internal static JToken Unwrap(string wire)
+    {
+        var box = ParseObject(wire);
+        if (box.Count != 1 || !box.TryGetValue("value", out var value)) throw new InvalidDataException("Expected one stored value.");
+        return value;
+    }
+
+    // Unity writes the backing field directly. Hydration and remote pushes never re-enter the property setter.
+    internal void Apply(string wire)
+    {
+        if (Visible == wire) return;
+        var value = Unwrap(wire);
+        var type = Member.FieldType;
+        bool valid;
+        if (type == typeof(string)) valid = value.Type == JTokenType.String || value.Type == JTokenType.Null;
+        else if (type == typeof(bool)) valid = value.Type == JTokenType.Boolean;
+        else if (type == typeof(float) || type == typeof(double)) valid = value.Type == JTokenType.Float || value.Type == JTokenType.Integer;
+        else if (type.IsPrimitive || type.IsEnum) valid = value.Type == JTokenType.Integer;
+        else if (type.IsArray || typeof(System.Collections.IList).IsAssignableFrom(type)) valid = value.Type == JTokenType.Array;
+        else valid = value.Type == JTokenType.Object || value.Type == JTokenType.Null;
+        if (!valid) throw new InvalidDataException("Incompatible stored value for " + Key);
+        JsonUtility.FromJsonOverwrite(_prefix + value.ToString(Formatting.None) + "}", _owner);
+        Visible = wire;
+    }
+}
+
+internal abstract class SOStorageMode : IDisposable
+{
+    [Serializable] private sealed class Box<T> { public T value; }
+    protected readonly SODataController Owner;
+    protected SOStorageMode(SODataController owner) => Owner = owner;
+    internal virtual Task OpenAsync(CancellationToken token) => Task.CompletedTask;
+
+    internal virtual void Assign<T>(ref T current, T value, string key)
+    {
+        var field = Owner.FindField(key);
+        string wire = JsonUtility.ToJson(new Box<T> { value = value });
+        if (!wire.StartsWith("{\"value\":", StringComparison.Ordinal)) throw new InvalidDataException("Unsupported SO value: " + typeof(T));
+        if (wire == field.Visible) return;
+        string previous = field.Visible;
+        current = value;
+        field.MarkAssigned(wire);
+        try { Save(field, wire); }
+        catch
+        {
+            if (field.Visible == wire) field.Apply(previous);
+            throw;
+        }
+    }
+
+    protected virtual void Save(SOStoredField field, string wire) => throw new NotSupportedException();
+    internal virtual Task FlushAsync() => Task.CompletedTask;
+    public virtual void Dispose() { }
+}
