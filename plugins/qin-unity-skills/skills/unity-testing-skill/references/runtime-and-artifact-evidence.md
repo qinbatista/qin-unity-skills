@@ -2,7 +2,7 @@
 
 ## Capture the active display
 
-On multi-display hardware, enumerate displays immediately before capture, select the active panel explicitly and compare the image dimensions and orientation with the running game window. A default screenshot can come from the inactive primary display. Open the image and confirm the expected game scene is visible. Capture the same active flow on both sides of the transfer and after return. For layout repairs, verify the projected artwork and tool shelf as well as the actual input targets.
+On multi-display hardware, enumerate displays immediately before capture, select the active panel explicitly and compare the image dimensions and orientation with the running game window. A default screenshot can come from the inactive primary display. Open the image and confirm the expected game scene is visible. Capture the same active flow on both sides of the transfer and after return. For a bottom toolbar, record the backing bounds, each slot’s top and bottom clearance and each icon’s painted height after fitting. Pick every slot in the running game and confirm its own tool view or action. Review the unobstructed Player frame and read diagnostic errors from its device log.
 
 For physical XCTest interactions, wait for the game window to finish activation. An app-switcher thumbnail can contain readable game controls while XCTest already reports the app in the foreground. Compare the window bounds and display scale with the reviewed screen, then locate the visible control and anchor the touch to that window. Verify the expected page, modal or gameplay state after the touch. A sent event alone supplies no evidence that the player action reached its target.
 
