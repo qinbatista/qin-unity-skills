@@ -35,6 +35,7 @@ public static class SOPickupWalkthrough
 
             Debug.Log("[SO pickup] 2. Calling PickupController.OnPickup(), which assigns _pickupData.value = 5");
             pickup.OnPickup();
+            await Task.Yield();
             Debug.Log($"[SO pickup] 4. Getter reads {data.value}, confirmations={confirmations}");
             pickup.OnPickup();
             Task close = data.CloseAsync();

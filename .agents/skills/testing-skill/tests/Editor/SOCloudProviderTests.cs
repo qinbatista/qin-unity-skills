@@ -103,6 +103,32 @@ public sealed partial class UnityFoundationTests
     [UnityTest]
     public IEnumerator EqualCloudScalarDoesNotResubmitOrNotify() => RunCloudCase(VerifyEqualCloudScalarAsync());
 
+    [UnityTest]
+    public IEnumerator SharedCloudClientBoundsConcurrentWrites() => RunCloudCase(VerifyBoundedCloudWritesAsync());
+
+    private static async Task VerifyBoundedCloudWritesAsync()
+    {
+        CloudPlayerFixture account = new CloudPlayerFixture();
+        UnityCloudSaveKeyStore first = new UnityCloudSaveKeyStore(account, () => "alice");
+        UnityCloudSaveKeyStore second = new UnityCloudSaveKeyStore(account, () => "alice");
+        List<SODataRecord> previous = new List<SODataRecord>();
+        for (int i = 0; i < 8; i++) previous.Add(await first.WriteAsync("bounded", "key-" + i, "0", null, CancellationToken.None));
+        TaskCompletionSource<bool> release = new TaskCompletionSource<bool>();
+        try
+        {
+            account.Acknowledgement = release.Task;
+            int before = account.Batches.Count;
+            Task<SODataRecord>[] writes = Enumerable.Range(0, 8).Select(i => (i % 2 == 0 ? first : second).WriteAsync("bounded", "key-" + i, "5", previous[i].Revision, CancellationToken.None)).ToArray();
+            Assert.AreEqual(before + 4, account.Batches.Count);
+            Assert.IsFalse(Task.WhenAll(writes).IsCompleted);
+            release.SetResult(true);
+            await Task.WhenAll(writes);
+            Assert.AreEqual(before + 8, account.Batches.Count);
+            TestContext.WriteLine("SO cloud backpressure: wrappers=2 sharedSDKClient=True requestedWrites=8 inFlightBeforeRelease=4 completedWrites=8");
+        }
+        finally { release.TrySetResult(true); }
+    }
+
     private static async Task VerifyEqualCloudScalarAsync()
     {
         CloudPlayerFixture account = new CloudPlayerFixture();
@@ -120,6 +146,7 @@ public sealed partial class UnityFoundationTests
             account.Acknowledgement = release.Task;
             data.value = 5;
             for (int i = 0; i < 10000; i++) data.value = 5;
+            await Task.Yield();
             Assert.AreEqual(0, changes);
             Assert.AreEqual(before + 1, account.Batches.Count);
             release.SetResult(true);
@@ -214,6 +241,7 @@ public sealed partial class UnityFoundationTests
             pickup.OnPickup();
             Assert.AreEqual(5, data.value);
             pickup.OnPickup(); // Reassigning the same value leaves the existing receipt in flight.
+            await Task.Yield();
             Assert.AreEqual(writesBeforePickup + 1, account.Batches.Count);
             CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(scope, "value") }, account.Batches.Last());
             Assert.AreEqual("{\"value\":5}", (await cloud.ReadAsync(scope, "value", CancellationToken.None)).Value);
@@ -226,7 +254,7 @@ public sealed partial class UnityFoundationTests
             reply.SetResult(true);
             await exit;
             CollectionAssert.AreEqual(new[] { "value" }, confirmed);
-            Assert.Throws<InvalidOperationException>(() => { var closed = data.value; });
+            Assert.AreEqual(0, data.value);
             EditorUtility.SetDirty(data);
             AssetDatabase.SaveAssetIfDirty(data);
             CollectionAssert.AreEqual(authored, File.ReadAllBytes(assetPath));
@@ -301,6 +329,7 @@ public sealed partial class UnityFoundationTests
             };
             Task opening = data.OpenAsync("slot", channel);
             Assert.IsFalse(opening.IsCompleted);
+            await Task.Yield();
             int readsBeforeReply = reads.Count;
             firstRead.SetResult(true);
             await opening;
@@ -313,6 +342,7 @@ public sealed partial class UnityFoundationTests
             Task pending = data.FlushAsync();
             Assert.IsFalse(pending.IsCompleted);
             Assert.AreEqual(128, data.Value);
+            await Task.Yield();
             int submitted = account.Batches.Count - start;
             Assert.AreEqual(1, submitted);
             firstWrite.SetResult(true);
@@ -355,12 +385,13 @@ public sealed partial class UnityFoundationTests
             data.value = 5;
             data.value = 8;
             Assert.AreEqual(8, data.value);
+            await Task.Yield();
             Assert.AreEqual(before + 1, account.Batches.Count);
             Task close = data.CloseAsync();
             Assert.IsFalse(close.IsCompleted);
             release.SetResult(true);
             await close;
-            Assert.AreEqual(before + 2, account.Batches.Count);
+            Assert.AreEqual(before + 1, account.Batches.Count);
             CollectionAssert.AreEqual(new[] { 8 }, confirmed);
             await data.OpenAsync("queue", channel);
             Assert.AreEqual(8, data.value);
@@ -402,8 +433,10 @@ public sealed partial class UnityFoundationTests
             Assert.AreEqual(40, cold.Coins);
             first.Coins += 2;
             await first.FlushAsync();
-            Assert.Throws<SODataConflictException>(() => cold.Coins += 10);
-            Assert.AreEqual(40, cold.Coins);
+            cold.Coins += 10;
+            try { await cold.FlushAsync(); Assert.Fail("The stale revision must be rejected asynchronously."); }
+            catch (SODataConflictException) { }
+            Assert.AreEqual(42, cold.Coins);
             cold.CloseData();
             await cold.OpenAsync("profile/1", secondDevice);
             Assert.AreEqual(42, cold.Coins);
@@ -412,8 +445,10 @@ public sealed partial class UnityFoundationTests
             Assert.AreEqual(43, cold.Coins);
 
             player.DropAcknowledgementFor = UnityCloudSaveKeyStore.GetCloudKey(scope, "coins");
-            Assert.Throws<IOException>(() => cold.Coins += 1);
-            Assert.AreEqual(43, cold.Coins);
+            cold.Coins += 1;
+            try { await cold.FlushAsync(); Assert.Fail("The lost reply must remain observable."); }
+            catch (IOException) { }
+            Assert.AreEqual(44, cold.Coins);
             cold.CloseData();
             player.DropAcknowledgementFor = null;
             await cold.OpenAsync("profile/1", secondDevice);
@@ -444,8 +479,8 @@ public sealed partial class UnityFoundationTests
             runtime.HatId = "felt";
             await runtime.FlushAsync();
             Assert.AreEqual("felt", runtime.HatId);
-            Assert.Throws<InvalidOperationException>(() => { var unopened = asset.HatId; });
-            CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(runtime.GetStorageScope("slot-a"), "hatId") }, player.Batches.Last());
+            Assert.AreEqual("", asset.HatId);
+            CollectionAssert.AreEqual(new[] { UnityCloudSaveKeyStore.GetCloudKey(runtime.GetStorageScope("slot-a"), "hatId") }, player.Batches.Last().Where(key => key != "so_data_v1_creation_fence").ToArray());
             runtime.CloseData();
             UnityEngine.Object.DestroyImmediate(runtime);
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.IO;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -15,9 +16,9 @@ public sealed partial class UnityFoundationTests
         var clean = Domain<SOOutfitData>(SODataMode.LocalFile, "clock-clean");
         try
         {
-            first.OpenAsync("slot").GetAwaiter().GetResult();
-            second.OpenAsync("slot").GetAwaiter().GetResult();
-            clean.OpenAsync("slot").GetAwaiter().GetResult();
+            Task opening = Task.WhenAll(first.OpenAsync("slot"), second.OpenAsync("slot"), clean.OpenAsync("slot"));
+            while (!opening.IsCompleted) yield return null;
+            opening.GetAwaiter().GetResult();
             int receipts = 0;
             first.DataChanged += _ => receipts++;
             second.DataChanged += _ => receipts++;
@@ -39,7 +40,9 @@ public sealed partial class UnityFoundationTests
             Assert.GreaterOrEqual(elapsed.Elapsed.TotalSeconds, 299.9);
             Assert.AreEqual(2, Directory.GetFiles(_root, nameof(SOOutfitData), SearchOption.AllDirectories).Length);
             first.CloseData();
-            first.OpenAsync("slot").GetAwaiter().GetResult();
+            Task reopened = first.OpenAsync("slot");
+            while (!reopened.IsCompleted) yield return null;
+            reopened.GetAwaiter().GetResult();
             Assert.AreEqual("latest", first.HatId);
             TestContext.WriteLine($"LocalFile actual clock: receipts={receipts}, elapsedSeconds={elapsed.Elapsed.TotalSeconds:F2}, cleanFiles=0");
         }

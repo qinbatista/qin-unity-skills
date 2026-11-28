@@ -26,8 +26,8 @@
           "id": "open-so-storage",
           "file": "unity-code-skill/assets/script/SODataController/SODataController.cs",
           "symbol": "SODataController.OpenAsync",
-          "anchor": "public async Task OpenAsync(string slot, ISODataKeyStore provider = null, CancellationToken cancellation = default)",
-          "summary": "Open the selected mode on the same SO and load the slot before gameplay."
+          "anchor": "public Task OpenAsync(string slot, ISODataKeyStore provider = null, CancellationToken cancellation = default, ISODataFileStore fileProvider = null)",
+          "summary": "Begin asynchronous loading, retain current fields and stage writes until the selected channel is ready."
         },
         {
           "id": "write-so-property",
@@ -40,8 +40,8 @@
           "id": "send-online-property",
           "file": "unity-code-skill/assets/script/SODataController/Modes/SODirectAccessOnlineMode.cs",
           "symbol": "SODirectAccessOnlineMode.SendAsync",
-          "anchor": "private async Task SendAsync(SOStoredField field, Entry entry, string wire, Task previous, Task start)",
-          "summary": "Send one field in write order and raise its change event after acknowledgement."
+          "anchor": "private async Task SendAsync(SOStoredField field, Entry entry)",
+          "summary": "Coalesce unsent field state and reconcile the asynchronous conditional write acknowledgement."
         },
         {
           "id": "receive-online-property",
@@ -74,16 +74,16 @@
         {
           "id": "commit-local-snapshot",
           "file": "unity-code-skill/assets/script/SODataController/Modes/SOLocalFileMode.cs",
-          "symbol": "SOLocalFileMode.FinishBatch",
-          "anchor": "private void FinishBatch(Batch batch)",
-          "summary": "Accept the atomic file revision, retain concurrent edits and notify an optional backup once."
+          "symbol": "SOLocalFileMode.CommitPendingAsync",
+          "anchor": "private async Task CommitPendingAsync()",
+          "summary": "Commit the dirty snapshot on a worker and publish the accepted visible fields and one file receipt."
         },
         {
           "id": "load-local-data",
           "file": "unity-code-skill/assets/script/SODataController/Modes/SOLocalFileMode.cs",
           "symbol": "SOLocalFileMode.OpenAsync",
-          "anchor": "internal override Task OpenAsync(CancellationToken token)",
-          "summary": "Read current or earlier local data before the first property access."
+          "anchor": "internal override async Task OpenAsync(CancellationToken token)",
+          "summary": "Read and decode the stored snapshot on a worker while preserving newer memory edits."
         },
         {
           "id": "read-installed-topic",
@@ -119,6 +119,20 @@
           "symbol": "CSharpRuleGuardTests.test_unity_csharp_rejects_named_pitfalls",
           "anchor": "def test_unity_csharp_rejects_named_pitfalls(self):",
           "summary": "Exercise the C# discard, recursion, forwarding, type and layout findings."
+        },
+        {
+          "id": "sync-local-file-online",
+          "file": "unity-code-skill/assets/script/SODataController/Modes/SOLocalFileOnlineMode.cs",
+          "symbol": "SOLocalFileOnlineMode.SynchronizeAsync",
+          "anchor": "private async Task SynchronizeAsync(bool refresh)",
+          "summary": "Restore a newer clean snapshot or upload the locally committed file and persist its remote acknowledgement."
+        },
+        {
+          "id": "write-unity-file",
+          "file": "unity-code-skill/assets/script/SODataController/Proviers/UnityCloudSaveFileStore.cs",
+          "symbol": "UnityCloudSaveFileStore.WriteAsync",
+          "anchor": "public async Task<SODataFileRecord> WriteAsync(string scope, byte[] content, string expectedRevision, CancellationToken cancellation)",
+          "summary": "Upload immutable bytes and conditionally publish their head, recovering unknown receipts and cleaning replaced blobs."
         }
       ]
     },
@@ -353,7 +367,7 @@
           "id": "replay-responsive-layouts",
           "file": "examples/charge-pulse/Assets/Editor/Tests/ResponsiveLayouts/ResponsiveLayoutCases.cs",
           "symbol": "ResponsiveLayoutCases.Review",
-          "anchor": "static IEnumerator Review(string name, Action<VisualElement, LayoutText> bind, Func<VisualElement, LayoutProfile, LayoutText, RenderTexture, IEnumerator> check)",
+          "anchor": "static IEnumerator Review(string name, Action<VisualElement, LayoutText> bind, Func<VisualElement, LayoutProfile, LayoutText, RenderTexture, IEnumerator> check,",
           "summary": "Mount one Toolkit tree in Unity Play Mode and replay every fixture locale against orientation and safe-area profiles.",
           "related": [
             {

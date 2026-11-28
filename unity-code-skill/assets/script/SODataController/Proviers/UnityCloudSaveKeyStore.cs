@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using Unity.Services.Authentication;
 using Unity.Services.CloudSave;
 using Unity.Services.CloudSave.Internal;
@@ -21,6 +22,8 @@ public sealed class UnityCloudSaveKeyStore : ISODataKeyStore
     private readonly IPlayerDataService _playerData;
     private readonly Func<string> _authorizedPlayerId;
     private readonly string _playerId;
+    private static readonly ConditionalWeakTable<IPlayerDataService, SemaphoreSlim> Writers = new ConditionalWeakTable<IPlayerDataService, SemaphoreSlim>();
+    private readonly SemaphoreSlim _writers;
 
     public UnityCloudSaveKeyStore() : this(CloudSaveService.Instance.Data.Player, CurrentPlayerId) { }
 
@@ -29,6 +32,7 @@ public sealed class UnityCloudSaveKeyStore : ISODataKeyStore
         _playerData = playerData ?? throw new ArgumentNullException(nameof(playerData));
         _authorizedPlayerId = authorizedPlayerId ?? throw new ArgumentNullException(nameof(authorizedPlayerId));
         _playerId = _authorizedPlayerId();
+        _writers = Writers.GetValue(_playerData, service => new SemaphoreSlim(4));
         if (string.IsNullOrWhiteSpace(_playerId)) throw new UnauthorizedAccessException("Sign in before opening the Unity Cloud Save store.");
     }
 
@@ -55,26 +59,34 @@ public sealed class UnityCloudSaveKeyStore : ISODataKeyStore
         if (value == null) throw new ArgumentNullException(nameof(value));
         if (expectedRevision != null && expectedRevision.Length == 0) throw new ArgumentException("A known revision must be nonempty.", nameof(expectedRevision));
         string cloudKey = GetCloudKey(scope, key);
-        Dictionary<string, SaveItem> batch = new Dictionary<string, SaveItem>();
-        if (expectedRevision == null)
+        if (expectedRevision != null)
         {
-            // Read the fence BEFORE checking absence. Every insertion advances it in the same atomic batch.
+            Dictionary<string, SaveItem> update = new Dictionary<string, SaveItem> { [cloudKey] = new SaveItem(value, expectedRevision) };
+            return new SODataRecord(value, await SavePlayerItemsAsync(update, cloudKey, cancellation));
+        }
+        for (int attempt = 0; attempt < 8; attempt++)
+        {
             SODataRecord fence = await ReadPlayerItemAsync(CreationFence, cancellation);
             string fenceRevision = fence?.Revision;
             if (fence == null)
             {
-                // Concurrent bootstrap can only rotate this reserved nonce. No gameplay data is in this write.
                 Dictionary<string, SaveItem> seed = new Dictionary<string, SaveItem> { [CreationFence] = new SaveItem(Guid.NewGuid().ToString("N"), null) };
                 fenceRevision = await SavePlayerItemsAsync(seed, CreationFence, cancellation);
             }
-
             if (await ReadPlayerItemAsync(cloudKey, cancellation) != null) throw new SODataConflictException("The cloud item already exists. Read its current revision.");
-            batch.Add(CreationFence, new SaveItem(Guid.NewGuid().ToString("N"), fenceRevision));
+            Dictionary<string, SaveItem> insertion = new Dictionary<string, SaveItem>
+            {
+                [CreationFence] = new SaveItem(Guid.NewGuid().ToString("N"), fenceRevision),
+                [cloudKey] = new SaveItem(value, null)
+            };
+            try { return new SODataRecord(value, await SavePlayerItemsAsync(insertion, cloudKey, cancellation)); }
+            catch (SODataConflictException) when (attempt < 7)
+            {
+                if (await ReadPlayerItemAsync(cloudKey, cancellation) != null) throw;
+                await Task.Delay(Math.Min(25 * (1 << attempt), 500), cancellation);
+            }
         }
-
-        batch.Add(cloudKey, new SaveItem(value, expectedRevision));
-        string revision = await SavePlayerItemsAsync(batch, cloudKey, cancellation);
-        return new SODataRecord(value, revision);
+        throw new SODataConflictException("Cloud item creation did not settle within the retry budget.");
     }
 
     private async Task<SODataRecord> ReadPlayerItemAsync(string key, CancellationToken cancellation)
@@ -94,8 +106,10 @@ public sealed class UnityCloudSaveKeyStore : ISODataKeyStore
     {
         CheckPlayer();
         cancellation.ThrowIfCancellationRequested();
+        await _writers.WaitAsync(cancellation);
         try
         {
+            CheckPlayer();
             Dictionary<string, string> revisions = await _playerData.SaveAsync(batch, new PlayerSaveOptions());
             // Once submitted, wait for the acknowledgement even if the original caller cancels.
             CheckPlayer();
@@ -106,6 +120,7 @@ public sealed class UnityCloudSaveKeyStore : ISODataKeyStore
         {
             throw new SODataConflictException("A competing Cloud Save write won. Read the item again before retrying.");
         }
+        finally { _writers.Release(); }
     }
 
     private void CheckPlayer()

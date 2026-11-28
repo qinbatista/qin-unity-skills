@@ -42,29 +42,31 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
-    public void OfflineKeyCommitsBeforeReturnAndAColdOwnerReadsTheLastValue()
+    public async Task OfflineKeyQueuesWithoutBlockingAndAColdOwnerReadsTheLastValue()
     {
         var data = Domain<SOStorageWorkloadData>(SODataMode.DirectAccess, "offline");
         var cold = Domain<SOStorageWorkloadData>(SODataMode.DirectAccess, "offline");
         try
         {
-            data.OpenAsync("slot").GetAwaiter().GetResult();
+            await data.OpenAsync("slot");
             int receipts = 0;
             data.DataChanged += key => { if (key == "value") receipts++; };
             var elapsed = System.Diagnostics.Stopwatch.StartNew();
             for (int value = 1; value <= 128; value++)
             {
                 data.Value = value;
-                Assert.AreEqual(value, receipts);
+                Assert.AreEqual(value, data.Value);
             }
             elapsed.Stop();
+            await data.FlushAsync();
+            int confirmed = receipts;
             string record = Directory.GetFiles(_root, "*.record", SearchOption.AllDirectories).Single();
             byte[] committed = File.ReadAllBytes(record);
             for (int i = 0; i < 10000; i++) data.Value = 128;
-            Assert.AreEqual(128, receipts);
+            Assert.AreEqual(confirmed, receipts);
             CollectionAssert.AreEqual(committed, File.ReadAllBytes(record));
             data.CloseData();
-            cold.OpenAsync("slot").GetAwaiter().GetResult();
+            await cold.OpenAsync("slot");
             Assert.AreEqual(128, cold.Value);
             TestContext.WriteLine($"SO cost DirectAccess: changes=128 receiptsBeforeReturn={receipts} recordFiles=1 burstMs={elapsed.Elapsed.TotalMilliseconds:F1} cleanAssignments=10000 cleanWrites=0 reopened={cold.Value}");
         }
@@ -80,26 +82,28 @@ public sealed partial class UnityFoundationTests
         {
             const int size = 2 * 1024 * 1024;
             JsonUtility.FromJsonOverwrite("{\"_padding\":\"" + new string('x', size) + "\"}", snapshot);
-            snapshot.OpenAsync("slot").GetAwaiter().GetResult();
-            key.OpenAsync("slot").GetAwaiter().GetResult();
+            await snapshot.OpenAsync("slot");
+            await key.OpenAsync("slot");
             key.Value = 1;
+            await key.FlushAsync();
             var elapsed = System.Diagnostics.Stopwatch.StartNew();
             key.Value = 2;
             double aloneMs = elapsed.Elapsed.TotalMilliseconds;
             snapshot.Value = 5;
             Task writing = snapshot.FlushAsync();
             string profiles = Path.Combine(_root, "SOData", "profiles");
-            Assert.IsTrue(SpinWait.SpinUntil(() => Directory.Exists(profiles)
-                && Directory.GetFiles(profiles, "writer.lock", SearchOption.AllDirectories).Length > 0, 5000));
+            for (int attempt = 0; attempt < 500 && (!Directory.Exists(profiles) || Directory.GetFiles(profiles, "writer.lock", SearchOption.AllDirectories).Length == 0); attempt++) await Task.Delay(10);
+            Assert.IsTrue(Directory.Exists(profiles));
             bool awaitingReplacement = Directory.GetFiles(profiles, nameof(SOStorageWorkloadData), SearchOption.AllDirectories).Length == 0;
             elapsed.Restart();
             key.Value = 3;
             elapsed.Stop();
             await writing;
+            await key.FlushAsync();
             key.CloseData();
             snapshot.CloseData();
-            key.OpenAsync("slot").GetAwaiter().GetResult();
-            snapshot.OpenAsync("slot").GetAwaiter().GetResult();
+            await key.OpenAsync("slot");
+            await snapshot.OpenAsync("slot");
             Assert.AreEqual(3, key.Value);
             Assert.AreEqual(5, snapshot.Value);
             Assert.AreEqual(size, snapshot.Padding.Length);
@@ -109,7 +113,7 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
-    public void UnchangedInventoryAndScalarUseDifferentComparisonPaths()
+    public async Task UnchangedInventoryAndScalarUseDifferentComparisonPaths()
     {
         var data = ScriptableObject.CreateInstance<NativeWalletDomain>();
         try
@@ -118,6 +122,7 @@ public sealed partial class UnityFoundationTests
             for (int i = 0; i < 1024; i++)
                 items.Add(new NativeWalletDomain.Item { id = "item-" + i, count = i });
             data.items = items;
+            await data.FlushAsync();
             string record = Directory.GetFiles(_root, "*.record", SearchOption.AllDirectories).Single();
             byte[] committed = File.ReadAllBytes(record);
             int receipts = 0;

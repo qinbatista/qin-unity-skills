@@ -59,6 +59,7 @@ def prepare(run, cloud=False, netcode=False, clock=False):
     tests = [
         "UnityFoundationTests.cs", "ScriptableObjectDataTests.cs", "SODataControllerTests.cs",
         "SOFileStorageTests.cs", "SOLocalSnapshotTests.cs", "SOStorageWorkloadTests.cs",
+        "SOAsyncStorageTests.cs",
     ]
     if clock:
         tests.append("SOLocalFileClockTests.cs")
@@ -67,7 +68,10 @@ def prepare(run, cloud=False, netcode=False, clock=False):
         for target in (runtime_assembly, assembly):
             target["references"].extend(["Unity.Services.CloudSave", "Unity.Services.Authentication", "Unity.Services.Core"])
             target["versionDefines"] = [{"name": "com.unity.services.cloudsave", "expression": "3.4.2", "define": "SO_DATA_UNITY_CLOUD_SAVE"}]
+        assembly["references"].append("Unity.Services.Core.Environments")
         tests.append("SOCloudProviderTests.cs")
+        tests.append("SOFileCloudProviderTests.cs")
+        tests.append("SOCloudFileLiveTests.cs")
     if netcode:
         packages["dependencies"]["com.unity.netcode.gameobjects"] = "2.14.0"
         for target in (runtime_assembly, assembly):

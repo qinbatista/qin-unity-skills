@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -10,7 +11,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine.Serialization;
 
-public enum SODataMode { None, LocalFile, DirectAccess, DirectAccessOnline, RealtimeOnline }
+public enum SODataMode { None, LocalFile, DirectAccess, DirectAccessOnline, RealtimeOnline, LocalFileOnline }
 
 public abstract class SODataController : ScriptableObject
 {
@@ -25,9 +26,18 @@ public abstract class SODataController : ScriptableObject
     [NonSerialized] private int _epoch;
     private static int _playEpoch;
     private string _defaults;
+    private Task _opening = Task.CompletedTask;
+    private Task _retiring = Task.CompletedTask;
+    private string _lifetimeKey;
+    private static readonly Dictionary<string, Task> Retirements = new Dictionary<string, Task>();
+    private readonly Dictionary<string, string> _staged = new Dictionary<string, string>();
+    [Serializable] private sealed class StagedValue<T> { public T value; }
 
     public virtual SODataMode? RequiredMode => null;
     public SODataMode Mode => RequiredMode ?? _storageMode;
+    public bool IsReady => _ready;
+    public Task Initialization => _opening;
+    public Task Retirement => _retiring;
     public event Action<string> DataChanged;
     public event Action<string> SnapshotCommitted;
     public event Action<Exception> StorageFailed;
@@ -49,6 +59,17 @@ public abstract class SODataController : ScriptableObject
     {
         EnsureReady();
         if (_closing) throw new InvalidOperationException("The SO is closing.");
+        if (_active == null)
+        {
+            if (SOStorageMode.Scalar<T>.CanCompare && EqualityComparer<T>.Default.Equals(field, value)) return;
+            SOStoredField stored = FindField(key);
+            string wire = JsonUtility.ToJson(new StagedValue<T> { value = value });
+            if (wire == stored.Visible) return;
+            _staged[key] = wire;
+            stored.MarkAssigned(wire);
+            field = value;
+            return;
+        }
         _active.Assign(ref field, value, key);
     }
 
@@ -65,13 +86,16 @@ public abstract class SODataController : ScriptableObject
         if (_active == null)
         {
             if (Mode == SODataMode.DirectAccessOnline || Mode == SODataMode.RealtimeOnline)
-                throw new InvalidOperationException("Open the signed-in slot or spawned match before accessing its data.");
-            OpenAsync("default").GetAwaiter().GetResult();
+            {
+                if (_defaults == null) _defaults = JsonUtility.ToJson(this);
+                if (_fields.Count == 0) DiscoverFields();
+                return;
+            }
+            Observe(OpenAsync("default"));
         }
-        if (!_ready) throw new InvalidOperationException("The SO is opening.");
     }
 
-    public async Task OpenAsync(string slot, ISODataKeyStore provider = null, CancellationToken cancellation = default)
+    public Task OpenAsync(string slot, ISODataKeyStore provider = null, CancellationToken cancellation = default, ISODataFileStore fileProvider = null)
     {
         CheckPlaySession();
         if (_active != null) throw new InvalidOperationException("Close the current SO slot before opening another.");
@@ -85,25 +109,52 @@ public abstract class SODataController : ScriptableObject
             case SODataMode.DirectAccess: mode = new SODirectAccessMode(this, scope); break;
             case SODataMode.DirectAccessOnline: mode = new SODirectAccessOnlineMode(this, scope, provider); break;
             case SODataMode.RealtimeOnline: mode = new SORealtimeOnlineMode(this, scope, provider); break;
+            case SODataMode.LocalFileOnline: mode = new SOLocalFileOnlineMode(this, scope, slot, fileProvider); break;
             default: throw new ArgumentOutOfRangeException(nameof(Mode));
         }
-        if (provider != null && Mode <= SODataMode.DirectAccess)
+        if (provider != null && Mode != SODataMode.DirectAccessOnline && Mode != SODataMode.RealtimeOnline)
             throw new ArgumentException("Only online modes take a channel.", nameof(provider));
+        if (fileProvider != null && Mode != SODataMode.LocalFileOnline) throw new ArgumentException("File providers require LocalFileOnline.", nameof(fileProvider));
         _active = mode;
         StorageError = null;
+        _lifetimeKey = SOLocalFileMode.Root + "/" + Mode + "/" + scope;
+        Retirements.TryGetValue(_lifetimeKey, out Task previous);
+        if (_defaults == null) _defaults = JsonUtility.ToJson(this);
+        if (Mode != SODataMode.None && _fields.Count == 0) DiscoverFields();
+        mode.BindFields(_fields.Values);
+        foreach (KeyValuePair<string, string> staged in _staged) mode.Stage(FindField(staged.Key), staged.Value);
+        _staged.Clear();
+        _opening = OpenModeAsync(mode, previous, cancellation);
+        return _opening;
+    }
+
+    private async Task OpenModeAsync(SOStorageMode mode, Task previous, CancellationToken cancellation)
+    {
+        Exception previousError = StorageError;
         try
         {
-            _defaults = JsonUtility.ToJson(this);
-            if (Mode != SODataMode.None) DiscoverFields();
+            if (!(mode is SONoneMode)) await Task.Yield();
+            if (previous != null) await previous;
+            cancellation.ThrowIfCancellationRequested();
             await mode.OpenAsync(cancellation);
-            if (_active != mode) throw new OperationCanceledException("This slot has closed.");
-            _ready = true;
+            if (_active == mode)
+            {
+                _ready = true;
+                if (ReferenceEquals(StorageError, previousError)) ClearStorageError();
+            }
         }
-        catch
+        catch (Exception error)
         {
-            if (_active == mode) CloseData(true);
+            if (_active == mode) Failed(error);
             throw;
         }
+    }
+
+    internal bool IsCurrent(SOStorageMode mode) => _active == mode && this != null;
+
+    private static void Observe(Task work)
+    {
+        work.GetAwaiter().OnCompleted(() => { if (work.IsFaulted) work.Exception.Handle(error => true); });
     }
 
     private void DiscoverFields()
@@ -132,20 +183,46 @@ public abstract class SODataController : ScriptableObject
         throw new InvalidOperationException("No serialized SO field for property " + key + ". Pass its storage key to Write.");
     }
 
-    public Task FlushAsync() => _active?.FlushAsync() ?? Task.CompletedTask;
+    public async Task FlushAsync()
+    {
+        SOStorageMode mode = _active;
+        if (mode == null)
+        {
+            if (_staged.Count != 0) throw new InvalidOperationException("Bind the signed-in slot or spawned match before confirming staged changes.");
+            await _retiring;
+            return;
+        }
+        await _opening;
+        if (_active == mode) await mode.FlushAsync();
+    }
+
+    public async Task RefreshAsync()
+    {
+        SOStorageMode mode = _active;
+        if (mode == null) return;
+        if ((_opening.IsFaulted || _opening.IsCanceled) && !(mode is SORealtimeOnlineMode)) _opening = OpenModeAsync(mode, null, CancellationToken.None);
+        await _opening;
+        if (_active == mode) await mode.RefreshAsync();
+    }
+
+    public async Task ResolveFileConflictAsync(SOFileConflictResolution resolution)
+    {
+        if (!(_active is SOLocalFileOnlineMode files)) throw new InvalidOperationException("A file conflict requires an open LocalFileOnline slot.");
+        await _opening;
+        if (_active == files) await files.ResolveAsync(resolution);
+    }
 
     public async Task CloseAsync()
     {
         var mode = _active;
-        if (mode == null) return;
+        if (mode == null) { await FlushAsync(); return; }
         _closing = true;
-        try { await mode.FlushAsync(); }
+        try { await FlushAsync(); }
         catch
         {
             if (_active == mode)
             {
-                if (mode is SOLocalFileMode) _closing = false;
-                else CloseData(true);
+                _closing = false;
             }
             throw;
         }
@@ -157,21 +234,45 @@ public abstract class SODataController : ScriptableObject
     public void CloseData(bool discardLocalChanges)
     {
         var mode = _active;
-        if (!discardLocalChanges && mode is SOLocalFileMode local)
-        {
-            _closing = true;
-            try { local.FlushBeforeClose(); }
-            finally { _closing = false; }
-            if (_active != mode) return;
-        }
+        if (mode == null && !discardLocalChanges && _staged.Count > 0) return;
         _active = null;
         _closing = _ready = false;
-        try { mode?.Dispose(); }
+        try
+        {
+            if (mode != null && !discardLocalChanges)
+            {
+                TaskCompletionSource<bool> completion = new TaskCompletionSource<bool>();
+                Task prior = Retirements.TryGetValue(_lifetimeKey, out Task existing) ? existing : Task.CompletedTask;
+                Task joined = Task.WhenAll(prior, completion.Task);
+                Retirements[_lifetimeKey] = joined;
+                Observe(joined);
+                _retiring = RetireModeAsync(mode, _opening, _lifetimeKey, joined, completion);
+                Observe(_retiring);
+            }
+            else mode?.Dispose();
+        }
         finally
         {
             if (_defaults != null) JsonUtility.FromJsonOverwrite(_defaults, this);
             _fields.Clear();
+            _staged.Clear();
             _defaults = null;
+        }
+    }
+
+    private async Task RetireModeAsync(SOStorageMode mode, Task opening, string key, Task joined, TaskCompletionSource<bool> completion)
+    {
+        try { await opening; await mode.FlushAsync(); completion.TrySetResult(true); await joined; }
+        catch (Exception error)
+        {
+            if (this != null && _active == null) Failed(error);
+            completion.TrySetException(error);
+            throw;
+        }
+        finally
+        {
+            mode.Dispose();
+            if (Retirements.TryGetValue(key, out Task current) && current == joined) Retirements.Remove(key);
         }
     }
 
@@ -276,7 +377,24 @@ internal sealed class SOStoredField
     internal void Apply(string wire)
     {
         if (Visible == wire) return;
-        var value = Unwrap(wire);
+        JToken value = Validate(wire);
+        JsonUtility.FromJsonOverwrite(_prefix + value.ToString(Formatting.None) + "}", _owner);
+        Visible = wire;
+    }
+
+    internal object DecodeScalar(string wire) => Member.FieldType.IsPrimitive || Member.FieldType.IsEnum || Member.FieldType == typeof(string) ? Validate(wire).ToObject(Member.FieldType) : null;
+
+    internal void Apply(string wire, object scalar)
+    {
+        if (Visible == wire) return;
+        if (!Member.FieldType.IsPrimitive && !Member.FieldType.IsEnum && Member.FieldType != typeof(string)) { Apply(wire); return; }
+        Member.SetValue(_owner, scalar);
+        Visible = wire;
+    }
+
+    private JToken Validate(string wire)
+    {
+        JToken value = Unwrap(wire);
         var type = Member.FieldType;
         bool valid;
         if (type == typeof(string)) valid = value.Type == JTokenType.String || value.Type == JTokenType.Null;
@@ -286,8 +404,7 @@ internal sealed class SOStoredField
         else if (type.IsArray || typeof(System.Collections.IList).IsAssignableFrom(type)) valid = value.Type == JTokenType.Array;
         else valid = value.Type == JTokenType.Object || value.Type == JTokenType.Null;
         if (!valid) throw new InvalidDataException("Incompatible stored value for " + Key);
-        JsonUtility.FromJsonOverwrite(_prefix + value.ToString(Formatting.None) + "}", _owner);
-        Visible = wire;
+        return value;
     }
 }
 
@@ -295,7 +412,10 @@ internal abstract class SOStorageMode : IDisposable
 {
     [Serializable] private sealed class Box<T> { public T value; }
     protected readonly SODataController Owner;
+    protected SOStoredField[] Fields { get; private set; } = Array.Empty<SOStoredField>();
     protected SOStorageMode(SODataController owner) => Owner = owner;
+    public void BindFields(IEnumerable<SOStoredField> fields) => Fields = fields.ToArray();
+    public void Stage(SOStoredField field, string wire) { field.MarkAssigned(wire); Save(field, wire); }
     internal virtual Task OpenAsync(CancellationToken token) => Task.CompletedTask;
 
     internal virtual void Assign<T>(ref T current, T value, string key)
@@ -317,12 +437,13 @@ internal abstract class SOStorageMode : IDisposable
     }
 
     // Reassigning a mutated collection must still compare its contents with the last wire value.
-    private static class Scalar<T>
+    public static class Scalar<T>
     {
-        internal static readonly bool CanCompare = typeof(T).IsPrimitive || typeof(T).IsEnum || typeof(T) == typeof(string);
+        public static readonly bool CanCompare = typeof(T).IsPrimitive || typeof(T).IsEnum || typeof(T) == typeof(string);
     }
 
     protected virtual void Save(SOStoredField field, string wire) => throw new NotSupportedException();
     internal virtual Task FlushAsync() => Task.CompletedTask;
+    internal virtual Task RefreshAsync() => Task.CompletedTask;
     public virtual void Dispose() { }
 }

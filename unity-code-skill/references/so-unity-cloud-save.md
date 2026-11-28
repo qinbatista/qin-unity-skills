@@ -9,3 +9,9 @@ After initialization and authentication, open the shared runtime SO with `await 
 ## Verify the service boundary
 
 The adapter scopes keys by slot and domain, validates the authenticated identity and uses the SDK write lock. Creation uses an account fence so two concurrent first writers cannot silently win. A lost acknowledgement or conflict requires reading the service again. The SDK fixture checks request contents and fresh reads against a simulated account. For a live receiver verify its real authenticated test account independently.
+
+## Whole-file backups
+
+For a new file-backed domain, select [LocalFileOnline](so-data-controller.md#localfileonline) and the [Unity file wrapper](../assets/script/SODataController/Proviers/UnityCloudSaveFileStore.cs). The local snapshot and acknowledgement remain encrypted. Cloud Save Files holds the portable JSON bytes and Player Data holds the conditional head. A restore creates an encrypted local copy on the receiving device. The same wrapper accepts binary files through `ISODataFileStore`.
+
+Cloud key-mode writes and file backups return asynchronous receipts. The property setter keeps the newest local state while a request is pending. Shared SDK clients bound concurrent key mutations. First-time writes retry a creation-fence conflict only while their own target remains absent. A competing write to the same key still produces a conflict.

@@ -121,10 +121,14 @@ public sealed class SOUnityNetcodeTests
             var serverStore = serverObject.GetComponent<SOUnityNetcodeStore>();
             serverStore.SetScopeBeforeSpawn(serverState.GetStorageScope(Profile));
             serverObject.Spawn();
-            serverState.OpenAsync(Profile, serverStore).GetAwaiter().GetResult();
+            Task serverOpening = serverState.OpenAsync(Profile, serverStore);
+            yield return Until(() => serverOpening.IsCompleted, "server SO initialization");
+            serverOpening.GetAwaiter().GetResult();
             yield return Until(() => client.SpawnManager.SpawnedObjects.ContainsKey(serverObject.NetworkObjectId), "domain spawn");
             var clientStore = client.SpawnManager.SpawnedObjects[serverObject.NetworkObjectId].GetComponent<SOUnityNetcodeStore>();
-            clientState.OpenAsync(Profile, clientStore).GetAwaiter().GetResult();
+            Task clientOpening = clientState.OpenAsync(Profile, clientStore);
+            yield return Until(() => clientOpening.IsCompleted, "client SO initialization");
+            clientOpening.GetAwaiter().GetResult();
             yield return verify(serverState, clientState, serverStore, clientStore);
         }
         finally
@@ -165,7 +169,7 @@ public sealed class SOUnityNetcodeTests
         yield return ConfirmServerWrite(server);
         yield return Until(() => store.ReadAsync(scope, "hatId", Token).Result.Value == "{\"value\":\"wool\"}", "post-close push");
         Assert.AreEqual(beforeClose, notifications);
-        Assert.Throws<InvalidOperationException>(() => { var closed = client.HatId; });
+        Assert.AreEqual("straw", client.HatId);
     }
 
     private static IEnumerator VerifyOpponentPosition(SOFighterPositionData server, SOFighterPositionData opponentView,

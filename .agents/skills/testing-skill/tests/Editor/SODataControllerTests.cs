@@ -93,7 +93,7 @@ public sealed partial class UnityFoundationTests
         {
             int changed = 0;
             data.DataChanged += key => { if (key == "hatId") changed++; };
-            data.OpenAsync("slot").GetAwaiter().GetResult();
+            await data.OpenAsync("slot");
             data.HatId = "miner";
             data.BootsId = "red";
             data.HatId = "miner";
@@ -101,19 +101,19 @@ public sealed partial class UnityFoundationTests
             await data.FlushAsync();
             Assert.AreEqual(1, changed);
             Assert.AreEqual("miner", data.HatId);
-            cold.OpenAsync("slot").GetAwaiter().GetResult();
+            await cold.OpenAsync("slot");
             Assert.AreEqual(mode == SODataMode.None ? "" : "miner", cold.HatId);
             Assert.AreEqual(mode == SODataMode.None ? "" : "red", cold.BootsId);
             if (mode == SODataMode.None) Assert.IsFalse(Directory.Exists(_root));
             cold.CloseData();
-            cold.OpenAsync("slot-b").GetAwaiter().GetResult();
+            await cold.OpenAsync("slot-b");
             Assert.AreEqual("", cold.HatId);
         }
         finally { Object.DestroyImmediate(cold); Object.DestroyImmediate(data); }
     }
 
     [Test]
-    public void DirectPropertyUpdatesOnlyOneOldKeyAndRejectsAStaleWriter()
+    public async Task DirectPropertyUpdatesOnlyOneOldKeyAndRejectsAStaleWriter()
     {
         var first = Domain<SOOutfitData>(SODataMode.DirectAccess, "clothes");
         var stale = Object.Instantiate(first);
@@ -122,15 +122,22 @@ public sealed partial class UnityFoundationTests
             string dir = Path.Combine(_root, "SOData", "keys");
             string old = Path.Combine(dir, SOFileEnvelope.Revision(Encoding.UTF8.GetBytes("default/clothes\0hatId")) + ".record");
             SOFileStorage.Commit(old, "{\"value\":\"old\"}", null, true, false, CancellationToken.None);
+            await first.OpenAsync("default");
+            await stale.OpenAsync("default");
             Assert.AreEqual("old", first.HatId);
             Assert.AreEqual("old", stale.HatId);
             first.BootsId = "2026-11-27T12:00:00Z";
+            await first.FlushAsync();
             var before = Directory.GetFiles(dir, "*.record").ToDictionary(path => path, File.ReadAllBytes);
             first.HatId = "miner";
+            await first.FlushAsync();
             Assert.AreEqual(1, before.Count(pair => !pair.Value.SequenceEqual(File.ReadAllBytes(pair.Key))));
-            Assert.Throws<SODataConflictException>(() => stale.HatId = "stale");
-            Assert.AreEqual("old", stale.HatId);
-            stale.CloseData();
+            stale.HatId = "stale";
+            try { await stale.FlushAsync(); Assert.Fail("A stale writer must be rejected."); }
+            catch (SODataConflictException) { }
+            Assert.AreEqual("miner", stale.HatId);
+            stale.CloseData(discardLocalChanges: true);
+            await stale.OpenAsync("default");
             Assert.AreEqual("miner", stale.HatId);
             Assert.AreEqual("2026-11-27T12:00:00Z", stale.BootsId);
         }
@@ -146,6 +153,7 @@ public sealed partial class UnityFoundationTests
         {
             first.HatId = "miner";
             await first.FlushAsync();
+            await stale.OpenAsync("default");
             Assert.AreEqual("miner", stale.HatId);
             first.BootsId = "work";
             await first.FlushAsync();
@@ -156,6 +164,7 @@ public sealed partial class UnityFoundationTests
             catch (SODataConflictException error) { Assert.AreSame(error, failed); }
             Assert.AreEqual("racing", stale.HatId);
             stale.CloseData(discardLocalChanges: true);
+            await stale.OpenAsync("default");
             Assert.AreEqual("miner", stale.HatId);
             Assert.AreEqual("work", stale.BootsId);
         }
@@ -163,12 +172,13 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
-    public void StructArrayAndListPropertiesRestoreThroughTheSameKeyAndDoNotEcho()
+    public async Task StructArrayAndListPropertiesRestoreThroughTheSameKeyAndDoNotEcho()
     {
         var first = ScriptableObject.CreateInstance<NativeWalletDomain>();
         var next = ScriptableObject.CreateInstance<NativeWalletDomain>();
         try
         {
+            await first.OpenAsync("default");
             first.money += 3;
             first.items = new List<NativeWalletDomain.Item> { new NativeWalletDomain.Item { id = "ore", count = 8 } };
             first.drops = new[] { new NativeWalletDomain.Item { id = "ruby", count = 2 } };
@@ -176,6 +186,8 @@ public sealed partial class UnityFoundationTests
             first.Hat = "miner";
             first.items[0] = new NativeWalletDomain.Item { id = "ore", count = 9 };
             first.items = first.items;
+            await first.FlushAsync();
+            await next.OpenAsync("default");
             var before = Directory.GetFiles(Path.Combine(_root, "SOData", "keys"), "*.record").ToDictionary(path => path, File.ReadAllBytes);
             for (int i = 0; i < 100; i++) first.money = 40;
             Assert.AreEqual(5, before.Count);
@@ -191,14 +203,18 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
-    public void OnlinePropertyRequiresAnOpenSlotAndHasARealSetter()
+    public void OnlinePropertyStagesAValueBeforeBindingAndHasARealSetter()
     {
         var data = ScriptableObject.CreateInstance<SOPickupData>();
         try
         {
             Assert.IsNotNull(typeof(SOPickupData).GetProperty("value").GetSetMethod());
             Assert.IsNull(typeof(SOPickupData).GetField("value"));
-            Assert.Throws<InvalidOperationException>(() => data.value = 5);
+            Assert.AreEqual(0, data.value);
+            data.value = 5;
+            Assert.AreEqual(5, data.value);
+            Assert.IsFalse(data.IsReady);
+            data.CloseData(discardLocalChanges: true);
         }
         finally { Object.DestroyImmediate(data); }
     }

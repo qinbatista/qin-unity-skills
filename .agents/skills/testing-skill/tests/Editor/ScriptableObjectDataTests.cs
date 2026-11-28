@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -93,7 +94,7 @@ public sealed partial class UnityFoundationTests
     }
 
     [Test]
-    public void PreviousWalletOpensWithoutChangingItsBytesAndUpgradesOnAssignment()
+    public async Task PreviousWalletOpensWithoutChangingItsBytesAndUpgradesOnAssignment()
     {
         Directory.CreateDirectory(_root);
         string path = Path.Combine(_root, "wallet.json");
@@ -101,12 +102,14 @@ public sealed partial class UnityFoundationTests
         var wallet = ScriptableObject.CreateInstance<SOPlayerWallet>();
         try
         {
+            await wallet.OpenAsync("default");
             Assert.AreEqual(37, wallet.Coin);
             Assert.AreEqual(0, wallet.Money);
             CollectionAssert.AreEqual(File.ReadAllBytes(PreviousWallet), File.ReadAllBytes(path));
             wallet.Money = 19;
             wallet.Coin += 5;
-            wallet.CloseData();
+            await wallet.CloseAsync();
+            await wallet.OpenAsync("default");
             Assert.AreEqual(42, wallet.Coin);
             Assert.AreEqual(19, wallet.Money);
         }
@@ -115,7 +118,7 @@ public sealed partial class UnityFoundationTests
 
     [TestCase("\"version\":1", "\"version\":3")]
     [TestCase("\"coin\":37", "\"coin\":99")]
-    public void CorruptPreviousWalletPreservesItsRecoveryBytes(string before, string after)
+    public async Task CorruptPreviousWalletPreservesItsRecoveryBytes(string before, string after)
     {
         Directory.CreateDirectory(_root);
         string path = Path.Combine(_root, "wallet.json");
@@ -124,7 +127,8 @@ public sealed partial class UnityFoundationTests
         var wallet = ScriptableObject.CreateInstance<SOPlayerWallet>();
         try
         {
-            Assert.Throws<InvalidDataException>(() => wallet.Coin = 7);
+            try { await wallet.OpenAsync("default"); Assert.Fail("The corrupted save must be rejected."); }
+            catch (InvalidDataException) { }
             CollectionAssert.AreEqual(original, File.ReadAllBytes(path));
         }
         finally { Object.DestroyImmediate(wallet); }

@@ -41,4 +41,6 @@ internal sealed class SORealtimeOnlineMode : SODirectAccessOnlineMode
         foreach (var subscription in _subscriptions) subscription.Dispose();
         _subscriptions.Clear();
     }
+
+    internal override Task RefreshAsync() => Task.CompletedTask;
 }

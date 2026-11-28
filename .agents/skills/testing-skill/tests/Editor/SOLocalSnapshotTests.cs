@@ -16,6 +16,7 @@ public sealed partial class UnityFoundationTests
         var wallet = ScriptableObject.CreateInstance<SOPlayerWallet>();
         try
         {
+            await wallet.OpenAsync("default");
             Assert.AreEqual(0, wallet.Coin);
             int instances = Resources.FindObjectsOfTypeAll<SOPlayerWallet>().Length;
             int commits = 0;
@@ -44,6 +45,7 @@ public sealed partial class UnityFoundationTests
             Assert.AreEqual(burstCommits, commits);
             CollectionAssert.AreEqual(saved, File.ReadAllBytes(path));
             await wallet.CloseAsync();
+            await wallet.OpenAsync("default");
             Assert.AreEqual(128, wallet.Coin);
             Assert.AreEqual(17, wallet.Money);
             Assert.AreEqual(SOFileStorage.ReadSnapshot(path), backup);
@@ -52,7 +54,9 @@ public sealed partial class UnityFoundationTests
             File.WriteAllText(path, "{}");
             Assert.AreEqual(128, wallet.Coin);
             wallet.CloseData();
-            Assert.Throws<InvalidDataException>(() => { var cold = wallet.Coin; });
+            await wallet.Retirement;
+            try { await wallet.OpenAsync("default"); Assert.Fail("The corrupted snapshot must be rejected."); }
+            catch (InvalidDataException) { }
             Assert.AreEqual("{}", File.ReadAllText(path));
         }
         finally { Object.DestroyImmediate(wallet); }
@@ -74,13 +78,15 @@ public sealed partial class UnityFoundationTests
             wallet.DataChanged += key => { if (key == "coin") confirmations++; };
             wallet.Coin = 5;
             Task first = wallet.FlushAsync();
+            await Task.Yield();
             wallet.Coin = 0;
             wallet.Money = 19;
             await first;
             await wallet.CloseAsync();
+            await wallet.OpenAsync("default");
             Assert.AreEqual(0, wallet.Coin);
             Assert.AreEqual(19, wallet.Money);
-            Assert.AreEqual(2, confirmations);
+            Assert.AreEqual(1, confirmations);
             Assert.AreEqual(2, snapshots);
 
             wallet.Coin = 6;
@@ -88,6 +94,8 @@ public sealed partial class UnityFoundationTests
             wallet.Coin = 7;
             wallet.CloseData();
             await submitted;
+            await wallet.Retirement;
+            await wallet.OpenAsync("default");
             Assert.AreEqual(7, wallet.Coin);
         }
         finally { Object.DestroyImmediate(wallet); }
@@ -99,6 +107,7 @@ public sealed partial class UnityFoundationTests
         var wallet = ScriptableObject.CreateInstance<SOPlayerWallet>();
         try
         {
+            await wallet.OpenAsync("default");
             wallet.Coin = 5;
             string path = Path.Combine(_root, "wallet.json");
             Directory.CreateDirectory(path);
@@ -113,6 +122,7 @@ public sealed partial class UnityFoundationTests
             await wallet.CloseAsync();
             Assert.AreEqual(1, confirmed);
             Assert.IsNull(wallet.StorageError);
+            await wallet.OpenAsync("default");
             Assert.AreEqual(5, wallet.Coin);
         }
         finally { Object.DestroyImmediate(wallet); }

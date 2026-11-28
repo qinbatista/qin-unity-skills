@@ -20,31 +20,25 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 // Whole-domain local snapshots and the native encrypted file format shared with DirectAccess.
-internal sealed class SOLocalFileMode : SOStorageMode
+internal class SOLocalFileMode : SOStorageMode
 {
-    private readonly string _path;
+    protected readonly string FilePath;
+    protected string SnapshotJson { get; private set; }
+    protected bool HasLocalFile { get; private set; }
+    protected bool HasLocalChanges => _dirty.Count != 0 || !_saving.IsCompleted;
     private string _revision;
     private JObject _snapshot;
-    private const string Format = "$sodata";
+    private bool _loaded;
+    private bool _disposed;
+    private bool _replaceSnapshot;
+    private Task _saving = Task.CompletedTask;
+    private readonly Dictionary<SOStoredField, string> _committed = new Dictionary<SOStoredField, string>();
+    private readonly HashSet<SOStoredField> _dirty = new HashSet<SOStoredField>();
+    private readonly HashSet<SOStoredField> _notified = new HashSet<SOStoredField>();
     private static readonly HashSet<SOLocalFileMode> Pending = new HashSet<SOLocalFileMode>();
     private static CancellationTokenSource _clock;
     private static Task _checkpointLoop = Task.CompletedTask;
-    private readonly Dictionary<SOStoredField, string> _committed = new Dictionary<SOStoredField, string>();
-    private readonly HashSet<SOStoredField> _dirty = new HashSet<SOStoredField>();
-    private Batch _writing;
-
-    private sealed class Batch
-    {
-        internal readonly KeyValuePair<SOStoredField, string>[] Fields;
-        internal readonly Task<(string Revision, string Json)> Receipt;
-
-        internal Batch(SOLocalFileMode mode)
-        {
-            Fields = mode._dirty.Select(field => new KeyValuePair<SOStoredField, string>(field, field.Visible)).ToArray();
-            string revision = mode._revision;
-            Receipt = Task.Run(() => mode.Commit(Fields, revision));
-        }
-    }
+    private const string Format = "$sodata";
 
     internal static string Root
     {
@@ -62,53 +56,65 @@ internal sealed class SOLocalFileMode : SOStorageMode
     internal SOLocalFileMode(SODataController owner, string scope, string slot) : base(owner)
     {
         string name = owner.SnapshotFileName;
-        if (string.IsNullOrWhiteSpace(name) || name.Contains("/") || name.Contains("\\")
-            || name == "." || name == ".." || name == ".sodata" || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-            throw new InvalidDataException("Expected one legacy save file name.");
-        _path = owner.PreviousFileName != null && slot == "default" ? Path.Combine(Root, name)
-            : Path.Combine(Root, "SOData", "profiles", SOFileEnvelope.Revision(Encoding.UTF8.GetBytes(scope)), name);
+        if (string.IsNullOrWhiteSpace(name) || name.Contains("/") || name.Contains("\\") || name == "." || name == ".." || name == ".sodata" || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidDataException("Expected one save file name.");
+        FilePath = owner.PreviousFileName != null && slot == "default" ? Path.Combine(Root, name) : Path.Combine(Root, "SOData", "profiles", SOFileEnvelope.Revision(Encoding.UTF8.GetBytes(scope)), name);
     }
 
-    internal override Task OpenAsync(CancellationToken token)
+    internal override async Task OpenAsync(CancellationToken token)
     {
-        token.ThrowIfCancellationRequested();
-        string text = SOFileStorage.ReadSnapshot(_path, out _revision);
-        _snapshot = text == null ? new JObject() : ReadSnapshot(text);
-        foreach (var field in Owner.Fields)
+        SOStoredField[] fields = Fields;
+        Dictionary<SOStoredField, string> initial = fields.ToDictionary(field => field, field => field.Visible);
+        var loaded = await SOFileStorage.RunAsync(FilePath, () =>
         {
-            if (_snapshot.TryGetValue(field.Key, out var value)) field.Apply(SOStoredField.Wrap(value));
-            else
+            string json = SOFileStorage.ReadSnapshot(FilePath, out string revision);
+            JObject snapshot = json == null ? new JObject() : ReadSnapshot(json);
+            Dictionary<SOStoredField, (string Wire, object Scalar)> values = new Dictionary<SOStoredField, (string Wire, object Scalar)>();
+            foreach (SOStoredField field in fields)
             {
-                value = _snapshot[field.Member.Name];
+                JToken value = snapshot[field.Key] ?? snapshot[field.Member.Name];
                 if (value == null)
                     foreach (FormerlySerializedAsAttribute alias in field.Member.GetCustomAttributes(typeof(FormerlySerializedAsAttribute), false))
-                        if ((value = _snapshot[alias.oldName]) != null) break;
-                if (value != null) field.Apply(SOStoredField.Wrap(value));
-                _snapshot[field.Key] = SOStoredField.Unwrap(field.Visible);
+                        if ((value = snapshot[alias.oldName]) != null) break;
+                string wire = value == null ? field.Initial : SOStoredField.Wrap(value);
+                snapshot[field.Key] = SOStoredField.Unwrap(wire);
+                values.Add(field, (wire, field.DecodeScalar(wire)));
             }
-            _committed.Add(field, field.Visible);
+            snapshot[Format] = 1;
+            return (Snapshot: snapshot, Revision: revision, Json: snapshot.ToString(Formatting.None), Values: values);
+        }, token);
+        if (_disposed) return;
+        _snapshot = loaded.Snapshot;
+        _revision = loaded.Revision;
+        HasLocalFile = _revision != null;
+        SnapshotJson = loaded.Json;
+        foreach (SOStoredField field in fields)
+        {
+            string wire = loaded.Values[field].Wire;
+            _committed[field] = wire;
+            if (!_dirty.Contains(field) && field.Visible == initial[field] && Owner.IsCurrent(this) && field.Visible != wire)
+            {
+                field.Apply(wire, loaded.Values[field].Scalar);
+                Owner.Changed(field.Key);
+            }
+            if (field.Visible == wire) _dirty.Remove(field);
+            else _dirty.Add(field);
         }
-        _snapshot[Format] = 1;
-        return Task.CompletedTask;
+        _loaded = true;
+        UpdateSchedule();
     }
 
     private static JObject ReadSnapshot(string text)
     {
-        var doc = SOStoredField.ParseObject(text);
-        if (doc.TryGetValue(Format, out var version))
+        JObject doc = SOStoredField.ParseObject(text);
+        if (doc.TryGetValue(Format, out JToken version))
         {
             if (version.Type != JTokenType.Integer || (int)version != 1) throw new InvalidDataException("Unsupported SO snapshot version.");
             return doc;
         }
-        // Previous writers signed the exact UTF-8 JSON with the signature field set to an empty string.
-        var signature = (string)(doc["_hashValue"] ?? doc["checksum"]);
-        if (signature == null || signature.Length != 64 ||
-            SOFileEnvelope.Revision(Encoding.UTF8.GetBytes(text.Replace(signature, ""))) != signature)
-            throw new InvalidDataException("Invalid legacy SO snapshot checksum.");
-        if (doc["data"]?.Type == JTokenType.String && doc["checksum"] != null && (int?)doc["version"] == 1)
-            return SOStoredField.ParseObject((string)doc["data"]);
-        if (doc["checksum"] != null && doc["version"] != null && (int?)doc["version"] != 1 && (int?)doc["version"] != 2)
-            throw new InvalidDataException("Unsupported legacy SO snapshot version.");
+        string signature = (string)(doc["_hashValue"] ?? doc["checksum"]);
+        if (signature == null || signature.Length != 64 || SOFileEnvelope.Revision(Encoding.UTF8.GetBytes(text.Replace(signature, ""))) != signature) throw new InvalidDataException("Invalid legacy SO snapshot checksum.");
+        if (doc["data"]?.Type == JTokenType.String && doc["checksum"] != null && (int?)doc["version"] == 1) return SOStoredField.ParseObject((string)doc["data"]);
+        if (doc["checksum"] != null && doc["version"] != null && (int?)doc["version"] != 1 && (int?)doc["version"] != 2) throw new InvalidDataException("Unsupported legacy SO snapshot version.");
         doc.Remove("_hashValue");
         doc.Remove("checksum");
         return doc;
@@ -116,98 +122,113 @@ internal sealed class SOLocalFileMode : SOStorageMode
 
     protected override void Save(SOStoredField field, string wire)
     {
-        if (wire == _committed[field]) _dirty.Remove(field);
+        _notified.Remove(field);
+        if (_loaded && _committed.TryGetValue(field, out string saved) && saved == wire) _dirty.Remove(field);
         else _dirty.Add(field);
         UpdateSchedule();
     }
 
-    // Only one worker touches this JSON tree. Gameplay continues to edit the SO on the Unity thread.
-    private (string Revision, string Json) Commit(KeyValuePair<SOStoredField, string>[] fields, string revision)
+    protected virtual void OnCommitted(string json) { }
+
+    // code-gate: semantic-boundary=The virtual checkpoint includes provider work; the online subclass also needs the local phase alone.
+    internal override Task FlushAsync() => FlushLocalAsync();
+
+    protected Task FlushLocalAsync()
     {
-        JToken[] originals = new JToken[fields.Length];
-        int applied = 0;
-        try
+        if (_disposed) return Task.CompletedTask;
+        if (!_saving.IsCompleted) return _saving;
+        _saving = CommitPendingAsync();
+        return _saving;
+    }
+
+    private async Task CommitPendingAsync()
+    {
+        await Task.Yield();
+        while (_loaded && !_disposed && (_dirty.Count > 0 || _replaceSnapshot))
         {
-            foreach (var item in fields)
+            KeyValuePair<SOStoredField, string>[] fields = _dirty.Select(field => new KeyValuePair<SOStoredField, string>(field, field.Visible)).ToArray();
+            try
             {
-                originals[applied] = _snapshot[item.Key.Key];
-                _snapshot[item.Key.Key] = SOStoredField.Unwrap(item.Value);
-                applied++;
+                var result = await SOFileStorage.RunAsync(FilePath, () =>
+                {
+                    JObject next = (JObject)_snapshot.DeepClone();
+                    foreach (KeyValuePair<SOStoredField, string> item in fields) next[item.Key.Key] = SOStoredField.Unwrap(item.Value);
+                    string json = next.ToString(Formatting.None);
+                    string revision = SOFileStorage.WriteSnapshot(FilePath, json, _revision);
+                    return (Snapshot: next, Revision: revision, Json: json);
+                }, CancellationToken.None);
+                _snapshot = result.Snapshot;
+                _revision = result.Revision;
+                SnapshotJson = result.Json;
+                HasLocalFile = true;
+                _replaceSnapshot = false;
+                foreach (KeyValuePair<SOStoredField, string> item in fields)
+                {
+                    _committed[item.Key] = item.Value;
+                    if (item.Key.Visible == item.Value) _dirty.Remove(item.Key);
+                    else _dirty.Add(item.Key);
+                }
+                if (Owner.IsCurrent(this))
+                {
+                    Owner.ClearStorageError();
+                    Owner.NotifySnapshotCommitted(result.Json);
+                    foreach (KeyValuePair<SOStoredField, string> item in fields)
+                        if (item.Key.Visible == item.Value && !_notified.Remove(item.Key)) Owner.Changed(item.Key.Key);
+                }
+                OnCommitted(result.Json);
             }
-            string json = _snapshot.ToString(Formatting.None);
-            return (SOFileStorage.WriteSnapshot(_path, json, revision), json);
+            catch (Exception error)
+            {
+                if (Owner.IsCurrent(this)) Owner.Failed(error);
+                throw;
+            }
+            finally { UpdateSchedule(); }
         }
-        catch
-        {
-            for (int i = 0; i < applied; i++) _snapshot[fields[i].Key.Key] = originals[i];
-            throw;
-        }
-    }
-
-    private Batch StartBatch()
-    {
-        if (_writing == null && _dirty.Count > 0) _writing = new Batch(this);
-        return _writing;
-    }
-
-    private void FinishBatch(Batch batch)
-    {
-        if (_writing != batch) return;
-        string json;
-        try
-        {
-            var result = batch.Receipt.GetAwaiter().GetResult();
-            _revision = result.Revision;
-            json = result.Json;
-        }
-        catch (Exception error)
-        {
-            _writing = null;
-            if (error is SODataConflictException) Unschedule();
-            else UpdateSchedule();
-            Owner.Failed(error);
-            throw;
-        }
-        _writing = null;
-        foreach (var item in batch.Fields)
-        {
-            _committed[item.Key] = item.Value;
-            if (item.Key.Visible == item.Value) _dirty.Remove(item.Key);
-            else _dirty.Add(item.Key);
-        }
-        Owner.ClearStorageError();
-        UpdateSchedule();
         StopClockIfIdle();
-        Owner.NotifySnapshotCommitted(json);
-        foreach (var item in batch.Fields) Owner.Changed(item.Key.Key);
     }
 
-    private async Task FlushBatchAsync(Batch batch)
+    protected async Task RestoreRemoteAsync(string json, IReadOnlyDictionary<SOStoredField, string> unchanged)
     {
-        try { await batch.Receipt; }
-        finally { FinishBatch(batch); }
-    }
-
-    internal override async Task FlushAsync()
-    {
-        Batch batch;
-        while ((batch = StartBatch()) != null) await FlushBatchAsync(batch);
-    }
-
-    internal void FlushBeforeClose()
-    {
-        Batch batch;
-        while ((batch = StartBatch()) != null) FinishBatch(batch);
+        var decoded = await Task.Run(() =>
+        {
+            JObject snapshot = ReadSnapshot(json);
+            Dictionary<SOStoredField, (string Wire, object Scalar)> values = new Dictionary<SOStoredField, (string Wire, object Scalar)>();
+            foreach (SOStoredField field in Fields)
+            {
+                JToken value = snapshot[field.Key];
+                if (value == null) continue;
+                string wire = SOStoredField.Wrap(value);
+                values.Add(field, (wire, field.DecodeScalar(wire)));
+            }
+            return (Snapshot: snapshot, Values: values);
+        });
+        JObject remote = decoded.Snapshot;
+        HashSet<SOStoredField> preserve = new HashSet<SOStoredField>(_dirty);
+        await FlushLocalAsync();
+        if (_disposed) return;
+        foreach (SOStoredField field in Fields)
+        {
+            if (!unchanged.TryGetValue(field, out string previous) || field.Visible != previous || preserve.Contains(field) || _dirty.Contains(field))
+            {
+                remote[field.Key] = SOStoredField.Unwrap(field.Visible);
+                continue;
+            }
+            if (!decoded.Values.TryGetValue(field, out var value)) continue;
+            string wire = value.Wire;
+            if (field.Visible == wire) continue;
+            field.Apply(wire, value.Scalar);
+            _dirty.Add(field);
+            if (Owner.IsCurrent(this)) { _notified.Add(field); Owner.Changed(field.Key); }
+        }
+        _snapshot = remote;
+        _replaceSnapshot = true;
+        await FlushLocalAsync();
     }
 
     private void UpdateSchedule()
     {
-        if (_dirty.Count == 0 && _writing == null)
-        {
-            // Repeated edits and reversions can share the rest of this window without timer churn.
-            Pending.Remove(this);
-            return;
-        }
+        if (!_loaded || _disposed) return;
+        if (_dirty.Count == 0 && !_replaceSnapshot) { Pending.Remove(this); return; }
         if (Owner.StorageError is SODataConflictException) { Unschedule(); return; }
         if (!Pending.Add(this) || !_checkpointLoop.IsCompleted) return;
         _clock = new CancellationTokenSource();
@@ -225,58 +246,42 @@ internal sealed class SOLocalFileMode : SOStorageMode
                 await Task.Delay(TimeSpan.FromMinutes(5), token);
                 token.ThrowIfCancellationRequested();
                 if (Pending.Count == 0) { StopClockIfIdle(); return; }
-                foreach (var mode in Pending.ToArray())
-                {
-                    token.ThrowIfCancellationRequested();
-                    var batch = mode.StartBatch();
-                    if (batch == null) continue;
-                    try { await mode.FlushBatchAsync(batch); }
-                    catch (Exception) { /* FinishBatch reports the error and retains dirty values. */ }
-                }
+                await Task.WhenAll(Pending.ToArray().Select(mode => CheckpointAsync(mode)));
             }
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested) { }
     }
 
-    private static void OnFocus(bool focused) { if (!focused) FlushPending(); }
+    private static async Task CheckpointAsync(SOLocalFileMode mode)
+    {
+        try { await mode.FlushAsync(); }
+        catch (Exception error) { if (mode.Owner.IsCurrent(mode)) mode.Owner.Failed(error); }
+    }
 
+    private static void OnFocus(bool focused) { if (!focused) FlushPending(); }
     private static void FlushPending()
     {
-        foreach (var mode in Pending.ToArray())
-            try { mode.FlushBeforeClose(); }
-            catch (Exception error) { Debug.LogException(error); }
+        foreach (SOLocalFileMode mode in Pending.ToArray())
+        {
+            Task checkpoint = CheckpointAsync(mode);
+            checkpoint.GetAwaiter().OnCompleted(() => { if (checkpoint.IsFaulted) checkpoint.Exception.Handle(error => true); });
+        }
     }
 
-    private void Unschedule()
-    {
-        Pending.Remove(this);
-        StopClockIfIdle();
-    }
-
+    private void Unschedule() { Pending.Remove(this); StopClockIfIdle(); }
     private static void StopClockIfIdle()
     {
         if (Pending.Count != 0 || _clock == null) return;
         Application.focusChanged -= OnFocus;
         Application.quitting -= FlushPending;
-        var clock = _clock;
+        CancellationTokenSource clock = _clock;
         _clock = null;
         _checkpointLoop = Task.CompletedTask;
         clock.Cancel();
         clock.Dispose();
     }
 
-    public override void Dispose()
-    {
-        // A submitted atomic replacement may already be on disk. Join it before the slot reopens.
-        if (_writing != null)
-        {
-            try { _writing.Receipt.GetAwaiter().GetResult(); }
-            catch (Exception error) { Owner.Failed(error); }
-            _writing = null;
-        }
-        _dirty.Clear();
-        Unschedule();
-    }
+    public override void Dispose() { _disposed = true; _dirty.Clear(); Unschedule(); }
 }
 
 internal static class SOFileEnvelope
@@ -411,6 +416,38 @@ internal static class SOFileEnvelope
 static class SOFileStorage
 {
     private static readonly byte[] KeyCreatedMarker = { 1 };
+    private static readonly Dictionary<string, Task> Operations = new Dictionary<string, Task>(StringComparer.Ordinal);
+
+    public static Task<T> RunAsync<T>(string path, Func<T> operation, CancellationToken cancellation)
+    {
+        TaskCompletionSource<T> completion = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+        Task previous;
+        lock (Operations)
+        {
+            Operations.TryGetValue(path, out previous);
+            Operations[path] = completion.Task;
+        }
+        Task worker = Task.Run(async () =>
+        {
+            try
+            {
+                if (previous != null)
+                    try { await previous.ConfigureAwait(false); }
+                    catch (Exception) { /* Each operation reports its own error; a later read can recover. */ }
+                cancellation.ThrowIfCancellationRequested();
+                completion.TrySetResult(operation());
+            }
+            catch (OperationCanceledException) { completion.TrySetCanceled(); }
+            catch (Exception error) { completion.TrySetException(error); }
+            finally
+            {
+                lock (Operations)
+                    if (Operations.TryGetValue(path, out Task current) && current == completion.Task) Operations.Remove(path);
+            }
+        });
+        worker.GetAwaiter().OnCompleted(() => { if (worker.IsFaulted) worker.Exception.Handle(error => true); });
+        return completion.Task;
+    }
 
     // The device key and atomic staging file belong to one .sodata directory.
     internal sealed class DirectoryWriter : IDisposable
